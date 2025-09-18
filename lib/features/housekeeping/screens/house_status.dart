@@ -244,13 +244,13 @@ class _HouseStatusState extends State<HouseStatus> {
   Color _getHousekeepingColor(HousekeepingStatus status) {
     switch (status) {
       case HousekeepingStatus.clean:
-        return Colors.green;
+        return AppColors.green;
       case HousekeepingStatus.dirty:
-        return Colors.red;
+        return AppColors.red;
       case HousekeepingStatus.inspected:
-        return Colors.blue;
+        return AppColors.blue;
       case HousekeepingStatus.outOfOrder:
-        return Colors.black;
+        return AppColors.black;
     }
   }
 

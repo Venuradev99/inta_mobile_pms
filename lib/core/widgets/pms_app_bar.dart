@@ -1,16 +1,18 @@
+// lib/widgets/common/pms_app_bar.dart
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 
-
 class PmsAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget> actions;
+  final Widget? leading;
 
   const PmsAppBar({
     Key? key,
     required this.title,
     this.actions = const [],
+    this.leading,
   }) : super(key: key);
 
   @override
@@ -34,6 +36,7 @@ class PmsAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: actions,
       iconTheme: const IconThemeData(color: AppColors.black),
+      leading: leading,
     );
   }
 

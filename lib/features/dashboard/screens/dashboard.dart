@@ -1,8 +1,6 @@
-// lib/features/dashboard/dashboard.dart (Updated)
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
@@ -312,7 +310,7 @@ class Dashboard extends StatelessWidget {
               ),
               trailing: Icon(Icons.arrow_forward_ios, size: iconSize * 0.8, color: AppColors.error),
               onTap: () {
-                // Handle logout
+         
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Logout functionality to be implemented')),
                 );
@@ -457,7 +455,7 @@ class Dashboard extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
             ],
           )
         else
@@ -495,7 +493,7 @@ class Dashboard extends StatelessWidget {
               ),
             ],
           ),
-        SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
         Row(
           children: [
             Expanded(
@@ -594,7 +592,7 @@ class Dashboard extends StatelessWidget {
                 color: accentColor,
                 fontWeight: FontWeight.bold,
                 height: 0.9,
-                fontSize: (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8, // Scale headline for mobile
+                fontSize: (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8, 
               ),
             ),
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 10)),
