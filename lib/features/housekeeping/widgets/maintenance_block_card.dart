@@ -16,6 +16,7 @@ class MaintenanceBlockCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: AppColors.surface,
       margin: EdgeInsets.only(bottom: ResponsiveConfig.listItemSpacing(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),

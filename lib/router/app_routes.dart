@@ -13,5 +13,8 @@ class AppRoutes {
   static const String workOrderList = '/workorderlist';
   static const String managerReport = '/managerreport';
   static const String maintenanceBlock = '/maintenanceblock';
+  static const String settings = '/settings';
+  static const String viewReservation = '/view-reservation';
+  static const String login = '/login';
   
 }

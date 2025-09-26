@@ -24,21 +24,21 @@ class Dashboard extends StatelessWidget {
         title: '',
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: AppColors.black, size: iconSize),
+            icon: Icon(Icons.edit_calendar, color: AppColors.black, size: iconSize),
             onPressed: () {
-              // Search functionality
+                  context.go(AppRoutes.quickReservation);
             },
           ),
           IconButton(
-            icon: Icon(Icons.calendar_today, color: AppColors.black, size: iconSize),
+            icon: Icon(Icons.calendar_view_month, color: AppColors.black, size: iconSize),
             onPressed: () {
-              // Alerts
+              context.go(AppRoutes.stayView);
             },
           ),
           IconButton(
             icon: Icon(Icons.notifications, color: AppColors.black, size: iconSize),
             onPressed: () {
-              // Notifications
+             context.go(AppRoutes.notifications);
             },
           ),
         ],
@@ -138,10 +138,15 @@ class Dashboard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Icon(
-                          Icons.settings_outlined,
-                          color: AppColors.onPrimary.withOpacity(0.9),
-                          size: iconSize,
+                        IconButton(
+                          icon: Icon(
+                            Icons.settings_outlined,
+                            color: AppColors.onPrimary.withOpacity(0.9),
+                            size: iconSize,
+                          ),
+                          onPressed: () {
+                            () => context.go(AppRoutes.settings);
+                          },
                         ),
                       ],
                     ),
@@ -287,6 +292,14 @@ class Dashboard extends StatelessWidget {
                   () => context.go(AppRoutes.notifications),
                   config,
                 ),
+                _buildMenuTile(
+                  context,
+                  textTheme,
+                  Icons.settings,
+                  'Settings',
+                  () => context.go(AppRoutes.settings),
+                  config,
+                ),
               ],
             ),
           ),
@@ -309,12 +322,7 @@ class Dashboard extends StatelessWidget {
                 ),
               ),
               trailing: Icon(Icons.arrow_forward_ios, size: iconSize * 0.8, color: AppColors.error),
-              onTap: () {
-         
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Logout functionality to be implemented')),
-                );
-              },
+              onTap: () => context.go(AppRoutes.login),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -493,7 +501,7 @@ class Dashboard extends StatelessWidget {
               ),
             ],
           ),
-        SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
         Row(
           children: [
             Expanded(

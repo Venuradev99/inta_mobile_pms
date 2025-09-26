@@ -78,7 +78,6 @@ class ActionBottomSheet extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      onTap: action.onTap ?? () => Navigator.pop(context),
     );
   }
 }
@@ -91,6 +90,7 @@ class ActionItem {
   const ActionItem({
     required this.icon,
     required this.label,
+  
     this.onTap,
   });
 }

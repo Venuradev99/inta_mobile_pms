@@ -1,11 +1,11 @@
 // lib/pages/in_house_list.dart (Refactored - Reduced to ~70 lines)
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/dashboard/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/action_bottom_sheet.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/guest_card.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/status_info_dialog.dart';
+import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet.dart';
+import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/guest_card.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
 
 class InHouseList extends StatefulWidget {
@@ -82,14 +82,14 @@ class _InHouseListState extends State<InHouseList> {
     );
   }
 
-  Widget _buildInHouseCard(InHouseItem item) {
+  Widget _buildInHouseCard(GuestItem item) {
     return GuestCard(
       guestName: item.guestName,
       resId: item.resId,
       folioId: item.folioId,
       startDate: item.startDate,
       endDate: item.endDate,
-      nights: item.remainingNights,
+      nights: item.remainingNights ?? item.nights,
       nightsLabel: 'Nights Remaining',
       adults: item.adults,
       totalAmount: item.totalAmount,
@@ -99,7 +99,7 @@ class _InHouseListState extends State<InHouseList> {
     );
   }
 
-  void _showActions(BuildContext context, InHouseItem item) {
+  void _showActions(BuildContext context, GuestItem item) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -123,37 +123,36 @@ class _InHouseListState extends State<InHouseList> {
     );
   }
 
-  List<InHouseItem> _getInHouseItems() {
-    // Mock data - replace with API
-    return [
-      InHouseItem(
-        guestName: 'John Smith',
-        resId: 'BH2500',
-        folioId: '2250',
-        startDate: 'Sep 10',
-        endDate: 'Sep 15',
-        nights: 4, // Original nights
-        roomType: '',
-        adults: 2,
-        totalAmount: 400.00,
-        balanceAmount: 50.00,
-        remainingNights: 2,
-        roomNumber: 'Room 101',
-      ),
-      InHouseItem(
-        guestName: 'Sarah Johnson',
-        resId: 'BH2510',
-        folioId: '2260',
-        startDate: 'Sep 12',
-        endDate: 'Sep 18',
-        nights: 6, // Original nights
-        roomType: '',
-        adults: 1,
-        totalAmount: 300.00,
-        balanceAmount: 0.00,
-        remainingNights: 4,
-        roomNumber: 'Room 205',
-      ),
-    ];
-  }
+ List<GuestItem> _getInHouseItems() {
+  return [
+    GuestItem(
+      guestName: 'John Smith',
+      resId: 'BH2500',
+      folioId: '2250',
+      startDate: 'Sep 10',
+      endDate: 'Sep 15',
+      nights: 4, // Original nights
+      roomType: '',
+      adults: 2,
+      totalAmount: 400.00,
+      balanceAmount: 50.00,
+      remainingNights: 2, // Now part of GuestItem
+      roomNumber: 'Room 101', // Now part of GuestItem
+    ),
+    GuestItem(
+      guestName: 'Sarah Johnson',
+      resId: 'BH2510',
+      folioId: '2260',
+      startDate: 'Sep 12',
+      endDate: 'Sep 18',
+      nights: 6, // Original nights
+      roomType: '',
+      adults: 1,
+      totalAmount: 300.00,
+      balanceAmount: 0.00,
+      remainingNights: 4,
+      roomNumber: 'Room 205',
+    ),
+  ];
+}
 }

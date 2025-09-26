@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card.dart';
@@ -156,19 +155,6 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     super.dispose();
   }
 
-  Color _getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High':
-        return AppColors.red;
-      case 'Medium':
-        return AppColors.yellow;
-      case 'Low':
-        return AppColors.green;
-      default:
-        return AppColors.lightgrey;
-    }
-  }
-
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Completed':
@@ -184,23 +170,6 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     }
   }
 
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'HVAC':
-        return Icons.air;
-      case 'Plumbing':
-        return Icons.plumbing;
-      case 'Elevator':
-        return Icons.elevator;
-      case 'Safety':
-        return Icons.security;
-      case 'Landscaping':
-        return Icons.grass;
-      default:
-        return Icons.build;
-    }
-  }
-
   void _showFilterBottomSheet() {
     showModalBottomSheet(
       context: context,
@@ -210,6 +179,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
         ),
       ),
       builder: (context) => Container(
+        color: AppColors.surface,
         padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
         child: Column(
           mainAxisSize: MainAxisSize.min,

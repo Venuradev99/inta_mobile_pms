@@ -8,12 +8,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onInfoTap;
   final VoidCallback? onFilterTap;
+  final VoidCallback? onRefreshTap;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.onInfoTap,
     this.onFilterTap,
+    this.onRefreshTap,
   });
 
   @override
@@ -42,6 +44,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
             onPressed: onFilterTap,
+          ),
+        if (onRefreshTap != null)
+          IconButton(
+            icon: const Icon(Icons.refresh, color: AppColors.black),
+            onPressed: onRefreshTap,
           ),
       ],
     );

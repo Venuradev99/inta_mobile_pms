@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/reservation_list.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/reservation_list.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/date_info.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/status_chip.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_chip.dart';
 
 
 class ReservationCard extends StatelessWidget {
@@ -178,4 +178,42 @@ class ReservationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class ReservationItem {
+  final String guestName;
+  final String propertyName;
+  final String bookingId;
+  final String status;
+  final String checkInDate;
+  final String checkOutDate;
+  final int nights;
+  final int guests;
+  final double totalAmount;
+  final double balanceAmount;
+  final String? reservedDate;
+  final String? reservationType;
+  final String? businessSource;
+  final String? roomNumber;
+  final String? cancellationNumber;
+  final String? voucherNumber;
+
+  ReservationItem({
+    required this.guestName,
+    required this.propertyName,
+    required this.bookingId,
+    required this.status,
+    required this.checkInDate,
+    required this.checkOutDate,
+    required this.nights,
+    required this.guests,
+    required this.totalAmount,
+    required this.balanceAmount,
+    this.reservedDate,
+    this.reservationType,
+    this.businessSource,
+    this.roomNumber,
+    this.cancellationNumber,
+    this.voucherNumber,
+  });
 }
