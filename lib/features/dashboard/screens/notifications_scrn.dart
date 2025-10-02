@@ -5,7 +5,6 @@ import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class Notifications extends StatelessWidget {
   const Notifications({super.key});
-
  @override
   Widget build(BuildContext context) {
     return Scaffold(

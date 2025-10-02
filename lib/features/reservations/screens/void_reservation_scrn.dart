@@ -43,7 +43,7 @@ class _VoidReservationState extends State<VoidReservation> {
        leading: 
           IconButton(
             icon: const Icon(Icons.close, color: AppColors.black),
-            onPressed: () => context.go(AppRoutes.arrivalList),
+            onPressed: () => context.pop(),
           ),
         title: Text(
           'Void Reservation',
@@ -278,8 +278,8 @@ class _VoidReservationState extends State<VoidReservation> {
                     }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.blue,
-                disabledBackgroundColor: AppColors.blue.withOpacity(0.5),
+                backgroundColor: Colors.blue,
+                disabledBackgroundColor: Colors.blue.withOpacity(0.5),
                 padding: const EdgeInsets.symmetric(vertical: 14.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),

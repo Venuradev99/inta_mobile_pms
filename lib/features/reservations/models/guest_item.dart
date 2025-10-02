@@ -17,6 +17,7 @@ class GuestItem {
   final String? businessSource;
   final String? cancellationNumber;
   final String? voucherNumber; 
+  final String? room;
 
   GuestItem({
     required this.guestName,
@@ -37,5 +38,6 @@ class GuestItem {
     this.businessSource,
     this.cancellationNumber,
     this.voucherNumber,
+    this.room,
   });
 }

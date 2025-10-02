@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class HouseStatus extends StatefulWidget {
@@ -71,6 +72,7 @@ class _HouseStatusState extends State<HouseStatus> {
         availability: 'Available',
         housekeepingStatus: HousekeepingStatus.dirty,
         roomType: RoomType.standard,
+         remark: 'should be available at 10.00am',
       ),
       // Alex section rooms
       RoomItem(
@@ -174,70 +176,174 @@ class _HouseStatusState extends State<HouseStatus> {
     final statusColor = _getHousekeepingColor(room.housekeepingStatus);
     final bgColor = _getBackgroundColor(room.housekeepingStatus);
     
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
-          width: 1,
+    return InkWell(
+      onTap: () => _showRoomActionsSheet(room),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  room.roomName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: _getTextColor(room.housekeepingStatus),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    room.roomName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: _getTextColor(room.housekeepingStatus),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Availability: ${room.availability}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                    fontSize: 13,
+                  const SizedBox(height: 2),
+                  Text(
+                    'Availability: ${room.availability}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (room.hasIssue) ...[
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.visibility,
+                      color: AppColors.surface,
+                      size: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    shape: BoxShape.circle,
                   ),
                 ),
               ],
             ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (room.hasIssue) ...[
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.visibility,
-                    color: AppColors.surface,
-                    size: 12,
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showRoomActionsSheet(RoomItem room) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _RoomActionsSheet(
+        room: room,
+        onActionSelected: (action) => _handleRoomAction(action, room),
+      ),
+    );
+  }
+
+  void _handleRoomAction(String action, RoomItem room) {
+    Navigator.pop(context);
+    
+    // Handle different actions
+    switch (action) {
+      case 'set_status':
+        _showSetStatusDialog(room);
+        break;
+      case 'clear_status':
+        _clearStatus(room);
+        break;
+      case 'edit_housekeeper':
+        _showEditHousekeeperDialog(room);
+        break;
+      case 'unassign_housekeeper':
+        _unassignHousekeeper(room);
+        break;
+      case 'add_remark':
+        _showAddRemarkDialog(room);
+        break;
+      case 'edit_remark':
+        _showEditRemarkDialog(room);
+        break;
+      case 'view_remark':
+        _showViewRemarkDialog(room);
+        break;
+      case 'clear_remark':
+        _clearRemark(room);
+        break;
+    }
+  }
+
+  void _showSetStatusDialog(RoomItem room) {
+    // Implement set status dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Set status for ${room.roomName}')),
+    );
+  }
+
+  void _clearStatus(RoomItem room) {
+    // Implement clear status logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Status cleared for ${room.roomName}')),
+    );
+  }
+
+  void _showEditHousekeeperDialog(RoomItem room) {
+    // Implement edit housekeeper dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
+    );
+  }
+
+  void _unassignHousekeeper(RoomItem room) {
+    // Implement unassign housekeeper logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Housekeeper unassigned from ${room.roomName}')),
+    );
+  }
+
+  void _showAddRemarkDialog(RoomItem room) {
+    // Implement add remark dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Add remark for ${room.roomName}')),
+    );
+  }
+
+  void _showEditRemarkDialog(RoomItem room) {
+    // Implement edit remark dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Edit remark for ${room.roomName}')),
+    );
+  }
+
+  void _showViewRemarkDialog(RoomItem room) {
+    // Implement view remark dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('View remark for ${room.roomName}')),
+    );
+  }
+
+  void _clearRemark(RoomItem room) {
+    // Implement clear remark logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Remark cleared for ${room.roomName}')),
     );
   }
 
@@ -535,38 +641,189 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 }
 
-// Enums and Data Models
-enum HousekeepingStatus {
-  clean,
-  dirty,
-  inspected,
-  outOfOrder,
-}
+class _RoomActionsSheet extends StatelessWidget {
+  final RoomItem room;
+  final Function(String) onActionSelected;
 
-enum RoomType {
-  standard,
-  luxury,
-  villa,
-  cabana,
-  beachHouse,
-  garden,
-  common,
-}
-
-class RoomItem {
-  final String section;
-  final String roomName;
-  final String availability;
-  final HousekeepingStatus housekeepingStatus;
-  final RoomType roomType;
-  final bool hasIssue;
-
-  RoomItem({
-    required this.section,
-    required this.roomName,
-    required this.availability,
-    required this.housekeepingStatus,
-    required this.roomType,
-    this.hasIssue = false,
+  const _RoomActionsSheet({
+    required this.room,
+    required this.onActionSelected,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRemark = room.remark != null && room.remark!.isNotEmpty;
+    
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            
+            // Room info header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(room.housekeepingStatus),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          room.roomName,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.black,
+                          ),
+                        ),
+                        Text(
+                          '${room.section} • ${room.availability}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: Colors.grey[600]),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+            
+            const Divider(height: 1),
+            
+            // Actions list
+            ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _buildActionTile(
+                  context,
+                  icon: Icons.check_circle_outline,
+                  title: 'Set Status',
+                  onTap: () => onActionSelected('set_status'),
+                ),
+                _buildActionTile(
+                  context,
+                  icon: Icons.clear,
+                  title: 'Clear Status',
+                  onTap: () => onActionSelected('clear_status'),
+                ),
+                const Divider(height: 1, indent: 64, endIndent: 16),
+                _buildActionTile(
+                  context,
+                  icon: Icons.person_outline,
+                  title: 'Edit Housekeeper',
+                  onTap: () => onActionSelected('edit_housekeeper'),
+                ),
+                _buildActionTile(
+                  context,
+                  icon: Icons.person_remove_outlined,
+                  title: 'Unassign Housekeeper',
+                  onTap: () => onActionSelected('unassign_housekeeper'),
+                ),
+                const Divider(height: 1, indent: 64, endIndent: 16),
+                if (!hasRemark)
+                  _buildActionTile(
+                    context,
+                    icon: Icons.note_add_outlined,
+                    title: 'Add Remark',
+                    onTap: () => onActionSelected('add_remark'),
+                  ),
+                if (hasRemark) ...[
+                  _buildActionTile(
+                    context,
+                    icon: Icons.visibility_outlined,
+                    title: 'View Remark',
+                    onTap: () => onActionSelected('view_remark'),
+                  ),
+                  _buildActionTile(
+                    context,
+                    icon: Icons.edit_note_outlined,
+                    title: 'Edit Remark',
+                    onTap: () => onActionSelected('edit_remark'),
+                  ),
+                  _buildActionTile(
+                    context,
+                    icon: Icons.delete_outline,
+                    title: 'Clear Remark',
+                    onTap: () => onActionSelected('clear_remark'),
+                    isDestructive: true,
+                  ),
+                ],
+              ],
+            ),
+            
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red[700] : AppColors.black;
+    
+    return ListTile(
+      leading: Icon(icon, color: color, size: 24),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
+  Color _getStatusColor(HousekeepingStatus status) {
+    switch (status) {
+      case HousekeepingStatus.clean:
+        return AppColors.green;
+      case HousekeepingStatus.dirty:
+        return AppColors.red;
+      case HousekeepingStatus.inspected:
+        return AppColors.blue;
+      case HousekeepingStatus.outOfOrder:
+        return AppColors.black;
+    }
+  }
 }

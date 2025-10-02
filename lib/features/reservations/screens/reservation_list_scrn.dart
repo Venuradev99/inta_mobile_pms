@@ -91,25 +91,15 @@ class _ReservationListState extends State<ReservationList> {
           dateMatch = itemDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
               itemDate.isBefore(endDate.add(const Duration(days: 1)));
         }
-
-        // Room type filtering
         bool roomMatch = roomType == null || item.roomType == roomType;
-
-        // Reservation type filtering (assuming reservationType in GuestItem)
         bool resTypeMatch = reservationType == null || item.reservationType == reservationType;
-
-        // Status filtering (assuming status in GuestItem)
         bool statusMatch = status == null || item.status == status;
-
-        // Business source filtering (assuming businessSource in GuestItem)
         bool sourceMatch = businessSource == null || item.businessSource == businessSource;
-
         // Text searches
         bool nameMatch = guestName.isEmpty || item.guestName.toLowerCase().contains(guestName);
         bool resNumMatch = reservationNumber.isEmpty || item.resId == reservationNumber;
         bool cancelNumMatch = cancellationNumber.isEmpty || (item.cancellationNumber ?? '') == cancellationNumber;
         bool voucherMatch = voucherNumber.isEmpty || (item.voucherNumber ?? '') == voucherNumber;
-
         // Flags (mock logic; in real app, check API data)
         bool unassignedMatch = !showUnassignedRooms || (item.roomNumber == null || item.roomNumber!.isEmpty);
         bool failedMatch = !showFailedBookings || (item.status == 'Failed' || item.status == 'Incomplete');
@@ -237,17 +227,17 @@ class _ReservationListState extends State<ReservationList> {
       builder: (context) => ActionBottomSheet(
         guestName: item.guestName,
         actions: [
-          ActionItem(icon: Icons.visibility, label: 'View Reservation', onTap: () => context.go(AppRoutes.viewReservation, extra: item)),
-          const ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
-          const ActionItem(icon: Icons.check_circle, label: 'Confirm Reservation'),
-          const ActionItem(icon: Icons.cancel, label: 'Cancel Reservation'),
-          const ActionItem(icon: Icons.meeting_room, label: 'Assign Rooms'),
-          const ActionItem(icon: Icons.swap_horiz, label: 'Change Reservation Type'),
-          const ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
-          const ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
-          const ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
-          const ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
-          const ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
+           ActionItem(icon: Icons.visibility, label: 'View Reservation', onTap: () => context.go(AppRoutes.viewReservation, extra: item)),
+           ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
+           ActionItem(icon: Icons.check_circle, label: 'Confirm Reservation'),
+           ActionItem(icon: Icons.cancel, label: 'Cancel Reservation',onTap:() => context.go(AppRoutes.cancelReservation, extra: item),),
+           ActionItem(icon: Icons.meeting_room, label: 'Assign Rooms'),
+           ActionItem(icon: Icons.swap_horiz, label: 'Change Reservation Type'),
+           ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
+           ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
+           ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
+           ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
+           ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
         ],
       ),
     );

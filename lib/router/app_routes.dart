@@ -24,5 +24,9 @@ class AppRoutes {
   static const String changeReservationType = '/change-reservation-type';
   static const String cancelReservation = '/cancel-reservation';
   static const String voidReservation = '/void-reservation';
+  static const String noShowReservation = '/no-show-reservation';
+  static const String blockRoomSelection = '/block-room-selection';
+  static const String blockRoomDetails = '/block-room-details';
+  
   
 }

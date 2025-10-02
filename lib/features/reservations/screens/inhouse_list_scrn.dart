@@ -1,12 +1,15 @@
 // lib/pages/in_house_list.dart (Refactored - Reduced to ~70 lines)
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class InHouseList extends StatefulWidget {
   const InHouseList({super.key});
@@ -110,14 +113,50 @@ class _InHouseListState extends State<InHouseList> {
       builder: (context) => ActionBottomSheet(
         guestName: item.guestName,
         actions: [
-          const ActionItem(icon: Icons.visibility, label: 'View Reservation'),
-          const ActionItem(icon: Icons.check, label: 'Check Out'),
-          const ActionItem(icon: Icons.edit_calendar, label: 'Extend Stay'),
-          const ActionItem(icon: Icons.meeting_room, label: 'Change Room'),
-          const ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
-          const ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
-          const ActionItem(icon: Icons.email, label: 'Send Folio'),
-          const ActionItem(icon: Icons.cleaning_services, label: 'Request Housekeeping'),
+         ActionItem(icon: Icons.visibility, label: 'View Reservation'),
+         ActionItem(icon: Icons.move_to_inbox,label: 'Room Move',onTap: () { Navigator.of(context).pop(); context.go(AppRoutes.roomMove);}, ),
+         ActionItem(icon: Icons.stop_circle_outlined,label: 'Stop Room Move',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.stopRoomMove); },),
+         ActionItem(icon: Icons.edit_calendar,label: 'Amend Stay',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.amendstay, extra: item);},),
+         ActionItem(icon: Icons.block,label: 'Void Reservation',onTap: () {
+           Navigator.of(context).pop();
+           final data = {
+             'guestName': item.guestName,
+             'resNumber': item.resId,
+             'folio': item.folioId,
+             'arrivalDate': item.startDate,
+             'departureDate': item.endDate,
+             'roomType': item.roomType ?? 'N/A',
+             'room': item.room ?? 'TBD',
+             'total': item.totalAmount,
+             'deposit': item.totalAmount - item.balanceAmount,
+           };
+           Navigator.push(
+             context,
+             PageRouteBuilder(
+               pageBuilder: (context, animation, secondaryAnimation) =>
+                   VoidReservation(reservationData: data),
+               transitionsBuilder:
+                   (context, animation, secondaryAnimation, child) {
+                 var begin = const Offset(0.0, 1.0);
+                 var end = Offset.zero;
+                 var curve = Curves.ease;
+                 var tween = Tween(begin: begin, end: end)
+                     .chain(CurveTween(curve: curve));
+                 return SlideTransition(
+                   position: animation.drive(tween),
+                   child: child,
+                 );
+               },
+             ),
+           );
+         },),
+         ActionItem(icon: Icons.check, label: 'Check Out'),
+          ActionItem(icon: Icons.edit_calendar, label: 'Extend Stay'),
+         ActionItem(icon: Icons.meeting_room, label: 'Change Room'),
+          ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
+          ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
+          ActionItem(icon: Icons.email, label: 'Send Folio'),
+          ActionItem(icon: Icons.cleaning_services, label: 'Request Housekeeping'),
         ],
       ),
     );
@@ -131,13 +170,13 @@ class _InHouseListState extends State<InHouseList> {
       folioId: '2250',
       startDate: 'Sep 10',
       endDate: 'Sep 15',
-      nights: 4, // Original nights
+      nights: 4, 
       roomType: '',
       adults: 2,
       totalAmount: 400.00,
       balanceAmount: 50.00,
-      remainingNights: 2, // Now part of GuestItem
-      roomNumber: 'Room 101', // Now part of GuestItem
+      remainingNights: 2, 
+      roomNumber: 'Room 101',
     ),
     GuestItem(
       guestName: 'Sarah Johnson',
@@ -145,7 +184,7 @@ class _InHouseListState extends State<InHouseList> {
       folioId: '2260',
       startDate: 'Sep 12',
       endDate: 'Sep 18',
-      nights: 6, // Original nights
+      nights: 6, 
       roomType: '',
       adults: 1,
       totalAmount: 300.00,

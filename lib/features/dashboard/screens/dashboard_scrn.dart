@@ -1135,12 +1135,7 @@ class Dashboard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildInventoryRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildInventoryRow(context,textTheme,config,iconSize,fontScale,
                 'Available Rooms',
                 0.8,
                 '107.5',
@@ -1148,12 +1143,7 @@ class Dashboard extends StatelessWidget {
                 Icons.hotel,
               ),
               SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
-              _buildInventoryRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildInventoryRow(context,textTheme,config,iconSize,fontScale,
                 'Sold Rooms',
                 0.15,
                 '45',
@@ -1161,12 +1151,7 @@ class Dashboard extends StatelessWidget {
                 Icons.check_circle,
               ),
               SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
-              _buildInventoryRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildInventoryRow(context,textTheme,config,iconSize,fontScale,
                 'Blocked Rooms',
                 0.03,
                 '12',
@@ -1174,12 +1159,7 @@ class Dashboard extends StatelessWidget {
                 Icons.block,
               ),
               SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
-              _buildInventoryRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildInventoryRow(context,textTheme,config,iconSize,fontScale,
                 'Complimentary Rooms',
                 0.02,
                 '8',
@@ -1337,12 +1317,7 @@ class Dashboard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildOccupancyRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildOccupancyRow(context,textTheme,config,iconSize,fontScale,
                 'Today',
                 0.2,
                 '22.5%',
@@ -1350,12 +1325,7 @@ class Dashboard extends StatelessWidget {
                 Icons.today,
               ),
               SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
-              _buildOccupancyRow(
-                context,
-                textTheme,
-                config,
-                iconSize,
-                fontScale,
+              _buildOccupancyRow(context,textTheme,config,iconSize,fontScale,
                 'Yesterday',
                 0.15,
                 '16.5%',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
@@ -44,7 +45,7 @@ class _DepartureListState extends State<DepartureList> {
               builder: (context, scrollController) => FilterBottomSheet(
                 type: 'departure',
                 onApply: _applyDepartureFilters,
-                scrollController: scrollController,  // Pass the controller
+                scrollController: scrollController,  
               ),
             ),
           );
@@ -187,6 +188,41 @@ class _DepartureListState extends State<DepartureList> {
          ActionItem(icon: Icons.move_to_inbox,label: 'Room Move',onTap: () { Navigator.of(context).pop(); context.go(AppRoutes.roomMove);}, ),
          ActionItem(icon: Icons.stop_circle_outlined,label: 'Stop Room Move',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.stopRoomMove); },),
          ActionItem(icon: Icons.edit_calendar,label: 'Amend Stay',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.amendstay);},),
+         ActionItem(icon: Icons.not_interested,label: 'No Show Reservation',onTap: () {
+           Navigator.of(context).pop();
+           final noShowData = NoShowReservationData(
+             guestName: item.guestName,
+             reservationNumber: item.resId,
+             folio: item.folioId,
+             arrivalDate: item.startDate,
+              departureDate: item.endDate,
+              roomType: item.roomType ?? 'N/A',
+              room: 'TBD', 
+              total: item.totalAmount,
+              deposit: item.totalAmount - item.balanceAmount,
+              balance: item.balanceAmount,
+              initialNoShowFee: null,
+            );
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    NoShowReservationPage(data: noShowData),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = const Offset(0.0, 1.0);
+                  var end = Offset.zero;
+                  var curve = Curves.ease;
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },),
          ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
          ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
          ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
@@ -213,6 +249,7 @@ class _DepartureListState extends State<DepartureList> {
           adults: 3,
           totalAmount: 500.00,
           balanceAmount: 0.00,
+          room: '102',
         ),
       ],
       'tomorrow': [
@@ -227,9 +264,25 @@ class _DepartureListState extends State<DepartureList> {
           adults: 5,
           totalAmount: 700.00,
           balanceAmount: 100.00,
+          room: '105',
+        ),
+         GuestItem(
+          guestName: 'James Anderson',
+          resId: 'BH3008',
+          folioId: '3011',
+          startDate: 'Sep 19',
+          endDate: 'Sep 22',
+          nights: 3,
+          roomType: 'Beach House',
+          adults: 5,
+          totalAmount: 400.00,
+          balanceAmount: 100.00,
+          room: '106',
         ),
       ],
-      'this week': [],
+      'this week': [
+        
+      ],
     };
   }
 }

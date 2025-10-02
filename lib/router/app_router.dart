@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
@@ -7,15 +8,16 @@ import 'package:inta_mobile_pms/features/dashboard/screens/dashboard_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/departure_list_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/settings_scrn.dart';
-import 'package:inta_mobile_pms/features/housekeeping/screens/house_status.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/house_status_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/inhouse_list_scrn.dart';
-import 'package:inta_mobile_pms/features/housekeeping/screens/maintenance_block.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/maintenance_block_screen.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/notifications_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/quick_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/rates_inventory_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/reservation_list_scrn.dart';
-import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_list.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_list_screen.dart';
 import 'package:inta_mobile_pms/features/reports/manager_report.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
@@ -24,6 +26,8 @@ import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_s
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/stay_view/stay_view.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+
+import '../features/housekeeping/screens/block_room_selection_details.dart';
 
 final  appRouter = GoRouter(
   initialLocation: AppRoutes.login,
@@ -50,8 +54,10 @@ final  appRouter = GoRouter(
     GoRoute(path: AppRoutes.roomMove, builder: (context, state) => RoomMovePage(guestItem: state.extra as GuestItem?,)),
     GoRoute(path: AppRoutes.changeReservationType, builder: (context, state) => const ChangeReservationType()),
     GoRoute(path: AppRoutes.cancelReservation, builder: (context,state) => const CancelReservation(reservationData: {},) ),
-    GoRoute(path: AppRoutes.voidReservation, builder: (context,state) => const VoidReservation(reservationData: {},) )
-
-
+    GoRoute(path: AppRoutes.voidReservation, builder: (context,state) => const VoidReservation(reservationData: {},) ),
+    GoRoute(path: AppRoutes.noShowReservation,builder: (context, state) {final data = state.extra as NoShowReservationData;return NoShowReservationPage(data: data);},),
+    GoRoute(path: AppRoutes.blockRoomSelection, builder: (context, state) => const BlockRoomSelectionScreen()),
+    GoRoute(path: AppRoutes.blockRoomDetails,builder: (context, state) {final selectedRooms = state.extra as List<String>;return BlockRoomDetailsScreen(selectedRooms: selectedRooms);},
+    ),
   ],
 );

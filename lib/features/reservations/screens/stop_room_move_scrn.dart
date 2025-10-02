@@ -19,7 +19,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
   final List<String> _predefinedReasons = [
     'Anniversary couple',
     'check',
-    'Customer has already Seen',
+    'Customer has already already Seen',
     'customer specifically asked for this',
     'Special guest',
   ];
@@ -40,7 +40,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => context.go(AppRoutes.arrivalList),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Stop Room Move',

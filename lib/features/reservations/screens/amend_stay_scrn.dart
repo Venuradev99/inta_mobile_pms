@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
+
 class AmendStay extends StatefulWidget {
   final GuestItem? guestItem;
 
@@ -23,22 +24,24 @@ class _AmendStayState extends State<AmendStay> {
   // Controllers
   late TextEditingController _arrivalController;
   late TextEditingController _departureController;
-  
-  // Form state
   bool _overrideRoomRate = false;
   DateTime? _selectedArrival;
   DateTime? _selectedDeparture;
-  
-  // Sample data - replace with actual data models
+
+  // Expanded to include all mock room types from your data to avoid mismatches
   final List<String> _roomTypes = [
     'Single Room',
     'Double Room',
-    'Double Room new',
+    'Double Room New',
+    'Double Room New /142', // Added variant
     'Suite',
     'Deluxe Room',
-    'Executive Suite'
+    'Executive Suite',
+    'Bunk Bed', // Added from mock
+    'Beach House', // Added from mock
+    'Garden Villa', // Added from mock
   ];
-  
+
   final List<String> _rooms = [
     'Test',
     '101',
@@ -47,7 +50,7 @@ class _AmendStayState extends State<AmendStay> {
     '202',
     'Presidential Suite'
   ];
-  
+
   String? _selectedRoomType;
   String? _selectedRoom;
 
@@ -58,20 +61,40 @@ class _AmendStayState extends State<AmendStay> {
   }
 
   void _initializeData() {
-    // Initialize with existing guest data if available
     if (widget.guestItem != null) {
+      // Normalize roomType: Trim, split on any whitespace, capitalize words, join
+      // Use RegExp(r'\s+') to avoid empty parts from multiple spaces or empty strings
+      final rawRoomType = widget.guestItem!.roomType?.trim() ?? '';
+      final words = rawRoomType.split(RegExp(r'\s+'));
+      final normalizedRoomType = words
+          .where((word) => word.isNotEmpty) // Filter any empties (though \s+ avoids them)
+          .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
+          .join(' ');
+
       _selectedArrival = _parseDateString(widget.guestItem!.startDate);
       _selectedDeparture = _parseDateString(widget.guestItem!.endDate);
-      _selectedRoomType = widget.guestItem!.roomType;
-      _selectedRoom = 'Test'; 
+      _selectedRoomType = normalizedRoomType.isNotEmpty ? normalizedRoomType : null;
+      _selectedRoom = widget.guestItem!.room ?? 'Test';
+
+      // Ensure _selectedRoomType matches an item in _roomTypes, else null
+      if (_selectedRoomType != null && !_roomTypes.contains(_selectedRoomType)) {
+        _selectedRoomType = null;
+        debugPrint('Warning: Normalized room type "$normalizedRoomType" not found in _roomTypes. Setting to null.');
+      }
+
+      // Similar check for _selectedRoom
+      if (_selectedRoom != null && !_rooms.contains(_selectedRoom)) {
+        _selectedRoom = null;
+        debugPrint('Warning: Room "$_selectedRoom" not found in _rooms. Setting to null.');
+      }
     } else {
-      // Default values
+      // Default values when no guestItem
       _selectedArrival = DateTime.now();
       _selectedDeparture = DateTime.now().add(const Duration(days: 1));
       _selectedRoomType = _roomTypes.first;
       _selectedRoom = _rooms.first;
     }
-    
+
     _arrivalController = TextEditingController(
       text: _formatDate(_selectedArrival!),
     );
@@ -80,17 +103,19 @@ class _AmendStayState extends State<AmendStay> {
     );
   }
 
-  DateTime _parseDateString(String dateStr) {
-
+  DateTime _parseDateString(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) {
+      return DateTime.now();
+    }
     try {
-      final parts = dateStr.split(' ');
+      final parts = dateStr.trim().split(RegExp(r'\s+')); // Use robust split here too
       if (parts.length == 2) {
         final month = _monthNameToNumber(parts[0]);
         final day = int.parse(parts[1]);
         return DateTime(DateTime.now().year, month, day);
       }
     } catch (e) {
-    
+      debugPrint('Error parsing date "$dateStr": $e');
     }
     return DateTime.now();
   }
@@ -130,7 +155,7 @@ class _AmendStayState extends State<AmendStay> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => context.go(AppRoutes.arrivalList),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Amend Stay',
@@ -482,16 +507,19 @@ class _AmendStayState extends State<AmendStay> {
     );
   }
 
-  Future<void> _showDatePicker(
+ Future<void> _showDatePicker(
     BuildContext context,
     DateTime? initialDate,
     ValueChanged<DateTime> onDateSelected,
   ) async {
+    final DateTime today = DateTime.now();
+    final DateTime todayDate = DateTime(today.year, today.month, today.day);
+    
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: initialDate ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: initialDate ?? todayDate,
+      firstDate: todayDate,
+      lastDate: todayDate.add(const Duration(days: 365)),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -511,7 +539,6 @@ class _AmendStayState extends State<AmendStay> {
       onDateSelected(picked);
     }
   }
-
   void _handleSave() {
 
     if (_selectedArrival != null && _selectedDeparture != null) {
@@ -519,8 +546,16 @@ class _AmendStayState extends State<AmendStay> {
         _showErrorSnackBar('Departure date must be after arrival date');
         return;
       }
+    } else {
+      _showErrorSnackBar('Please select valid arrival and departure dates');
+      return;
     }
 
+    // Optional: Validate dropdowns before save
+    if (_selectedRoomType == null) {
+      _showErrorSnackBar('Please select a room type');
+      return;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

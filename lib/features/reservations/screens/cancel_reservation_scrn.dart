@@ -26,11 +26,11 @@ class _CancelReservationState extends State<CancelReservation> {
   final List<String> reasons = [
     '',
     'Add Reason',
-    'amend',
-    'budget save',
-    'cANCEL',
-    'curfew',
-    'cvcv',
+    'Amend',
+    'Budget save',
+    'Cancel',
+    'Change of plan',
+    'Sick ',
     'Guest asked to cancel',
   ];
 
@@ -59,7 +59,7 @@ class _CancelReservationState extends State<CancelReservation> {
         leading: 
           IconButton(
             icon: const Icon(Icons.close, color: AppColors.black),
-            onPressed: () => context.go(AppRoutes.arrivalList),
+            onPressed: () => context.pop(),
           ),
         
         title: Text(

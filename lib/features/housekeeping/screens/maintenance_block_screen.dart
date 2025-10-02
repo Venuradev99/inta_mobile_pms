@@ -301,12 +301,12 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
             icon: const Icon(Icons.filter_list, color: AppColors.black),
             onPressed: _showFilterBottomSheet,
           ),
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.black),
-            onPressed: () {
-              // Navigate to add new maintenance block
-            },
-          ),
+         IconButton(
+          icon: const Icon(Icons.add, color: AppColors.black),
+          onPressed: () {
+            context.push(AppRoutes.blockRoomSelection);
+          },
+        ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48.0),
@@ -405,11 +405,10 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
             child: filteredMaintenanceBlocks.isEmpty
                 ? EmptyState(
                     title: 'No Maintenance Blocks',
-        subMessage: 'No in-house guests at the moment',
-      )
+                    subMessage: 'No in-house guests at the moment',
+               )
                 : RefreshIndicator(
                     onRefresh: () async {
-                      // Implement refresh logic
                       await Future.delayed(const Duration(seconds: 1));
                     },
                     child: ListView.builder(
@@ -426,13 +425,13 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                         );
                       },
                     ),
-                  ),
+             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+     floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to create new maintenance block
+          context.push(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),

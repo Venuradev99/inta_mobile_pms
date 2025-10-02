@@ -20,7 +20,7 @@ class RoomMovePage extends StatefulWidget {
 }
 
 class _RoomMovePageState extends State<RoomMovePage> {
-  // Sample data - replace with actual data models
+
   final List<String> _roomTypes = [
     'Single Room',
     'Double Room',
@@ -52,17 +52,16 @@ class _RoomMovePageState extends State<RoomMovePage> {
   }
 
   void _initializeData() {
-    // Initialize with existing guest data if available
+   
     if (widget.guestItem != null) {
       _selectedRoomType = widget.guestItem!.roomType;
-      _selectedRoom = 'Test'; // Default from your design
+      _selectedRoom = 'Test'; 
     } else {
-      // Default values
+   
       _selectedRoomType = 'Double Room new';
       _selectedRoom = 'Test';
     }
     
-    // Update available rooms based on selected room type
     _updateAvailableRooms();
   }
 
@@ -94,7 +93,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => context.go(AppRoutes.arrivalList),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Room Move',

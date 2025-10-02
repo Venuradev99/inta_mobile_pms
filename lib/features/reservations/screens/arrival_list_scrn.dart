@@ -5,9 +5,15 @@ import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-
+import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
@@ -61,8 +67,8 @@ class _ArrivalListState extends State<ArrivalList> {
     );
   }
 
-  void _applyArrivalFilters(Map<String, dynamic> filters) {
-    var fullData = _getArrivalsMap();
+ void _applyArrivalFilters(Map<String, dynamic> filters) {
+  var fullData = _getArrivalsMap();
 
     DateTime? startDate = filters['startDate'];
     DateTime? endDate = filters['endDate'];
@@ -185,28 +191,56 @@ class _ArrivalListState extends State<ArrivalList> {
               context.go(AppRoutes.viewReservation, extra: item);
             },
           ),
-          
-          ActionItem(
+            ActionItem(
             icon: Icons.meeting_room,
             label: 'Unassign Rooms',
-            onTap: () {
+            onTap: () async {
               Navigator.of(context).pop();
+              final confirmed = await ConfirmationDialog.show(
+              context: context,
+              title: 'Unassign Rooms',
+              message: 'Are you sure you want to unassign rooms for this reservation?',
+              confirmText: 'Unassign',
+              cancelText: 'Cancel',
+              confirmColor: AppColors.red,
+              icon: Icons.meeting_room,
+              );
+              if (confirmed == true) {
               context.go(AppRoutes.maintenanceBlock);
+              }
             },
-          ),
+            ),
           ActionItem(
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.amendstay);
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AmendStay(guestItem: item),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
           ),
           ActionItem(
           icon: Icons.swap_horiz,
           label: 'Change Reservation Type',
           onTap: () async {
-            Navigator.of(context).pop(); // Close bottom sheet first
+            Navigator.of(context).pop(); 
             
             String? newType = await context.showChangeReservationTypeDialog(
               guestItem: item,
@@ -229,7 +263,36 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Cancel Reservation',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.cancelReservation);
+              final data = {
+                'guestName': item.guestName,
+                'resNumber': item.resId,
+                'folio': item.folioId,
+                'arrivalDate': item.startDate,
+                'departureDate': item.endDate,
+                'roomType': item.roomType ?? 'N/A',
+                'room': item.room ?? 'TBD',
+                'total': item.totalAmount,
+                'deposit': item.totalAmount - item.balanceAmount,
+              };
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      CancelReservation(reservationData: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
           ),
           ActionItem(
@@ -237,9 +300,78 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Void Reservation',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.voidReservation);
+              final data = {
+                'guestName': item.guestName,
+                'resNumber': item.resId,
+                'folio': item.folioId,
+                'arrivalDate': item.startDate,
+                'departureDate': item.endDate,
+                'roomType': item.roomType ?? 'N/A',
+                'room': item.room ?? 'TBD',
+                'total': item.totalAmount,
+                'deposit': item.totalAmount - item.balanceAmount,
+              };
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      VoidReservation(reservationData: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
           ),
+        ActionItem(
+        icon: Icons.not_interested,
+        label: 'No Show Reservation',
+        onTap: () {
+          Navigator.of(context).pop(); 
+          final noShowData = NoShowReservationData(
+            guestName: item.guestName,
+            reservationNumber: item.resId,
+            folio: item.folioId,
+            arrivalDate: item.startDate,
+            departureDate: item.endDate,
+            roomType: item.roomType ?? 'N/A',
+            room: 'TBD', 
+            total: item.totalAmount,
+            deposit: item.totalAmount - item.balanceAmount,
+            balance: item.balanceAmount,
+            initialNoShowFee: null, 
+          );
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  NoShowReservationPage(data: noShowData),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                var begin = const Offset(0.0, 1.0);
+                var end = Offset.zero;
+                var curve = Curves.ease;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                return SlideTransition(
+                  position: animation.drive(tween),
+                  child: child,
+                );
+              },
+            ),
+          );
+          
+        },
+      ),
           ActionItem(
             icon: Icons.person,
             label: 'Edit Guest Details',
@@ -253,7 +385,25 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Room Move',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.roomMove);
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      RoomMovePage(guestItem: item),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
           ),
           ActionItem(
@@ -261,7 +411,25 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Stop Room Move',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.stopRoomMove);
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      const StopRoomMoveScreen(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
             },
           ),
           ActionItem(
@@ -332,6 +500,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 2,
           totalAmount: 200.00,
           balanceAmount: 100.00,
+          room: '101', 
         ),
       ],
       'tomorrow': [
@@ -347,6 +516,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 1,
           totalAmount: 131.00,
           balanceAmount: 131.00,
+          room: '102', 
         ),
         GuestItem(
           guestName: 'Ms. Pabasara Dissanayake',
@@ -360,6 +530,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 1,
           totalAmount: 0.00,
           balanceAmount: 0.00,
+          room: '103',
         ),
       ],
       'this week': [
@@ -374,6 +545,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 3,
           totalAmount: 300.00,
           balanceAmount: 0.00,
+          room: '104',
         ),
       ],
     };
