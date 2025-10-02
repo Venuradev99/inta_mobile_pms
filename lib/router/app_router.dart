@@ -1,21 +1,27 @@
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/arrival_list.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/dashboard.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/departure_list.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/settings.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/arrival_list_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/dashboard_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/departure_list_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/settings_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/house_status.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/inhouse_list.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/inhouse_list_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/maintenance_block.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/net_lock.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/notifications.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/quick_reservation.dart';
-import 'package:inta_mobile_pms/features/dashboard/screens/rates_inventory.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/reservation_list.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/notifications_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/quick_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/screens/rates_inventory_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/reservation_list_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_list.dart';
 import 'package:inta_mobile_pms/features/reports/manager_report.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/view_reservation.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/stay_view/stay_view.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
@@ -39,6 +45,13 @@ final  appRouter = GoRouter(
     GoRoute(path: AppRoutes.settings, builder: (context, state) => const Settings()),
     GoRoute(path: AppRoutes.viewReservation, builder: (context, state) => ViewReservation(item: state.extra as GuestItem,)),
     GoRoute(path: AppRoutes.login, builder: (context, state) => const LoginPage()),
-    // Define your app routes here
+    GoRoute(path: AppRoutes.amendstay, builder: (context, state) => AmendStay(guestItem: state.extra as GuestItem?,)),
+    GoRoute(path: AppRoutes.stopRoomMove, builder: (context, state) => const StopRoomMoveScreen()),
+    GoRoute(path: AppRoutes.roomMove, builder: (context, state) => RoomMovePage(guestItem: state.extra as GuestItem?,)),
+    GoRoute(path: AppRoutes.changeReservationType, builder: (context, state) => const ChangeReservationType()),
+    GoRoute(path: AppRoutes.cancelReservation, builder: (context,state) => const CancelReservation(reservationData: {},) ),
+    GoRoute(path: AppRoutes.voidReservation, builder: (context,state) => const VoidReservation(reservationData: {},) )
+
+
   ],
 );

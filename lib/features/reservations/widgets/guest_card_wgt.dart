@@ -14,6 +14,7 @@ class GuestCard extends StatelessWidget {
   final double totalAmount;
   final double balanceAmount;
   final String? roomNumber;
+  final String? reservationType;
   final Widget? actionButton;
   final GestureTapCallback? onTap;
   final String? roomType;
@@ -31,6 +32,7 @@ class GuestCard extends StatelessWidget {
     required this.totalAmount,
     required this.balanceAmount,
     this.roomNumber,
+    this.reservationType,
     this.actionButton,
     this.onTap,
     this.roomType,
@@ -138,6 +140,13 @@ class GuestCard extends StatelessWidget {
                     color: Colors.grey[600],
                   ),
                 ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Reservation Type: ${reservationType ?? 'N/A'}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 if (roomNumber != null) ...[
                   const Spacer(),
                   Container(
@@ -183,5 +192,9 @@ class GuestCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String getReservationType() {
+    return reservationType ?? 'N/A';
   }
 }

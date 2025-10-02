@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/guest_card.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class DepartureList extends StatefulWidget {
   const DepartureList({super.key});
@@ -181,22 +183,23 @@ class _DepartureListState extends State<DepartureList> {
       builder: (context) => ActionBottomSheet(
         guestName: item.guestName,
         actions: [
-          const ActionItem(icon: Icons.visibility, label: 'View Reservation'),
-          const ActionItem(icon: Icons.check, label: 'Check Out'),
-          const ActionItem(icon: Icons.edit_calendar, label: 'Extend Stay'),
-          const ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
-          const ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
-          const ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
-          const ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
-          const ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
-          const ActionItem(icon: Icons.cleaning_services, label: 'Request Housekeeping'),
+         ActionItem(icon: Icons.visibility, label: 'View Reservation' ,onTap: () { Navigator.of(context).pop();context.go(AppRoutes.viewReservation, extra: item); },),
+         ActionItem(icon: Icons.move_to_inbox,label: 'Room Move',onTap: () { Navigator.of(context).pop(); context.go(AppRoutes.roomMove);}, ),
+         ActionItem(icon: Icons.stop_circle_outlined,label: 'Stop Room Move',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.stopRoomMove); },),
+         ActionItem(icon: Icons.edit_calendar,label: 'Amend Stay',onTap: () {Navigator.of(context).pop();context.go(AppRoutes.amendstay);},),
+         ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
+         ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
+         ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
+         ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
+         ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
+         ActionItem(icon: Icons.cleaning_services, label: 'Request Housekeeping'),
         ],
       ),
     );
   }
 
   Map<String, List<GuestItem>> _getDeparturesMap() {
-    // Mock data - replace with API
+    
     return {
       'today': [
         GuestItem(

@@ -16,5 +16,13 @@ class AppRoutes {
   static const String settings = '/settings';
   static const String viewReservation = '/view-reservation';
   static const String login = '/login';
+  static const String roomMove = '/room-move';
+  static const String stopRoomMove = '/stop-room-move';
+  static const String resendReviewEmail = '/resend-review-email';
+  static const String auditTrail = '/audit-trail';
+  static const String amendstay = '/amend-stay';
+  static const String changeReservationType = '/change-reservation-type';
+  static const String cancelReservation = '/cancel-reservation';
+  static const String voidReservation = '/void-reservation';
   
 }

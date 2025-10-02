@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/reservation_list.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/date_info.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/status_chip.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/reservation_list_scrn.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/date_info_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_chip_wgt.dart';
 
 
 class ReservationCard extends StatelessWidget {

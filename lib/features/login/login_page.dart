@@ -116,8 +116,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           child: ConstrainedBox(
             constraints: BoxConstraints(
               minHeight: MediaQuery.of(context).size.height - 
-                        MediaQuery.of(context).padding.top - 
-                        MediaQuery.of(context).padding.bottom,
+                         MediaQuery.of(context).padding.top - 
+                         MediaQuery.of(context).padding.bottom,
             ),
             child: IntrinsicHeight(
               child: Padding(
@@ -197,7 +197,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         
         // Welcome Text
         Text(
-          'Property Management System',
+          'Welcome to Inta PMS Mobile',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: AppColors.darkgrey,
             fontSize: ResponsiveConfig.scaleWidth(context, 18) * ResponsiveConfig.fontScale(context),

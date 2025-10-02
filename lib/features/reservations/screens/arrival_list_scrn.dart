@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/view_reservation.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/guest_card.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog.dart';
+
+import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class ArrivalList extends StatefulWidget {
@@ -164,14 +166,6 @@ class _ArrivalListState extends State<ArrivalList> {
     );
   }
 
-  
-
-  // Alternative: If you want to use GoRouter with state passing
-  void _navigateToViewReservationWithGoRouter(GuestItem item) {
-    // Store the item temporarily (you might want to use a state management solution)
-    context.go(AppRoutes.viewReservation, extra: item);
-  }
-
   void _showActions(BuildContext context, GuestItem item) {
     showModalBottomSheet<String>(
       context: context,
@@ -187,13 +181,14 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.visibility,
             label: 'View Reservation',
             onTap: () {
-              Navigator.of(context).pop(); // Close bottom sheet first
-              _navigateToViewReservationWithGoRouter(item); // Then navigate with proper data
+              Navigator.of(context).pop();
+              context.go(AppRoutes.viewReservation, extra: item);
             },
           ),
+          
           ActionItem(
             icon: Icons.meeting_room,
-            label: 'Assign Rooms',
+            label: 'Unassign Rooms',
             onTap: () {
               Navigator.of(context).pop();
               context.go(AppRoutes.maintenanceBlock);
@@ -204,23 +199,37 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Amend Stay',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              context.go(AppRoutes.amendstay);
             },
           ),
           ActionItem(
-            icon: Icons.swap_horiz,
-            label: 'Change Reservation Type',
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
-            },
-          ),
+          icon: Icons.swap_horiz,
+          label: 'Change Reservation Type',
+          onTap: () async {
+            Navigator.of(context).pop(); // Close bottom sheet first
+            
+            String? newType = await context.showChangeReservationTypeDialog(
+              guestItem: item,
+            );
+            
+            if (newType != null) {
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Reservation type changed to $newType'),
+                  backgroundColor: AppColors.green,
+                ),
+              );
+            }
+          },
+        ),
           ActionItem(
-            icon: Icons.cancel,
+            icon: Icons.cancel, 
+            
             label: 'Cancel Reservation',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              context.go(AppRoutes.cancelReservation);
             },
           ),
           ActionItem(
@@ -228,7 +237,7 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Void Reservation',
             onTap: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              context.go(AppRoutes.voidReservation);
             },
           ),
           ActionItem(
@@ -237,6 +246,22 @@ class _ArrivalListState extends State<ArrivalList> {
             onTap: () {
               Navigator.of(context).pop();
               context.go(AppRoutes.maintenanceBlock);
+            },
+          ),
+          ActionItem(
+            icon: Icons.move_to_inbox,
+            label: 'Room Move',
+            onTap: () {
+              Navigator.of(context).pop();
+              context.go(AppRoutes.roomMove);
+            },
+          ),
+          ActionItem(
+            icon: Icons.stop_circle_outlined,
+            label: 'Stop Room Move',
+            onTap: () {
+              Navigator.of(context).pop();
+              context.go(AppRoutes.stopRoomMove);
             },
           ),
           ActionItem(
@@ -271,6 +296,22 @@ class _ArrivalListState extends State<ArrivalList> {
               context.go(AppRoutes.maintenanceBlock);
             },
           ),
+          ActionItem(
+            icon: Icons.mark_email_unread,
+            label: 'Resend Review Email',
+            onTap: () {
+              Navigator.of(context).pop();
+              context.go(AppRoutes.resendReviewEmail);
+            },
+          ),
+          ActionItem(
+            icon: Icons.assignment,
+            label: 'Audit Trail',
+            onTap: () {
+              Navigator.of(context).pop();
+              context.go(AppRoutes.auditTrail);
+            },
+          ),
         ],
       ),
     );
@@ -287,6 +328,7 @@ class _ArrivalListState extends State<ArrivalList> {
           endDate: 'Sep 25',
           nights: 2,
           roomType: 'Double Room',
+          reservationType: 'Standard Reservation',
           adults: 2,
           totalAmount: 200.00,
           balanceAmount: 100.00,
@@ -301,6 +343,7 @@ class _ArrivalListState extends State<ArrivalList> {
           endDate: 'Sep 25',
           nights: 1,
           roomType: 'Bunk Bed',
+          reservationType: 'Standard Reservation',
           adults: 1,
           totalAmount: 131.00,
           balanceAmount: 131.00,
@@ -313,6 +356,7 @@ class _ArrivalListState extends State<ArrivalList> {
           endDate: 'Sep 27',
           nights: 3,
           roomType: 'Double Room new /142',
+          reservationType: 'Dayuse',
           adults: 1,
           totalAmount: 0.00,
           balanceAmount: 0.00,

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/guest_card.dart';
-import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class ReservationList extends StatefulWidget {

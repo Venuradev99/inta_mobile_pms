@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -22,11 +24,12 @@ class Dashboard extends StatelessWidget {
       backgroundColor: AppColors.surface,
       appBar: PmsAppBar(
         title: '',
+        alwaysVisibleSearch: true,
         actions: [
           IconButton(
             icon: Icon(Icons.edit_calendar, color: AppColors.black, size: iconSize),
             onPressed: () {
-                  context.go(AppRoutes.quickReservation);
+              context.go(AppRoutes.quickReservation);
             },
           ),
           IconButton(
@@ -38,7 +41,7 @@ class Dashboard extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.notifications, color: AppColors.black, size: iconSize),
             onPressed: () {
-             context.go(AppRoutes.notifications);
+              context.go(AppRoutes.notifications);
             },
           ),
         ],
@@ -432,8 +435,8 @@ class Dashboard extends StatelessWidget {
                     child: _buildOccupancyCard(
                       context,
                       'Arrival',
-                      '0',
-                      'Pending (0)\nArrived (0)',
+                      '4',
+                      'Pending (1)\nArrived (3)',
                       AppColors.primary.withOpacity(0.1),
                       AppColors.surface,
                       textTheme,
@@ -450,7 +453,7 @@ class Dashboard extends StatelessWidget {
                       context,
                       'Departure',
                       '2',
-                      'Pending (0)\nChecked out (0)',
+                      'Pending (0)\nChecked out (2)',
                       AppColors.secondary.withOpacity(0.1),
                       AppColors.surface,
                       textTheme,
@@ -928,82 +931,53 @@ class Dashboard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: ResponsiveConfig.scaleHeight(context, 18)),
-          Row(
+          SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
+          _buildGuestRow(context, textTheme, config, 'Adult', '4', 'Y\'day: (4)', fontScale),
+          SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
+          _buildGuestRow(context, textTheme, config, 'Child', '0', 'Y\'day: (0)', fontScale),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestRow(BuildContext context, TextTheme textTheme, ResponsiveConfig config, String label, String value, String yday, double fontScale) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: ResponsiveConfig.scaleHeight(context, 6)),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: textTheme.bodySmall?.copyWith(
+              color: AppColors.black.withOpacity(0.7),
+              fontWeight: FontWeight.w500,
+              fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+            ),
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Adult',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.black.withOpacity(0.7),
-                        fontWeight: FontWeight.w600,
-                        fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
-                    Text(
-                      '4',
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                        height: 1.0,
-                        fontSize: (textTheme.headlineSmall?.fontSize ?? 20) * fontScale * 0.9,
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
-                    Text(
-                      'Y\'day: (4)',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.black.withOpacity(0.5),
-                        fontSize: (textTheme.bodySmall?.fontSize ?? 10) * fontScale,
-                      ),
-                    ),
-                  ],
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: ResponsiveConfig.scaleWidth(context, 8), vertical: ResponsiveConfig.scaleHeight(context, 2)),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+                ),
+                child: Text(
+                  value,
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                    fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                  ),
                 ),
               ),
-              if (!ResponsiveConfig.isMobile(context)) // Divider only on larger screens
-                Container(
-                  width: 1,
-                  height: ResponsiveConfig.scaleHeight(context, 50),
-                  color: AppColors.black.withOpacity(0.1),
-                )
-              else
-                SizedBox(width: ResponsiveConfig.scaleWidth(context, 12)),
-              SizedBox(width: ResponsiveConfig.scaleWidth(context, 12)),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Child',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.black.withOpacity(0.7),
-                        fontWeight: FontWeight.w600,
-                        fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
-                    Text(
-                      '0',
-                      style: textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                        height: 1.0,
-                        fontSize: (textTheme.headlineSmall?.fontSize ?? 20) * fontScale * 0.9,
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
-                    Text(
-                      'Y\'day: (0)',
-                      style: textTheme.bodySmall?.copyWith(
-                        color: AppColors.black.withOpacity(0.5),
-                        fontSize: (textTheme.bodySmall?.fontSize ?? 10) * fontScale,
-                      ),
-                    ),
-                  ],
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
+              Text(
+                yday,
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.black.withOpacity(0.5),
+                  fontSize: (textTheme.bodySmall?.fontSize ?? 10) * fontScale,
                 ),
               ),
             ],
@@ -1045,7 +1019,7 @@ class Dashboard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Booking (0)',
+                'Booking (6)',
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.black,
@@ -1069,9 +1043,9 @@ class Dashboard extends StatelessWidget {
           SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
           _buildBookingRow(context, textTheme, config, 'Void', '0', fontScale),
           SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
-          _buildBookingRow(context, textTheme, config, 'Cancel', '0', fontScale),
+          _buildBookingRow(context, textTheme, config, 'Cancel', '4', fontScale),
           SizedBox(height: ResponsiveConfig.scaleHeight(context, 2)),
-          _buildBookingRow(context, textTheme, config, 'No Show', '0', fontScale),
+          _buildBookingRow(context, textTheme, config, 'No Show', '2', fontScale),
         ],
       ),
     );
