@@ -58,6 +58,7 @@ final  appRouter = GoRouter(
     GoRoute(path: AppRoutes.noShowReservation,builder: (context, state) {final data = state.extra as NoShowReservationData;return NoShowReservationPage(data: data);},),
     GoRoute(path: AppRoutes.blockRoomSelection, builder: (context, state) => const BlockRoomSelectionScreen()),
     GoRoute(path: AppRoutes.blockRoomDetails,builder: (context, state) {final selectedRooms = state.extra as List<String>;return BlockRoomDetailsScreen(selectedRooms: selectedRooms);},
+    
     ),
   ],
 );

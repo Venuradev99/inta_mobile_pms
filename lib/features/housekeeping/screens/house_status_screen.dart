@@ -13,6 +13,8 @@ class HouseStatus extends StatefulWidget {
 
 class _HouseStatusState extends State<HouseStatus> {
   List<RoomItem> rooms = [];
+  bool isEditMode = false;
+  Set<RoomItem> selectedRooms = {};
   
   @override
   void initState() {
@@ -22,7 +24,6 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _loadRooms() {
     rooms = [
-      // Alan section rooms
       RoomItem(
         section: 'Alan',
         roomName: 'GR 2',
@@ -72,7 +73,7 @@ class _HouseStatusState extends State<HouseStatus> {
         availability: 'Available',
         housekeepingStatus: HousekeepingStatus.dirty,
         roomType: RoomType.standard,
-         remark: 'should be available at 10.00am',
+        remark: 'should be available at 10.00am',
       ),
       // Alex section rooms
       RoomItem(
@@ -131,44 +132,181 @@ class _HouseStatusState extends State<HouseStatus> {
             icon: const Icon(Icons.info_outline, color: AppColors.black),
             onPressed: () => _showStatusInfoDialog(context),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () => _refreshData(),
-          ),
+          if (!isEditMode)
+            IconButton(
+              icon: const Icon(Icons.edit, color: AppColors.black),
+              onPressed: () {
+                setState(() {
+                  isEditMode = true;
+                });
+              },
+            ),
+          if (isEditMode)
+            IconButton(
+              icon: const Icon(Icons.close, color: AppColors.black),
+              onPressed: () {
+                setState(() {
+                  isEditMode = false;
+                  selectedRooms.clear();
+                });
+              },
+            ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: groupedRooms.keys.length,
-        itemBuilder: (context, index) {
-          final section = groupedRooms.keys.elementAt(index);
-          final sectionRooms = groupedRooms[section]!;
-          
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (index > 0) const SizedBox(height: 24),
-              _buildSectionHeader(section),
-              const SizedBox(height: 12),
-              ...sectionRooms.map((room) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: _buildRoomCard(room),
-              )),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          if (isEditMode) _buildActionButtons(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: groupedRooms.keys.length,
+              itemBuilder: (context, index) {
+                final section = groupedRooms.keys.elementAt(index);
+                final sectionRooms = groupedRooms[section]!;
+                
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (index > 0) const SizedBox(height: 24),
+                    _buildSectionHeader(section, sectionRooms),
+                    const SizedBox(height: 12),
+                    ...sectionRooms.map((room) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildRoomCard(room),
+                    )),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String section) {
-    return Text(
-      section,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.w700,
-        color: AppColors.black,
-        fontSize: 20,
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _bulkSetStatus,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.handyman_outlined, size: 24),
+                  SizedBox(height: 4),
+                  Text('Set Status', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _bulkEditHousekeeper,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.person_outline, size: 24),
+                  SizedBox(height: 4),
+                  Text('Edit Housekeeper', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _bulkClearStatus,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.clear_all, size: 24),
+                  SizedBox(height: 4),
+                  Text('Clear Status', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _bulkClearRemark,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Column(
+                children: [
+                  Icon(Icons.delete_outline, size: 24),
+                  SizedBox(height: 4),
+                  Text('Clear Remark', style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
+    if (!isEditMode) {
+      return Text(
+        section,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: AppColors.black,
+          fontSize: 20,
+        ),
+      );
+    }
+
+    final allSelected = sectionRooms.every((room) => selectedRooms.contains(room));
+
+    return Row(
+      children: [
+        Text(
+          section,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.black,
+            fontSize: 20,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          'Select All',
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Checkbox(
+          value: allSelected,
+          onChanged: (value) {
+            setState(() {
+              if (value == true) {
+                selectedRooms.addAll(sectionRooms);
+              } else {
+                selectedRooms.removeWhere((room) => sectionRooms.contains(room));
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -177,7 +315,7 @@ class _HouseStatusState extends State<HouseStatus> {
     final bgColor = _getBackgroundColor(room.housekeepingStatus);
     
     return InkWell(
-      onTap: () => _showRoomActionsSheet(room),
+      onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -239,12 +377,64 @@ class _HouseStatusState extends State<HouseStatus> {
                     shape: BoxShape.circle,
                   ),
                 ),
+                if (isEditMode) ...[
+                  const SizedBox(width: 8),
+                  Checkbox(
+                    value: selectedRooms.contains(room),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedRooms.add(room);
+                        } else {
+                          selectedRooms.remove(room);
+                        }
+                      });
+                    },
+                  ),
+                ],
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  void _bulkSetStatus() {
+    if (selectedRooms.isEmpty) return;
+    // Implement bulk set status logic, e.g., show dialog for status selection
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Set status for ${selectedRooms.length} rooms')),
+    );
+    // After action, optionally clear selections
+    setState(() => selectedRooms.clear());
+  }
+
+  void _bulkEditHousekeeper() {
+    if (selectedRooms.isEmpty) return;
+    // Implement bulk edit housekeeper logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Edit housekeeper for ${selectedRooms.length} rooms')),
+    );
+    setState(() => selectedRooms.clear());
+  }
+
+  void _bulkClearStatus() {
+    if (selectedRooms.isEmpty) return;
+    // Implement bulk clear status logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Clear status for ${selectedRooms.length} rooms')),
+    );
+    setState(() => selectedRooms.clear());
+  }
+
+  void _bulkClearRemark() {
+    if (selectedRooms.isEmpty) return;
+    // Implement bulk clear remark logic
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Clear remark for ${selectedRooms.length} rooms')),
+    );
+    setState(() => selectedRooms.clear());
   }
 
   void _showRoomActionsSheet(RoomItem room) {
@@ -392,24 +582,6 @@ class _HouseStatusState extends State<HouseStatus> {
       grouped.putIfAbsent(room.section, () => []).add(room);
     }
     return grouped;
-  }
-
-  void _refreshData() {
-    setState(() {
-      _loadRooms();
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('House status refreshed'),
-        backgroundColor: AppColors.secondary,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
   }
 
   void _showStatusInfoDialog(BuildContext context) {

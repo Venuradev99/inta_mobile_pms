@@ -14,8 +14,9 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _hotelIdController = TextEditingController();
   
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -59,8 +60,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   @override
   void dispose() {
     _animationController.dispose();
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
+    _hotelIdController.dispose();
     super.dispose();
   }
 
@@ -83,12 +85,15 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     }
   }
 
-  String? _validateEmail(String? value) {
+  String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Email is required';
+      return 'Username is required';
     }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-      return 'Please enter a valid email';
+    if (value.length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(value)) {
+      return 'Username can only contain letters, numbers, underscores, dots, or hyphens';
     }
     return null;
   }
@@ -99,6 +104,19 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     }
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateHotelId(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Hotel ID is required';
+    }
+    if (value.length < 3) {
+      return 'Hotel ID must be at least 3 characters';
+    }
+    if (!RegExp(r'^[a-zA-Z0-9-]+$').hasMatch(value)) {
+      return 'Hotel ID can only contain letters, numbers, or hyphens';
     }
     return null;
   }
@@ -240,14 +258,14 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Email Field
+            // Username Field
             _buildInputField(
-              controller: _emailController,
-              label: 'Email Address',
-              hint: 'Enter your email',
-              prefixIcon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: _validateEmail,
+              controller: _usernameController,
+              label: 'Username',
+              hint: 'Enter your username',
+              prefixIcon: Icons.person,
+              keyboardType: TextInputType.text,
+              validator: _validateUsername,
               textInputAction: TextInputAction.next,
             ),
             
@@ -261,6 +279,19 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               prefixIcon: Icons.lock_outline,
               isPassword: true,
               validator: _validatePassword,
+              textInputAction: TextInputAction.next,
+            ),
+            
+            SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
+            
+            // Hotel ID Field
+            _buildInputField(
+              controller: _hotelIdController,
+              label: 'Hotel ID',
+              hint: 'Enter the Hotel ID',
+              prefixIcon: Icons.hotel,
+              keyboardType: TextInputType.text,
+              validator: _validateHotelId,
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _handleLogin(),
             ),
