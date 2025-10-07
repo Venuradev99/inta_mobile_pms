@@ -358,10 +358,10 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        height: 80,
-        padding: const EdgeInsets.all(16),
+        height: 72,
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.grey[50],
           borderRadius: BorderRadius.circular(16),
@@ -665,7 +665,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                     'Tap any cell to edit values. Changes are highlighted in yellow.',
                     style: textTheme.bodySmall?.copyWith(
                       color: AppColors.darkgrey,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

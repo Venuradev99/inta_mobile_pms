@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
@@ -220,7 +221,41 @@ class _ReservationListState extends State<ReservationList> {
             onTap: () => context.go(AppRoutes.viewReservation, extra: item),
           ),
           ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
-          ActionItem(icon: Icons.check_circle, label: 'Confirm Reservation'),
+          ActionItem(icon: Icons.not_interested,label: 'No Show Reservation',onTap: () {
+           Navigator.of(context).pop();
+           final noShowData = NoShowReservationData(
+             guestName: item.guestName,
+             reservationNumber: item.resId,
+             folio: item.folioId,
+             arrivalDate: item.startDate,
+              departureDate: item.endDate,
+              roomType: item.roomType ?? 'N/A',
+              room: 'TBD', 
+              total: item.totalAmount,
+              deposit: item.totalAmount - item.balanceAmount,
+              balance: item.balanceAmount,
+              initialNoShowFee: null,
+            );
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    NoShowReservationPage(data: noShowData),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var begin = const Offset(0.0, 1.0);
+                  var end = Offset.zero;
+                  var curve = Curves.ease;
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },),
           ActionItem(
             icon: Icons.cancel,
             label: 'Cancel Reservation',

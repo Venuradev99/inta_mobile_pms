@@ -151,7 +151,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       ),
                     ],
                     
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, isKeyboardVisible ? 40 : 80)),
+                    SizedBox(height: ResponsiveConfig.scaleHeight(context, isKeyboardVisible ? 40 : 60)),
                     
                     // Login Form
                     SlideTransition(
