@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:inta_mobile_pms/services/data_access_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
-  
   static Future<Map<String, dynamic>> getConfigJSON() async {
     try {
       final configString = await rootBundle.loadString('assets/config.json');
@@ -58,6 +58,9 @@ class UserApiService {
           );
           await LocalStorageManager.setHotelId(hotelId);
 
+          final systemInfo = await loadSystemInformation();
+          print('systemInfo$systemInfo');
+
           return {
             "isSuccessful": true,
             "message": "No access token found in response",
@@ -75,10 +78,41 @@ class UserApiService {
         };
       }
     } catch (e) {
-      return {
-        "isLoggingSuccessful": false,
-        "message": "An error occurred while logging in: $e",
+     throw Exception('Error occurede while login: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> loadSystemInformation() async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      final url = AppResources.getSystemWorkingDate;
+
+      final configDataResponse = await ApiConfigService().getConfigJSON();
+      final baseUrl = configDataResponse['baseUrl'];
+
+      if (token.isEmpty) throw Exception('Session key not available');
+      if (baseUrl == null) throw Exception('baseUrl URL not available');
+
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        "hotelid": hotelId,
+        'requestedhotelid': (-1).toString(),
       };
+
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load system information');
+      }
+    } catch (e) {
+      throw Exception('Error loading system information: $e');
     }
   }
 
@@ -89,10 +123,7 @@ class UserApiService {
       // final response = await http.post(Uri.parse(logoutUrl));
       return {"isUserLogout": true, "message": "User Logged out!"};
     } catch (e) {
-      return {
-        "isUserLogout": false,
-        "message": "An error occurred while logging in: $e",
-      };
+      throw Exception('Error occured while logout: $e');
     }
   }
 }

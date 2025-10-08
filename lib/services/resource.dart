@@ -14,5 +14,6 @@ class AppResources {
   //dashboard
   static const String getBookingStats = 'dashboard/GetBookingStatic';
   static const String getInventoryStats = 'calenderBooking/GetQuickOverview';
-
+  static const String searchReservationList = 'booking/SearchReservationList';
+  static const String getSystemWorkingDate = 'system/GetSystemWorkingDate';
 }

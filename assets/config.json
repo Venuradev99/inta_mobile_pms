@@ -1,3 +1,56 @@
 {
-    "baseUrl": "http://192.168.1.176:2233/api/"
+    "baseUrl": "http://192.168.1.176:2233/api/",
+
+    "propertyStatistics": {
+        "isSuccessful": true,
+        "result": [
+            {
+                "name": "Total Revenue",
+                "today": 123.53,
+                "yesterday": 23.4,
+                "percentage": 10.3
+            },
+            {
+                "name": "Average Daily Rate",
+                "today": 8500.9,
+                "yesterday": 3455.03,
+                "percentage": 2.5
+            },
+            {
+                "name": "Booking Lead Time",
+                "today": 900,
+                "yesterday": 1000,
+                "percentage": -0.13
+            },
+            {
+                "name": "Average Length Of Stay",
+                "today": 3,
+                "yesterday": 1,
+                "percentage": -0.33
+            },
+            {
+                "name": "Total Payment",
+                "today": 6500,
+                "yesterday": 1200,
+                "percentage": 4.43
+            },
+            {
+                "name": "RevPar",
+                "today": 20.56,
+                "yesterday": 10,
+                "percentage": 1.67
+            }
+        ]
+    },
+
+     "occupancyStatics": {
+        "isSuccessful": true,
+        "result": 
+            {
+            
+                "today": 23.4,
+                "yesterday": 10.3
+            }
+        
+    }
 }

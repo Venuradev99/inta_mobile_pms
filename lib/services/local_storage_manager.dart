@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:inta_mobile_pms/data/models/MasterData.model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class LocalStorageManager {
   static Future<void> setMasterData(Map<String, dynamic> masterData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -34,11 +32,10 @@ class LocalStorageManager {
      await prefs.clear();
   }
 
-
    static Future<void> setAccessToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode({
-      'access_token':  'Bearer '+ token,
+      'access_token':  'Bearer $token',
     });
     await prefs.setString('access_token', jsonString);
   }
@@ -56,7 +53,7 @@ class LocalStorageManager {
   static Future<void> setRefreshToken(String token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode({
-      'refresh_token':  'Bearer '+ token,
+      'refresh_token':  'Bearer $token',
     });
     await prefs.setString('refresh_token', jsonString);
   }

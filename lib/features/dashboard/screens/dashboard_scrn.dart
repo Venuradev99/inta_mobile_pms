@@ -805,8 +805,12 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final projectedRevPar =  _DashboardVm.projectedRevPar.value;
-      final projectedAdr = _DashboardVm.projectedAdr.value;
+      final totalRevenueData = _DashboardVm.totalRevenueData.value;
+      final averageDailyRateData = _DashboardVm.averageDailyRateData.value;
+      final bookingLeadTimeData = _DashboardVm.bookingLeadTimeData.value;
+      final averageLengthOfStayData = _DashboardVm.averageLengthOfStayData.value;
+      final totalPaymentData = _DashboardVm.totalPaymentData.value;
+      final revParData = _DashboardVm.revParData.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -846,9 +850,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Total Revenue',
-                '\$13,469.02',
-                'Y\'day: \$2,233.91',
-                '+502.93%',
+                '\$${totalRevenueData?.today}',
+                'Y\'day: \$${totalRevenueData?.yesterday}',
+                '+${totalRevenueData?.percentage}%',
                 true,
                 AppColors.primary,
                 Icons.trending_up,
@@ -861,9 +865,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Avg. Daily Rate',
-                '\$$projectedAdr',
-                'Y\'day: \$1,116.96',
-                '+703.91%',
+                '\$${averageDailyRateData?.today}',
+                'Y\'day: \$${averageDailyRateData?.yesterday}',
+                '+${averageDailyRateData?.percentage}%',
                 true,
                 AppColors.primary,
                 Icons.show_chart,
@@ -876,9 +880,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Booking Lead Time',
-                '-1092 Days',
-                'Y\'day: -1089 Days',
-                '-0.28%',
+                '\$${bookingLeadTimeData?.today}',
+                'Y\'day: \$${bookingLeadTimeData?.yesterday}',
+                '+${bookingLeadTimeData?.percentage}%',
                 false,
                 AppColors.primary,
                 Icons.trending_down,
@@ -891,9 +895,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Avg. Length of Stay',
-                '2 Nights',
-                'Y\'day: 3 Nights',
-                '-33.33%',
+                 '\$${averageLengthOfStayData?.today}Nights',
+                'Y\'day: \$${averageLengthOfStayData?.yesterday}',
+                '+${averageLengthOfStayData?.percentage}%',
                 false,
                 AppColors.primary,
                 Icons.trending_down,
@@ -906,9 +910,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Total Payment',
-                '\$13,685.00',
-                'Y\'day: \$6,930.00',
-                '+97.47%',
+                '\$${totalPaymentData?.today}',
+                'Y\'day: \$${totalPaymentData?.yesterday}',
+                '+${totalPaymentData?.percentage}%',
                 true,
                 AppColors.primary,
                 Icons.trending_up,
@@ -921,9 +925,9 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'RevPar',
-                '\$$projectedRevPar',
-                'Y\'day: \$20.31',
-                '+508.42%',
+                '\$${revParData?.today}',
+                'Y\'day: \$${revParData?.yesterday}',
+                '+${revParData?.percentage}%',
                 true,
                 AppColors.primary,
                 Icons.trending_up,
@@ -1601,7 +1605,7 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final projectedOccupancy = _DashboardVm.projectedOccupancy.value;
+      final occupancyData = _DashboardVm.occupancyData.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1654,8 +1658,8 @@ class _DashboardState extends State<Dashboard> {
                   iconSize,
                   fontScale,
                   'Today',
-                  (projectedOccupancy / 100),
-                  '$projectedOccupancy%',
+                  (occupancyData?.today ?? 0) / 100,
+                  '${occupancyData?.today}%',
                   AppColors.primary,
                   Icons.today,
                 ),
@@ -1667,8 +1671,8 @@ class _DashboardState extends State<Dashboard> {
                   iconSize,
                   fontScale,
                   'Yesterday',
-                  0.15,
-                  '16.5%',
+                  (occupancyData?.yesterday ?? 0) / 100,
+                  '${occupancyData?.yesterday}%',
                   Colors.green.shade600,
                   Icons.date_range,
                 ),
