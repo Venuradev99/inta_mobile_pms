@@ -5,6 +5,7 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/arrival_list_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/dashboard_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/audit_trail_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/departure_list_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/settings_scrn.dart';
@@ -57,8 +58,8 @@ final  appRouter = GoRouter(
     GoRoute(path: AppRoutes.voidReservation, builder: (context,state) => const VoidReservation(reservationData: {},) ),
     GoRoute(path: AppRoutes.noShowReservation,builder: (context, state) {final data = state.extra as NoShowReservationData;return NoShowReservationPage(data: data);},),
     GoRoute(path: AppRoutes.blockRoomSelection, builder: (context, state) => const BlockRoomSelectionScreen()),
-    GoRoute(path: AppRoutes.blockRoomDetails,builder: (context, state) {final selectedRooms = state.extra as List<String>;return BlockRoomDetailsScreen(selectedRooms: selectedRooms);},
+    GoRoute(path: AppRoutes.blockRoomDetails,builder: (context, state) {final selectedRooms = state.extra as List<String>;return BlockRoomDetailsScreen(selectedRooms: selectedRooms);},),
+    GoRoute(path: AppRoutes.auditTrail,builder: (context, state) => const AuditTrail()),
     
-    ),
   ],
 );
