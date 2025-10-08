@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -12,16 +13,19 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _hotelIdController = TextEditingController();
-  
+
+  final UserApiService _userApiService = UserApiService();
+
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   bool _rememberMe = false;
-  
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -37,23 +41,22 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
+          ),
+        );
+
     _animationController.forward();
   }
 
@@ -67,22 +70,31 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
-    
+    // if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    
-    // Add haptic feedback for better UX
-    HapticFeedback.lightImpact();
-    
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-    
-    setState(() => _isLoading = false);
-    
-    // Navigate to dashboard on successful login
-    if (mounted) {
-      context.go(AppRoutes.dashboard);
+    try {
+      final response = await _userApiService.login(
+        _usernameController.text.trim(),
+        _passwordController.text.trim(),
+        _hotelIdController.text.trim(),
+      );
+
+      if (response["isSuccessful"] == true) {
+        if (mounted) context.go(AppRoutes.dashboard);
+      } else {
+        _showError(response["message"] ?? "Invalid login credentials");
+      }
+    } catch (e) {
+      _showError("Something went wrong during login.");
+    } finally {
+      setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   String? _validateUsername(String? value) {
@@ -125,7 +137,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -133,9 +145,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           physics: const ClampingScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height - 
-                         MediaQuery.of(context).padding.top - 
-                         MediaQuery.of(context).padding.bottom,
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
             ),
             child: IntrinsicHeight(
               child: Padding(
@@ -144,14 +157,16 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   children: [
                     // Logo Section
                     if (!isKeyboardVisible) ...[
-                      SizedBox(height: ResponsiveConfig.scaleHeight(context, 60)),
+                      SizedBox(
+                        height: ResponsiveConfig.scaleHeight(context, 60),
+                      ),
                       FadeTransition(
                         opacity: _fadeAnimation,
                         child: _buildLogoSection(context),
                       ),
                     ],
                     
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, isKeyboardVisible ? 40 : 60)),
+                    SizedBox(height: ResponsiveConfig.scaleHeight(context, isKeyboardVisible ? 40 : 80)),
                     
                     // Login Form
                     SlideTransition(
@@ -161,16 +176,16 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         child: _buildLoginForm(context, theme),
                       ),
                     ),
-                    
+
                     const Spacer(),
-                    
+
                     // Footer
                     if (!isKeyboardVisible)
                       FadeTransition(
                         opacity: _fadeAnimation,
                         child: _buildFooter(context),
                       ),
-                    
+
                     SizedBox(height: ResponsiveConfig.defaultPadding(context)),
                   ],
                 ),
@@ -191,7 +206,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           width: ResponsiveConfig.scaleWidth(context, 120),
           decoration: BoxDecoration(
             color: AppColors.primary,
-            borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context) * 1.5),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.cardRadius(context) * 1.5,
+            ),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primary.withOpacity(0.3),
@@ -212,13 +229,15 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           ),
         ),
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-        
+
         // Welcome Text
         Text(
           'Welcome to Inta PMS Mobile',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: AppColors.darkgrey,
-            fontSize: ResponsiveConfig.scaleWidth(context, 18) * ResponsiveConfig.fontScale(context),
+            fontSize:
+                ResponsiveConfig.scaleWidth(context, 18) *
+                ResponsiveConfig.fontScale(context),
           ),
           textAlign: TextAlign.center,
         ),
@@ -227,7 +246,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           'Welcome back! Please sign in to continue.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppColors.lightgrey,
-            fontSize: ResponsiveConfig.scaleWidth(context, 14) * ResponsiveConfig.fontScale(context),
+            fontSize:
+                ResponsiveConfig.scaleWidth(context, 14) *
+                ResponsiveConfig.fontScale(context),
           ),
           textAlign: TextAlign.center,
         ),
@@ -244,7 +265,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context) * 1.5),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context) * 1.5),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context) * 1.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -268,9 +291,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               validator: _validateUsername,
               textInputAction: TextInputAction.next,
             ),
-            
+
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
-            
+
             // Password Field
             _buildInputField(
               controller: _passwordController,
@@ -281,9 +304,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               validator: _validatePassword,
               textInputAction: TextInputAction.next,
             ),
-            
+
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
-            
+
             // Hotel ID Field
             _buildInputField(
               controller: _hotelIdController,
@@ -295,9 +318,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _handleLogin(),
             ),
-            
+
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
-            
+
             // Remember Me & Forgot Password
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,7 +332,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       width: 20,
                       child: Checkbox(
                         value: _rememberMe,
-                        onChanged: (value) => setState(() => _rememberMe = value ?? false),
+                        onChanged: (value) =>
+                            setState(() => _rememberMe = value ?? false),
                         activeColor: AppColors.primary,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
@@ -319,7 +343,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       'Remember me',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.darkgrey,
-                        fontSize: ResponsiveConfig.scaleWidth(context, 12) * ResponsiveConfig.fontScale(context),
+                        fontSize:
+                            ResponsiveConfig.scaleWidth(context, 12) *
+                            ResponsiveConfig.fontScale(context),
                       ),
                     ),
                   ],
@@ -334,15 +360,17 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w500,
-                      fontSize: ResponsiveConfig.scaleWidth(context, 12) * ResponsiveConfig.fontScale(context),
+                      fontSize:
+                          ResponsiveConfig.scaleWidth(context, 12) *
+                          ResponsiveConfig.fontScale(context),
                     ),
                   ),
                 ),
               ],
             ),
-            
+
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 32)),
-            
+
             // Login Button
             _buildLoginButton(context),
           ],
@@ -370,7 +398,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: AppColors.darkgrey,
             fontWeight: FontWeight.w500,
-            fontSize: ResponsiveConfig.scaleWidth(context, 14) * ResponsiveConfig.fontScale(context),
+            fontSize:
+                ResponsiveConfig.scaleWidth(context, 14) *
+                ResponsiveConfig.fontScale(context),
           ),
         ),
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
@@ -391,7 +421,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             suffixIcon: isPassword
                 ? IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
+                      _isPasswordVisible
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppColors.lightgrey,
                       size: ResponsiveConfig.iconSize(context),
                     ),
@@ -402,19 +434,33 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                   )
                 : null,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
-              borderSide: const BorderSide(color: AppColors.lightgrey, width: 1),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.cardRadius(context),
+              ),
+              borderSide: const BorderSide(
+                color: AppColors.lightgrey,
+                width: 1,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
-              borderSide: BorderSide(color: AppColors.lightgrey.withOpacity(0.5), width: 1),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.cardRadius(context),
+              ),
+              borderSide: BorderSide(
+                color: AppColors.lightgrey.withOpacity(0.5),
+                width: 1,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.cardRadius(context),
+              ),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.cardRadius(context),
+              ),
               borderSide: const BorderSide(color: AppColors.error, width: 1),
             ),
             contentPadding: EdgeInsets.symmetric(
@@ -436,9 +482,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           : () async {
               await _handleLogin();
               // Ensure navigation to dashboard after login
-              if (mounted) {
-                context.go(AppRoutes.dashboard);
-              }
+
+              // if (mounted) {
+              //   context.go(AppRoutes.dashboard);
+              // }
             },
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
@@ -449,7 +496,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           vertical: ResponsiveConfig.scaleHeight(context, 16),
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+          borderRadius: BorderRadius.circular(
+            ResponsiveConfig.cardRadius(context),
+          ),
         ),
       ),
       child: _isLoading
@@ -464,10 +513,12 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           : Text(
               'Sign In',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.onPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: ResponsiveConfig.scaleWidth(context, 16) * ResponsiveConfig.fontScale(context),
-                  ),
+                color: AppColors.onPrimary,
+                fontWeight: FontWeight.w600,
+                fontSize:
+                    ResponsiveConfig.scaleWidth(context, 16) *
+                    ResponsiveConfig.fontScale(context),
+              ),
             ),
     );
   }
@@ -478,23 +529,31 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         // Divider with text
         Row(
           children: [
-            Expanded(child: Divider(color: AppColors.lightgrey.withOpacity(0.5))),
+            Expanded(
+              child: Divider(color: AppColors.lightgrey.withOpacity(0.5)),
+            ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: ResponsiveConfig.scaleWidth(context, 16)),
+              padding: EdgeInsets.symmetric(
+                horizontal: ResponsiveConfig.scaleWidth(context, 16),
+              ),
               child: Text(
                 'Need Help?',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.lightgrey,
-                  fontSize: ResponsiveConfig.scaleWidth(context, 12) * ResponsiveConfig.fontScale(context),
+                  fontSize:
+                      ResponsiveConfig.scaleWidth(context, 12) *
+                      ResponsiveConfig.fontScale(context),
                 ),
               ),
             ),
-            Expanded(child: Divider(color: AppColors.lightgrey.withOpacity(0.5))),
+            Expanded(
+              child: Divider(color: AppColors.lightgrey.withOpacity(0.5)),
+            ),
           ],
         ),
-        
+
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
-        
+
         // Support Button
         TextButton.icon(
           onPressed: () {
@@ -511,19 +570,23 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.w500,
-              fontSize: ResponsiveConfig.scaleWidth(context, 14) * ResponsiveConfig.fontScale(context),
+              fontSize:
+                  ResponsiveConfig.scaleWidth(context, 14) *
+                  ResponsiveConfig.fontScale(context),
             ),
           ),
         ),
-        
+
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
-        
+
         // Version Info
         Text(
           'Inta PMS v1.0.0.1',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: AppColors.lightgrey,
-            fontSize: ResponsiveConfig.scaleWidth(context, 11) * ResponsiveConfig.fontScale(context),
+            fontSize:
+                ResponsiveConfig.scaleWidth(context, 11) *
+                ResponsiveConfig.fontScale(context),
           ),
         ),
       ],
