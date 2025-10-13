@@ -4,19 +4,19 @@ class StatusChip extends StatelessWidget {
   final String status;
   final double? fontSize;
 
-  const StatusChip({
+ const StatusChip({
     super.key,
     required this.status,
     this.fontSize,
   });
 
-  @override
+@override
   Widget build(BuildContext context) {
     Color backgroundColor;
     Color textColor;
     IconData? icon;
 
-    switch (status.toLowerCase()) {
+  switch (status.toLowerCase()) {
       case 'confirmed':
         backgroundColor = Colors.green.withOpacity(0.1);
         textColor = Colors.green[700]!;

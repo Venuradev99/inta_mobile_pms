@@ -35,7 +35,7 @@ class ConfirmationDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon (optional)
+
             if (icon != null) ...[
               Container(
                 padding: const EdgeInsets.all(16),

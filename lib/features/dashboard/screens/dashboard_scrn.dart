@@ -10,6 +10,7 @@ import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
+import 'package:shimmer/shimmer.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -88,46 +89,439 @@ class _DashboardState extends State<Dashboard> {
         ],
       ),
       drawer: _buildDrawer(context, textTheme, config),
-      body: ListView(
-        padding: EdgeInsets.all(padding),
-        children: [
-          _buildOccupancyCards(
-            context,
-            textTheme,
-            config,
-            isMobile,
-            cardRadius,
-            iconSize,
-            fontScale,
+      body: Obx(() {
+        if (_DashboardVm.isLoading.value) {
+          return ListView(
+            padding: EdgeInsets.all(padding),
+            children: [
+              _buildShimmerOccupancyCards(
+                context,
+                textTheme,
+                config,
+                isMobile,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildShimmerPropertyStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildShimmerInventoryStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildShimmerOccupancyStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+            ],
+          );
+        } else {
+          return ListView(
+            padding: EdgeInsets.all(padding),
+            children: [
+              _buildOccupancyCards(
+                context,
+                textTheme,
+                config,
+                isMobile,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildPropertyStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildInventoryStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+              _buildOccupancyStatistics(
+                context,
+                textTheme,
+                config,
+                cardRadius,
+                iconSize,
+                fontScale,
+              ),
+            ],
+          );
+        }
+      }),
+    );
+  }
+
+  Widget _buildShimmerOccupancyCards(
+    BuildContext context,
+    TextTheme textTheme,
+    ResponsiveConfig config,
+    bool isMobile,
+    double cardRadius,
+    double iconSize,
+    double fontScale,
+  ) {
+    return Column(
+      children: [
+        if (isMobile)
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildShimmerCard(
+                      context,
+                      height: ResponsiveConfig.scaleHeight(context, 150),
+                      cardRadius: cardRadius,
+                    ),
+                  ),
+                  SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
+                  Expanded(
+                    child: _buildShimmerCard(
+                      context,
+                      height: ResponsiveConfig.scaleHeight(context, 150),
+                      cardRadius: cardRadius,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+            ],
+          )
+        else
+          Column(
+            children: [
+              _buildShimmerCard(
+                context,
+                height: ResponsiveConfig.scaleHeight(context, 150),
+                cardRadius: cardRadius,
+              ),
+              SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
+              _buildShimmerCard(
+                context,
+                height: ResponsiveConfig.scaleHeight(context, 150),
+                cardRadius: cardRadius,
+              ),
+            ],
           ),
-          SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-          _buildPropertyStatistics(
-            context,
-            textTheme,
-            config,
-            cardRadius,
-            iconSize,
-            fontScale,
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
+        Row(
+          children: [
+            Expanded(
+              child: _buildShimmerCard(
+                context,
+                height: ResponsiveConfig.scaleHeight(context, 150),
+                cardRadius: cardRadius,
+              ),
+            ),
+            SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
+            Expanded(
+              child: _buildShimmerCard(
+                context,
+                height: ResponsiveConfig.scaleHeight(context, 150),
+                cardRadius: cardRadius,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerPropertyStatistics(
+    BuildContext context,
+    TextTheme textTheme,
+    ResponsiveConfig config,
+    double cardRadius,
+    double iconSize,
+    double fontScale,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: ResponsiveConfig.horizontalPadding(context)
+              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: ResponsiveConfig.scaleWidth(context, 200),
+              height: textTheme.headlineSmall?.fontSize ?? 20,
+              color: Colors.white,
+            ),
           ),
-          SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-          _buildInventoryStatistics(
+        ),
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: ResponsiveConfig.gridCrossAxisCount(
             context,
-            textTheme,
-            config,
-            cardRadius,
-            iconSize,
-            fontScale,
+            mobileCount: 2,
+            tabletCount: 3,
           ),
-          SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-          _buildOccupancyStatistics(
-            context,
-            textTheme,
-            config,
-            cardRadius,
-            iconSize,
-            fontScale,
+          mainAxisSpacing: ResponsiveConfig.listItemSpacing(context),
+          crossAxisSpacing: ResponsiveConfig.listItemSpacing(context),
+          childAspectRatio: ResponsiveConfig.gridChildAspectRatio(context),
+          children: List.generate(
+            6,
+            (index) => _buildShimmerCard(
+              context,
+              height: ResponsiveConfig.scaleHeight(context, 150),
+              cardRadius: cardRadius,
+            ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerInventoryStatistics(
+    BuildContext context,
+    TextTheme textTheme,
+    ResponsiveConfig config,
+    double cardRadius,
+    double iconSize,
+    double fontScale,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: ResponsiveConfig.horizontalPadding(context)
+              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: ResponsiveConfig.scaleWidth(context, 200),
+              height: textTheme.headlineSmall?.fontSize ?? 20,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
+        _buildShimmerCard(
+          context,
+          height: ResponsiveConfig.scaleHeight(context, 300),
+          cardRadius: cardRadius,
+          child: Column(
+            children: List.generate(
+              4,
+              (index) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: ResponsiveConfig.scaleHeight(context, 20),
+                ),
+                child: Row(
+                  children: [
+                    Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: iconSize,
+                        height: iconSize,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  width: ResponsiveConfig.scaleWidth(context, 100),
+                                  height: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  width: ResponsiveConfig.scaleWidth(context, 50),
+                                  height: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              width: double.infinity,
+                              height: 8,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerOccupancyStatistics(
+    BuildContext context,
+    TextTheme textTheme,
+    ResponsiveConfig config,
+    double cardRadius,
+    double iconSize,
+    double fontScale,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: ResponsiveConfig.horizontalPadding(context)
+              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: ResponsiveConfig.scaleWidth(context, 200),
+              height: textTheme.headlineSmall?.fontSize ?? 20,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(height: ResponsiveConfig.scaleHeight(context, 20)),
+        _buildShimmerCard(
+          context,
+          height: ResponsiveConfig.scaleHeight(context, 150),
+          cardRadius: cardRadius,
+          child: Column(
+            children: List.generate(
+              2,
+              (index) => Padding(
+                padding: EdgeInsets.only(
+                  bottom: ResponsiveConfig.scaleHeight(context, 20),
+                ),
+                child: Row(
+                  children: [
+                    Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        width: iconSize,
+                        height: iconSize,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  width: ResponsiveConfig.scaleWidth(context, 100),
+                                  height: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: Container(
+                                  width: ResponsiveConfig.scaleWidth(context, 50),
+                                  height: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+                          Shimmer.fromColors(
+                            baseColor: Colors.grey[300]!,
+                            highlightColor: Colors.grey[100]!,
+                            child: Container(
+                              width: double.infinity,
+                              height: 8,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShimmerCard(
+    BuildContext context, {
+    required double height,
+    required double cardRadius,
+    Widget? child,
+  }) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(cardRadius),
+        ),
+        child: child,
       ),
     );
   }

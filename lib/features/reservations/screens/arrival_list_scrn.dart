@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+// Add this import
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
@@ -15,6 +16,7 @@ import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_shee
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/message_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
@@ -67,8 +69,8 @@ class _ArrivalListState extends State<ArrivalList> {
     );
   }
 
- void _applyArrivalFilters(Map<String, dynamic> filters) {
-  var fullData = _getArrivalsMap();
+  void _applyArrivalFilters(Map<String, dynamic> filters) {
+    var fullData = _getArrivalsMap();
 
     DateTime? startDate = filters['startDate'];
     DateTime? endDate = filters['endDate'];
@@ -191,25 +193,25 @@ class _ArrivalListState extends State<ArrivalList> {
               context.go(AppRoutes.viewReservation, extra: item);
             },
           ),
-            ActionItem(
+          ActionItem(
             icon: Icons.meeting_room,
             label: 'Unassign Rooms',
             onTap: () async {
               Navigator.of(context).pop();
               final confirmed = await ConfirmationDialog.show(
-              context: context,
-              title: 'Unassign Rooms',
-              message: 'Are you sure you want to unassign rooms for this reservation?',
-              confirmText: 'Unassign',
-              cancelText: 'Cancel',
-              confirmColor: AppColors.red,
-              icon: Icons.meeting_room,
+                context: context,
+                title: 'Unassign Rooms',
+                message: 'Are you sure you want to unassign rooms for this reservation?',
+                confirmText: 'Unassign',
+                cancelText: 'Cancel',
+                confirmColor: AppColors.red,
+                icon: Icons.meeting_room,
               );
               if (confirmed == true) {
-              context.go(AppRoutes.maintenanceBlock);
+                context.go(AppRoutes.maintenanceBlock);
               }
             },
-            ),
+          ),
           ActionItem(
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
@@ -237,29 +239,27 @@ class _ArrivalListState extends State<ArrivalList> {
             },
           ),
           ActionItem(
-          icon: Icons.swap_horiz,
-          label: 'Change Reservation Type',
-          onTap: () async {
-            Navigator.of(context).pop(); 
-            
-            String? newType = await context.showChangeReservationTypeDialog(
-              guestItem: item,
-            );
-            
-            if (newType != null) {
-              // Show success message
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Reservation type changed to $newType'),
-                  backgroundColor: AppColors.green,
-                ),
+            icon: Icons.swap_horiz,
+            label: 'Change Reservation Type',
+            onTap: () async {
+              Navigator.of(context).pop();
+              
+              String? newType = await context.showChangeReservationTypeDialog(
+                guestItem: item,
               );
-            }
-          },
-        ),
+              
+              if (newType != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Reservation type changed to $newType'),
+                    backgroundColor: AppColors.green,
+                  ),
+                );
+              }
+            },
+          ),
           ActionItem(
-            icon: Icons.cancel, 
-            
+            icon: Icons.cancel,
             label: 'Cancel Reservation',
             onTap: () {
               Navigator.of(context).pop();
@@ -332,46 +332,45 @@ class _ArrivalListState extends State<ArrivalList> {
               );
             },
           ),
-        ActionItem(
-        icon: Icons.not_interested,
-        label: 'No Show Reservation',
-        onTap: () {
-          Navigator.of(context).pop(); 
-          final noShowData = NoShowReservationData(
-            guestName: item.guestName,
-            reservationNumber: item.resId,
-            folio: item.folioId,
-            arrivalDate: item.startDate,
-            departureDate: item.endDate,
-            roomType: item.roomType ?? 'N/A',
-            room: 'TBD', 
-            total: item.totalAmount,
-            deposit: item.totalAmount - item.balanceAmount,
-            balance: item.balanceAmount,
-            initialNoShowFee: null, 
-          );
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  NoShowReservationPage(data: noShowData),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                var begin = const Offset(0.0, 1.0);
-                var end = Offset.zero;
-                var curve = Curves.ease;
-                var tween = Tween(begin: begin, end: end)
-                    .chain(CurveTween(curve: curve));
-                return SlideTransition(
-                  position: animation.drive(tween),
-                  child: child,
-                );
-              },
-            ),
-          );
-          
-        },
-      ),
+          ActionItem(
+            icon: Icons.not_interested,
+            label: 'No Show Reservation',
+            onTap: () {
+              Navigator.of(context).pop();
+              final noShowData = NoShowReservationData(
+                guestName: item.guestName,
+                reservationNumber: item.resId,
+                folio: item.folioId,
+                arrivalDate: item.startDate,
+                departureDate: item.endDate,
+                roomType: item.roomType ?? 'N/A',
+                room: 'TBD',
+                total: item.totalAmount,
+                deposit: item.totalAmount - item.balanceAmount,
+                balance: item.balanceAmount,
+                initialNoShowFee: null,
+              );
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      NoShowReservationPage(data: noShowData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    var begin = const Offset(0.0, 1.0);
+                    var end = Offset.zero;
+                    var curve = Curves.ease;
+                    var tween = Tween(begin: begin, end: end)
+                        .chain(CurveTween(curve: curve));
+                    return SlideTransition(
+                      position: animation.drive(tween),
+                      child: child,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
           ActionItem(
             icon: Icons.person,
             label: 'Edit Guest Details',
@@ -448,28 +447,67 @@ class _ArrivalListState extends State<ArrivalList> {
               context.go(AppRoutes.maintenanceBlock);
             },
           ),
-          ActionItem(
+          // UPDATED: Send Res. Voucher with MessageDialog
+         ActionItem(
             icon: Icons.email,
             label: 'Send Res. Voucher',
-            onTap: () {
+            onTap: () async {
               Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              
+              // Simulate sending process
+              await Future.delayed(const Duration(milliseconds: 300));
+              
+              if (context.mounted) {
+                MessageDialog.show(
+                  context,
+                  title: 'Voucher Sent!',
+                  message: 'Reservation voucher has been sent successfully to ${item.guestName}.',
+                  type: MessageType.success,
+                  buttonText: 'Perfect!',
+                );
+              }
             },
           ),
+          // UPDATED: Resend Booking Email with MessageDialog
           ActionItem(
             icon: Icons.email,
             label: 'Resend Booking Email',
-            onTap: () {
+            onTap: () async {
               Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              
+              // Simulate sending process
+              await Future.delayed(const Duration(milliseconds: 300));
+              
+              if (context.mounted) {
+                MessageDialog.show(
+                  context,
+                  title: 'Email Sent!',
+                  message: 'Booking confirmation email has been resent successfully to ${item.guestName}.',
+                  type: MessageType.success,
+                  buttonText: 'Great!',
+                );
+              }
             },
           ),
+          // UPDATED: Resend Review Email with MessageDialog
           ActionItem(
             icon: Icons.mark_email_unread,
             label: 'Resend Review Email',
-            onTap: () {
+            onTap: () async {
               Navigator.of(context).pop();
-              context.go(AppRoutes.resendReviewEmail);
+              
+              // Simulate sending process
+              await Future.delayed(const Duration(milliseconds: 300));
+              
+              if (context.mounted) {
+                MessageDialog.show(
+                  context,
+                  title: 'Review Email Sent!',
+                  message: 'Review request email has been sent successfully to ${item.guestName}.',
+                  type: MessageType.success,
+                  buttonText: 'Awesome!',
+                );
+              }
             },
           ),
           ActionItem(
@@ -500,7 +538,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 2,
           totalAmount: 200.00,
           balanceAmount: 100.00,
-          room: '101', 
+          room: '101',
         ),
       ],
       'tomorrow': [
@@ -516,7 +554,7 @@ class _ArrivalListState extends State<ArrivalList> {
           adults: 1,
           totalAmount: 131.00,
           balanceAmount: 131.00,
-          room: '102', 
+          room: '102',
         ),
         GuestItem(
           guestName: 'Ms. Pabasara Dissanayake',

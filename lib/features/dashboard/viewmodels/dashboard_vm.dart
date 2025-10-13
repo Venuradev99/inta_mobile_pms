@@ -6,7 +6,7 @@ import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.
 import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 
-class DashboardVm {
+class DashboardVm extends GetxController {
   final DashboardService _dashboardService = DashboardService();
 
   final arrivalData = Rx<BookingStaticData?>(null);
@@ -39,8 +39,12 @@ class DashboardVm {
 
   final occupancyData = Rx<OccupancyData?>(null);
 
+  final isLoading = true.obs;
+
   DashboardVm();
+
   Future<void> loadBookingStaticData() async {
+    isLoading.value = true;
     try {
       final responses = await Future.wait([
         _dashboardService.getBookingStatics(),
@@ -184,6 +188,8 @@ class DashboardVm {
       }
     } catch (e) {
       print("error: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 }
