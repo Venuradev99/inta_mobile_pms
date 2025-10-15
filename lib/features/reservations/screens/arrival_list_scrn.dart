@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
@@ -12,6 +13,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservatio
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/arrival_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
@@ -28,12 +30,18 @@ class ArrivalList extends StatefulWidget {
 }
 
 class _ArrivalListState extends State<ArrivalList> {
+  final ArrivalListVm _arrivalListVm = Get.put(ArrivalListVm());
   late Map<String, List<GuestItem>> arrivalsMap;
 
   @override
   void initState() {
     super.initState();
-    arrivalsMap = _getArrivalsMap();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _arrivalListVm.getReservationsMap();
+      }
+    });
   }
 
   @override
@@ -51,11 +59,14 @@ class _ArrivalListState extends State<ArrivalList> {
               initialChildSize: 0.8,
               minChildSize: 0.5,
               maxChildSize: 0.95,
-              builder: (context, scrollController) => FilterBottomSheet(
-                type: 'arrival',
-                onApply: _applyArrivalFilters,
-                scrollController: scrollController,
-              ),
+              builder: (context, scrollController) => Obx(() {
+                return FilterBottomSheet(
+                  type: 'arrival',
+                  filteredData: _arrivalListVm.receivedFilters.value ?? {},
+                  onApply: _arrivalListVm.applyArrivalFilters,
+                  scrollController: scrollController,
+                );
+              }),
             ),
           );
         },
@@ -194,6 +205,7 @@ class _ArrivalListState extends State<ArrivalList> {
             },
           ),
           ActionItem(
+          ActionItem(
             icon: Icons.meeting_room,
             label: 'Unassign Rooms',
             onTap: () async {
@@ -209,8 +221,10 @@ class _ArrivalListState extends State<ArrivalList> {
               );
               if (confirmed == true) {
                 context.go(AppRoutes.maintenanceBlock);
+                context.go(AppRoutes.maintenanceBlock);
               }
             },
+          ),
           ),
           ActionItem(
             icon: Icons.edit_calendar,
@@ -224,16 +238,18 @@ class _ArrivalListState extends State<ArrivalList> {
                       AmendStay(guestItem: item),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
@@ -281,16 +297,18 @@ class _ArrivalListState extends State<ArrivalList> {
                       CancelReservation(reservationData: data),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
@@ -318,16 +336,18 @@ class _ArrivalListState extends State<ArrivalList> {
                       VoidReservation(reservationData: data),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
@@ -391,16 +411,18 @@ class _ArrivalListState extends State<ArrivalList> {
                       RoomMovePage(guestItem: item),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
@@ -417,16 +439,18 @@ class _ArrivalListState extends State<ArrivalList> {
                       const StopRoomMoveScreen(),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },

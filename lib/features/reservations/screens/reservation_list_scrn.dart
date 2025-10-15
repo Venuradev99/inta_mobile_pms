@@ -53,19 +53,21 @@ class _ReservationListState extends State<ReservationList> {
               initialChildSize: 0.8,
               minChildSize: 0.5,
               maxChildSize: 0.95,
-              builder: (context, scrollController) => FilterBottomSheet(
+              builder: (context, scrollController) => Obx( () {
+                return  FilterBottomSheet(
                 type: 'reservation',
-                onApply: _applyReservationFilters,
+                filteredData: _reservationListVm.receivedFilters.value ?? {},
+                onApply: _reservationListVm.applyReservationFilters,
                 scrollController: scrollController,
-              ),
+              );
+              }),
             ),
           );
         },
       ),
 
       body: Obx(() {
-        final reservations = _reservationListVm.reservationList.value ?? {};
-
+        final reservations = _reservationListVm.reservationFilteredList.value ?? {};
         if (reservations.isEmpty) {
           return const Center(child: Text('No reservations found'));
         }
@@ -79,113 +81,6 @@ class _ReservationListState extends State<ReservationList> {
     );
   }
 
-  void _applyReservationFilters(Map<String, dynamic> filters) {
-    var fullData = _reservationListVm.reservationList.value ?? {};
-
-    // Extract filters
-    DateTime? startDate = filters['startDate'];
-    DateTime? endDate = filters['endDate'];
-    String? roomType = filters['roomType'] != 'All'
-        ? filters['roomType']
-        : null;
-    String? reservationType = filters['reservationType'] != 'All'
-        ? filters['reservationType']
-        : null;
-    String dateFilterType = filters['dateFilterType'] ?? 'reserved';
-    String? status = filters['status'] != 'All' ? filters['status'] : null;
-    String? businessSource = filters['businessSource'] != 'All'
-        ? filters['businessSource']
-        : null;
-    bool showUnassignedRooms = filters['showUnassignedRooms'] ?? false;
-    bool showFailedBookings = filters['showFailedBookings'] ?? false;
-    String guestName = (filters['guestName'] ?? '').toLowerCase();
-    String reservationNumber = filters['reservationNumber'] ?? '';
-    String cancellationNumber = filters['cancellationNumber'] ?? '';
-    String voucherNumber = filters['voucherNumber'] ?? '';
-
-    // Filter each tab's list
-    Map<String, List<GuestItem>> filteredMap = {};
-    fullData.forEach((tab, items) {
-      filteredMap[tab] = items.where((item) {
-        // Date filtering
-        DateTime itemDate = dateFilterType == 'reserved'
-            ? _parseMockDate(item.reservedDate ?? item.startDate)
-            : _parseMockDate(item.startDate);
-        bool dateMatch = true;
-        if (startDate != null && endDate != null) {
-          dateMatch =
-              itemDate.isAfter(startDate.subtract(const Duration(days: 1))) &&
-              itemDate.isBefore(endDate.add(const Duration(days: 1)));
-        }
-        bool roomMatch = roomType == null || item.roomType == roomType;
-        bool resTypeMatch =
-            reservationType == null || item.reservationType == reservationType;
-        bool statusMatch = status == null || item.status == status;
-        bool sourceMatch =
-            businessSource == null || item.businessSource == businessSource;
-        // Text searches
-        bool nameMatch =
-            guestName.isEmpty ||
-            item.guestName.toLowerCase().contains(guestName);
-        bool resNumMatch =
-            reservationNumber.isEmpty || item.resId == reservationNumber;
-        bool cancelNumMatch =
-            cancellationNumber.isEmpty ||
-            (item.cancellationNumber ?? '') == cancellationNumber;
-        bool voucherMatch =
-            voucherNumber.isEmpty ||
-            (item.voucherNumber ?? '') == voucherNumber;
-        // Flags
-        bool unassignedMatch =
-            !showUnassignedRooms ||
-            (item.roomNumber == null || item.roomNumber!.isEmpty);
-        bool failedMatch =
-            !showFailedBookings ||
-            (item.status == 'Failed' || item.status == 'Incomplete');
-
-        return dateMatch &&
-            roomMatch &&
-            resTypeMatch &&
-            statusMatch &&
-            sourceMatch &&
-            nameMatch &&
-            resNumMatch &&
-            cancelNumMatch &&
-            voucherMatch &&
-            unassignedMatch &&
-            failedMatch;
-      }).toList();
-    });
-
-    setState(() {
-      reservationsMap = filteredMap;
-    });
-  }
-
-  DateTime _parseMockDate(String dateStr) {
-    final parts = dateStr.split(' ');
-    final month = _monthToInt(parts[0]);
-    final day = int.parse(parts[1]);
-    return DateTime(2025, month, day);
-  }
-
-  int _monthToInt(String month) {
-    const months = {
-      'Jan': 1,
-      'Feb': 2,
-      'Mar': 3,
-      'Apr': 4,
-      'May': 5,
-      'Jun': 6,
-      'Jul': 7,
-      'Aug': 8,
-      'Sep': 9,
-      'Oct': 10,
-      'Nov': 11,
-      'Dec': 12,
-    };
-    return months[month] ?? 1;
-  }
 
   void _showInfoDialog(BuildContext context) {
     showDialog(
@@ -245,6 +140,7 @@ class _ReservationListState extends State<ReservationList> {
       nights: item.nights,
       nightsLabel: 'Nights Stay',
       adults: item.adults,
+      reservationType: item.reservationType,
       totalAmount: item.totalAmount,
       balanceAmount: item.balanceAmount,
       onTap: () => _showActions(context, item),
@@ -268,41 +164,47 @@ class _ReservationListState extends State<ReservationList> {
             onTap: () => context.go(AppRoutes.viewReservation, extra: item),
           ),
           ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
-          ActionItem(icon: Icons.not_interested,label: 'No Show Reservation',onTap: () {
-           Navigator.of(context).pop();
-           final noShowData = NoShowReservationData(
-             guestName: item.guestName,
-             reservationNumber: item.resId,
-             folio: item.folioId,
-             arrivalDate: item.startDate,
-              departureDate: item.endDate,
-              roomType: item.roomType ?? 'N/A',
-              room: 'TBD', 
-              total: item.totalAmount,
-              deposit: item.totalAmount - item.balanceAmount,
-              balance: item.balanceAmount,
-              initialNoShowFee: null,
-            );
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    NoShowReservationPage(data: noShowData),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  var begin = const Offset(0.0, 1.0);
-                  var end = Offset.zero;
-                  var curve = Curves.ease;
-                  var tween = Tween(begin: begin, end: end)
-                      .chain(CurveTween(curve: curve));
-                  return SlideTransition(
-                    position: animation.drive(tween),
-                    child: child,
-                  );
-                },
-              ),
-            );
-          },),
+          ActionItem(
+            icon: Icons.not_interested,
+            label: 'No Show Reservation',
+            onTap: () {
+              Navigator.of(context).pop();
+              final noShowData = NoShowReservationData(
+                guestName: item.guestName,
+                reservationNumber: item.resId,
+                folio: item.folioId,
+                arrivalDate: item.startDate,
+                departureDate: item.endDate,
+                roomType: item.roomType ?? 'N/A',
+                room: 'TBD',
+                total: item.totalAmount,
+                deposit: item.totalAmount - item.balanceAmount,
+                balance: item.balanceAmount,
+                initialNoShowFee: null,
+              );
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      NoShowReservationPage(data: noShowData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        var begin = const Offset(0.0, 1.0);
+                        var end = Offset.zero;
+                        var curve = Curves.ease;
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                ),
+              );
+            },
+          ),
           ActionItem(
             icon: Icons.cancel,
             label: 'Cancel Reservation',
@@ -375,102 +277,4 @@ class _ReservationListState extends State<ReservationList> {
       ),
     );
   }
-
-  // Map<String, List<GuestItem>> _getReservationsMap() {
-  //   final reservationList = _reservationListVm.reservationList.value ?? {};
-  //   print('reservationList$reservationList');
-  //   return reservationList;
-    // {
-    //   'today': [
-    //     GuestItem(
-    //       guestName: 'Mr. Ethan Harris',
-    //       resId: 'BH3500',
-    //       folioId: '3501',
-    //       startDate: 'Sep 23',
-    //       endDate: 'Sep 25',
-    //       nights: 2,
-    //       roomType: 'Double Room',
-    //       adults: 2,
-    //       totalAmount: 220.00,
-    //       balanceAmount: 220.00,
-    //       reservedDate: 'Sep 23',
-    //       reservationType: 'Standard',
-    //       status: 'Pending',
-    //       businessSource: 'Direct',
-    //       roomNumber: '101',
-    //     ),
-    //   ],
-    //   'tomorrow': [
-    //     GuestItem(
-    //       guestName: 'Ms. Fiona Irving',
-    //       resId: 'BH3600',
-    //       folioId: '3601',
-    //       startDate: 'Sep 24',
-    //       endDate: 'Sep 26',
-    //       nights: 2,
-    //       roomType: 'Suite',
-    //       adults: 2,
-    //       totalAmount: 350.00,
-    //       balanceAmount: 0.00,
-    //       reservedDate: 'Sep 20',
-    //       reservationType: 'Corporate',
-    //       status: 'Confirmed',
-    //       businessSource: 'OTA',
-    //       roomNumber: null,
-    //     ),
-    //     GuestItem(
-    //       guestName: 'Mr. George Jackson',
-    //       resId: 'BH3700',
-    //       folioId: '3701',
-    //       startDate: 'Sep 24',
-    //       endDate: 'Sep 27',
-    //       nights: 3,
-    //       roomType: 'Single Room',
-    //       adults: 1,
-    //       totalAmount: 180.00,
-    //       balanceAmount: 90.00,
-    //       reservedDate: 'Sep 22',
-    //       reservationType: 'Day Use',
-    //       status: 'Failed',
-    //       businessSource: 'Walk-in',
-    //     ),
-    //     GuestItem(
-    //       guestName: 'Ms. Emily Carter',
-    //       resId: 'BH4825',
-    //       folioId: '4826',
-    //       startDate: 'Oct 10',
-    //       endDate: 'Oct 14',
-    //       nights: 4,
-    //       roomType: 'Deluxe Suite',
-    //       adults: 2,
-    //       totalAmount: 520.00,
-    //       balanceAmount: 130.00,
-    //       reservedDate: 'Oct 8',
-    //       reservationType: 'Overnight',
-    //       status: 'Confirmed',
-    //       businessSource: 'Online Booking',
-    //     ),
-    //   ],
-    //   'this week': [
-    //     GuestItem(
-    //       guestName: 'Ms. Hannah King',
-    //       resId: 'BH3800',
-    //       folioId: '3801',
-    //       startDate: 'Sep 25',
-    //       endDate: 'Sep 28',
-    //       nights: 3,
-    //       roomType: 'Bunk Bed',
-    //       adults: 1,
-    //       totalAmount: 120.00,
-    //       balanceAmount: 0.00,
-    //       reservedDate: 'Sep 23',
-    //       reservationType: 'Group',
-    //       status: 'Confirmed',
-    //       businessSource: 'Agent',
-    //       roomNumber: '205',
-    //       room: '205',
-    //     ),
-    //   ],
-    // };
-  // }
 }

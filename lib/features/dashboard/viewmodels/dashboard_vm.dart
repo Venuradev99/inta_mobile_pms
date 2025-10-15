@@ -5,9 +5,11 @@ import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
+import 'package:inta_mobile_pms/services/loading_controller.dart';
 
 class DashboardVm extends GetxController {
   final DashboardService _dashboardService = DashboardService();
+  final loadingController = Get.find<LoadingController>();
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -46,6 +48,8 @@ class DashboardVm extends GetxController {
   Future<void> loadBookingStaticData() async {
     isLoading.value = true;
     try {
+      loadingController.show();
+
       final responses = await Future.wait([
         _dashboardService.getBookingStatics(),
         _dashboardService.getInventoryStatics(),
@@ -190,6 +194,7 @@ class DashboardVm extends GetxController {
       print("error: $e");
     } finally {
       isLoading.value = false;
+      
     }
   }
 }

@@ -26,7 +26,7 @@ class _InHouseListState extends State<InHouseList> {
       appBar: CustomAppBar(
         title: 'In House List',
         onInfoTap: () => _showInfoDialog(context),
-        onFilterTap: () {}, // Implement filter
+        onFilterTap: () {},
       ),
       body: _buildInHouseList(),
     );

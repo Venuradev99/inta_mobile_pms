@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:inta_mobile_pms/services/data_access_service.dart';
+import 'package:inta_mobile_pms/services/loading_controller.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
+  final loadingController = Get.find<LoadingController>();
+
   static Future<Map<String, dynamic>> getConfigJSON() async {
     try {
       final configString = await rootBundle.loadString('assets/config.json');
@@ -59,7 +63,11 @@ class UserApiService {
           await LocalStorageManager.setHotelId(hotelId);
 
           final systemInfo = await loadSystemInformation();
-          print('systemInfo$systemInfo');
+          if (systemInfo["isSuccessful"]) {
+            await LocalStorageManager.setSystemDate(
+              systemInfo["result"]["systemDate"],
+            );
+          }
 
           return {
             "isSuccessful": true,
@@ -78,8 +86,8 @@ class UserApiService {
         };
       }
     } catch (e) {
-     throw Exception('Error occurede while login: $e');
-    }
+      throw Exception('Error occurede while login: $e');
+    } 
   }
 
   Future<Map<String, dynamic>> loadSystemInformation() async {
@@ -118,6 +126,7 @@ class UserApiService {
 
   Future<Map<String, dynamic>> logout() async {
     try {
+      loadingController.show();
       await LocalStorageManager.clearUserData();
       // final logoutUrl = AppResources.logoutUrl;
       // final response = await http.post(Uri.parse(logoutUrl));

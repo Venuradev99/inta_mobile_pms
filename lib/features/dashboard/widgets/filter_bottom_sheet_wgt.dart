@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/filter_bottom_sheet_wgt_vm.dart';
+import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   final String type; // 'arrival', 'departure', 'reservation'
   final Function(Map<String, dynamic>) onApply; // Callback to apply filters
-  final ScrollController scrollController;  // Required for DraggableScrollableSheet integration
+  final Map<String, dynamic> filteredData;
+  final ScrollController
+  scrollController; // Required for DraggableScrollableSheet integration
 
   const FilterBottomSheet({
     super.key,
     required this.type,
     required this.onApply,
+    required this.filteredData,
     required this.scrollController,
   });
 
@@ -19,6 +26,10 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  final FilterBottomSheetWgtVm _filterBottomSheetWgtVm = Get.put(
+    FilterBottomSheetWgtVm(),
+  );
+
   // Common controllers and states
   DateTime? startDate;
   DateTime? endDate;
@@ -34,15 +45,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   bool showUnassignedRooms = false;
   bool showFailedBookings = false;
   final TextEditingController guestNameController = TextEditingController();
-  final TextEditingController reservationNumberController = TextEditingController();
-  final TextEditingController cancellationNumberController = TextEditingController();
+  final TextEditingController reservationNumberController =
+      TextEditingController();
+  final TextEditingController cancellationNumberController =
+      TextEditingController();
   final TextEditingController voucherNumberController = TextEditingController();
 
-  // Mock options
-  final List<String> roomTypes = ['All', 'Single', 'Double', 'Suite', 'Bunk Bed', 'Beach House', 'Garden Villa'];
-  final List<String> reservationTypes = ['All', 'Standard', 'Day Use', 'Group', 'Corporate'];
-  final List<String> statuses = ['All', 'Confirmed', 'Pending', 'Checked In', 'Checked Out', 'Cancelled', 'Completed'];
-  final List<String> businessSources = ['All', 'Direct', 'OTA', 'Agent', 'Corporate', 'Walk-in'];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _filterBottomSheetWgtVm.loadData(widget.type);
+        _setFilters();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -70,6 +88,33 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       reservationNumberController.clear();
       cancellationNumberController.clear();
       voucherNumberController.clear();
+    });
+  }
+
+  void _setFilters() {
+
+    if (!mounted) return; 
+
+    print('${widget.filteredData}');
+    setState(() {
+      startDate = widget.filteredData['startDate'];
+      endDate = widget.filteredData['endDate'];
+      selectedRoomType = widget.filteredData['roomType'];
+      selectedReservationType = widget.filteredData['reservationType'];
+      guestCheckedInToday = widget.filteredData['guestCheckedInToday'] ?? false;
+      guestCheckedOutToday =
+          widget.filteredData['guestCheckedOutToday'] ?? false;
+      dateFilterType = widget.filteredData['dateFilterType'] ?? 'reserved';
+      selectedStatus = widget.filteredData['status'];
+      selectedBusinessSource = widget.filteredData['businessSource'];
+      showUnassignedRooms = widget.filteredData['showUnassignedRooms'] ?? false;
+      showFailedBookings = widget.filteredData['showFailedBookings'] ?? false;
+      guestNameController.text = widget.filteredData['guestName'] ?? '';
+      reservationNumberController.text =
+          widget.filteredData['reservationNumber'] ?? '';
+      cancellationNumberController.text =
+          widget.filteredData['cancellationNumber'] ?? '';
+      voucherNumberController.text = widget.filteredData['voucherNumber'] ?? '';
     });
   }
 
@@ -102,11 +147,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final todaySystemWorkingDate = await LocalStorageManager.getSystemDate();
+    DateTime? firstDate = DateTime.parse(todaySystemWorkingDate);
+    DateTime? lastDate = firstDate.add(const Duration(days: 6));
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+
+      // initialDate: DateTime.now(),
+      // firstDate: DateTime(2000),
+      // lastDate: DateTime(2100),
+      initialDate: firstDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
     );
     if (picked != null) {
       setState(() {
@@ -142,7 +194,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // Scrollable content (drag handle + filters)
           ListView(
             controller: widget.scrollController,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),  // Bottom padding for fixed buttons
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              80,
+            ), // Bottom padding for fixed buttons
             children: [
               // Drag handle (centered at top)
               const SizedBox(height: 8),
@@ -188,12 +245,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       onPressed: _resetFilters,
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: AppColors.primary),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: Text(
                         'Reset',
-                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -203,12 +265,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       onPressed: _applyFilters,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text(
                         'Search',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -224,48 +291,73 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   List<Widget> _buildFilterFields() {
     List<Widget> fields = [
       Text(
-        '${widget.type.capitalize()} Filters',
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+        '${StringExtension(widget.type).capitalize()} Filters',
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
       ),
       const SizedBox(height: 16),
       // Date range
       Row(
         children: [
-          Expanded(
-            child: _buildDateField('Start Date', startDate, true),
-          ),
+          Expanded(child: _buildDateField('Start Date', startDate, true)),
           const SizedBox(width: 16),
-          Expanded(
-            child: _buildDateField('End Date', endDate, false),
-          ),
+          Expanded(child: _buildDateField('End Date', endDate, false)),
         ],
       ),
       const SizedBox(height: 16),
       // Room type dropdown
-      _buildDropdown('Room Type', roomTypes, selectedRoomType, (value) => selectedRoomType = value),
+      Obx(() {
+        final roomTypes = _filterBottomSheetWgtVm.roomTypes;
+        return _buildDropdown(
+          'Room Type',
+          roomTypes,
+          selectedRoomType,
+          (value) => selectedRoomType = value,
+        );
+      }),
+
       if (widget.type != 'departure') ...[
         const SizedBox(height: 16),
         // Reservation type dropdown
-        _buildDropdown('Reservation Type', reservationTypes, selectedReservationType, (value) => selectedReservationType = value),
+        Obx(() {
+          final reservationTypes = _filterBottomSheetWgtVm.reservationTypes;
+          return _buildDropdown(
+            'Reservation Type',
+            reservationTypes,
+            selectedReservationType,
+            (value) => selectedReservationType = value,
+          );
+        }),
       ],
     ];
 
     if (widget.type == 'arrival') {
       fields.addAll([
         const SizedBox(height: 16),
-        _buildToggle('Guest Checked In Today', guestCheckedInToday, (value) => guestCheckedInToday = value!),
+        _buildToggle(
+          'Guest Checked In Today',
+          guestCheckedInToday,
+          (value) => guestCheckedInToday = value!,
+        ),
       ]);
     } else if (widget.type == 'departure') {
       fields.addAll([
         const SizedBox(height: 16),
-        _buildToggle('Guest Checked Out Today', guestCheckedOutToday, (value) => guestCheckedOutToday = value!),
+        _buildToggle(
+          'Guest Checked Out Today',
+          guestCheckedOutToday,
+          (value) => guestCheckedOutToday = value!,
+        ),
       ]);
     } else if (widget.type == 'reservation') {
       fields.addAll([
         const SizedBox(height: 16),
         Text(
           'Date Filter Type',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         RadioListTile<String>(
           title: const Text('Reserved Date'),
@@ -282,13 +374,38 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),
-        _buildDropdown('Status', statuses, selectedStatus, (value) => selectedStatus = value),
+        Obx(() {
+          final statuses = _filterBottomSheetWgtVm.statuses;
+          return _buildDropdown(
+            'Status',
+            statuses,
+            selectedStatus,
+            (value) => selectedStatus = value,
+          );
+        }),
+
         const SizedBox(height: 16),
-        _buildDropdown('Business Source', businessSources, selectedBusinessSource, (value) => selectedBusinessSource = value),
+        Obx(() {
+          final businessSources = _filterBottomSheetWgtVm.businessSources;
+          return _buildDropdown(
+            'Business Source',
+            businessSources,
+            selectedBusinessSource,
+            (value) => selectedBusinessSource = value,
+          );
+        }),
         const SizedBox(height: 16),
-        _buildToggle('Show Unassigned Rooms', showUnassignedRooms, (value) => showUnassignedRooms = value!),
+        _buildToggle(
+          'Show Unassigned Rooms',
+          showUnassignedRooms,
+          (value) => showUnassignedRooms = value!,
+        ),
         const SizedBox(height: 8),
-        _buildToggle('Show Failed/Incomplete Bookings', showFailedBookings, (value) => showFailedBookings = value!),
+        _buildToggle(
+          'Show Failed/Incomplete Bookings',
+          showFailedBookings,
+          (value) => showFailedBookings = value!,
+        ),
         const SizedBox(height: 16),
         _buildTextField('Guest Name', guestNameController),
         const SizedBox(height: 16),
@@ -309,8 +426,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       child: AbsorbPointer(
         child: TextField(
           decoration: InputDecoration(
-            labelText: label,
-            hintText: date != null ? DateFormat('MMM dd, yyyy').format(date) : 'Select date',
+            labelText: date != null
+                ? DateFormat('MMM dd, yyyy').format(
+                    date,
+                  ) // show selected date as label
+                : label,
+            hintText: date != null
+                ? DateFormat('MMM dd, yyyy').format(date)
+                : 'Select date',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             suffixIcon: const Icon(Icons.calendar_today),
           ),
@@ -319,17 +442,24 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
-  Widget _buildDropdown(String label, List<String> items, String? value, Function(String?) onChanged) {
+  Widget _buildDropdown(
+    String label,
+    List<FilterDropdownData> items,
+    String? value,
+    Function(String?) onChanged,
+  ) {
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      value: value ?? items.first,
-      items: items.map((String item) {
+      // initialValue: items.isNotEmpty ? items.first.id.toString() : null,
+      initialValue: value,
+      hint: Text('Select $label'),
+      items: items.map((FilterDropdownData item) {
         return DropdownMenuItem<String>(
-          value: item,
-          child: Text(item),
+          value: item.id.toString(),
+          child: Text(item.name),
         );
       }).toList(),
       onChanged: (newValue) => setState(() => onChanged(newValue)),

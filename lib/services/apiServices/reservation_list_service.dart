@@ -13,5 +13,45 @@ class ReservationListService {
       return {"error": error.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getAllRoomTypes() async {
+     try {
+      final url = AppResources.getAllRoomTypes;
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllreservationTypes() async {
+     try {
+      final url = AppResources.getAllreservationTypes;
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+  
+   Future<Map<String, dynamic>> getAllroomstatus() async {
+     try {
+      final url = AppResources.getAllroomstatus;
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+    Future<Map<String, dynamic>> getAllbusinessSources() async {
+     try {
+      final url = AppResources.getAllbusinessSources;
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
   
 }

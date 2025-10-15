@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 
 class DataAccessService {
+
   Map<String, dynamic>? configData;
   String? baseUrl;
   final ApiConfigService apiConfigService = ApiConfigService();
@@ -12,11 +13,13 @@ class DataAccessService {
 
   Future<void> loadConfigData() async {
     try {
+
       final response = await ApiConfigService().getConfigJSON();
       configData = response;
       baseUrl = response['baseUrl'];
     } catch (e) {
       throw Exception('Failed to load configuration: $e');
+    } finally {
     }
   }
 
@@ -33,63 +36,74 @@ class DataAccessService {
   }
 
   Future<Map<String, dynamic>> get(String url) async {
-    final token = await LocalStorageManager.getAccessToken();
-    final hotelId = await LocalStorageManager.getHotelId();
-    if (baseUrl == null) {
-      await loadConfigData();
-    }
+    try {
 
-    if (token.isEmpty) {
-      throw Exception('Session key not available');
-    }
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      if (baseUrl == null) {
+        await loadConfigData();
+      }
 
-    if (baseUrl == null) {
-      throw Exception('baseUrl URL not available');
-    }
+      if (token.isEmpty) {
+        throw Exception('Session key not available');
+      }
 
-    final headers = {
-      'Authorization': token,
-      'Content-Type': 'application/json',
-      'Hotelid': hotelId,
-    };
+      if (baseUrl == null) {
+        throw Exception('baseUrl URL not available');
+      }
 
-    final response = await http.get(
-      Uri.parse('$baseUrl$url'),
-      headers: headers,
-    );
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        'Hotelid': hotelId,
+      };
 
-    return _handleResponse(response);
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('GET error: $e');
+    } 
   }
 
+  Future<Map<String, dynamic>> post(
+    Map<String, dynamic> body,
+    String url,
+  ) async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      if (baseUrl == null) {
+        await loadConfigData();
+      }
 
-  Future<Map<String, dynamic>> post(Map<String, dynamic> body,String url) async {
-    final token = await LocalStorageManager.getAccessToken();
-    final hotelId = await LocalStorageManager.getHotelId();
-    if (baseUrl == null) {
-      await loadConfigData();
+      if (token.isEmpty) {
+        throw Exception('Session key not available');
+      }
+
+      if (baseUrl == null) {
+        throw Exception('baseUrl URL not available');
+      }
+
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        'Hotelid': hotelId,
+      };
+
+      final response = await http.post(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('POST error: $e');
     }
-
-    if (token.isEmpty) {
-      throw Exception('Session key not available');
-    }
-
-    if (baseUrl == null) {
-      throw Exception('baseUrl URL not available');
-    }
-
-    final headers = {
-      'Authorization': token,
-      'Content-Type': 'application/json',
-      'Hotelid': hotelId,
-    };
-
-    final response = await http.post(
-      Uri.parse('$baseUrl$url'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
-
-    return _handleResponse(response);
   }
 
   //   Future<Map<String, dynamic>> Post(

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
+import 'package:inta_mobile_pms/services/loading_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -21,6 +24,7 @@ class _LoginPageState extends State<LoginPage>
   final _hotelIdController = TextEditingController();
 
   final UserApiService _userApiService = UserApiService();
+  final loadingController = Get.find<LoadingController>();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -72,7 +76,9 @@ class _LoginPageState extends State<LoginPage>
   Future<void> _handleLogin() async {
     // if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+
     try {
+      loadingController.show();
       final response = await _userApiService.login(
         _usernameController.text.trim(),
         _passwordController.text.trim(),
@@ -88,6 +94,7 @@ class _LoginPageState extends State<LoginPage>
       _showError("Something went wrong during login.");
     } finally {
       setState(() => _isLoading = false);
+      loadingController.hide();
     }
   }
 
