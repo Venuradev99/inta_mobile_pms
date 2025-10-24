@@ -1,15 +1,14 @@
 import 'package:get/get.dart';
+import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/booking_static_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/hotel_inventory_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
-import 'package:inta_mobile_pms/services/loading_controller.dart';
 
 class DashboardVm extends GetxController {
-  final DashboardService _dashboardService = DashboardService();
-  final loadingController = Get.find<LoadingController>();
+  final DashboardService _dashboardService;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -43,12 +42,11 @@ class DashboardVm extends GetxController {
 
   final isLoading = true.obs;
 
-  DashboardVm();
+  DashboardVm(this._dashboardService);
 
   Future<void> loadBookingStaticData() async {
     isLoading.value = true;
     try {
-      loadingController.show();
 
       final responses = await Future.wait([
         _dashboardService.getBookingStatics(),
@@ -84,7 +82,7 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-        ////error message
+        MessageHelper.error(bookingResponse["errors"][0] ?? 'Error getting booking details!');
       }
 
       if (inventoryResponse["isSuccessful"] == true) {
@@ -107,17 +105,17 @@ class DashboardVm extends GetxController {
 
           // if (data.name == "Projected RevPAR") {
           //   projectedRevPar.value = data.value;
-          //   print('projectedRevPar=$projectedRevPar');
+          //  
           // }
 
           // if (data.name == "Projected ADR") {
           //   projectedAdr.value = data.value;
-          //   print('projectedAdr=$projectedAdr');
+          //  
           // }
 
           // if (data.name == "Projected Occupancy") {
           //   projectedOccupancy.value = data.value;
-          //   print('projectedOccupancy=$projectedOccupancy');
+          //   
           // }
         }
 
@@ -127,12 +125,12 @@ class DashboardVm extends GetxController {
           final data = HotelInventoryData.fromJson(item);
           // if (data.name == "Total Rooms Available") {
           //   totalAvailableRooms.value = data.value;
-          //   print('totalAvailableRooms=$totalAvailableRooms');
+          //   
           // }
 
           if (data.name == "Out of Order") {
             outOfOrderRooms.value = data.value;
-            // print('outOfOrder=$outOfOrderRooms');
+            //
           }
         }
 
@@ -144,13 +142,13 @@ class DashboardVm extends GetxController {
             : 0;
 
         totalAvailableRooms.value = totalRoomsToSell - todayInventory;
-        totalRoomSoldRate.value = (totalRoomSold / totalRoomsToSell);
-        totalAvailableRoomsRate.value =
-            (totalAvailableRooms / totalRoomsToSell);
-        complementaryRoomsRate.value = (complementaryRooms / totalRoomsToSell);
-        outOfOrderRoomsRate.value = (outOfOrderRooms / totalRoomsToSell);
+        totalRoomSoldRate.value =  totalRoomsToSell == 0 ? 0 : (totalRoomSold / totalRoomsToSell);
+        totalAvailableRoomsRate.value = totalRoomsToSell == 0 ? 0 :
+            (totalAvailableRooms / totalRoomsToSell) ;
+        complementaryRoomsRate.value = totalRoomsToSell == 0 ? 0 :  (complementaryRooms / totalRoomsToSell);
+        outOfOrderRoomsRate.value = totalRoomsToSell == 0 ? 0 : (outOfOrderRooms / totalRoomsToSell);
       } else {
-        ////error message
+       MessageHelper.error(inventoryResponse["errors"][0] ?? 'Error getting inventory details!');
       }
 
       if (propertyStatisticsResponse["isSuccessful"] == true) {
@@ -180,7 +178,7 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-        //// error message
+       MessageHelper.error(propertyStatisticsResponse["errors"][0] ?? 'Error getting property statistics details!');
       }
 
       if (occupancyStaticsResponse["isSuccessful"] == true) {
@@ -188,10 +186,10 @@ class DashboardVm extends GetxController {
         final data = OccupancyData.fromJson(result);
         occupancyData.value = data;
       } else {
-        //// error message
+       MessageHelper.error(occupancyStaticsResponse["errors"][0] ?? 'Error getting booking details!');
       }
     } catch (e) {
-      print("error: $e");
+      MessageHelper.error('Error loading dashboard data: $e');
     } finally {
       isLoading.value = false;
       

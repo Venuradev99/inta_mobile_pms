@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
-import 'package:inta_mobile_pms/features/dashboard/viewmodels/filter_bottom_sheet_wgt_vm.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -10,13 +8,20 @@ class FilterBottomSheet extends StatefulWidget {
   final String type; // 'arrival', 'departure', 'reservation'
   final Function(Map<String, dynamic>) onApply; // Callback to apply filters
   final Map<String, dynamic> filteredData;
-  final ScrollController
-  scrollController; // Required for DraggableScrollableSheet integration
+  final ScrollController scrollController;
+  final List<FilterDropdownData>? roomTypes;
+  final List<FilterDropdownData>? reservationTypes;
+  final List<FilterDropdownData>? statuses;
+  final List<FilterDropdownData>? businessSources;
 
   const FilterBottomSheet({
     super.key,
     required this.type,
     required this.onApply,
+    required this.roomTypes,
+    required this.reservationTypes,
+    required this.statuses,
+    required this.businessSources,
     required this.filteredData,
     required this.scrollController,
   });
@@ -26,10 +31,6 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  final FilterBottomSheetWgtVm _filterBottomSheetWgtVm = Get.put(
-    FilterBottomSheetWgtVm(),
-  );
-
   // Common controllers and states
   DateTime? startDate;
   DateTime? endDate;
@@ -54,12 +55,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
-        await _filterBottomSheetWgtVm.loadData(widget.type);
-        _setFilters();
-      }
-    });
+     _setFilters();
   }
 
   @override
@@ -92,10 +88,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   void _setFilters() {
+    if (!mounted) return;
 
-    if (!mounted) return; 
-
-    print('${widget.filteredData}');
     setState(() {
       startDate = widget.filteredData['startDate'];
       endDate = widget.filteredData['endDate'];
@@ -152,10 +146,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     DateTime? lastDate = firstDate.add(const Duration(days: 6));
     final DateTime? picked = await showDatePicker(
       context: context,
-
-      // initialDate: DateTime.now(),
-      // firstDate: DateTime(2000),
-      // lastDate: DateTime(2100),
       initialDate: firstDate,
       firstDate: firstDate,
       lastDate: lastDate,
@@ -307,28 +297,24 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       ),
       const SizedBox(height: 16),
       // Room type dropdown
-      Obx(() {
-        final roomTypes = _filterBottomSheetWgtVm.roomTypes;
-        return _buildDropdown(
+      _buildDropdown(
           'Room Type',
-          roomTypes,
+          widget.roomTypes ?? [FilterDropdownData(id: 0, name: '')],
           selectedRoomType,
           (value) => selectedRoomType = value,
-        );
-      }),
+        ),
 
       if (widget.type != 'departure') ...[
         const SizedBox(height: 16),
         // Reservation type dropdown
-        Obx(() {
-          final reservationTypes = _filterBottomSheetWgtVm.reservationTypes;
-          return _buildDropdown(
+       
+        _buildDropdown(
             'Reservation Type',
-            reservationTypes,
+            widget.reservationTypes ?? [FilterDropdownData(id: 0, name: '')],
             selectedReservationType,
             (value) => selectedReservationType = value,
-          );
-        }),
+          ),
+       
       ],
     ];
 
@@ -374,26 +360,25 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 16),
-        Obx(() {
-          final statuses = _filterBottomSheetWgtVm.statuses;
-          return _buildDropdown(
+       
+        
+         _buildDropdown(
             'Status',
-            statuses,
+            widget.statuses ?? [FilterDropdownData(id: 0, name: '')],
             selectedStatus,
             (value) => selectedStatus = value,
-          );
-        }),
+          ),
+       
 
         const SizedBox(height: 16),
-        Obx(() {
-          final businessSources = _filterBottomSheetWgtVm.businessSources;
-          return _buildDropdown(
-            'Business Source',
-            businessSources,
-            selectedBusinessSource,
-            (value) => selectedBusinessSource = value,
-          );
-        }),
+
+        _buildDropdown(
+          'Business Source',
+          widget.businessSources ?? [FilterDropdownData(id: 0, name: '')],
+          selectedBusinessSource,
+          (value) => selectedBusinessSource = value,
+        ),
+
         const SizedBox(height: 16),
         _buildToggle(
           'Show Unassigned Rooms',

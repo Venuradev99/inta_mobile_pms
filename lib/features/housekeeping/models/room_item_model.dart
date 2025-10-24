@@ -20,8 +20,8 @@ class RoomItem {
   final String section;
   final String roomName;
   final String availability;
-  final HousekeepingStatus housekeepingStatus;
-  final RoomType roomType;
+  final String housekeepingStatus;
+  final String roomType;
   final bool hasIssue;
   final String? remark;
 

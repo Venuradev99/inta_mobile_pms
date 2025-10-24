@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/no_show_reservation_vm.dart';
 
 class NoShowReservationData {
+  final List<Map<String, dynamic>> reasons;
+  final String bookingRoomId;
   final String guestName;
   final String reservationNumber;
   final String folio;
@@ -17,6 +22,8 @@ class NoShowReservationData {
   final double? initialNoShowFee;
 
   const NoShowReservationData({
+    required this.bookingRoomId,
+    required this.reasons,
     required this.guestName,
     required this.reservationNumber,
     required this.folio,
@@ -30,10 +37,15 @@ class NoShowReservationData {
     this.initialNoShowFee,
   });
 
-
   factory NoShowReservationData.fromJson(Map<String, dynamic> json) {
     return NoShowReservationData(
+      reasons:
+          (json['reasons'] as List<dynamic>?)
+              ?.map((e) => Map<String, dynamic>.from(e as Map))
+              .toList() ??
+          [],
       guestName: json['guestName'] as String,
+      bookingRoomId: json['bookingRoomId'] as String,
       reservationNumber: json['reservationNumber'] as String,
       folio: json['folio'] as String,
       arrivalDate: json['arrivalDate'] as String,
@@ -43,15 +55,17 @@ class NoShowReservationData {
       total: (json['total'] as num).toDouble(),
       deposit: (json['deposit'] as num).toDouble(),
       balance: (json['balance'] as num).toDouble(),
-      initialNoShowFee: json['initialNoShowFee'] != null 
-          ? (json['initialNoShowFee'] as num).toDouble() 
+      initialNoShowFee: json['initialNoShowFee'] != null
+          ? (json['initialNoShowFee'] as num).toDouble()
           : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'reasons': reasons,
       'guestName': guestName,
+      'bookingRoomId': bookingRoomId,
       'reservationNumber': reservationNumber,
       'folio': folio,
       'arrivalDate': arrivalDate,
@@ -69,18 +83,17 @@ class NoShowReservationData {
 class NoShowReservationPage extends StatefulWidget {
   final NoShowReservationData data;
 
-  const NoShowReservationPage({
-    Key? key,
-    required this.data,
-  }) : super(key: key);
+  const NoShowReservationPage({Key? key, required this.data}) : super(key: key);
 
   @override
   State<NoShowReservationPage> createState() => _NoShowReservationPageState();
 }
 
 class _NoShowReservationPageState extends State<NoShowReservationPage> {
+  final _noShowReservationVm = Get.find<NoShowReservationVm>();
   late final TextEditingController _noShowFeeController;
-  bool _isRateInclusiveTax = true;
+  final TextEditingController commentController = TextEditingController();
+  bool _isRateInclusiveTax = false;
   String? _selectedOwner;
   String? _selectedReason;
 
@@ -88,8 +101,12 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
   void initState() {
     super.initState();
     _noShowFeeController = TextEditingController(
-      text: widget.data.initialNoShowFee?.toStringAsFixed(2) ?? '3125.00',
+      text: widget.data.initialNoShowFee?.toStringAsFixed(2) ?? '0.00',
     );
+    commentController.text = '';
+    _noShowFeeController.addListener(() {
+      setState(() {});
+    });
   }
 
   final List<String> _owners = [
@@ -98,21 +115,14 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     '144 - Jane Doe',
   ];
 
-  final List<String> _reasons = [
-    'Flight missed',
-    'Guest didn\'t arrive to the hotel',
-    'Sick cannot travel',
-    'Weather conditions',
-    'Personal emergency',
-  ];
-
   @override
   void dispose() {
     _noShowFeeController.dispose();
+    commentController.dispose();
     super.dispose();
   }
 
-  void _handleSave() {
+  void _handleSave() async {
     if (_selectedReason == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -123,13 +133,16 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
       return;
     }
 
-    // Handle save logic here
-    Navigator.of(context).pop({
-      'noShowFee': double.tryParse(_noShowFeeController.text) ?? 0.0,
-      'isRateInclusiveTax': _isRateInclusiveTax,
-      'owner': _selectedOwner,
-      'reason': _selectedReason,
-    });
+    Map<String, dynamic> result = {
+      "reason": _selectedReason ?? '',
+      "bookingRoomId": widget.data.bookingRoomId,
+      "rate": _noShowFeeController.text,
+      "isTaxInclusive": _isRateInclusiveTax,
+    };
+
+    await _noShowReservationVm.noShowReservation(result);
+    if (!mounted) return;
+    Get.back();
   }
 
   @override
@@ -169,10 +182,12 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
                   _buildReservationCard(context, theme, padding),
                   SizedBox(height: padding),
                   _buildNoShowFeeCard(context, theme, padding),
-                  SizedBox(height: padding),
-                  _buildChangeOwnerCard(context, theme, padding),
+                  // SizedBox(height: padding),
+                  // _buildChangeOwnerCard(context, theme, padding),
                   SizedBox(height: padding),
                   _buildReasonCard(context, theme, padding),
+                  SizedBox(height: padding),
+                  _buildTextField(context, commentController),
                 ],
               ),
             ),
@@ -183,11 +198,37 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     );
   }
 
-  Widget _buildReservationCard(BuildContext context, ThemeData theme, double padding) {
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Widget _buildReservationCard(
+    BuildContext context,
+    ThemeData theme,
+    double padding,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -212,21 +253,40 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
           _buildDivider(),
           _buildInfoRow('Room', widget.data.room, theme),
           _buildDivider(),
-          _buildInfoRow('Total', '\$ ${widget.data.total.toStringAsFixed(2)}', theme),
+          _buildInfoRow(
+            'Total',
+            '\$ ${widget.data.total.toStringAsFixed(2)}',
+            theme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Deposit', '\$ ${widget.data.deposit.toStringAsFixed(2)}', theme),
+          _buildInfoRow(
+            'Deposit',
+            '\$ ${widget.data.deposit.toStringAsFixed(2)}',
+            theme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Balance', '\$ ${widget.data.balance.toStringAsFixed(2)}', theme, isLast: true),
+          _buildInfoRow(
+            'Balance',
+            '\$ ${widget.data.balance.toStringAsFixed(2)}',
+            theme,
+            isLast: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNoShowFeeCard(BuildContext context, ThemeData theme, double padding) {
+  Widget _buildNoShowFeeCard(
+    BuildContext context,
+    ThemeData theme,
+    double padding,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -251,22 +311,32 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
                 width: 120,
                 child: TextField(
                   controller: _noShowFeeController,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   textAlign: TextAlign.right,
                   style: theme.textTheme.bodyMedium,
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: AppColors.lightgrey),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.lightgrey.withOpacity(0.3)),
+                      borderSide: BorderSide(
+                        color: AppColors.lightgrey.withOpacity(0.3),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppColors.primary,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -299,11 +369,17 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     );
   }
 
-  Widget _buildChangeOwnerCard(BuildContext context, ThemeData theme, double padding) {
+  Widget _buildChangeOwnerCard(
+    BuildContext context,
+    ThemeData theme,
+    double padding,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -316,7 +392,12 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(padding, padding * 0.75, padding, padding * 0.5),
+            padding: EdgeInsets.fromLTRB(
+              padding,
+              padding * 0.75,
+              padding,
+              padding * 0.5,
+            ),
             child: Text(
               'Change Owner',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -347,7 +428,10 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
                   ),
                 ),
                 activeColor: AppColors.primary,
-                contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 0),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: padding,
+                  vertical: 0,
+                ),
               );
             },
           ),
@@ -356,11 +440,17 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     );
   }
 
-  Widget _buildReasonCard(BuildContext context, ThemeData theme, double padding) {
+  Widget _buildReasonCard(
+    BuildContext context,
+    ThemeData theme,
+    double padding,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -373,7 +463,12 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(padding, padding * 0.75, padding, padding * 0.5),
+            padding: EdgeInsets.fromLTRB(
+              padding,
+              padding * 0.75,
+              padding,
+              padding * 0.5,
+            ),
             child: Text(
               'Reason',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -385,10 +480,11 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: _reasons.length,
+            itemCount: widget.data.reasons.length,
             separatorBuilder: (context, index) => _buildDivider(),
             itemBuilder: (context, index) {
-              final reason = _reasons[index];
+              final selected = widget.data.reasons[index];
+              final reason = selected["name"];
               return RadioListTile<String>(
                 value: reason,
                 groupValue: _selectedReason,
@@ -404,7 +500,10 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
                   ),
                 ),
                 activeColor: AppColors.primary,
-                contentPadding: EdgeInsets.symmetric(horizontal: padding, vertical: 0),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: padding,
+                  vertical: 0,
+                ),
               );
             },
           ),
@@ -413,7 +512,35 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, ThemeData theme, {bool isLast = false}) {
+  Widget _buildTextField(
+    BuildContext context,
+    TextEditingController controller,
+  ) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: 'Comments',
+          labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 10,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    ThemeData theme, {
+    bool isLast = false,
+  }) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: ResponsiveConfig.defaultPadding(context),
@@ -448,7 +575,11 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
     );
   }
 
-  Widget _buildBottomActions(BuildContext context, ThemeData theme, double padding) {
+  Widget _buildBottomActions(
+    BuildContext context,
+    ThemeData theme,
+    double padding,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -466,7 +597,7 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Get.back(),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.lightgrey),

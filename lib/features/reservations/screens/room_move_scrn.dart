@@ -1,80 +1,47 @@
 // lib/features/reservations/pages/room_move_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:inta_mobile_pms/features/reservations/models/room_move_save_data.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/room_move_vm.dart';
 
 class RoomMovePage extends StatefulWidget {
   final GuestItem? guestItem;
 
-  const RoomMovePage({
-    super.key,
-    this.guestItem,
-  });
+  const RoomMovePage({super.key, this.guestItem});
 
   @override
   State<RoomMovePage> createState() => _RoomMovePageState();
 }
 
 class _RoomMovePageState extends State<RoomMovePage> {
+  final _roomMoveVm = Get.find<RoomMoveVm>();
 
-  final List<String> _roomTypes = [
-    'Single Room',
-    'Double Room',
-    'Double Room new',
-    'Suite',
-    'Deluxe Room',
-    'Executive Suite',
-    'Presidential Suite'
-  ];
-  
-  final Map<String, List<String>> _roomsByType = {
-    'Single Room': ['101', '102', '103', '201', '202'],
-    'Double Room': ['104', '105', '106', '203', '204'],
-    'Double Room new': ['Test', '107', '108', '205', '206'],
-    'Suite': ['301', '302', '401', '402'],
-    'Deluxe Room': ['303', '304', '403', '404'],
-    'Executive Suite': ['501', '502'],
-    'Presidential Suite': ['601', '602'],
-  };
-  
+  bool isManualRate = false;
+  bool isEnabledTaxInclusive = false;
+  final TextEditingController _rateController = TextEditingController();
+
+  final String currencyCode = 'LKR';
+
   String? _selectedRoomType;
   String? _selectedRoom;
-  List<String> _availableRooms = [];
+  bool isOverrideRate = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeData();
-  }
-
-  void _initializeData() {
-   
-    if (widget.guestItem != null) {
-      _selectedRoomType = widget.guestItem!.roomType;
-      _selectedRoom = 'Test'; 
-    } else {
-   
-      _selectedRoomType = 'Double Room new';
-      _selectedRoom = 'Test';
-    }
-    
-    _updateAvailableRooms();
-  }
-
-  void _updateAvailableRooms() {
-    if (_selectedRoomType != null) {
-      setState(() {
-        _availableRooms = _roomsByType[_selectedRoomType!] ?? [];
-        // Reset room selection if current room is not available in new type
-        if (!_availableRooms.contains(_selectedRoom)) {
-          _selectedRoom = _availableRooms.isNotEmpty ? _availableRooms.first : null;
-        }
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        int? folioId = int.tryParse(widget.guestItem?.folioId ?? '');
+        await _roomMoveVm.loadInitialData(folioId!);
+      }
+    });
   }
 
   @override
@@ -108,15 +75,19 @@ class _RoomMovePageState extends State<RoomMovePage> {
 
   Widget _buildBody(BuildContext context) {
     return SingleChildScrollView(
-      padding: ResponsiveConfig.horizontalPadding(context).add(
-        ResponsiveConfig.verticalPadding(context),
-      ),
+      padding: ResponsiveConfig.horizontalPadding(
+        context,
+      ).add(ResponsiveConfig.verticalPadding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildGuestInfoSection(context),
           SizedBox(height: ResponsiveConfig.listItemSpacing(context)),
           _buildRoomSelectionSection(context),
+          SizedBox(height: ResponsiveConfig.listItemSpacing(context)),
+          _buildOverrideRateSection(context),
+          SizedBox(height: ResponsiveConfig.listItemSpacing(context)),
+          if (isOverrideRate == true) _buildRateSection(context),
         ],
       ),
     );
@@ -127,48 +98,206 @@ class _RoomMovePageState extends State<RoomMovePage> {
       context,
       child: Column(
         children: [
-          _buildInfoRow(
-            'Guest Name',
-            widget.guestItem?.guestName ?? 'Ms. Pabasara Dissanayake',
-          ),
+          _buildInfoRow('Guest Name', widget.guestItem?.guestName ?? ''),
           _buildDivider(),
-          _buildInfoRow(
-            'Res #',
-            widget.guestItem?.resId ?? 'BH2832',
+          _buildInfoRow('Res #', widget.guestItem?.resId ?? ''),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOverrideRateSection(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          ResponsiveConfig.defaultPadding(context),
+          ResponsiveConfig.defaultPadding(context),
+          ResponsiveConfig.defaultPadding(context),
+          8,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Is Override Rate',
+              style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                color: AppColors.darkgrey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Switch(
+              value: isOverrideRate,
+              onChanged: (v) => setState(() => isOverrideRate = v),
+              activeColor: AppColors.surface,
+              activeTrackColor: AppColors.blue,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRateSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          /// --- Left Side: Switches + Labels ---
+          Row(
+            children: [
+              // Main "Rate" switch
+              Switch(
+                value: isManualRate,
+                onChanged: (v) => setState(() => isManualRate = v),
+                activeColor: AppColors.surface,
+                activeTrackColor: AppColors.blue,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Rate',
+                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                  color: AppColors.darkgrey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              // Tax Inclusive toggle (only visible if Rate enabled)
+              if (isManualRate) ...[
+                const SizedBox(width: 20),
+                Switch(
+                  value: isEnabledTaxInclusive,
+                  onChanged: (v) => setState(() => isEnabledTaxInclusive = v),
+                  activeColor: AppColors.surface,
+                  activeTrackColor: AppColors.blue,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Tax Inclusive',
+                  style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                    color: AppColors.darkgrey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
+          ),
+
+          /// --- Right Side: Rate input + Currency label ---
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 100,
+                child: TextField(
+                  controller: _rateController,
+                  enabled: isManualRate,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
+                  decoration: InputDecoration(
+                    hintText: '0.00',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                  ),
+                  onChanged: (_) {},
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                currencyCode,
+                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                  color: AppColors.darkgrey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
+  double? _getRateValue() {
+    final text = _rateController.text.trim();
+    if (text.isEmpty) return null;
+    return double.tryParse(text);
+  }
+
   Widget _buildRoomSelectionSection(BuildContext context) {
+    final RoomMoveVm roomMoveVm = Get.find<RoomMoveVm>();
+
     return Column(
       children: [
-        _buildDropdownSection(
-          context,
-          'Room Type',
-          _selectedRoomType,
-          _roomTypes,
-          (value) {
-            setState(() {
-              _selectedRoomType = value;
-              _updateAvailableRooms();
-            });
-          },
-        ),
+        // Room Type Dropdown
+        Obx(() {
+          return _buildDropdownSection(
+            context,
+            'Room Type',
+            _selectedRoomType,
+            roomMoveVm.roomTypes,
+            (value) {
+              setState(() {
+                _selectedRoomType = value;
+              });
+              roomMoveVm.availableRooms.clear();
+              roomMoveVm.loadAvailableRooms(value!);
+            },
+          );
+        }),
         SizedBox(height: ResponsiveConfig.listItemSpacing(context)),
-        _buildDropdownSection(
-          context,
-          'Room',
-          _selectedRoom,
-          _availableRooms,
-          (value) {
-            setState(() {
-              _selectedRoom = value;
-            });
-          },
-          enabled: _availableRooms.isNotEmpty,
-        ),
+
+        // Available Rooms Dropdown
+        Obx(() {
+          return _buildDropdownSection(
+            context,
+            'Room',
+            _selectedRoom,
+            roomMoveVm.availableRooms,
+            (value) {
+              setState(() {
+                _selectedRoom = value;
+              });
+            },
+            enabled: roomMoveVm.availableRooms.isNotEmpty,
+          );
+        }),
       ],
     );
   }
@@ -177,7 +306,9 @@ class _RoomMovePageState extends State<RoomMovePage> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -194,14 +325,21 @@ class _RoomMovePageState extends State<RoomMovePage> {
     BuildContext context,
     String label,
     String? value,
-    List<String> items,
+    List<Map<String, dynamic>> items,
     ValueChanged<String?> onChanged, {
     bool enabled = true,
   }) {
+    final selectedName = items.firstWhere(
+      (item) => item["id"].toString() == value,
+      orElse: () => {"name": "Select option"},
+    )["name"];
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -241,7 +379,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               children: [
                 Expanded(
                   child: Text(
-                    value ?? (items.isNotEmpty ? items.first : 'No options available'),
+                    selectedName ?? 'Selected Type',
                     style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
                       color: enabled ? AppColors.black : AppColors.lightgrey,
                       fontWeight: FontWeight.w500,
@@ -254,22 +392,25 @@ class _RoomMovePageState extends State<RoomMovePage> {
                   onSelected: onChanged,
                   icon: Icon(
                     Icons.keyboard_arrow_down,
-                    color: enabled ? AppColors.lightgrey : AppColors.lightgrey.withOpacity(0.5),
+                    color: enabled
+                        ? AppColors.lightgrey
+                        : AppColors.lightgrey.withOpacity(0.5),
                     size: ResponsiveConfig.iconSize(context),
                   ),
                   itemBuilder: (BuildContext context) {
-                    return items.map((String item) {
+                    return items.map((Map<String, dynamic> item) {
                       return PopupMenuItem<String>(
-                        value: item,
+                        value: item["id"].toString(),
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Text(
-                            item,
-                            style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                              color: AppColors.black,
-                              fontWeight: FontWeight.w400,
-                            ),
+                            item["name"],
+                            style: AppTextTheme.lightTextTheme.bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.black,
+                                  fontWeight: FontWeight.w400,
+                                ),
                           ),
                         ),
                       );
@@ -323,9 +464,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
   }
 
   Widget _buildBottomActions(BuildContext context) {
-    final bool canSave = _selectedRoomType != null && 
-                        _selectedRoom != null && 
-                        _availableRooms.isNotEmpty;
+    final bool canSave = _selectedRoomType != null && _selectedRoom != null;
 
     return Container(
       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
@@ -367,7 +506,9 @@ class _RoomMovePageState extends State<RoomMovePage> {
             child: ElevatedButton(
               onPressed: canSave ? _handleSave : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: canSave ? AppColors.primary : Colors.grey.shade300,
+                backgroundColor: canSave
+                    ? AppColors.primary
+                    : Colors.grey.shade300,
                 padding: EdgeInsets.symmetric(
                   vertical: ResponsiveConfig.defaultPadding(context),
                 ),
@@ -396,6 +537,13 @@ class _RoomMovePageState extends State<RoomMovePage> {
       return;
     }
 
+    final selectedRoomType = _roomMoveVm.getType(
+      int.tryParse(_selectedRoomType.toString()) ?? 0,
+    );
+    final selectedRoom = _roomMoveVm.getRoom(
+      int.tryParse(_selectedRoom.toString()) ?? 0,
+    );
+
     // Show confirmation dialog
     showDialog(
       context: context,
@@ -403,7 +551,9 @@ class _RoomMovePageState extends State<RoomMovePage> {
         return AlertDialog(
           backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.cardRadius(context),
+            ),
           ),
           title: Text(
             'Confirm Room Move',
@@ -424,14 +574,14 @@ class _RoomMovePageState extends State<RoomMovePage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Room Type: $_selectedRoomType',
+                'Room Type: $selectedRoomType',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
                   color: AppColors.black,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
-                'Room: $_selectedRoom',
+                'Room: ${selectedRoom!}',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
                   color: AppColors.black,
                   fontWeight: FontWeight.w600,
@@ -441,7 +591,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () => Get.back(),
               child: Text(
                 'Cancel',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
@@ -451,9 +601,30 @@ class _RoomMovePageState extends State<RoomMovePage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                _confirmRoomMove();
+              onPressed: () async {
+                try {
+                  Get.back();
+                  final roomMoveVm = Get.find<RoomMoveVm>();
+                  final folioDetails = roomMoveVm.folioDetails.value;
+
+                  final saveData = RoomMoveSaveData(
+                    bookingRoomId:
+                        int.tryParse(widget.guestItem?.bookingRoomId ?? '') ??
+                        0,
+                    currencyId: folioDetails?.visibleCurrencyId ?? 0,
+                    isManualRate: isManualRate,
+                    isOverrideRate: isOverrideRate,
+                    isTaxInclusive: isEnabledTaxInclusive,
+                    manualRate: _getRateValue() ?? 0.0,
+                    roomId: int.tryParse(_selectedRoom.toString()) ?? 0,
+                    roomTypeId: int.tryParse(_selectedRoomType.toString()) ?? 0,
+                  );
+
+                  final response = await roomMoveVm.saveRoomMove(saveData);
+                  if (!mounted) return;
+                } catch (e) {
+                  throw Exception('Error while room move: $e');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
@@ -476,34 +647,13 @@ class _RoomMovePageState extends State<RoomMovePage> {
     );
   }
 
-  void _confirmRoomMove() {
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Room moved successfully to $_selectedRoomType - $_selectedRoom',
-        ),
-        backgroundColor: AppColors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
-
-    // Navigate back
-    context.pop();
-  }
-
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

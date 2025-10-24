@@ -8,6 +8,7 @@ import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_w
 import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
@@ -30,8 +31,7 @@ class ArrivalList extends StatefulWidget {
 }
 
 class _ArrivalListState extends State<ArrivalList> {
-  final ArrivalListVm _arrivalListVm = Get.put(ArrivalListVm());
-  late Map<String, List<GuestItem>> arrivalsMap;
+  final _arrivalListVm = Get.find<ArrivalListVm>();
 
   @override
   void initState() {
@@ -62,6 +62,10 @@ class _ArrivalListState extends State<ArrivalList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'arrival',
+                  roomTypes: _arrivalListVm.roomTypes.toList(),
+                  reservationTypes: _arrivalListVm.reservationTypes.toList(),
+                  statuses: _arrivalListVm.statuses.toList(),
+                  businessSources: _arrivalListVm.businessSources.toList(),
                   filteredData: _arrivalListVm.receivedFilters.value ?? {},
                   onApply: _arrivalListVm.applyArrivalFilters,
                   scrollController: scrollController,
@@ -71,101 +75,85 @@ class _ArrivalListState extends State<ArrivalList> {
           );
         },
       ),
-      body: TabbedListView<GuestItem>(
-        tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-        dataMap: arrivalsMap,
-        itemBuilder: (item) => _buildArrivalCard(item),
-        emptySubMessage: (period) => 'No arrivals scheduled for this period',
-      ),
+      body: Obx(() {
+        final isLoading = _arrivalListVm.isLoading;
+        final isBottomSheetDataLoading =
+            _arrivalListVm.isBottomSheetDataLoading.value;
+        GuestItem guestItem = GuestItem(
+          bookingRoomId: '',
+          guestName: '',
+          resId: '',
+          folioId: '',
+          startDate: '',
+          endDate: '',
+          nights: 0,
+          adults: 0,
+          totalAmount: 0,
+          balanceAmount: 0,
+        );
+
+        return Stack(
+          children: [
+            TabbedListView<GuestItem>(
+              tabLabels: const ['Today', 'Tomorrow', 'This Week'],
+              dataMap: isLoading.value
+                  ? {
+                      'today': List.generate(3, (_) => guestItem),
+                      'tomorrow': List.generate(3, (_) => guestItem),
+                      'thisweek': List.generate(3, (_) => guestItem),
+                    }
+                  : _arrivalListVm.arrivalFilteredList.value ?? {},
+              itemBuilder: (item) => isLoading.value
+                  ? _buildArrivalCardShimmer()
+                  : _buildArrivalCard(item),
+              emptySubMessage: (period) =>
+                  'No arrivals scheduled for this period',
+            ),
+            if (isBottomSheetDataLoading == true)
+              Container(
+                color: Colors.black.withOpacity(0.2), // slight dim effect
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.lightgrey,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      }),
     );
-  }
-
-  void _applyArrivalFilters(Map<String, dynamic> filters) {
-    var fullData = _getArrivalsMap();
-
-    DateTime? startDate = filters['startDate'];
-    DateTime? endDate = filters['endDate'];
-    String? roomType = filters['roomType'] != 'All' ? filters['roomType'] : null;
-    String? reservationType = filters['reservationType'] != 'All' ? filters['reservationType'] : null;
-    bool guestCheckedInToday = filters['guestCheckedInToday'] ?? false;
-
-    Map<String, List<GuestItem>> filteredMap = {};
-    fullData.forEach((tab, items) {
-      filteredMap[tab] = items.where((item) {
-        DateTime itemStart = _parseMockDate(item.startDate);
-        bool dateMatch = true;
-        if (startDate != null && endDate != null) {
-          dateMatch = itemStart.isAfter(startDate.subtract(const Duration(days: 1))) &&
-              itemStart.isBefore(endDate.add(const Duration(days: 1)));
-        }
-
-        bool roomMatch = roomType == null || item.roomType == roomType;
-        bool checkedInMatch = !guestCheckedInToday || (tab == 'today' && itemStart == DateTime.now());
-
-        return dateMatch && roomMatch && checkedInMatch;
-      }).toList();
-    });
-
-    setState(() {
-      arrivalsMap = filteredMap;
-    });
-  }
-
-  DateTime _parseMockDate(String dateStr) {
-    final parts = dateStr.split(' ');
-    final month = _monthToInt(parts[0]);
-    final day = int.parse(parts[1]);
-    return DateTime(2025, month, day);
-  }
-
-  int _monthToInt(String month) {
-    const months = {
-      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-      'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
-    };
-    return months[month] ?? 1;
   }
 
   void _showInfoDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => StatusInfoDialog(
-        title: 'Arrival Status',
-        statusItems: const [
-          StatusItem(
-            status: 'Arrival',
-            description: 'Guests expected to arrive today',
-            color: Color(0xFF4CAF50),
-            icon: Icons.login,
-          ),
-          StatusItem(
-            status: 'Confirm Reservation',
-            description: 'Reservations that need confirmation',
-            color: Color(0xFFFF9800),
-            icon: Icons.check_circle_outline,
-          ),
-          StatusItem(
-            status: 'Unconfirmed Reservation',
-            description: 'Reservations awaiting confirmation',
-            color: Color(0xFFF44336),
-            icon: Icons.schedule,
-          ),
-          StatusItem(
-            status: 'Dayuse Reservation',
-            description: 'Day-use bookings for today',
-            color: Color(0xFF2196F3),
-            icon: Icons.today,
-          ),
-          StatusItem(
-            status: 'Day Used',
-            description: 'Completed day-use reservations',
-            color: Color(0xFF9E9E9E),
-            icon: Icons.task_alt,
-          ),
-        ],
-      ),
+      builder: (context) {
+        return Obx(() {
+          final statusList = _arrivalListVm.statusList;
+
+          final List<StatusItem> items = statusList.map((status) {
+            return StatusItem(
+              status: status['name'],
+              description: status['description'],
+              color: status['colorCode'],
+              icon: Icons.check_circle,
+            );
+          }).toList();
+
+          return StatusInfoDialog(
+            title: 'Housekeeping Status',
+            statusItems: items,
+          );
+        });
+      },
     );
+  }
+
+  Widget _buildArrivalCardShimmer() {
+    return GuestCardShimmer();
   }
 
   Widget _buildArrivalCard(GuestItem item) {
@@ -178,6 +166,7 @@ class _ArrivalListState extends State<ArrivalList> {
       nights: item.nights,
       nightsLabel: 'Nights Stay',
       adults: item.adults,
+      reservationType: item.reservationType,
       totalAmount: item.totalAmount,
       balanceAmount: item.balanceAmount,
       actionButton: const SizedBox(height: 32),
@@ -185,7 +174,16 @@ class _ArrivalListState extends State<ArrivalList> {
     );
   }
 
-  void _showActions(BuildContext context, GuestItem item) {
+  void _showActions(BuildContext context, GuestItem item) async {
+    await _arrivalListVm.getAllGuestData(item);
+    if (!mounted) return;
+    final guestData = _arrivalListVm.allGuestDetails.value;
+    final isNoShowResponse = await _arrivalListVm.isNoShow(item);
+    int status = int.tryParse(guestData?.status.toString() ?? '') ?? 0;
+    bool isNoShow = isNoShowResponse["isNoShow"];
+    bool isAssign = guestData?.roomId == 0;
+    bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
+
     showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -199,58 +197,58 @@ class _ArrivalListState extends State<ArrivalList> {
           ActionItem(
             icon: Icons.visibility,
             label: 'View Reservation',
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.viewReservation, extra: item);
-            },
-          ),
-          ActionItem(
-          ActionItem(
-            icon: Icons.meeting_room,
-            label: 'Unassign Rooms',
             onTap: () async {
-              Navigator.of(context).pop();
-              final confirmed = await ConfirmationDialog.show(
-                context: context,
-                title: 'Unassign Rooms',
-                message: 'Are you sure you want to unassign rooms for this reservation?',
-                confirmText: 'Unassign',
-                cancelText: 'Cancel',
-                confirmColor: AppColors.red,
-                icon: Icons.meeting_room,
-              );
-              if (confirmed == true) {
-                context.go(AppRoutes.maintenanceBlock);
-                context.go(AppRoutes.maintenanceBlock);
-              }
+              if (!mounted) return;
+              Get.back();
+              Get.toNamed(AppRoutes.viewReservation, arguments: guestData);
             },
           ),
-          ),
+          if (isAssign == true)
+            ActionItem(
+              icon: Icons.meeting_room,
+              label: 'Assign Rooms',
+              onTap: () async {
+                Get.back();
+                await AssignRoomsBottomSheet.show(
+                  context: context,
+                  guestItem: guestData!,
+                );
+              },
+            ),
+          if (isUnAssignRoom == true)
+            ActionItem(
+              icon: Icons.meeting_room,
+              label: 'Unassign Rooms',
+              onTap: () async {
+                Get.back();
+                final confirmed = await ConfirmationDialog.show(
+                  context: Get.context!,
+                  title: 'Unassign Rooms',
+                  message:
+                      'Are you sure you want to unassign rooms for this reservation?',
+                  confirmText: 'Unassign',
+                  cancelText: 'Cancel',
+                  confirmColor: AppColors.red,
+                  icon: Icons.meeting_room,
+                );
+                if (confirmed == true) {
+                  Get.back();
+                  await _arrivalListVm.unassignRoom(guestData!);
+                  if (!mounted) return;
+                }
+              },
+            ),
+
           ActionItem(
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
             onTap: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      AmendStay(guestItem: item),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                ),
+              Get.back();
+              Get.to(
+                () => AmendStay(guestItem: guestData),
+                transition: Transition.downToUp,
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
               );
             },
           ),
@@ -258,200 +256,161 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.swap_horiz,
             label: 'Change Reservation Type',
             onTap: () async {
-              Navigator.of(context).pop();
-              
-              String? newType = await context.showChangeReservationTypeDialog(
-                guestItem: item,
-              );
-              
-              if (newType != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Reservation type changed to $newType'),
-                    backgroundColor: AppColors.green,
-                  ),
+              Get.back();
+
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                await context.showChangeReservationTypeDialog(
+                  guestItem: guestData,
                 );
-              }
+              });
             },
           ),
           ActionItem(
             icon: Icons.cancel,
             label: 'Cancel Reservation',
-            onTap: () {
-              Navigator.of(context).pop();
+            onTap: () async {
+              final cancelReservationData = await _arrivalListVm
+                  .getCancelReservationData(item);
+              if (!mounted) return;
               final data = {
-                'guestName': item.guestName,
-                'resNumber': item.resId,
-                'folio': item.folioId,
-                'arrivalDate': item.startDate,
-                'departureDate': item.endDate,
-                'roomType': item.roomType ?? 'N/A',
-                'room': item.room ?? 'TBD',
-                'total': item.totalAmount,
-                'deposit': item.totalAmount - item.balanceAmount,
+                'reasons': cancelReservationData["reasons"],
+                'bookingRoomId': guestData?.bookingRoomId,
+                'guestName': guestData?.guestName,
+                'resNumber': guestData?.resId,
+                'folio': guestData?.folioId,
+                'arrivalDate': guestData?.startDate,
+                'departureDate': guestData?.endDate,
+                'roomType': guestData?.roomType,
+                'room': guestData?.room,
+                'total': guestData?.totalAmount,
+                'deposit':
+                    (guestData?.totalAmount ?? 0.0) -
+                    (guestData?.balanceAmount ?? 0.0),
               };
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      CancelReservation(reservationData: data),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                ),
+              Get.back();
+              Get.to(
+                () => CancelReservation(reservationData: data),
+                transition: Transition.downToUp,
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
               );
             },
           ),
           ActionItem(
             icon: Icons.block,
             label: 'Void Reservation',
-            onTap: () {
-              Navigator.of(context).pop();
+            onTap: () async {
+              final voidReservationData = await _arrivalListVm
+                  .getVoidReservationData(item);
+              if (!mounted) return;
+              Get.back();
               final data = {
-                'guestName': item.guestName,
-                'resNumber': item.resId,
-                'folio': item.folioId,
-                'arrivalDate': item.startDate,
-                'departureDate': item.endDate,
-                'roomType': item.roomType ?? 'N/A',
-                'room': item.room ?? 'TBD',
-                'total': item.totalAmount,
-                'deposit': item.totalAmount - item.balanceAmount,
+                'reasons': voidReservationData["reasons"],
+                'bookingRoomId': guestData?.bookingRoomId,
+                'guestName': guestData?.guestName,
+                'resNumber': guestData?.resId,
+                'folio': guestData?.folioId,
+                'arrivalDate': guestData?.startDate,
+                'departureDate': guestData?.endDate,
+                'roomType': guestData?.roomType,
+                'room': guestData?.room,
+                'total': guestData?.totalAmount,
+                'deposit':
+                    (guestData?.totalAmount ?? 0.0) -
+                    (guestData?.balanceAmount ?? 0.0),
               };
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      VoidReservation(reservationData: data),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                ),
+              Get.to(
+                () => VoidReservation(reservationData: data),
+                transition: Transition.downToUp,
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
               );
             },
           ),
-          ActionItem(
-            icon: Icons.not_interested,
-            label: 'No Show Reservation',
-            onTap: () {
-              Navigator.of(context).pop();
-              final noShowData = NoShowReservationData(
-                guestName: item.guestName,
-                reservationNumber: item.resId,
-                folio: item.folioId,
-                arrivalDate: item.startDate,
-                departureDate: item.endDate,
-                roomType: item.roomType ?? 'N/A',
-                room: 'TBD',
-                total: item.totalAmount,
-                deposit: item.totalAmount - item.balanceAmount,
-                balance: item.balanceAmount,
-                initialNoShowFee: null,
-              );
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      NoShowReservationPage(data: noShowData),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                    var begin = const Offset(0.0, 1.0);
-                    var end = Offset.zero;
-                    var curve = Curves.ease;
-                    var tween = Tween(begin: begin, end: end)
-                        .chain(CurveTween(curve: curve));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
-                ),
-              );
-            },
-          ),
+          if (isNoShow == true)
+            ActionItem(
+              icon: Icons.not_interested,
+              label: 'No Show Reservation',
+              onTap: () async {
+                final noShowReservationData = await _arrivalListVm
+                    .getNoShowReservationData(item);
+                if (!mounted) return;
+                Get.back();
+                final noShowData = NoShowReservationData(
+                  reasons: noShowReservationData["reasons"],
+                  bookingRoomId: guestData?.bookingRoomId ?? '',
+                  guestName: guestData?.guestName ?? '',
+                  reservationNumber: guestData?.resId ?? '',
+                  folio: guestData?.folioId ?? '',
+                  arrivalDate: guestData?.startDate ?? '',
+                  departureDate: guestData?.endDate ?? '',
+                  roomType: guestData?.roomType ?? '',
+                  room: guestData?.room ?? '',
+                  total: guestData?.totalAmount ?? 0.0,
+                  deposit:
+                      (guestData?.totalAmount ?? 0.0) -
+                      (guestData?.balanceAmount ?? 0.0),
+                  balance: guestData?.balanceAmount ?? 0.0,
+                  initialNoShowFee: null,
+                );
+                Get.to(
+                  () => NoShowReservationPage(data: noShowData),
+                  transition: Transition.downToUp,
+                  curve: Curves.ease,
+                  duration: const Duration(milliseconds: 300),
+                );
+              },
+            ),
           ActionItem(
             icon: Icons.person,
             label: 'Edit Guest Details',
             onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              Get.back();
+              Get.toNamed(AppRoutes.maintenanceBlock);
             },
           ),
           ActionItem(
             icon: Icons.move_to_inbox,
             label: 'Room Move',
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      RoomMovePage(guestItem: item),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                ),
+            onTap: () async {
+              if (!mounted) return;
+              Get.back();
+              GuestItem data = GuestItem(
+                bookingRoomId: guestData?.bookingRoomId ?? '',
+                guestName: guestData?.guestName ?? '',
+                resId: guestData?.resId ?? '',
+                folioId: guestData?.folioId ?? '',
+                startDate: guestData?.startDate ?? '',
+                endDate: guestData?.endDate ?? '',
+                nights: guestData?.nights ?? 0,
+                adults: guestData?.adults ?? 0,
+                totalAmount: guestData?.totalAmount ?? 0.0,
+                balanceAmount: guestData?.balanceAmount ?? 0.0,
+                roomType: guestData?.roomType ?? '',
+                room: guestData?.room ?? '',
+              );
+              Get.to(
+                () => RoomMovePage(guestItem: data),
+                transition: Transition
+                    .downToUp, // slides from bottom like Offset(0.0, 1.0)
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
               );
             },
           ),
           ActionItem(
             icon: Icons.stop_circle_outlined,
             label: 'Stop Room Move',
-            onTap: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      const StopRoomMoveScreen(),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
+            onTap: () async {
+              if (!mounted) return;
+              Get.back();
+              Get.to(
+                () => StopRoomMoveScreen(
+                  bookingRoomId: guestData?.bookingRoomId ?? '',
                 ),
+                transition: Transition.downToUp,
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
               );
             },
           ),
@@ -459,33 +418,34 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.receipt,
             label: 'Print Invoice',
             onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              Get.back();
+              Get.toNamed(AppRoutes.maintenanceBlock);
             },
           ),
           ActionItem(
             icon: Icons.description,
             label: 'Print Res. Voucher',
             onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.maintenanceBlock);
+              Get.back();
+              Get.toNamed(AppRoutes.maintenanceBlock);
             },
           ),
           // UPDATED: Send Res. Voucher with MessageDialog
-         ActionItem(
+          ActionItem(
             icon: Icons.email,
             label: 'Send Res. Voucher',
             onTap: () async {
-              Navigator.of(context).pop();
-              
+              Get.back();
+
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
-              
+
               if (context.mounted) {
                 MessageDialog.show(
                   context,
                   title: 'Voucher Sent!',
-                  message: 'Reservation voucher has been sent successfully to ${item.guestName}.',
+                  message:
+                      'Reservation voucher has been sent successfully to ${item.guestName}.',
                   type: MessageType.success,
                   buttonText: 'Perfect!',
                 );
@@ -497,16 +457,17 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.email,
             label: 'Resend Booking Email',
             onTap: () async {
-              Navigator.of(context).pop();
-              
+              Get.back();
+
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
-              
+
               if (context.mounted) {
                 MessageDialog.show(
                   context,
                   title: 'Email Sent!',
-                  message: 'Booking confirmation email has been resent successfully to ${item.guestName}.',
+                  message:
+                      'Booking confirmation email has been resent successfully to ${item.guestName}.',
                   type: MessageType.success,
                   buttonText: 'Great!',
                 );
@@ -518,16 +479,17 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.mark_email_unread,
             label: 'Resend Review Email',
             onTap: () async {
-              Navigator.of(context).pop();
-              
+              Get.back();
+
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
-              
+
               if (context.mounted) {
                 MessageDialog.show(
                   context,
                   title: 'Review Email Sent!',
-                  message: 'Review request email has been sent successfully to ${item.guestName}.',
+                  message:
+                      'Review request email has been sent successfully to ${item.guestName}.',
                   type: MessageType.success,
                   buttonText: 'Awesome!',
                 );
@@ -537,79 +499,19 @@ class _ArrivalListState extends State<ArrivalList> {
           ActionItem(
             icon: Icons.assignment,
             label: 'Audit Trail',
-            onTap: () {
-              Navigator.of(context).pop();
-              context.go(AppRoutes.auditTrail);
+            onTap: () async {
+              Get.back();
+              Get.to(
+                () => RoomMovePage(guestItem: guestData),
+                transition: Transition
+                    .downToUp,
+                curve: Curves.ease,
+                duration: const Duration(milliseconds: 300),
+              );
             },
           ),
         ],
       ),
     );
-  }
-
-  Map<String, List<GuestItem>> _getArrivalsMap() {
-    return {
-      'today': [
-        GuestItem(
-          guestName: 'Mr. John Doe',
-          resId: 'BH3000',
-          folioId: '3001',
-          startDate: 'Sep 23',
-          endDate: 'Sep 25',
-          nights: 2,
-          roomType: 'Double Room',
-          reservationType: 'Standard Reservation',
-          adults: 2,
-          totalAmount: 200.00,
-          balanceAmount: 100.00,
-          room: '101',
-        ),
-      ],
-      'tomorrow': [
-        GuestItem(
-          guestName: 'Mr. Dilini',
-          resId: 'BH2800',
-          folioId: '2253',
-          startDate: 'Sep 24',
-          endDate: 'Sep 25',
-          nights: 1,
-          roomType: 'Bunk Bed',
-          reservationType: 'Standard Reservation',
-          adults: 1,
-          totalAmount: 131.00,
-          balanceAmount: 131.00,
-          room: '102',
-        ),
-        GuestItem(
-          guestName: 'Ms. Pabasara Dissanayake',
-          resId: 'BH2827',
-          folioId: '2290',
-          startDate: 'Sep 24',
-          endDate: 'Sep 27',
-          nights: 3,
-          roomType: 'Double Room new /142',
-          reservationType: 'Dayuse',
-          adults: 1,
-          totalAmount: 0.00,
-          balanceAmount: 0.00,
-          room: '103',
-        ),
-      ],
-      'this week': [
-        GuestItem(
-          guestName: 'Ms. Jane Smith',
-          resId: 'BH2900',
-          folioId: '2400',
-          startDate: 'Sep 26',
-          endDate: 'Sep 28',
-          nights: 2,
-          roomType: 'Suite',
-          adults: 3,
-          totalAmount: 300.00,
-          balanceAmount: 0.00,
-          room: '104',
-        ),
-      ],
-    };
   }
 }

@@ -1,19 +1,18 @@
 // lib/features/reservations/widgets/assign_rooms_bottom_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/assign_rooms_vm.dart';
 
 class AssignRoomsBottomSheet extends StatefulWidget {
-  final String guestName;
-  final String reservationId;
-  final String? initialRoomType;
-  final String? initialRoom;
+  final GuestItem guestItem;
 
   const AssignRoomsBottomSheet({
     Key? key,
-    required this.guestName,
-    required this.reservationId,
-    this.initialRoomType,
-    this.initialRoom,
+    required this.guestItem,
+
   }) : super(key: key);
 
   @override
@@ -22,10 +21,8 @@ class AssignRoomsBottomSheet extends StatefulWidget {
   /// Static method to show the bottom sheet
   static Future<Map<String, String>?> show({
     required BuildContext context,
-    required String guestName,
-    required String reservationId,
-    String? initialRoomType,
-    String? initialRoom,
+    required GuestItem guestItem,
+
   }) {
     return showModalBottomSheet<Map<String, String>>(
       context: context,
@@ -34,89 +31,66 @@ class AssignRoomsBottomSheet extends StatefulWidget {
       enableDrag: true,
       isDismissible: true,
       builder: (context) => AssignRoomsBottomSheet(
-        guestName: guestName,
-        reservationId: reservationId,
-        initialRoomType: initialRoomType,
-        initialRoom: initialRoom,
+        guestItem: guestItem,
       ),
     );
   }
 }
 
 class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
+  final _assignRoomsVm = Get.find<AssignRoomsVm>();
   String? selectedRoomType;
   String? selectedRoom;
   bool isLoading = false;
 
-  // Sample data - replace with your actual data source
-  // Updated to include consistent room types matching GuestItem data
-  final List<String> roomTypes = [
-    'Double Room',
-    'Single Room',
-    'Suite',
-    'Deluxe Room',
-    'Family Room',
-    'Bunk Bed',
-  ];
-
-  final Map<String, List<String>> availableRooms = {
-    'Double Room': ['201', '202', '203', '204'],
-    'Single Room': ['101', '102', '103'],
-    'Suite': ['301', '302'],
-    'Deluxe Room': ['401', '402', '403'],
-    'Family Room': ['501', '502'],
-    'Bunk Bed': ['601', '602'],
-  };
-
   @override
   void initState() {
     super.initState();
-    // Set initial values only if they exist in the data to avoid assertion errors
-    if (widget.initialRoomType != null && roomTypes.contains(widget.initialRoomType)) {
-      selectedRoomType = widget.initialRoomType;
-    }
-    if (selectedRoomType != null && widget.initialRoom != null &&
-        availableRooms[selectedRoomType]?.contains(widget.initialRoom) == true) {
-      selectedRoom = widget.initialRoom;
-    }
-  }
 
-  List<String> get currentAvailableRooms {
-    if (selectedRoomType == null) return [];
-    return availableRooms[selectedRoomType!] ?? [];
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _assignRoomsVm.loadInitialData(widget.guestItem);
+        selectedRoomType = widget.guestItem.roomType;
+      }
+    });
   }
 
   void _handleSave() async {
-    if (selectedRoomType == null || selectedRoom == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please select both room type and room'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-      return;
+    try {
+      if (selectedRoomType == null || selectedRoom == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please select both room type and room'),
+            backgroundColor: AppColors.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+        return;
+      }
+      setState(() => isLoading = true);
+
+      Map<String, dynamic> saveData = {
+        "BookingRoomId": widget.guestItem.bookingRoomId,
+        "RoomId": selectedRoom,
+        "arrivalDate": widget.guestItem.startDate,
+        "departureDate": widget.guestItem.endDate,
+      };
+      await _assignRoomsVm.assignRoom(saveData);
+      if (!mounted) return;
+      
+    } catch (e) {
+      throw Exception('Error while saving: $e');
     }
-    setState(() => isLoading = true);
-
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 800));
-
-    if (!mounted) return;
-
-    // Return the selected values
-    Navigator.pop(context, {
-      'roomType': selectedRoomType!,
-      'room': selectedRoom!,
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final bottomPadding = mediaQuery.viewInsets.bottom;
-    
+
     return GestureDetector(
       onTap: () => Navigator.pop(context),
       child: Container(
@@ -131,9 +105,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
               return Container(
                 decoration: const BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: Column(
                   children: [
@@ -156,10 +128,11 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                           Expanded(
                             child: Text(
                               'Assign Rooms',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.black,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.black,
+                                  ),
                             ),
                           ),
                           IconButton(
@@ -191,35 +164,41 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                           const SizedBox(height: 24),
 
                           // Room Type Dropdown
-                          _buildDropdownField(
-                            label: 'Room Type',
-                            value: selectedRoomType,
-                            items: roomTypes,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedRoomType = value;
-                                selectedRoom = null; // Reset room selection
-                              });
-                            },
-                          ),
+                          // Obx(() {
+                          //   return _buildDropdownField(
+                          //     label: 'Room Type',
+                          //     value: selectedRoomType,
+                          //     items: _assignRoomsVm.roomTypes,
+                          //     onChanged: (value) {
+                          //       setState(() {
+                          //         selectedRoomType = value;
+                          //         selectedRoom = null;
+                          //       });
 
+                          //       _assignRoomsVm.availableRooms.clear();
+                          //       _assignRoomsVm.loadAvailableRooms(value!);
+                          //     },
+                          //   );
+                          // }),
                           const SizedBox(height: 20),
 
                           // Room Dropdown
-                          _buildDropdownField(
-                            label: 'Room',
-                            value: selectedRoom,
-                            hint: selectedRoomType == null
-                                ? 'Select room type first'
-                                : 'Select',
-                            items: currentAvailableRooms,
-                            enabled: selectedRoomType != null,
-                            onChanged: (value) {
-                              setState(() {
-                                selectedRoom = value;
-                              });
-                            },
-                          ),
+                          Obx(() {
+                            return _buildDropdownField(
+                              label: 'Room',
+                              value: selectedRoom,
+                              hint:  _assignRoomsVm.availableRooms.isEmpty
+                                  ? 'No Available Rooms'
+                                  : 'Select',
+                              items: _assignRoomsVm.availableRooms,
+                              enabled: selectedRoomType != null,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedRoom = value;
+                                });
+                              },
+                            );
+                          }),
 
                           const SizedBox(height: 32),
 
@@ -232,18 +211,23 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                                       ? null
                                       : () => Navigator.pop(context),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    side: const BorderSide(color: AppColors.lightgrey),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    side: const BorderSide(
+                                      color: AppColors.lightgrey,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                   ),
                                   child: Text(
                                     'Cancel',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.darkgrey,
-                                    ),
+                                    style: Theme.of(context).textTheme.bodyLarge
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.darkgrey,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -252,7 +236,9 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                                 child: ElevatedButton(
                                   onPressed: isLoading ? null : _handleSave,
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: AppColors.onPrimary,
                                     elevation: 0,
@@ -266,9 +252,10 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                                           width: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(
-                                              AppColors.onPrimary,
-                                            ),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  AppColors.onPrimary,
+                                                ),
                                           ),
                                         )
                                       : Text(
@@ -308,9 +295,11 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
       ),
       child: Column(
         children: [
-          _buildInfoRow('Guest Name', widget.guestName),
+          _buildInfoRow('Guest Name', widget.guestItem.guestName),
           const SizedBox(height: 12),
-          _buildInfoRow('Res #', widget.reservationId),
+          _buildInfoRow('Res #', widget.guestItem.bookingRoomId),
+          const SizedBox(height: 12),
+          _buildInfoRow('Room Type', widget.guestItem.roomType!),
         ],
       ),
     );
@@ -342,7 +331,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
     required String label,
     required String? value,
     String? hint,
-    required List<String> items,
+    required List<Map<String, dynamic>> items,
     required ValueChanged<String?> onChanged,
     bool enabled = true,
   }) {
@@ -371,9 +360,9 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
               value: value,
               hint: Text(
                 hint ?? 'Select',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.lightgrey,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.lightgrey),
               ),
               isExpanded: true,
               icon: Icon(
@@ -382,12 +371,12 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
               ),
               items: items.map((item) {
                 return DropdownMenuItem<String>(
-                  value: item,
+                  value: item["id"].toString(),
                   child: Text(
-                    item,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.black,
-                    ),
+                    item["name"],
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: AppColors.black),
                   ),
                 );
               }).toList(),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
-
+import 'package:shimmer/shimmer.dart';
 
 class MaintenanceBlockCard extends StatelessWidget {
   final MaintenanceBlockItem block;
@@ -11,20 +11,27 @@ class MaintenanceBlockCard extends StatelessWidget {
   const MaintenanceBlockCard({
     required this.block,
     required this.onTap,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       color: AppColors.surface,
-      margin: EdgeInsets.only(bottom: ResponsiveConfig.listItemSpacing(context)),
+      margin: EdgeInsets.only(
+        bottom: ResponsiveConfig.listItemSpacing(context),
+      ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
       ),
       elevation: 2,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         child: Padding(
           padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
           child: Column(
@@ -40,7 +47,7 @@ class MaintenanceBlockCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      _getCategoryIcon(block.category),
+                      Icons.security,
                       color: AppColors.primary,
                       size: ResponsiveConfig.iconSize(context),
                     ),
@@ -51,124 +58,55 @@ class MaintenanceBlockCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          block.title,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          block.roomName,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          'ID: ${block.id}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.lightgrey,
-                              ),
+                          'From ${block.fromDate} To ${block.toDate}',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.lightgrey),
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(block.status).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      block.status,
-                      style: TextStyle(
-                        color: _getStatusColor(block.status),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
                 ],
               ),
+
               const SizedBox(height: 12),
-              // Description
+
+              // Reason text
               Text(
-                block.description,
+                block.reasonName,
                 style: Theme.of(context).textTheme.bodyMedium,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+
               const SizedBox(height: 12),
-              // Tags
-              if (block.tags.isNotEmpty)
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: block.tags
-                      .take(3)
-                      .map((tag) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.secondary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              tag,
-                              style: const TextStyle(
-                                color: AppColors.secondary,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              if (block.tags.isNotEmpty) const SizedBox(height: 12),
-              // Footer Row
-              Row(
-                children: [
-                  Icon(
-                    Icons.person_outline,
-                    color: AppColors.lightgrey,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      block.assignedTo,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.lightgrey,
-                          ),
-                    ),
-                  ),
-                  if (block.estimatedCost != null) ...[
-                    Icon(
-                      Icons.attach_money,
+
+              // Footer Row (aligned to bottom right)
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.person_outline,
                       color: AppColors.lightgrey,
                       size: 16,
                     ),
+                    const SizedBox(width: 4),
                     Text(
-                      '\$${block.estimatedCost!.toStringAsFixed(0)}',
+                      '${block.blockedBy} on ${block.blockedOn}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.lightgrey,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        color: AppColors.lightgrey,
+                      ),
                     ),
                   ],
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: _getPriorityColor(block.priority),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    block.priority,
-                    style: TextStyle(
-                      color: _getPriorityColor(block.priority),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -176,49 +114,93 @@ class MaintenanceBlockCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Color _getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High':
-        return AppColors.red;
-      case 'Medium':
-        return AppColors.yellow;
-      case 'Low':
-        return AppColors.green;
-      default:
-        return AppColors.lightgrey;
-    }
-  }
+class MaintenanceBlockCardShimmer extends StatelessWidget {
+  const MaintenanceBlockCardShimmer({Key? key}) : super(key: key);
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Completed':
-        return AppColors.green;
-      case 'In Progress':
-        return AppColors.yellow;
-      case 'Pending':
-        return AppColors.red;
-      case 'Scheduled':
-        return AppColors.secondary;
-      default:
-        return AppColors.lightgrey;
-    }
-  }
+  @override
+  Widget build(BuildContext context) {
+    final baseColor = AppColors.lightgrey.withOpacity(0.3);
+    final highlightColor = AppColors.lightgrey.withOpacity(0.1);
 
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'HVAC':
-        return Icons.air;
-      case 'Plumbing':
-        return Icons.plumbing;
-      case 'Elevator':
-        return Icons.elevator;
-      case 'Safety':
-        return Icons.security;
-      case 'Landscaping':
-        return Icons.grass;
-      default:
-        return Icons.build;
-    }
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Card(
+        color: AppColors.surface,
+        margin: EdgeInsets.only(
+          bottom: ResponsiveConfig.listItemSpacing(context),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            ResponsiveConfig.cardRadius(context),
+          ),
+        ),
+        elevation: 2,
+        child: Padding(
+          padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          height: 14,
+                          color: baseColor,
+                        ),
+                        const SizedBox(height: 6),
+                        Container(width: 120, height: 12, color: baseColor),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Reason text
+              Container(width: double.infinity, height: 14, color: baseColor),
+              const SizedBox(height: 8),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                height: 14,
+                color: baseColor,
+              ),
+
+              const SizedBox(height: 12),
+
+              // Footer
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 16, height: 16, color: baseColor),
+                    const SizedBox(width: 8),
+                    Container(width: 100, height: 12, color: baseColor),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

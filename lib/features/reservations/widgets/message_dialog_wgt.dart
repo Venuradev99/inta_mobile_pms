@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class MessageDialog extends StatefulWidget {
@@ -112,7 +114,7 @@ class _MessageDialogState extends State<MessageDialog>
   void _handleDismiss() {
     _controller.reverse().then((_) {
       if (mounted) {
-        Navigator.of(context).pop();
+       Get.back();
         widget.onDismiss?.call();
       }
     });

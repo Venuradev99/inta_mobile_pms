@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
+import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HouseStatus extends StatefulWidget {
   const HouseStatus({super.key});
@@ -12,105 +16,24 @@ class HouseStatus extends StatefulWidget {
 }
 
 class _HouseStatusState extends State<HouseStatus> {
+  final _houseStatusVm = Get.find<HouseStatusVm>();
+
   List<RoomItem> rooms = [];
   bool isEditMode = false;
   Set<RoomItem> selectedRooms = {};
-  
   @override
   void initState() {
     super.initState();
-    _loadRooms();
-  }
-
-  void _loadRooms() {
-    rooms = [
-      RoomItem(
-        section: 'Alan',
-        roomName: 'GR 2',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.clean,
-        roomType: RoomType.garden,
-      ),
-      RoomItem(
-        section: 'Alan',
-        roomName: '3',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.clean,
-        roomType: RoomType.garden,
-        hasIssue: true,
-      ),
-      RoomItem(
-        section: 'Alan',
-        roomName: 'Cabana 2',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.cabana,
-      ),
-      RoomItem(
-        section: 'Alan',
-        roomName: 'LX 11',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.luxury,
-      ),
-      RoomItem(
-        section: 'Alan',
-        roomName: '1',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.standard,
-      ),
-      RoomItem(
-        section: 'George',
-        roomName: '5',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.standard,
-      ),
-      RoomItem(
-        section: 'Alan',
-        roomName: '205',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.standard,
-        remark: 'should be available at 10.00am',
-      ),
-      // Alex section rooms
-      RoomItem(
-        section: 'Alex',
-        roomName: 'Family Villa',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.clean,
-        roomType: RoomType.villa,
-        hasIssue: true,
-      ),
-      RoomItem(
-        section: 'Alex',
-        roomName: 'Reception Area',
-        availability: '-NA-',
-        housekeepingStatus: HousekeepingStatus.clean,
-        roomType: RoomType.common,
-      ),
-      RoomItem(
-        section: 'George',
-        roomName: '106',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.standard,
-      ),
-      RoomItem(
-        section: 'Peter',
-        roomName: 'BH 101',
-        availability: 'Available',
-        housekeepingStatus: HousekeepingStatus.dirty,
-        roomType: RoomType.beachHouse,
-      ),
-    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _houseStatusVm.loadRooms();
+        rooms = _houseStatusVm.roomList;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final groupedRooms = _groupRoomsBySection();
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -118,7 +41,7 @@ class _HouseStatusState extends State<HouseStatus> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => Get.toNamed(AppRoutes.dashboard),
         ),
         title: Text(
           'House Status',
@@ -153,34 +76,71 @@ class _HouseStatusState extends State<HouseStatus> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          if (isEditMode) _buildActionButtons(),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: groupedRooms.keys.length,
-              itemBuilder: (context, index) {
-                final section = groupedRooms.keys.elementAt(index);
-                final sectionRooms = groupedRooms[section]!;
-                
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (index > 0) const SizedBox(height: 24),
-                    _buildSectionHeader(section, sectionRooms),
-                    const SizedBox(height: 12),
-                    ...sectionRooms.map((room) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: _buildRoomCard(room),
-                    )),
-                  ],
-                );
-              },
+      body: Obx(() {
+        final groupedRooms = _houseStatusVm.groupedRooms;
+        final isLoading = _houseStatusVm.isLoading;
+
+        return Column(
+          children: [
+            if (isEditMode) _buildActionButtons(),
+            Expanded(
+              child: isLoading.value
+                  ? ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: 10, 
+                      itemBuilder: (context, index) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 20,
+                              width: 150,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            ...List.generate(
+                              3,
+                              (i) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _buildRoomCardShimmer(),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+                        );
+                      },
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: groupedRooms.keys.length,
+                      itemBuilder: (context, index) {
+                        final section = groupedRooms.keys.elementAt(index);
+                        final sectionRooms = groupedRooms[section]!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (index > 0) const SizedBox(height: 24),
+                            _buildSectionHeader(section, sectionRooms),
+                            const SizedBox(height: 12),
+                            ...sectionRooms.map(
+                              (room) => Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: _buildRoomCard(room),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
@@ -195,7 +155,9 @@ class _HouseStatusState extends State<HouseStatus> {
               onPressed: _bulkSetStatus,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Column(
                 children: [
@@ -212,7 +174,9 @@ class _HouseStatusState extends State<HouseStatus> {
               onPressed: _bulkEditHousekeeper,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Column(
                 children: [
@@ -229,7 +193,9 @@ class _HouseStatusState extends State<HouseStatus> {
               onPressed: _bulkClearStatus,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Column(
                 children: [
@@ -246,7 +212,9 @@ class _HouseStatusState extends State<HouseStatus> {
               onPressed: _bulkClearRemark,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Column(
                 children: [
@@ -268,13 +236,15 @@ class _HouseStatusState extends State<HouseStatus> {
         section,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
-          color: AppColors.black,
+          color: AppColors.darkgrey,
           fontSize: 20,
         ),
       );
     }
 
-    final allSelected = sectionRooms.every((room) => selectedRooms.contains(room));
+    final allSelected = sectionRooms.every(
+      (room) => selectedRooms.contains(room),
+    );
 
     return Row(
       children: [
@@ -301,7 +271,9 @@ class _HouseStatusState extends State<HouseStatus> {
               if (value == true) {
                 selectedRooms.addAll(sectionRooms);
               } else {
-                selectedRooms.removeWhere((room) => sectionRooms.contains(room));
+                selectedRooms.removeWhere(
+                  (room) => sectionRooms.contains(room),
+                );
               }
             });
           },
@@ -311,9 +283,14 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 
   Widget _buildRoomCard(RoomItem room) {
-    final statusColor = _getHousekeepingColor(room.housekeepingStatus);
-    final bgColor = _getBackgroundColor(room.housekeepingStatus);
-    
+    // final statusColor = _getHousekeepingColor(room.housekeepingStatus);
+    // final bgColor = _getBackgroundColor(room.housekeepingStatus);
+
+    final statusColor = _houseStatusVm.getHousekeepingColor(
+      room.housekeepingStatus,
+    );
+    final bgColor = _houseStatusVm.getBackgroundColor(room.housekeepingStatus);
+
     return InkWell(
       onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
       borderRadius: BorderRadius.circular(8),
@@ -322,10 +299,7 @@ class _HouseStatusState extends State<HouseStatus> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.grey.withOpacity(0.2),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
         ),
         child: Row(
           children: [
@@ -337,7 +311,9 @@ class _HouseStatusState extends State<HouseStatus> {
                     room.roomName,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: _getTextColor(room.housekeepingStatus),
+                      color: _houseStatusVm.getTextColor(
+                        room.housekeepingStatus,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -400,6 +376,44 @@ class _HouseStatusState extends State<HouseStatus> {
     );
   }
 
+  Widget _buildRoomCardShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(height: 16, width: 120, color: Colors.white),
+                  const SizedBox(height: 8),
+                  Container(height: 14, width: 180, color: Colors.white),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 20,
+              height: 20,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _bulkSetStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk set status logic, e.g., show dialog for status selection
@@ -414,7 +428,9 @@ class _HouseStatusState extends State<HouseStatus> {
     if (selectedRooms.isEmpty) return;
     // Implement bulk edit housekeeper logic
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit housekeeper for ${selectedRooms.length} rooms')),
+      SnackBar(
+        content: Text('Edit housekeeper for ${selectedRooms.length} rooms'),
+      ),
     );
     setState(() => selectedRooms.clear());
   }
@@ -451,7 +467,7 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _handleRoomAction(String action, RoomItem room) {
     Navigator.pop(context);
-    
+
     // Handle different actions
     switch (action) {
       case 'set_status':
@@ -483,9 +499,9 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _showSetStatusDialog(RoomItem room) {
     // Implement set status dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Set status for ${room.roomName}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
   }
 
   void _clearStatus(RoomItem room) {
@@ -511,23 +527,23 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _showAddRemarkDialog(RoomItem room) {
     // Implement add remark dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Add remark for ${room.roomName}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Add remark for ${room.roomName}')));
   }
 
   void _showEditRemarkDialog(RoomItem room) {
     // Implement edit remark dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit remark for ${room.roomName}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Edit remark for ${room.roomName}')));
   }
 
   void _showViewRemarkDialog(RoomItem room) {
     // Implement view remark dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('View remark for ${room.roomName}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('View remark for ${room.roomName}')));
   }
 
   void _clearRemark(RoomItem room) {
@@ -537,51 +553,43 @@ class _HouseStatusState extends State<HouseStatus> {
     );
   }
 
-  Color _getHousekeepingColor(HousekeepingStatus status) {
-    switch (status) {
-      case HousekeepingStatus.clean:
+  Color _getHousekeepingColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'clean':
         return AppColors.green;
-      case HousekeepingStatus.dirty:
+      case 'dirty':
         return AppColors.red;
-      case HousekeepingStatus.inspected:
+      case 'inspected':
         return AppColors.blue;
-      case HousekeepingStatus.outOfOrder:
-        return AppColors.black;
+      default:
+        return AppColors.darkgrey;
     }
   }
 
-  Color _getBackgroundColor(HousekeepingStatus status) {
-    switch (status) {
-      case HousekeepingStatus.clean:
+  Color _getBackgroundColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'clean':
         return const Color(0xFFF0F8E8);
-      case HousekeepingStatus.dirty:
+      case 'dirty':
         return const Color(0xFFFFF0F0);
-      case HousekeepingStatus.inspected:
+      case 'inspected':
         return const Color(0xFFE8F4FD);
-      case HousekeepingStatus.outOfOrder:
+      default:
         return const Color(0xFFF5F5F5);
     }
   }
 
-  Color _getTextColor(HousekeepingStatus status) {
+  Color _getTextColor(String status) {
     switch (status) {
-      case HousekeepingStatus.clean:
+      case 'clean':
         return Colors.green[800]!;
-      case HousekeepingStatus.dirty:
+      case 'dirty':
         return Colors.red[800]!;
-      case HousekeepingStatus.inspected:
+      case 'inspected':
         return Colors.blue[800]!;
-      case HousekeepingStatus.outOfOrder:
+      default:
         return Colors.grey[800]!;
     }
-  }
-
-  Map<String, List<RoomItem>> _groupRoomsBySection() {
-    final Map<String, List<RoomItem>> grouped = {};
-    for (final room in rooms) {
-      grouped.putIfAbsent(room.section, () => []).add(room);
-    }
-    return grouped;
   }
 
   void _showStatusInfoDialog(BuildContext context) {
@@ -597,123 +605,116 @@ class _HouseStatusState extends State<HouseStatus> {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+            child: Obx(() {
+              final houseKeepingStatusList =
+                  _houseStatusVm.houseKeepingStatusList;
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: AppColors.primary,
-                      size: 24,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Status & Indicators Info',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.black,
+                                fontSize: 18,
+                              ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () =>Get.back(),
+                          icon: Icon(
+                            Icons.close,
+                            color: Colors.grey[600],
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 20),
                     Text(
-                      'Status & Indicators Info',
+                      'Housekeeping Status',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.black,
-                        fontSize: 18,
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.close,
-                        color: Colors.grey[600],
-                        size: 20,
+                    ...houseKeepingStatusList.map(
+                      (status) => Column(
+                        children: [
+                          const SizedBox(height: 12),
+                          _buildStatusInfoItem(
+                            context,
+                            status['name'],
+                            status['description'],
+                            status['colorCode'],
+                          ),
+                        ],
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Housekeeping Indicators',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildIndicatorInfoItem(
+                      context,
+                      'Eye Icon',
+                      'Room has special attention or maintenance issues',
+                      Icons.visibility,
+                      Colors.black,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildIndicatorInfoItem(
+                      context,
+                      'Color Dots',
+                      'Quick visual status indicator for housekeeping teams',
+                      Icons.circle,
+                      Colors.grey[600]!,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Get.back(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          'Got it',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.onPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  'Housekeeping Status',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildStatusInfoItem(
-                  context,
-                  'Clean',
-                  'Room is cleaned and ready for guests',
-                  Colors.green,
-                ),
-                const SizedBox(height: 8),
-                _buildStatusInfoItem(
-                  context,
-                  'Dirty',
-                  'Room needs housekeeping attention',
-                  Colors.red,
-                ),
-                const SizedBox(height: 8),
-                _buildStatusInfoItem(
-                  context,
-                  'Inspected',
-                  'Room has been inspected and approved',
-                  Colors.blue,
-                ),
-                const SizedBox(height: 8),
-                _buildStatusInfoItem(
-                  context,
-                  'Out of Order',
-                  'Room is temporarily unavailable',
-                  Colors.black,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Housekeeping Indicators',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildIndicatorInfoItem(
-                  context,
-                  'Eye Icon',
-                  'Room has special attention or maintenance issues',
-                  Icons.visibility,
-                  Colors.black,
-                ),
-                const SizedBox(height: 8),
-                _buildIndicatorInfoItem(
-                  context,
-                  'Color Dots',
-                  'Quick visual status indicator for housekeeping teams',
-                  Icons.circle,
-                  Colors.grey[600]!,
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Got it',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              );
+            }),
           ),
         );
       },
@@ -732,10 +733,7 @@ class _HouseStatusState extends State<HouseStatus> {
         Container(
           width: 16,
           height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -780,11 +778,7 @@ class _HouseStatusState extends State<HouseStatus> {
             color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: Icon(
-            icon,
-            size: 14,
-            color: color,
-          ),
+          child: Icon(icon, size: 14, color: color),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -817,15 +811,12 @@ class _RoomActionsSheet extends StatelessWidget {
   final RoomItem room;
   final Function(String) onActionSelected;
 
-  const _RoomActionsSheet({
-    required this.room,
-    required this.onActionSelected,
-  });
+  const _RoomActionsSheet({required this.room, required this.onActionSelected});
 
   @override
   Widget build(BuildContext context) {
     final hasRemark = room.remark != null && room.remark!.isNotEmpty;
-    
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -845,53 +836,60 @@ class _RoomActionsSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
+
             // Room info header
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
-              child: Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(room.housekeepingStatus),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          room.roomName,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
+              child: Obx(() {
+                final _houseStatusVm = Get.find<HouseStatusVm>();
+
+                return Row(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        // color: _getStatusColor(room.housekeepingStatus),
+                        color: _houseStatusVm.getStatusColor(
+                          room.housekeepingStatus,
                         ),
-                        Text(
-                          '${room.section} • ${room.availability}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.close, color: Colors.grey[600]),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            room.roomName,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.black,
+                                ),
+                          ),
+                          Text(
+                            '${room.section} • ${room.availability}',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close, color: Colors.grey[600]),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                );
+              }),
             ),
-            
+
             const Divider(height: 1),
-            
+
             // Actions list
             ListView(
               shrinkWrap: true,
@@ -954,7 +952,7 @@ class _RoomActionsSheet extends StatelessWidget {
                 ],
               ],
             ),
-            
+
             const SizedBox(height: 8),
           ],
         ),
@@ -970,7 +968,7 @@ class _RoomActionsSheet extends StatelessWidget {
     bool isDestructive = false,
   }) {
     final color = isDestructive ? Colors.red[700] : AppColors.black;
-    
+
     return ListTile(
       leading: Icon(icon, color: color, size: 24),
       title: Text(
@@ -986,16 +984,16 @@ class _RoomActionsSheet extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(HousekeepingStatus status) {
-    switch (status) {
-      case HousekeepingStatus.clean:
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'clean':
         return AppColors.green;
-      case HousekeepingStatus.dirty:
+      case 'dirty':
         return AppColors.red;
-      case HousekeepingStatus.inspected:
+      case 'inspected':
         return AppColors.blue;
-      case HousekeepingStatus.outOfOrder:
-        return AppColors.black;
+      default:
+        return AppColors.darkgrey;
     }
   }
 }

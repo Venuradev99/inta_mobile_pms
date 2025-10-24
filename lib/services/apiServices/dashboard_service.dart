@@ -5,11 +5,14 @@ import 'package:inta_mobile_pms/services/data_access_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class DashboardService {
-  final DataAccessService _dataAccess = DataAccessService();
+  final DataAccessService _dataAccess;
+  final AppResources _appResources;
+
+  DashboardService(this._dataAccess, this._appResources);
 
   Future<Map<String, dynamic>> getBookingStatics() async {
     try {
-      final url = AppResources.getBookingStats;
+      final url = '${_appResources.baseUrl}${AppResources.getBookingStats}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -19,8 +22,29 @@ class DashboardService {
 
   Future<Map<String, dynamic>> getInventoryStatics() async {
     try {
-      final url = AppResources.getInventoryStats;
+      final url = '${_appResources.baseUrl}${AppResources.getInventoryStats}';
       final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllLockReservations() async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllLockReservations}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> lockBooking(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.lockBooking}';
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
@@ -40,7 +64,7 @@ class DashboardService {
     }
   }
 
-    Future<Map<String, dynamic>> getOccupancyStatics() async {
+  Future<Map<String, dynamic>> getOccupancyStatics() async {
     try {
       // final url = AppResources.getInventoryStats;
       // final response = await _dataAccess.get(url);
@@ -52,5 +76,4 @@ class DashboardService {
       return {"error": error.toString()};
     }
   }
-
 }

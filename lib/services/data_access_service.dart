@@ -1,55 +1,66 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
+import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
+import 'package:inta_mobile_pms/data/models/Api_response_model.dart';
+import 'package:inta_mobile_pms/router/app_router.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 
 class DataAccessService {
-
   Map<String, dynamic>? configData;
   String? baseUrl;
-  final ApiConfigService apiConfigService = ApiConfigService();
-  String? errorMessage;
-  var serviceUrl;
 
   Future<void> loadConfigData() async {
     try {
-
-      final response = await ApiConfigService().getConfigJSON();
-      configData = response;
-      baseUrl = response['baseUrl'];
+      final configString = await rootBundle.loadString('assets/config.json');
+      final response = json.decode(configString);
+      baseUrl = response['baseUrl'].toString();
     } catch (e) {
       throw Exception('Failed to load configuration: $e');
-    } finally {
-    }
+    } finally {}
   }
 
-  Map<String, dynamic> _handleResponse(http.Response response) {
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
+  Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
+    final Map<String, dynamic> responseBody = json.decode(response.body);
+
+    if (response.statusCode == 401) {
+      Get.toNamed(AppRoutes.login);
+      await LocalStorageManager.clearUserData();
+
+      String errorMsg =
+          responseBody["errors"][0] ?? 'Unauthorized, try login again!';
+      MessageHelper.error(errorMsg);
+      return ApiResponse(
+        errors: [errorMsg],
+        isSuccessful: responseBody['isSuccessful'] ?? false,
+        isDBAccessible: responseBody['isDBAccessible'] ?? false,
+        result: responseBody['result'],
+        message: responseBody['message'] ?? '',
+        statusCode: response.statusCode,
+      ).toJson();
     } else {
-      throw Exception(
-        'Failed to make ${response.request?.method} request. '
-        'Status Code: ${response.statusCode}, '
-        'Response: ${response.body}',
-      );
+      return ApiResponse(
+        errors: responseBody['errors'] ?? [],
+        isSuccessful: responseBody['isSuccessful'] ?? false,
+        isDBAccessible: responseBody['isDBAccessible'] ?? false,
+        result: responseBody['result'],
+        message: responseBody['message'] ?? '',
+        statusCode: response.statusCode,
+      ).toJson();
     }
   }
 
   Future<Map<String, dynamic>> get(String url) async {
     try {
-
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
-      if (baseUrl == null) {
-        await loadConfigData();
-      }
 
       if (token.isEmpty) {
         throw Exception('Session key not available');
-      }
-
-      if (baseUrl == null) {
-        throw Exception('baseUrl URL not available');
       }
 
       final headers = {
@@ -58,15 +69,12 @@ class DataAccessService {
         'Hotelid': hotelId,
       };
 
-      final response = await http.get(
-        Uri.parse('$baseUrl$url'),
-        headers: headers,
-      );
+      final response = await http.get(Uri.parse(url), headers: headers);
 
       return _handleResponse(response);
     } catch (e) {
       throw Exception('GET error: $e');
-    } 
+    }
   }
 
   Future<Map<String, dynamic>> post(
@@ -76,16 +84,9 @@ class DataAccessService {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
-      if (baseUrl == null) {
-        await loadConfigData();
-      }
 
       if (token.isEmpty) {
         throw Exception('Session key not available');
-      }
-
-      if (baseUrl == null) {
-        throw Exception('baseUrl URL not available');
       }
 
       final headers = {
@@ -95,7 +96,7 @@ class DataAccessService {
       };
 
       final response = await http.post(
-        Uri.parse('$baseUrl$url'),
+        Uri.parse(url),
         headers: headers,
         body: jsonEncode(body),
       );
@@ -263,16 +264,4 @@ class DataAccessService {
 
   //     return _handleResponse(response);
   //   }
-}
-
-class ApiConfigService {
-  Future<Map<String, dynamic>> getConfigJSON() async {
-    try {
-      final configString = await rootBundle.loadString('assets/config.json');
-      final response = json.decode(configString);
-      return response;
-    } catch (e) {
-      throw Exception('Failed to load configuration: $e');
-    }
-  }
 }

@@ -1,12 +1,20 @@
+import 'dart:convert';
+
+import 'package:flutter/services.dart';
 import 'package:inta_mobile_pms/services/data_access_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class ReservationListService {
-  final DataAccessService _dataAccess = DataAccessService();
+  final DataAccessService _dataAccess;
+  final AppResources _appResources;
 
-  Future<Map<String, dynamic>> getAllReservationList(Map<String, dynamic> body) async {
-     try {
-      final url = AppResources.searchReservationList;
+  ReservationListService(this._dataAccess,this._appResources);
+
+  Future<Map<String, dynamic>> getAllReservationList(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.searchReservationList}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -15,9 +23,21 @@ class ReservationListService {
   }
 
   Future<Map<String, dynamic>> getAllRoomTypes() async {
-     try {
-      final url = AppResources.getAllRoomTypes;
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
       final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getAvailableRooms(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAvailableRooms}';
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
@@ -25,18 +45,8 @@ class ReservationListService {
   }
 
   Future<Map<String, dynamic>> getAllreservationTypes() async {
-     try {
-      final url = AppResources.getAllreservationTypes;
-      final response = await _dataAccess.get(url);
-      return response;
-    } catch (error) {
-      return {"error": error.toString()};
-    }
-  }
-  
-   Future<Map<String, dynamic>> getAllroomstatus() async {
-     try {
-      final url = AppResources.getAllroomstatus;
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllreservationTypes}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -44,14 +54,151 @@ class ReservationListService {
     }
   }
 
-    Future<Map<String, dynamic>> getAllbusinessSources() async {
-     try {
-      final url = AppResources.getAllbusinessSources;
+  Future<Map<String, dynamic>> getAllroomstatus() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllroomstatus}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getAllbusinessSources() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllbusinessSources}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getByBookingRoomId(int bookingRoomId) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getByBookingRoomId}/$bookingRoomId';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getCancellationReasons() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getCancellationReasons}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getNoShowReasons() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getNoShowReasons}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getVoidReasons() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getVoidReasons}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getStopRoomMoveReasons() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getStopRoomMoveReasons}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+   Future<Map<String, dynamic>> getAuditTrial(int bookingId, int bookingRoomId,int masterFolioBookingTransId,int roomId) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAuditTrial}$bookingId/$bookingRoomId/$masterFolioBookingTransId/$roomId';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+// 2025-10-26T13:00:00
+   Future<Map<String, dynamic>> getAmendStayData(int roomId, int bookingRoomId,String amendCheckinDate) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAmendStayData}/$roomId?bookingRoomId=$bookingRoomId&amendCheckinDate=$amendCheckinDate'; 
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+   Future<Map<String, dynamic>> updateBooking(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.updateBooking}';
+      final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+
+  Future<Map<String, dynamic>> getFolioPayments(int folioId ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getFolioPayments}/GetFolioPayments/$folioId/false';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> saveOtherInformation(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.saveOtherInformation}';
+      final response = await _dataAccess.post(body,url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+
   
+  Future<Map<String, dynamic>> saveReason(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.saveReason}';
+      final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getInhousedata(Map<String, dynamic> body) async {
+    try {
+      final config = await rootBundle.loadString('assets/config.json');
+      final response = json.decode(config);
+      return response["inhouseList"];
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+
+
+
 }

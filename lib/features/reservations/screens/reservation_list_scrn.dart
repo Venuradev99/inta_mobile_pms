@@ -10,6 +10,8 @@ import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_lis
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
@@ -23,18 +25,18 @@ class ReservationList extends StatefulWidget {
 }
 
 class _ReservationListState extends State<ReservationList> {
-  final ReservationListVm _reservationListVm = Get.put(ReservationListVm());
-  late Map<String, List<GuestItem>> reservationsMap;
+  final _reservationListVm = Get.find<ReservationListVm>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
+      if (!mounted) {
+        return;
+      } else {
         await _reservationListVm.getReservationsMap();
       }
     });
-    // reservationsMap = _getReservationsMap();
   }
 
   @override
@@ -53,13 +55,17 @@ class _ReservationListState extends State<ReservationList> {
               initialChildSize: 0.8,
               minChildSize: 0.5,
               maxChildSize: 0.95,
-              builder: (context, scrollController) => Obx( () {
-                return  FilterBottomSheet(
-                type: 'reservation',
-                filteredData: _reservationListVm.receivedFilters.value ?? {},
-                onApply: _reservationListVm.applyReservationFilters,
-                scrollController: scrollController,
-              );
+              builder: (context, scrollController) => Obx(() {
+                return FilterBottomSheet(
+                  type: 'reservation',
+                  roomTypes:_reservationListVm.roomTypes.toList(),
+                  reservationTypes:_reservationListVm.reservationTypes.toList(),
+                  statuses:_reservationListVm.statuses.toList(),
+                  businessSources:_reservationListVm.businessSources.toList(),
+                  filteredData: _reservationListVm.receivedFilters.value ?? {},
+                  onApply: _reservationListVm.applyReservationFilters,
+                  scrollController: scrollController,
+                );
               }),
             ),
           );
@@ -67,67 +73,84 @@ class _ReservationListState extends State<ReservationList> {
       ),
 
       body: Obx(() {
-        final reservations = _reservationListVm.reservationFilteredList.value ?? {};
-        if (reservations.isEmpty) {
-          return const Center(child: Text('No reservations found'));
-        }
-        return TabbedListView<GuestItem>(
-          tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-          dataMap: reservations,
-          itemBuilder: (item) => _buildReservationCard(item),
-          emptySubMessage: (period) => 'No reservations for this period',
+        GuestItem guestItem = GuestItem(
+          bookingRoomId: '',
+          guestName: '',
+          resId: '',
+          folioId: '',
+          startDate: '',
+          endDate: '',
+          nights: 0,
+          adults: 0,
+          totalAmount: 0,
+          balanceAmount: 0,
+        );
+
+        return Stack(
+          children: [
+            if (_reservationListVm.isLoading.value == true)
+              TabbedListView<GuestItem>(
+                tabLabels: const ['Today', 'Tomorrow', 'This Week'],
+                dataMap: {
+                  'today': List.generate(3, (_) => guestItem),
+                  'tomorrow': List.generate(3, (_) => guestItem),
+                  'thisweek': List.generate(3, (_) => guestItem),
+                },
+                itemBuilder: (item) => _buildReservationCardShimmer(),
+                emptySubMessage: (period) => 'No reservations for this period',
+              ),
+            if (_reservationListVm.isLoading.value == false)
+              TabbedListView<GuestItem>(
+                tabLabels: const ['Today', 'Tomorrow', 'This Week'],
+                dataMap: _reservationListVm.reservationFilteredList.value ?? {},
+                itemBuilder: (item) => _buildReservationCard(item),
+                emptySubMessage: (period) => 'No reservations for this period',
+              ),
+            if (_reservationListVm.isBottomSheetDataLoading.value)
+              Container(
+                color: Colors.black.withOpacity(0.2),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.lightgrey,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
       }),
     );
   }
 
-
   void _showInfoDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => StatusInfoDialog(
-        title: 'Reservation Status',
-        statusItems: const [
-          StatusItem(
-            status: 'Confirmed',
-            description: 'Reservations that are confirmed',
-            color: Color(0xFF4CAF50),
-            icon: Icons.check_circle,
-          ),
-          StatusItem(
-            status: 'Pending',
-            description: 'Reservations awaiting confirmation',
-            color: Color(0xFFFF9800),
-            icon: Icons.hourglass_empty,
-          ),
-          StatusItem(
-            status: 'Cancelled',
-            description: 'Cancelled reservations',
-            color: Color(0xFFF44336),
-            icon: Icons.cancel,
-          ),
-          StatusItem(
-            status: 'Checked In',
-            description: 'Guests who have checked in',
-            color: Color(0xFF2196F3),
-            icon: Icons.login,
-          ),
-          StatusItem(
-            status: 'Checked Out',
-            description: 'Guests who have checked out',
-            color: Color(0xFF9E9E9E),
-            icon: Icons.logout,
-          ),
-          StatusItem(
-            status: 'Failed/Incomplete',
-            description: 'Failed or incomplete bookings',
-            color: Color(0xFFE91E63),
-            icon: Icons.error,
-          ),
-        ],
-      ),
+      builder: (context) {
+        return Obx(() {
+          final statusList = _reservationListVm.statusList;
+
+          final List<StatusItem> items = statusList.map((status) {
+            return StatusItem(
+              status: status['name'] ?? '',
+              description: status['description'] ?? '',
+              color: status['colorCode'] ?? Colors.grey,
+              icon: Icons.check_circle,
+            );
+          }).toList();
+
+          return StatusInfoDialog(
+            title: 'Housekeeping Status',
+            statusItems: items,
+          );
+        });
+      },
     );
+  }
+
+  Widget _buildReservationCardShimmer() {
+    return GuestCardShimmer();
   }
 
   Widget _buildReservationCard(GuestItem item) {
@@ -147,7 +170,16 @@ class _ReservationListState extends State<ReservationList> {
     );
   }
 
-  void _showActions(BuildContext context, GuestItem item) {
+  void _showActions(BuildContext context, GuestItem item) async {
+    await _reservationListVm.getAllGuestData(item);
+    final guestData = _reservationListVm.allGuestDetails.value;
+
+    if (!mounted) return;
+    bool isNoshow = int.tryParse(item.status.toString()) == 2;
+    int status = int.tryParse(guestData?.status.toString() ?? '') ?? 0;
+    bool isAssign = guestData?.roomId == 0;
+    bool isUnAssignRoom =  _reservationListVm.isUnAssign(guestData!);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -155,125 +187,160 @@ class _ReservationListState extends State<ReservationList> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => ActionBottomSheet(
-        guestName: item.guestName,
-        actions: [
-          ActionItem(
-            icon: Icons.visibility,
-            label: 'View Reservation',
-            onTap: () => context.go(AppRoutes.viewReservation, extra: item),
-          ),
-          ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
-          ActionItem(
-            icon: Icons.not_interested,
-            label: 'No Show Reservation',
-            onTap: () {
-              Navigator.of(context).pop();
-              final noShowData = NoShowReservationData(
-                guestName: item.guestName,
-                reservationNumber: item.resId,
-                folio: item.folioId,
-                arrivalDate: item.startDate,
-                departureDate: item.endDate,
-                roomType: item.roomType ?? 'N/A',
-                room: 'TBD',
-                total: item.totalAmount,
-                deposit: item.totalAmount - item.balanceAmount,
-                balance: item.balanceAmount,
-                initialNoShowFee: null,
-              );
-              Navigator.push(
-                context,
-                PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) =>
-                      NoShowReservationPage(data: noShowData),
-                  transitionsBuilder:
-                      (context, animation, secondaryAnimation, child) {
-                        var begin = const Offset(0.0, 1.0);
-                        var end = Offset.zero;
-                        var curve = Curves.ease;
-                        var tween = Tween(
-                          begin: begin,
-                          end: end,
-                        ).chain(CurveTween(curve: curve));
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                ),
-              );
-            },
-          ),
-          ActionItem(
-            icon: Icons.cancel,
-            label: 'Cancel Reservation',
-            onTap: () => context.go(AppRoutes.cancelReservation, extra: item),
-          ),
-          ActionItem(
-            icon: Icons.meeting_room,
-            label: 'Assign Rooms',
-            onTap: () async {
-              Navigator.pop(context);
-              final result = await AssignRoomsBottomSheet.show(
-                context: context,
-                guestName: item.guestName,
-                reservationId: item.resId,
-                initialRoomType: item.roomType,
-                initialRoom: item.roomNumber,
-              );
-              if (result != null) {
-                setState(() {
-                  // Find and update the specific item in the map
-                  for (var tab in reservationsMap.keys) {
-                    final index = reservationsMap[tab]!.indexWhere(
-                      (g) => g.resId == item.resId,
-                    );
-                    if (index != -1) {
-                      reservationsMap[tab]![index] = GuestItem(
-                        guestName: item.guestName,
-                        resId: item.resId,
-                        folioId: item.folioId,
-                        startDate: item.startDate,
-                        endDate: item.endDate,
-                        nights: item.nights,
-                        roomType: result['roomType'],
-                        adults: item.adults,
-                        totalAmount: item.totalAmount,
-                        balanceAmount: item.balanceAmount,
-                        remainingNights: item.remainingNights,
-                        roomNumber: result['room'],
-                        reservedDate: item.reservedDate,
-                        reservationType: item.reservationType,
-                        status: item.status,
-                        businessSource: item.businessSource,
-                        cancellationNumber: item.cancellationNumber,
-                        voucherNumber: item.voucherNumber,
-                        room:
-                            result['room'], // If room is separate, update it; otherwise remove if duplicate
-                      );
-                    }
-                  }
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Room assigned successfully: ${result['room']} (${result['roomType']})',
-                    ),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                  ),
+      builder: (context) {
+        return ActionBottomSheet(
+          guestName: item.guestName,
+          actions: [
+            ActionItem(
+              icon: Icons.visibility,
+              label: 'View Reservation',
+              onTap: () {
+                Get.back();
+                Get.toNamed(
+                  AppRoutes.viewReservation,
+                  arguments: _reservationListVm.allGuestDetails.value,
                 );
-              }
-            },
-          ),
-          ActionItem(icon: Icons.swap_horiz, label: 'Change Reservation Type'),
-          ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
-          ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
-          ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
-          ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
-          ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
-        ],
+              },
+            ),
+            ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
+            if (isNoshow == true)
+              ActionItem(
+                icon: Icons.not_interested,
+                label: 'No Show Reservation',
+                onTap: () async {
+                  final noShowReasons = await _reservationListVm
+                      .getNoShowReservationData(item);
+                  if (!mounted) return;
+                  final noShowData = NoShowReservationData(
+                    reasons: noShowReasons["reasons"],
+                    bookingRoomId: guestData?.bookingRoomId ?? '',
+                    guestName: guestData?.guestName ?? '',
+                    reservationNumber: guestData?.resId ?? '',
+                    folio: guestData?.folioId ?? '',
+                    arrivalDate: guestData?.startDate ?? '',
+                    departureDate: guestData?.endDate ?? '',
+                    roomType: guestData?.roomType ?? '',
+                    room: guestData?.room ?? '',
+                    total: guestData?.totalAmount ?? 0.0,
+                    deposit:
+                        (guestData?.totalAmount ?? 0.0) -
+                        (guestData?.balanceAmount ?? 0.0),
+                    balance: guestData?.balanceAmount ?? 0.0,
+                    initialNoShowFee: null,
+                  );
+                  Get.back();
+                  Get.to(
+                    () => NoShowReservationPage(data: noShowData),
+                    transition: Transition
+                        .downToUp, // slides from bottom (like Offset(0.0, 1.0))
+                    curve: Curves.ease,
+                    duration: const Duration(
+                      milliseconds: 300,
+                    ), // optional, same speed as original
+                  );
+                },
+              ),
+            ActionItem(
+              icon: Icons.cancel,
+              label: 'Cancel Reservation',
+              onTap: () async {
+                final cancelReservationData = await _reservationListVm
+                    .getCancelReservationData(item);
+                if (!mounted) return;
+                final data = {
+                  'reasons': cancelReservationData["reasons"],
+                  'bookingRoomId': guestData?.bookingRoomId,
+                  'guestName': guestData?.guestName,
+                  'resNumber': guestData?.resId,
+                  'folio': guestData?.folioId,
+                  'arrivalDate': guestData?.startDate,
+                  'departureDate': guestData?.endDate,
+                  'roomType': guestData?.roomType,
+                  'room': guestData?.room,
+                  'total': guestData?.totalAmount,
+                  'deposit':
+                      (guestData?.totalAmount ?? 0.0) -
+                      (guestData?.balanceAmount ?? 0.0),
+                };
+
+                Get.back();
+                Get.toNamed(AppRoutes.cancelReservation, arguments: data);
+              },
+            ),
+            if (isAssign == true)
+              ActionItem(
+                icon: Icons.meeting_room,
+                label: 'Assign Rooms',
+                onTap: () async {
+                  Get.back();
+                  await AssignRoomsBottomSheet.show(
+                    context: context,
+                    guestItem: guestData!,
+                  );
+                },
+              ),
+            if (isUnAssignRoom == true)
+              ActionItem(
+                icon: Icons.meeting_room,
+                label: 'Unassign Rooms',
+                onTap: () async {
+                  Get.back();
+                  final confirmed = await ConfirmationDialog.show(
+                    context: context,
+                    title: 'Unassign Rooms',
+                    message:
+                        'Are you sure you want to unassign rooms for this reservation?',
+                    confirmText: 'Unassign',
+                    cancelText: 'Cancel',
+                    confirmColor: AppColors.red,
+                    icon: Icons.meeting_room,
+                  );
+                  if (confirmed == true) {
+                    await _reservationListVm.unassignRoom(guestData!);
+                    if (!mounted) return;
+                  }
+                },
+              ),
+            ActionItem(
+              icon: Icons.swap_horiz,
+              label: 'Change Reservation Type',
+              onTap: () async {
+                Get.back();
+
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  await context.showChangeReservationTypeDialog(
+                    guestItem: guestData,
+                  );
+                });
+              },
+            ),
+            ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
+            ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
+            ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
+            ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
+            ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 3),
       ),
     );
   }

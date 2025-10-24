@@ -7,7 +7,6 @@ import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
-import 'package:inta_mobile_pms/services/loading_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -24,7 +23,6 @@ class _LoginPageState extends State<LoginPage>
   final _hotelIdController = TextEditingController();
 
   final UserApiService _userApiService = UserApiService();
-  final loadingController = Get.find<LoadingController>();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -76,33 +74,14 @@ class _LoginPageState extends State<LoginPage>
   Future<void> _handleLogin() async {
     // if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-
-    try {
-      loadingController.show();
-      final response = await _userApiService.login(
-        _usernameController.text.trim(),
-        _passwordController.text.trim(),
-        _hotelIdController.text.trim(),
-      );
-
-      if (response["isSuccessful"] == true) {
-        if (mounted) context.go(AppRoutes.dashboard);
-      } else {
-        _showError(response["message"] ?? "Invalid login credentials");
-      }
-    } catch (e) {
-      _showError("Something went wrong during login.");
-    } finally {
-      setState(() => _isLoading = false);
-      loadingController.hide();
-    }
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    await _userApiService.login(
+      _usernameController.text.trim(),
+      _passwordController.text.trim(),
+      _hotelIdController.text.trim(),
     );
+    setState(() => _isLoading = false);
   }
+
 
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
@@ -172,9 +151,14 @@ class _LoginPageState extends State<LoginPage>
                         child: _buildLogoSection(context),
                       ),
                     ],
-                    
-                    SizedBox(height: ResponsiveConfig.scaleHeight(context, isKeyboardVisible ? 40 : 80)),
-                    
+
+                    SizedBox(
+                      height: ResponsiveConfig.scaleHeight(
+                        context,
+                        isKeyboardVisible ? 40 : 80,
+                      ),
+                    ),
+
                     // Login Form
                     SlideTransition(
                       position: _slideAnimation,
@@ -491,7 +475,7 @@ class _LoginPageState extends State<LoginPage>
               // Ensure navigation to dashboard after login
 
               // if (mounted) {
-              //   context.go(AppRoutes.dashboard);
+              //   Get.toNamed(AppRoutes.dashboard);
               // }
             },
       style: ElevatedButton.styleFrom(

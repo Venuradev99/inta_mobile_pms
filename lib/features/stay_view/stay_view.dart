@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
@@ -16,7 +18,7 @@ class StayView extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => Get.toNamed(AppRoutes.dashboard),
         ),
         title: Text(
           'Stay View',

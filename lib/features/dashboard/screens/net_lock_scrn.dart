@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/net_lock_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NetLock extends StatefulWidget {
   const NetLock({super.key});
@@ -12,6 +16,7 @@ class NetLock extends StatefulWidget {
 }
 
 class _NetLockState extends State<NetLock> {
+  final _netLockVm = Get.find<NetLockVm>();
   final TextEditingController _searchController = TextEditingController();
   List<ReservationData> _filteredReservations = [];
   List<ReservationData> _allReservations = [];
@@ -21,107 +26,26 @@ class _NetLockState extends State<NetLock> {
   @override
   void initState() {
     super.initState();
-    _loadMockData();
-    _filteredReservations = List.from(_allReservations);
-  }
 
-  void _loadMockData() {
-    _allReservations = [
-      ReservationData(
-        guestName: 'Mr.Wasana Mudalige',
-        roomType: 'Deluxe Queen',
-        roomName: '14',
-        user: 'Admin',
-        reservationNo: 'R-4068-2',
-      ),
-      ReservationData(
-        guestName: 'Mr.Wasana Mudalige',
-        roomType: 'Super Gold',
-        roomName: 'SG-001',
-        user: 'Admin',
-        reservationNo: 'R-4263',
-      ),
-      ReservationData(
-        guestName: 'Mr.Sameer Hishad',
-        roomType: 'Deluxe King',
-        roomName: '04',
-        user: 'Admin',
-        reservationNo: 'R-4271',
-      ),
-      ReservationData(
-        guestName: 'Mr.Lio Fernando',
-        roomType: 'Deluxe King',
-        roomName: '03',
-        user: 'Admin',
-        reservationNo: 'R-4282',
-      ),
-      ReservationData(
-        guestName: 'Mr.Wasana Mudalige',
-        roomType: 'Deluxe Queen',
-        roomName: '11',
-        user: 'Admin',
-        reservationNo: 'R-4330',
-      ),
-      ReservationData(
-        guestName: 'Ms.Janani S Bandara',
-        roomType: 'Deluxe King',
-        roomName: '04',
-        user: 'Admin',
-        reservationNo: 'R-4386',
-      ),
-      ReservationData(
-        guestName: 'Mr.Sameer Hishad',
-        roomType: 'Deluxe King',
-        roomName: '04',
-        user: 'Admin',
-        reservationNo: 'R-4271',
-      ),
-      ReservationData(
-        guestName: 'Mr.Lio Fernando',
-        roomType: 'Deluxe King',
-        roomName: '03',
-        user: 'Admin',
-        reservationNo: 'R-4282',
-      ),
-      ReservationData(
-        guestName: 'Mr.Wasana Mudalige',
-        roomType: 'Deluxe Queen',
-        roomName: '11',
-        user: 'Admin',
-        reservationNo: 'R-4330',
-      ),
-      ReservationData(
-        guestName: 'Ms.Janani S Bandara',
-        roomType: 'Deluxe King',
-        roomName: '04',
-        user: 'Admin',
-        reservationNo: 'R-4386',
-      ),
-    ];
-  }
-
-  void _filterReservations(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredReservations = List.from(_allReservations);
-      } else {
-        _filteredReservations = _allReservations
-            .where((reservation) =>
-                reservation.guestName.toLowerCase().contains(query.toLowerCase()) ||
-                reservation.roomType.toLowerCase().contains(query.toLowerCase()) ||
-                reservation.reservationNo.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _netLockVm.loadInitialData();
       }
-      _selectedRows.clear();
-      _selectAll = false;
     });
+    // _loadMockData();
+    // _filteredReservations = List.from(_allReservations);
   }
 
   void _toggleSelectAll(bool? value) {
     setState(() {
       _selectAll = value ?? false;
       if (_selectAll) {
-        _selectedRows = Set.from(List.generate(_filteredReservations.length, (index) => index));
+        _selectedRows = Set.from(
+          List.generate(
+            _netLockVm.netlockDataFiltered.toList().length,
+            (index) => index,
+          ),
+        );
       } else {
         _selectedRows.clear();
       }
@@ -135,47 +59,20 @@ class _NetLockState extends State<NetLock> {
       } else {
         _selectedRows.add(index);
       }
-      _selectAll = _selectedRows.length == _filteredReservations.length;
+      _selectAll =
+          _selectedRows.length ==
+          _netLockVm.netlockDataFiltered.toList().length;
     });
   }
 
-  void _unlockSelected() {
+  void _unlockSelected() async {
     if (_selectedRows.isNotEmpty) {
       final selectedCount = _selectedRows.length;
-      final selectedIndices = _selectedRows.toList()..sort((a, b) => b.compareTo(a));
-      
-      setState(() {
 
-        for (final index in selectedIndices) {
-          final reservation = _filteredReservations[index];
-          _filteredReservations.removeAt(index);
-          _allReservations.remove(reservation);
-        }
-        _selectedRows.clear();
-        _selectAll = false;
-      });
-      
-      // Show success feedback
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: AppColors.onPrimary, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '$selectedCount reservation${selectedCount > 1 ? 's' : ''} unlocked and removed',
-                ),
-              ),
-            ],
-          ),
-          backgroundColor: AppColors.secondary,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
+      await _netLockVm.unlockBooking(_selectedRows);
+      _selectedRows.clear();
+      _selectAll = false;
+      if (!mounted) return;
     }
   }
 
@@ -188,7 +85,7 @@ class _NetLockState extends State<NetLock> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => Get.toNamed(AppRoutes.dashboard),
         ),
         title: Text(
           'Net Lock',
@@ -209,15 +106,18 @@ class _NetLockState extends State<NetLock> {
                   backgroundColor: AppColors.secondary,
                   foregroundColor: AppColors.onPrimary,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
               ),
             ),
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () {
-              _loadMockData();
-              _filteredReservations = List.from(_allReservations);
+            onPressed: () async {
+              await _netLockVm.loadInitialData();
+              // _filteredReservations = List.from(_allReservations);
               setState(() {});
             },
           ),
@@ -228,8 +128,9 @@ class _NetLockState extends State<NetLock> {
           // Search Header
           Container(
             color: AppColors.surface,
-            padding: ResponsiveConfig.horizontalPadding(context)
-                .add(ResponsiveConfig.verticalPadding(context)),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).add(ResponsiveConfig.verticalPadding(context)),
             child: Row(
               children: [
                 Expanded(
@@ -240,17 +141,22 @@ class _NetLockState extends State<NetLock> {
                       borderRadius: BorderRadius.circular(
                         ResponsiveConfig.cardRadius(context) - 4,
                       ),
-                      border: Border.all(color: AppColors.lightgrey.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppColors.lightgrey.withOpacity(0.3),
+                      ),
                     ),
                     child: TextField(
                       controller: _searchController,
-                      onChanged: _filterReservations,
+                      onChanged: (value) {
+                        _netLockVm.filterReservations(value);
+                        _selectedRows.clear();
+                        _selectAll = false;
+                      },
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
                         hintText: 'Search reservations...',
-                        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.lightgrey,
-                        ),
+                        hintStyle: Theme.of(context).textTheme.bodyMedium
+                            ?.copyWith(color: AppColors.lightgrey),
                         prefixIcon: Icon(
                           Icons.search,
                           size: ResponsiveConfig.iconSize(context),
@@ -265,12 +171,16 @@ class _NetLockState extends State<NetLock> {
                                 ),
                                 onPressed: () {
                                   _searchController.clear();
-                                  _filterReservations('');
+                                  _netLockVm.filterReservations('');
+                                  _selectedRows.clear();
+                                  _selectAll = false;
                                 },
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -286,10 +196,14 @@ class _NetLockState extends State<NetLock> {
                 elevation: 2,
                 shadowColor: AppColors.surface,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.cardRadius(context),
+                  ),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.cardRadius(context),
+                  ),
                   child: Column(
                     children: [
                       // Table Header
@@ -297,19 +211,24 @@ class _NetLockState extends State<NetLock> {
                         color: AppColors.primary,
                         padding: EdgeInsets.symmetric(
                           horizontal: ResponsiveConfig.defaultPadding(context),
-                          vertical: ResponsiveConfig.isMobile(context) ? 12 : 16,
+                          vertical: ResponsiveConfig.isMobile(context)
+                              ? 12
+                              : 16,
                         ),
                         child: Row(
                           children: [
                             // Select All Checkbox
                             SizedBox(
-                              width: ResponsiveConfig.isMobile(context) ? 40 : 50,
+                              width: ResponsiveConfig.isMobile(context)
+                                  ? 40
+                                  : 50,
                               child: Checkbox(
-                              value: _selectAll,
-                              onChanged: _toggleSelectAll,
-                              activeColor: AppColors.primary,
-                              checkColor: Colors.white,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                value: _selectAll,
+                                onChanged: _toggleSelectAll,
+                                activeColor: AppColors.primary,
+                                checkColor: Colors.white,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
                               ),
                             ),
                             // Headers
@@ -317,11 +236,15 @@ class _NetLockState extends State<NetLock> {
                               flex: ResponsiveConfig.isMobile(context) ? 3 : 4,
                               child: Text(
                                 'Details',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: AppColors.surface,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: ResponsiveConfig.isMobile(context) ? 14 : 16,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      color: AppColors.surface,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize:
+                                          ResponsiveConfig.isMobile(context)
+                                          ? 14
+                                          : 16,
+                                    ),
                               ),
                             ),
                             if (!ResponsiveConfig.isMobile(context))
@@ -329,21 +252,26 @@ class _NetLockState extends State<NetLock> {
                                 flex: 2,
                                 child: Text(
                                   'User',
-                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ),
                             Expanded(
                               flex: ResponsiveConfig.isMobile(context) ? 2 : 2,
                               child: Text(
                                 'Reservation No',
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: AppColors.surface,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: ResponsiveConfig.isMobile(context) ? 14 : 16,
-                                ),
+                                style: Theme.of(context).textTheme.titleSmall
+                                    ?.copyWith(
+                                      color: AppColors.surface,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize:
+                                          ResponsiveConfig.isMobile(context)
+                                          ? 14
+                                          : 16,
+                                    ),
                                 textAlign: TextAlign.end,
                               ),
                             ),
@@ -352,21 +280,37 @@ class _NetLockState extends State<NetLock> {
                       ),
                       // Table Body
                       Expanded(
-                        child: _filteredReservations.isEmpty
-                            ? _buildEmptyState()
-                            : ListView.separated(
-                                itemCount: _filteredReservations.length,
-                                separatorBuilder: (context, index) => Divider(
-                                  height: 1,
-                                  color: AppColors.lightgrey.withOpacity(0.2),
-                                ),
-                                itemBuilder: (context, index) {
-                                  return _buildTableRow(
-                                    _filteredReservations[index],
-                                    index,
-                                  );
-                                },
+                        child: Obx(() {
+                          if (_netLockVm.isLoading.value) {
+                            return ListView.separated(
+                              padding: const EdgeInsets.all(8),
+                              itemCount: 10,
+                              separatorBuilder: (context, index) => Divider(
+                                height: 1,
+                                color: AppColors.lightgrey.withOpacity(0.2),
                               ),
+                              itemBuilder: (context, index) =>
+                                  _buildTableRowShimmer(context),
+                            );
+                          }
+
+                          if (_netLockVm.netlockDataFiltered.isEmpty) {
+                            return _buildEmptyState();
+                          }
+
+                          return ListView.separated(
+                            itemCount: _netLockVm.netlockDataFiltered.length,
+                            separatorBuilder: (context, index) => Divider(
+                              height: 1,
+                              color: AppColors.lightgrey.withOpacity(0.2),
+                            ),
+                            itemBuilder: (context, index) {
+                              final item =
+                                  _netLockVm.netlockDataFiltered[index];
+                              return _buildTableRow(item, index);
+                            },
+                          );
+                        }),
                       ),
                     ],
                   ),
@@ -374,16 +318,99 @@ class _NetLockState extends State<NetLock> {
               ),
             ),
           ),
-          // Bottom spacing for mobile
           SizedBox(height: ResponsiveConfig.defaultPadding(context)),
         ],
       ),
     );
   }
 
+  Widget _buildTableRowShimmer(BuildContext context) {
+    final baseColor = AppColors.lightgrey.withOpacity(0.3);
+    final highlightColor = AppColors.lightgrey.withOpacity(0.1);
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: ResponsiveConfig.defaultPadding(context),
+          vertical: ResponsiveConfig.isMobile(context) ? 12 : 16,
+        ),
+        child: Row(
+          children: [
+            // Checkbox placeholder
+            SizedBox(
+              width: ResponsiveConfig.isMobile(context) ? 40 : 50,
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: baseColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+
+            // Details Column
+            Expanded(
+              flex: ResponsiveConfig.isMobile(context) ? 3 : 4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Guest name shimmer
+                  Container(
+                    width: double.infinity,
+                    height: 14,
+                    color: baseColor,
+                  ),
+                  const SizedBox(height: 6),
+                  // Room info shimmer
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: 12,
+                    color: baseColor,
+                  ),
+                  if (ResponsiveConfig.isMobile(context)) ...[
+                    const SizedBox(height: 6),
+                    Container(width: 100, height: 12, color: baseColor),
+                  ],
+                ],
+              ),
+            ),
+
+            // User Column (Desktop/Tablet only)
+            if (!ResponsiveConfig.isMobile(context))
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: baseColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+            // Reservation Number shimmer
+            Expanded(
+              flex: 2,
+              child: Container(
+                height: 20,
+                decoration: BoxDecoration(
+                  color: baseColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTableRow(ReservationData reservation, int index) {
     final isSelected = _selectedRows.contains(index);
-    
+
     return Container(
       color: isSelected ? AppColors.primary.withOpacity(0.05) : null,
       child: InkWell(
@@ -400,7 +427,9 @@ class _NetLockState extends State<NetLock> {
                 width: ResponsiveConfig.isMobile(context) ? 40 : 50,
                 child: Checkbox(
                   value: isSelected,
-                  onChanged: (_) => _toggleRowSelection(index),
+                  onChanged: (value) {
+                    _toggleRowSelection(index);
+                  },
                   activeColor: AppColors.primary,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
@@ -447,7 +476,10 @@ class _NetLockState extends State<NetLock> {
                 Expanded(
                   flex: 2,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
@@ -466,7 +498,10 @@ class _NetLockState extends State<NetLock> {
               Expanded(
                 flex: ResponsiveConfig.isMobile(context) ? 2 : 2,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.secondary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
@@ -512,9 +547,9 @@ class _NetLockState extends State<NetLock> {
             const SizedBox(height: 8),
             Text(
               'Try adjusting your search criteria',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.lightgrey,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.lightgrey),
             ),
           ],
         ),
@@ -530,6 +565,7 @@ class _NetLockState extends State<NetLock> {
 }
 
 class ReservationData {
+  final int? bookingRoomId;
   final String guestName;
   final String roomType;
   final String roomName;
@@ -537,6 +573,7 @@ class ReservationData {
   final String reservationNo;
 
   ReservationData({
+    this.bookingRoomId,
     required this.guestName,
     required this.roomType,
     required this.roomName,

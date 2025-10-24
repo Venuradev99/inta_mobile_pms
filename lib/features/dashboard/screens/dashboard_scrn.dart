@@ -21,14 +21,14 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final UserApiService _userApiService = UserApiService();
-  final DashboardVm _DashboardVm = Get.put(DashboardVm());
+  final _dashboardVm = Get.find<DashboardVm>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await _DashboardVm.loadBookingStaticData();
+        await _dashboardVm.loadBookingStaticData();
       }
     });
   }
@@ -36,7 +36,7 @@ class _DashboardState extends State<Dashboard> {
   Future<void> handleLogout(BuildContext context) async {
     final result = await _userApiService.logout();
     if (result["isUserLogout"]) {
-      context.go(AppRoutes.login);
+      Get.toNamed(AppRoutes.login);
     }
   }
 
@@ -63,7 +63,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.quickReservation);
+              Get.toNamed(AppRoutes.quickReservation);
             },
           ),
           IconButton(
@@ -73,7 +73,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.stayView);
+              Get.toNamed(AppRoutes.stayView);
             },
           ),
           IconButton(
@@ -83,14 +83,14 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.notifications);
+              Get.toNamed(AppRoutes.notifications);
             },
           ),
         ],
       ),
       drawer: _buildDrawer(context, textTheme, config),
       body: Obx(() {
-        if (_DashboardVm.isLoading.value) {
+        if (_dashboardVm.isLoading.value) {
           return ListView(
             padding: EdgeInsets.all(padding),
             children: [
@@ -632,7 +632,7 @@ class _DashboardState extends State<Dashboard> {
                             size: iconSize,
                           ),
                           onPressed: () {
-                            () => context.go(AppRoutes.settings);
+                            () => Get.toNamed(AppRoutes.settings);
                           },
                         ),
                       ],
@@ -669,7 +669,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.home,
                   'Dashboard',
-                  () => context.go(AppRoutes.dashboard),
+                  () => Get.toNamed(AppRoutes.dashboard),
                   config,
                   isActive: true, // Assuming dashboard is active
                 ),
@@ -678,7 +678,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.grid_view,
                   'Stay View',
-                  () => context.go(AppRoutes.stayView),
+                  () => Get.toNamed(AppRoutes.stayView),
                   config,
                 ),
                 _buildMenuTile(
@@ -686,7 +686,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_today,
                   'Quick Reservation',
-                  () => context.go(AppRoutes.quickReservation),
+                  () => Get.toNamed(AppRoutes.quickReservation),
                   config,
                 ),
                 _buildMenuTile(
@@ -694,7 +694,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_month,
                   'Reservation List',
-                  () => context.go(AppRoutes.reservationList),
+                  () => Get.toNamed(AppRoutes.reservationList),
                   config,
                 ),
                 _buildMenuTile(
@@ -702,7 +702,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.airplanemode_on,
                   'Arrival List',
-                  () => context.go(AppRoutes.arrivalList),
+                  () => Get.toNamed(AppRoutes.arrivalList),
                   config,
                 ),
                 _buildMenuTile(
@@ -710,7 +710,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.hotel,
                   'In-house List',
-                  () => context.go(AppRoutes.inhouseList),
+                  () => Get.toNamed(AppRoutes.inhouseList),
                   config,
                 ),
                 _buildMenuTile(
@@ -718,7 +718,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.emoji_transportation_rounded,
                   'Departure List',
-                  () => context.go(AppRoutes.departureList),
+                  () => Get.toNamed(AppRoutes.departureList),
                   config,
                 ),
                 _buildMenuTile(
@@ -726,7 +726,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.attach_money,
                   'Rates & Inventory',
-                  () => context.go(AppRoutes.ratesInventory),
+                  () => Get.toNamed(AppRoutes.ratesInventory),
                   config,
                 ),
                 _buildMenuTile(
@@ -734,7 +734,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.bar_chart,
                   'Manager Report',
-                  () => context.go(AppRoutes.managerReport),
+                  () => Get.toNamed(AppRoutes.managerReport),
                   config,
                 ),
                 Divider(
@@ -751,7 +751,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.tire_repair_sharp,
                   'Maintenance Block',
-                  () => context.go(AppRoutes.maintenanceBlock),
+                  () => Get.toNamed(AppRoutes.maintenanceBlock),
                   config,
                 ),
                 _buildMenuTile(
@@ -759,7 +759,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.checklist,
                   'Work Order List',
-                  () => context.go(AppRoutes.workOrderList),
+                  () => Get.toNamed(AppRoutes.workOrderList),
                   config,
                 ),
                 _buildMenuTile(
@@ -767,7 +767,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.house,
                   'House Status',
-                  () => context.go(AppRoutes.houseStatus),
+                  () => Get.toNamed(AppRoutes.houseStatus),
                   config,
                 ),
                 Divider(
@@ -784,7 +784,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.lock,
                   'Net Lock',
-                  () => context.go(AppRoutes.netLock),
+                  () => Get.toNamed(AppRoutes.netLock),
                   config,
                 ),
                 _buildMenuTile(
@@ -792,7 +792,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.notifications,
                   'Notification',
-                  () => context.go(AppRoutes.notifications),
+                  () => Get.toNamed(AppRoutes.notifications),
                   config,
                 ),
                 _buildMenuTile(
@@ -800,7 +800,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.settings,
                   'Settings',
-                  () => context.go(AppRoutes.settings),
+                  () => Get.toNamed(AppRoutes.settings),
                   config,
                 ),
               ],
@@ -953,8 +953,8 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final departureData = _DashboardVm.departureData.value;
-      final arrivalData = _DashboardVm.arrivalData.value;
+      final departureData = _dashboardVm.departureData.value;
+      final arrivalData = _dashboardVm.arrivalData.value;
 
       return Column(
         children: [
@@ -976,7 +976,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => context.go(AppRoutes.arrivalList),
+                        () => Get.toNamed(AppRoutes.arrivalList),
                       ),
                     ),
                     SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
@@ -993,7 +993,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => context.go(AppRoutes.departureList),
+                        () => Get.toNamed(AppRoutes.departureList),
                       ),
                     ),
                   ],
@@ -1017,7 +1017,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => context.go(AppRoutes.arrivalList),
+                  () => Get.toNamed(AppRoutes.arrivalList),
                 ),
                 SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
                 _buildOccupancyCard(
@@ -1032,7 +1032,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => context.go(AppRoutes.departureList),
+                  () => Get.toNamed(AppRoutes.departureList),
                 ),
               ],
             ),
@@ -1041,7 +1041,7 @@ class _DashboardState extends State<Dashboard> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.inhouseList),
+                  onTap: () => Get.toNamed(AppRoutes.inhouseList),
                   child: _buildInHouseCard(
                     context,
                     textTheme,
@@ -1055,7 +1055,7 @@ class _DashboardState extends State<Dashboard> {
               SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.reservationList),
+                  onTap: () => Get.toNamed(AppRoutes.reservationList),
                   child: _buildBookingCard(
                     context,
                     textTheme,
@@ -1199,12 +1199,12 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final totalRevenueData = _DashboardVm.totalRevenueData.value;
-      final averageDailyRateData = _DashboardVm.averageDailyRateData.value;
-      final bookingLeadTimeData = _DashboardVm.bookingLeadTimeData.value;
-      final averageLengthOfStayData = _DashboardVm.averageLengthOfStayData.value;
-      final totalPaymentData = _DashboardVm.totalPaymentData.value;
-      final revParData = _DashboardVm.revParData.value;
+      final totalRevenueData = _dashboardVm.totalRevenueData.value;
+      final averageDailyRateData = _dashboardVm.averageDailyRateData.value;
+      final bookingLeadTimeData = _dashboardVm.bookingLeadTimeData.value;
+      final averageLengthOfStayData = _dashboardVm.averageLengthOfStayData.value;
+      final totalPaymentData = _dashboardVm.totalPaymentData.value;
+      final revParData = _dashboardVm.revParData.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1469,7 +1469,7 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final inHouseData = _DashboardVm.inHouseData.value;
+      final inHouseData = _dashboardVm.inHouseData.value;
 
       return Container(
         padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
@@ -1625,7 +1625,7 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final bookingData = _DashboardVm.bookingData.value;
+      final bookingData = _dashboardVm.bookingData.value;
 
       return Container(
         padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
@@ -1774,16 +1774,16 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final totalRoomSold = _DashboardVm.totalRoomSold.value;
-      final totalAvailableRooms = _DashboardVm.totalAvailableRooms.value;
-      final complementaryRooms = _DashboardVm.complementaryRooms.value;
-      final outOfOrderRooms = _DashboardVm.outOfOrderRooms.value;
-      final totalRoomSoldRate = _DashboardVm.totalRoomSoldRate.value;
+      final totalRoomSold = _dashboardVm.totalRoomSold.value;
+      final totalAvailableRooms = _dashboardVm.totalAvailableRooms.value;
+      final complementaryRooms = _dashboardVm.complementaryRooms.value;
+      final outOfOrderRooms = _dashboardVm.outOfOrderRooms.value;
+      final totalRoomSoldRate = _dashboardVm.totalRoomSoldRate.value;
       final totalAvailableRoomsRate =
-          _DashboardVm.totalAvailableRoomsRate.value;
-      final outOfOrderRoomsRate = _DashboardVm.outOfOrderRoomsRate.value;
-      final complementaryRoomsRate = _DashboardVm.complementaryRoomsRate.value;
-
+          _dashboardVm.totalAvailableRoomsRate.value;
+      final outOfOrderRoomsRate = _dashboardVm.outOfOrderRoomsRate.value;
+      final complementaryRoomsRate = _dashboardVm.complementaryRoomsRate.value;
+      
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1835,7 +1835,7 @@ class _DashboardState extends State<Dashboard> {
                   iconSize,
                   fontScale,
                   'Available Rooms',
-                  totalAvailableRoomsRate,
+                  totalAvailableRoomsRate < 0 ? 0 : totalAvailableRoomsRate,
                   '$totalAvailableRooms',
                   AppColors.primary,
                   Icons.hotel,
@@ -1999,7 +1999,7 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Obx(() {
-      final occupancyData = _DashboardVm.occupancyData.value;
+      final occupancyData = _dashboardVm.occupancyData.value;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

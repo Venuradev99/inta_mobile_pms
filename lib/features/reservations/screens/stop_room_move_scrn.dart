@@ -1,28 +1,35 @@
 // lib/features/reservations/pages/stop_room_move_page.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/stop_room_move_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
-
 class StopRoomMoveScreen extends StatefulWidget {
-  const StopRoomMoveScreen({super.key});
+  final String? bookingRoomId;
+  const StopRoomMoveScreen({super.key, this.bookingRoomId});
 
   @override
   State<StopRoomMoveScreen> createState() => _StopRoomMoveScreenState();
 }
 
 class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
+  final _stopRoomMoveVm = Get.find<StopRoomMoveVm>();
   String? _selectedReason;
-  final List<String> _predefinedReasons = [
-    'Anniversary couple',
-    'check',
-    'Customer has already already Seen',
-    'customer specifically asked for this',
-    'Special guest',
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _stopRoomMoveVm.loadInitialData();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +62,9 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
 
   Widget _buildBody(BuildContext context) {
     return SingleChildScrollView(
-      padding: ResponsiveConfig.horizontalPadding(context).add(
-        ResponsiveConfig.verticalPadding(context),
-      ),
+      padding: ResponsiveConfig.horizontalPadding(
+        context,
+      ).add(ResponsiveConfig.verticalPadding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,7 +100,9 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
             horizontal: ResponsiveConfig.defaultPadding(context),
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.cardRadius(context),
+            ),
           ),
         ),
       ),
@@ -101,66 +110,75 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
   }
 
   Widget _buildReasonSelection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return Obx(() {
+      final reasons = _stopRoomMoveVm.reasons;
+      return Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(
+            ResponsiveConfig.cardRadius(context),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Section Header
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5), // Light grey background
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(ResponsiveConfig.cardRadius(context)),
-                topRight: Radius.circular(ResponsiveConfig.cardRadius(context)),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-            child: Text(
-              'Select Reason',
-              style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                color: AppColors.darkgrey,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          // Reason List
-          ...List.generate(_predefinedReasons.length, (index) {
-            final reason = _predefinedReasons[index];
-            final isLast = index == _predefinedReasons.length - 1;
-            
-            return Column(
-              children: [
-                _buildReasonItem(context, reason),
-                if (!isLast)
-                  Divider(
-                    height: 1,
-                    color: Colors.grey.shade200,
-                    indent: ResponsiveConfig.defaultPadding(context),
-                    endIndent: ResponsiveConfig.defaultPadding(context),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Header
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5), // Light grey background
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(
+                    ResponsiveConfig.cardRadius(context),
                   ),
-              ],
-            );
-          }),
-        ],
-      ),
-    );
+                  topRight: Radius.circular(
+                    ResponsiveConfig.cardRadius(context),
+                  ),
+                ),
+              ),
+              child: Text(
+                'Select Reason',
+                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                  color: AppColors.darkgrey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            // Reason List
+            ...List.generate(reasons.length, (index) {
+              final reason = reasons[index]["name"];
+              final isLast = index == reasons.length - 1;
+
+              return Column(
+                children: [
+                  _buildReasonItem(context, reason),
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      color: Colors.grey.shade200,
+                      indent: ResponsiveConfig.defaultPadding(context),
+                      endIndent: ResponsiveConfig.defaultPadding(context),
+                    ),
+                ],
+              );
+            }),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildReasonItem(BuildContext context, String reason) {
     final isSelected = _selectedReason == reason;
-    
+
     return InkWell(
       onTap: () => setState(() => _selectedReason = reason),
       child: Container(
@@ -188,11 +206,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
                 color: isSelected ? AppColors.primary : Colors.transparent,
               ),
               child: isSelected
-                  ? const Icon(
-                      Icons.circle,
-                      size: 12,
-                      color: AppColors.surface,
-                    )
+                  ? const Icon(Icons.circle, size: 12, color: AppColors.surface)
                   : null,
             ),
           ],
@@ -242,8 +256,8 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
             child: ElevatedButton(
               onPressed: _selectedReason != null ? _handleSave : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _selectedReason != null 
-                    ? AppColors.primary 
+                backgroundColor: _selectedReason != null
+                    ? AppColors.primary
                     : Colors.grey.shade300,
                 padding: EdgeInsets.symmetric(
                   vertical: ResponsiveConfig.defaultPadding(context),
@@ -256,8 +270,8 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               child: Text(
                 'Save',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                  color: _selectedReason != null 
-                      ? AppColors.onPrimary 
+                  color: _selectedReason != null
+                      ? AppColors.onPrimary
                       : Colors.grey.shade600,
                   fontWeight: FontWeight.w600,
                 ),
@@ -271,7 +285,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
 
   void _showAddNewReasonDialog() {
     final TextEditingController reasonController = TextEditingController();
-    
+
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -279,7 +293,9 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
         return AlertDialog(
           backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.cardRadius(context),
+            ),
           ),
           title: Text(
             'Add New Reason',
@@ -316,7 +332,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () => Get.back(),
               child: Text(
                 'Cancel',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
@@ -326,26 +342,11 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final newReason = reasonController.text.trim();
                 if (newReason.isNotEmpty) {
-                  setState(() {
-                    _predefinedReasons.add(newReason);
-                    _selectedReason = newReason;
-                  });
-                  Navigator.of(dialogContext).pop();
-                  
-                  // Show success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('New reason added successfully'),
-                      backgroundColor: AppColors.green,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  );
+                  await _stopRoomMoveVm.addNewReason(newReason);
+                  if (!mounted) return;
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -369,26 +370,31 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
     );
   }
 
-  void _handleSave() {
+  void _handleSave() async {
     if (_selectedReason == null) {
       _showErrorSnackBar('Please select a reason');
       return;
     }
 
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Room move stopped. Reason: $_selectedReason'),
-        backgroundColor: AppColors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
+    final response = await _stopRoomMoveVm.stopMovingRoom(
+      _selectedReason!,
+      widget.bookingRoomId!,
     );
-
-    // Navigate back
-    context.pop();
+    if (!mounted) return;
+    if (response["isSuccessful"] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Room move stopped. Reason: $_selectedReason'),
+          backgroundColor: AppColors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+      context.pop();
+    } else {
+      final msg = response["errors"][0] ?? "";
+      _showErrorSnackBar(msg);
+    }
   }
 
   void _showErrorSnackBar(String message) {
@@ -397,9 +403,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
         content: Text(message),
         backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

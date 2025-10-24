@@ -2,30 +2,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
-import 'package:inta_mobile_pms/services/data_access_service.dart';
-import 'package:inta_mobile_pms/services/loading_controller.dart';
+import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
-  final loadingController = Get.find<LoadingController>();
-
   static Future<Map<String, dynamic>> getConfigJSON() async {
     try {
       final configString = await rootBundle.loadString('assets/config.json');
       final response = json.decode(configString);
       return response;
     } catch (e) {
-      throw Exception('Failed to load configuration: $e');
+      String msg = 'Failed to load configuration: $e';
+      MessageHelper.error(msg);
+      throw Exception(msg);
     }
   }
 
-  Future<Map<String, dynamic>> login(
-    String username,
-    String password,
-    String hotelId,
-  ) async {
+  Future<void> login(String username, String password, String hotelId) async {
     try {
       final config = await UserApiService.getConfigJSON();
       final baseUrl = config['baseUrl'] ?? '';
@@ -45,49 +42,56 @@ class UserApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final token = responseData["access_token"];
-        if (token != null &&
-            responseData["access_token"].toString().isNotEmpty) {
+
+        if (token != null && token.isNotEmpty) {
+          // Save data locally
           await LocalStorageManager.setMasterData({
             "userName": responseData["userName"],
-            "userid": responseData["userid"],
-            "ClientId": responseData["ClientId"],
-            "Menus": responseData["Menus"],
-            "Privileges": responseData["Privileges"],
+            "userId": responseData["userid"],
+            "clientId": responseData["ClientId"],
+            "menus": responseData["Menus"],
+            "privileges": responseData["Privileges"],
           });
-          await LocalStorageManager.setAccessToken(
-            responseData["access_token"],
-          );
+          await LocalStorageManager.setAccessToken(token);
           await LocalStorageManager.setRefreshToken(
             responseData["refresh_token"],
           );
           await LocalStorageManager.setHotelId(hotelId);
 
-          final systemInfo = await loadSystemInformation();
+          final systemInfoResponse = await Future.wait([
+            loadSystemInformation(),
+            loadBaseCurrency(),
+          ]);
+
+          final systemInfo = systemInfoResponse[0];
+          final baseCurrency = systemInfoResponse[1];
+
           if (systemInfo["isSuccessful"]) {
             await LocalStorageManager.setSystemDate(
               systemInfo["result"]["systemDate"],
             );
           }
 
-          return {
-            "isSuccessful": true,
-            "message": "No access token found in response",
-          };
+          if (baseCurrency["isSuccessful"]) {
+            await LocalStorageManager.setBaseCurrencyData(
+              baseCurrency["result"],
+            );
+          }
+          // Show success
+          Get.toNamed(AppRoutes.dashboard);
+          MessageHelper.success("Login successful");
         } else {
-          return {
-            "isSuccessful": false,
-            "message": "No access token found in response",
-          };
+          MessageHelper.error("No access token found in response");
         }
       } else {
-        return {
-          "isSuccessful": false,
-          "message": "Login failed: ${response.body}",
-        };
+        //login failed
+        MessageHelper.error(
+          "${jsonDecode(response.body)["error_description"]}",
+        );
       }
     } catch (e) {
-      throw Exception('Error occurede while login: $e');
-    } 
+      MessageHelper.error("An error occurred while login: $e");
+    }
   }
 
   Future<Map<String, dynamic>> loadSystemInformation() async {
@@ -96,8 +100,8 @@ class UserApiService {
       final hotelId = await LocalStorageManager.getHotelId();
       final url = AppResources.getSystemWorkingDate;
 
-      final configDataResponse = await ApiConfigService().getConfigJSON();
-      final baseUrl = configDataResponse['baseUrl'];
+      final config = await UserApiService.getConfigJSON();
+      final baseUrl = config['baseUrl'] ?? '';
 
       if (token.isEmpty) throw Exception('Session key not available');
       if (baseUrl == null) throw Exception('baseUrl URL not available');
@@ -114,25 +118,70 @@ class UserApiService {
         headers: headers,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to load system information');
+        final responseBody = jsonDecode(response.body);
+        MessageHelper.error(
+          responseBody["errors"] ?? "Error loading system information!",
+        );
+        throw Exception();
       }
     } catch (e) {
-      throw Exception('Error loading system information: $e');
+      String msg = 'Failed to load system information : $e';
+      MessageHelper.error(msg);
+      throw Exception(msg);
+    }
+  }
+
+  Future<Map<String, dynamic>> loadBaseCurrency() async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      final url = AppResources.getBaseCurrency;
+
+      final config = await UserApiService.getConfigJSON();
+      final baseUrl = config['baseUrl'] ?? '';
+
+      if (token.isEmpty) throw Exception('Session key not available');
+      if (baseUrl == null) throw Exception('baseUrl URL not available');
+
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        "hotelid": hotelId,
+        'requestedhotelid': (-1).toString(),
+      };
+
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        String msg = 'Failed to load system information';
+        MessageHelper.error(msg);
+        throw Exception(msg);
+      }
+    } catch (e) {
+      String msg = 'Error loading system information: $e';
+      MessageHelper.error(msg);
+      throw Exception(msg);
     }
   }
 
   Future<Map<String, dynamic>> logout() async {
     try {
-      loadingController.show();
       await LocalStorageManager.clearUserData();
       // final logoutUrl = AppResources.logoutUrl;
       // final response = await http.post(Uri.parse(logoutUrl));
       return {"isUserLogout": true, "message": "User Logged out!"};
     } catch (e) {
-      throw Exception('Error occured while logout: $e');
+      String msg = 'Error occured while logout: $e';
+      MessageHelper.error(msg);
+      throw Exception(msg);
     }
   }
 }

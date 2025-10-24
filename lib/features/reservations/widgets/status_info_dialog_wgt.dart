@@ -1,5 +1,7 @@
 // lib/widgets/common/status_info_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class StatusInfoDialog extends StatelessWidget {
@@ -16,9 +18,7 @@ class StatusInfoDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         padding: const EdgeInsets.all(24),
@@ -28,11 +28,7 @@ class StatusInfoDialog extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
+                Icon(Icons.info_outline, color: AppColors.primary, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -44,27 +40,33 @@ class StatusInfoDialog extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.grey[600],
-                    size: 20,
-                  ),
+                  onPressed: () => Get.back(),
+                  icon: Icon(Icons.close, color: Colors.grey[600], size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            ...statusItems.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildStatusItem(context, item),
-            )),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: statusItems
+                      .map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildStatusItem(context, item),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Get.back(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.onPrimary,
@@ -99,11 +101,7 @@ class StatusInfoDialog extends StatelessWidget {
             color: item.color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(
-            item.icon,
-            size: 16,
-            color: item.color,
-          ),
+          child: Icon(item.icon, size: 16, color: item.color),
         ),
         const SizedBox(width: 12),
         Expanded(

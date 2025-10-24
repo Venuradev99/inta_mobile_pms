@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
@@ -43,7 +45,7 @@ class _SettingsState extends State<Settings> {
             Icons.arrow_back_ios,
             color: AppColors.onSurface,
           ),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => Get.toNamed(AppRoutes.dashboard),
         ),
       ),
       body: SingleChildScrollView(

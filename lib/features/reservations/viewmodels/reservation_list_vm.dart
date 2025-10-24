@@ -1,20 +1,31 @@
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
+import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
-import 'package:inta_mobile_pms/services/loading_controller.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 
 class ReservationListVm extends GetxController {
-  final ReservationListService _reservationListService =
-      ReservationListService();
-  final loadingController = Get.find<LoadingController>();
+  final ReservationListService _reservationListService;
 
   final reservationList = Rx<Map<String, List<GuestItem>>?>(null);
   final reservationFilteredList = Rx<Map<String, List<GuestItem>>?>(null);
   final receivedFilters = Rx<Map<String, dynamic>?>(null);
+  final statusList = [].obs;
+  final allGuestDetails = Rx<GuestItem?>(null);
 
-  ReservationListVm();
+  var roomTypes = <FilterDropdownData>[].obs;
+  var reservationTypes = <FilterDropdownData>[].obs;
+  var statuses = <FilterDropdownData>[].obs;
+  var businessSources = <FilterDropdownData>[].obs;
+
+  final isLoading = true.obs;
+  final isBottomSheetDataLoading = false.obs;
+
+  ReservationListVm(this._reservationListService);
 
   String getToDateForWeek(String fromDate) {
     DateTime startDate = DateTime.parse(fromDate);
@@ -30,9 +41,8 @@ class ReservationListVm extends GetxController {
 
   Future<void> getReservationsMap() async {
     try {
-      loadingController.show();
+      isLoading.value = true;
       final today = await LocalStorageManager.getSystemDate();
-
       final body = ReservationSearchRequest(
         businessSourceId: 0,
         exceptCancelled: false,
@@ -48,17 +58,29 @@ class ReservationListVm extends GetxController {
         businessCategoryId: 0,
       ).toJson();
 
-      final response = await _reservationListService.getAllReservationList(
-        body,
-      );
+      final response = await Future.wait([
+        _reservationListService.getAllReservationList(body),
+        _reservationListService.getAllroomstatus(),
+        _reservationListService.getAllRoomTypes(),
+        _reservationListService.getAllroomstatus(),
+        _reservationListService.getAllreservationTypes(),
+        _reservationListService.getAllbusinessSources(),
+      ]);
 
-      if (response["isSuccessful"] == true) {
-        final List<dynamic> result = response["result"];
+      final reservationResponse = response[0];
+      final statusResponse = response[1];
+      final roomTypeResponse = response[2];
+      final roomStatusResponse = response[3];
+      final reservationTypeResponse = response[4];
+      final businessSourcesResponse = response[5];
 
+      if (reservationResponse["isSuccessful"] == true) {
+        final result = reservationResponse["result"];
         reservationList.value = {'today': [], 'tomorrow': [], 'thisweek': []};
 
         for (final item in result) {
           final data = GuestItem(
+            bookingRoomId: item['bookingRoomId'].toString(),
             guestName: item['bookingGuestWithTitle'] ?? '',
             resId: item['reservationNo'] ?? '',
             folioId: item['bookingId'].toString(),
@@ -84,45 +106,123 @@ class ReservationListVm extends GetxController {
             reservationList.value!["tomorrow"]!.add(data);
           }
           reservationList.value!["thisweek"]!.add(data);
-
-          // reservationList.value!["today"]!.add(
-          //   GuestItem(
-          //     guestName: 'Mr. Ethan Harris',
-          //     resId: 'BH3500',
-          //     folioId: '3501',
-          //     startDate: 'Sep 23',
-          //     endDate: 'Sep 25',
-          //     nights: 2,
-          //     roomType: 'Double Room',
-          //     adults: 2,
-          //     totalAmount: 220.00,
-          //     balanceAmount: 220.00,
-          //     reservedDate: 'Sep 23',
-          //     reservationType: 'Standard',
-          //     status: 'Pending',
-          //     businessSource: 'Direct',
-          //     roomNumber: '101',
-          //   ),
-          // );
         }
         reservationFilteredList.value = reservationList.value;
         reservationList.refresh();
         reservationFilteredList.refresh();
+      } else {
+        MessageHelper.error(
+          reservationResponse["errors"][0] ?? 'Error getting reservation data!',
+        );
+      }
+
+      if (statusResponse["isSuccessful"] == true) {
+        statusList.value = [];
+        final result = statusResponse["result"]["recordSet"];
+        for (final item in result) {
+          final data = {
+            "id": item["roomStatusId"],
+            "name": item["name"] ?? '',
+            "description": item["description"] ?? '',
+            "colorCode": hexToColor(item["colorCode"]),
+          };
+          statusList.add(data);
+        }
+      } else {
+        MessageHelper.error(
+          statusResponse["errors"][0] ?? 'Error getting status data!',
+        );
+      }
+
+      if (roomTypeResponse["isSuccessful"]) {
+        final result = roomTypeResponse["result"]["recordSet"];
+        roomTypes.value = [];
+        for (final item in result) {
+          final data = FilterDropdownData.fromJson({
+            "id": item["roomTypeId"],
+            "name": item["name"],
+          });
+          roomTypes.add(data);
+          roomTypes.refresh();
+        }
+      } else {
+        MessageHelper.error(
+          roomTypeResponse["errors"][0] ?? 'Error getting room details!',
+        );
+      }
+
+      if (reservationTypeResponse["isSuccessful"]) {
+        final result = reservationTypeResponse["result"]["recordSet"];
+        reservationTypes.value = [];
+        for (final item in result) {
+          final data = FilterDropdownData.fromJson({
+            "id": item["reservationTypeId"],
+            "name": item["name"],
+          });
+          reservationTypes.add(data);
+          roomTypes.refresh();
+        }
+      } else {
+        MessageHelper.error(
+          reservationTypeResponse["errors"][0] ??
+              'Error getting reservation types!',
+        );
+      }
+
+      if (roomStatusResponse["isSuccessful"]) {
+        statuses.value = [];
+        final result = roomStatusResponse["result"]["recordSet"];
+        for (final item in result) {
+          final data = FilterDropdownData.fromJson({
+            "id": item["roomStatusId"],
+            "name": item["name"],
+          });
+          statuses.add(data);
+          roomTypes.refresh();
+        }
+      } else {
+        MessageHelper.error(
+          roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
+        );
+      }
+
+      if (businessSourcesResponse["isSuccessful"]) {
+        final result = businessSourcesResponse["result"]["recordSet"];
+        businessSources.value = [];
+        for (final item in result) {
+          final data = FilterDropdownData.fromJson({
+            "id": item["businessSourceId"],
+            "name": item["name"],
+          });
+          businessSources.add(data);
+          roomTypes.refresh();
+        }
+      } else {
+        MessageHelper.error(
+          businessSourcesResponse["errors"][0] ??
+              'Error getting business sources!',
+        );
       }
     } catch (e) {
+      MessageHelper.error('Error getting reservation list: $e');
       throw Exception('Error getting reservation list: $e');
-    } finally{
-      loadingController.hide();
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  bool isUnAssign(GuestItem guestItem) {
+    int status = int.tryParse(guestItem.status.toString()) ?? 0;
+    bool isAssign = guestItem.roomId == 0;
+    bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
+    return isUnAssignRoom;
   }
 
   void applyReservationFilters(Map<String, dynamic> filters) {
     var fullData = reservationList.value ?? {};
-
+    print('filters$filters');
     receivedFilters.value = filters;
-    print('receivedFilters$receivedFilters');
 
-    // Extract filters
     DateTime? startDate = filters['startDate'];
     DateTime? endDate = filters['endDate'];
     String? roomType = filters['roomType'];
@@ -141,6 +241,7 @@ class ReservationListVm extends GetxController {
     fullData.forEach((tab, items) {
       filteredMap[tab] = items.where((item) {
         bool match = true;
+        bool isUnassign = isUnAssign(item);
 
         if (startDate != null && endDate != null) {
           final itemStart = _parseDate(item.startDate);
@@ -164,9 +265,9 @@ class ReservationListVm extends GetxController {
         //   if (item.reservationType != reservationType) match = false;
         // }
 
-        // if (status != null && status.isNotEmpty) {
-        //   if (item.status != status) match = false;
-        // }
+        if (status != null && status.isNotEmpty) {
+          if (item.status != status) match = false;
+        }
 
         // if (businessSource != null && businessSource.isNotEmpty) {
         //   if (item.businessSource != businessSource) match = false;
@@ -178,9 +279,9 @@ class ReservationListVm extends GetxController {
           }
         }
 
-        // if (reservationNumber.isNotEmpty) {
-        //   if (item.resId != reservationNumber) match = false;
-        // }
+        if (reservationNumber.isNotEmpty) {
+          if (item.resId != reservationNumber) match = false;
+        }
 
         // if (cancellationNumber.isNotEmpty) {
         //   if ((item.cancellationNumber ?? '') != cancellationNumber)
@@ -191,11 +292,11 @@ class ReservationListVm extends GetxController {
         //   if ((item.voucherNumber ?? '') != voucherNumber) match = false;
         // }
 
-        // if (showUnassignedRooms) {
-        //   if (item.roomNumber != null && item.roomNumber!.isNotEmpty) {
-        //     match = false;
-        //   }
-        // }
+        if (showUnassignedRooms) {
+          if (isUnassign) {
+            match = false;
+          }
+        }
 
         // if (showFailedBookings) {
         //   if (!(item.status == 'Failed' || item.status == 'Incomplete')) {
@@ -207,7 +308,6 @@ class ReservationListVm extends GetxController {
       }).toList();
     });
 
-    print('filteredMap$filteredMap');
     reservationFilteredList.value = filteredMap;
     reservationFilteredList.refresh();
   }
@@ -215,5 +315,264 @@ class ReservationListVm extends GetxController {
   DateTime _parseDate(String dateStr) {
     final dateTime = DateTime.parse(dateStr);
     return DateTime(dateTime.year, dateTime.month, dateTime.day);
+  }
+
+  Color hexToColor(String hexCode) {
+    if (hexCode == '' || hexCode.isEmpty) {
+      return Colors.grey;
+    }
+
+    try {
+      String hex = hexCode.replaceAll('#', '').trim();
+      if (hex.length == 6) hex = 'FF$hex';
+      if (hex.length != 8) {
+        throw FormatException("Hex color must be 6 or 8 characters long.");
+      }
+      return Color(int.parse(hex, radix: 16));
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
+  Future<void> getAllGuestData(GuestItem item) async {
+    try {
+      isBottomSheetDataLoading.value = true;
+
+      final bookingRoomId = int.parse(item.bookingRoomId);
+      final response = await _reservationListService.getByBookingRoomId(
+        bookingRoomId,
+      );
+      if (response["isSuccessful"] == true) {
+        final result = response["result"];
+        final folioChargesList = result["bookingRoom"]["folioCharges"];
+        final roomCharge = result["bookingRoom"]["roomCharges"];
+        List<FolioCharge> folioCharges = [];
+        double totalRoomCharges = 0;
+
+        for (final item in folioChargesList) {
+          final folioChargesItem = FolioCharge(
+            title: item["description"] ?? '',
+            date: _parseDate(item["dateOfStay"]).toString(),
+            room: item["roomName"] ?? '',
+            amount: item["totalAmount"] ?? 0,
+            isPosted: true,
+          );
+          folioCharges.add(folioChargesItem);
+        }
+
+        for (final item in roomCharge) {
+          totalRoomCharges += item["totalAmount"];
+        }
+
+        final guestItem = GuestItem(
+          bookingId: result["bookingId"] ?? 0,
+          bookingRoomId: result["bookingRoom"]["bookingRoomId"].toString(),
+          guestName: result["guest"]["firstName"] ?? '',
+          resId: result["bookingRoom"]["reservatioNumber"].toString(),
+          folioId: result["bookingRoom"]["folioId"].toString(),
+          startDate: getFirstTenCharacters(
+            result["bookingRoom"]["arrivalDate"],
+          ),
+          endDate: getFirstTenCharacters(
+            result["bookingRoom"]["departureDate"],
+          ),
+          nights: result["bookingRoom"]["noOfNights"] ?? 0,
+          roomType: result["bookingRoom"]["roomTypeName"] ?? '',
+          adults: result["bookingRoom"]["noOfAdults"] ?? 0,
+          totalAmount: result["bookingRoom"]["totalAmount"] ?? 0,
+          balanceAmount: result["bookingRoom"]["balanceAmount"] ?? 0,
+          remainingNights:
+              result["bookingRoom"]["noOfNights"] ??
+              0, ////change remaining nights logic
+          roomNumber: result["bookingRoom"]["roomName"] ?? '',
+          reservedDate: getFirstTenCharacters(
+            result["bookingRoom"]["bookingDate"],
+          ),
+          reservationType: result["bookingRoom"]["reservationTypeName"] ?? '',
+          status: result["bookingRoom"]["status"].toString(),
+          businessSource: result["bookingRoom"]["businessSourceName"] ?? '',
+          cancellationNumber:
+              result["cancellationData"]["cancellationNo"] ?? '',
+          voucherNumber: result["advancePaymentData"]["voucherNumber"] ?? '',
+          room: result["bookingRoom"]["roomName"] ?? '',
+          roomId: result["bookingRoom"]["roomId"],
+          country: result["guest"]["countryName"] ?? '',
+          rateType: result["bookingRoom"]["rateTypeName"] ?? '',
+          avgDailyRate: 0.0,
+          totalCredits: 0.0,
+          roomCharges: totalRoomCharges,
+          discount: result["bookingRoom"]["discountAmount"] ?? 0.0,
+          tax: result["bookingRoom"]["taxAmount"] ?? 0.0,
+          extraCharge: 50.0,
+          unpostedInclusionRate: 0.0,
+          balanceTransfer: 0.0,
+          amountPaid: 1000.0,
+          roundOff: 0.0,
+          childAge: "",
+          adjustment: 0.0,
+          netAmount: result["bookingRoom"]["grossAmount"] ?? 0.0,
+          phone: result["guest"]["homeTel"] ?? '',
+          mobile: result["guest"]["mobile"] ?? '',
+          email: result["guest"]["email"] ?? '',
+          fax: result["guest"]["fax"] ?? '',
+          idNumber: result["guest"]["identityNumber"] ?? '',
+          idType: result["guest"]["identityType"].toString(),
+          expiryDate: getFirstTenCharacters(result["guest"]["expiryDate"]),
+          dob: getFirstTenCharacters(result["guest"]["dateofBirth"]),
+          nationality: result["guest"]["nationalityId"].toString(),
+          arrivalBy: result["pickUpData"]["pickupMode"].toString(),
+          arrivalVehicle: result["pickUpData"]["vehicle"] ?? '',
+          arrivalDate: getFirstTenCharacters(
+            result["bookingRoom"]["arrivalDate"],
+          ),
+          arrivalTime: getFirstTenCharacters(
+            result["bookingRoom"]["arrivalTime"],
+          ),
+          departureBy: result["pickUpData"]["pickupMode"].toString(),
+          departureVehicle: result["pickUpData"]["vehicle"] ?? '',
+          departureDate: getFirstTenCharacters(
+            result["bookingRoom"]["departureDate"],
+          ),
+          departureTime: getFirstTenCharacters(
+            result["bookingRoom"]["departureTime"],
+          ),
+          arrival: getFirstTenCharacters(result["bookingRoom"]["arrivalDate"]),
+          departure: getFirstTenCharacters(
+            result["bookingRoom"]["departureDate"],
+          ),
+          cancellationDate: result["cancellationData"]["cancellDate"],
+          children: result["bookingRoom"]["noOfChildren"],
+          marketCode: result["bookingRoom"]["marketName"] ?? '',
+          company: result["companyOther"]["companyName"].toString(),
+          travelAgent: result["travelAgentInformation"]["agentId"].toString(),
+          remarks: result["guest"]["remark"] ?? '',
+          billingRateTypeId:
+              result["billingInformation"]["billingRateTypeId"] ?? 0,
+          billingInstructionId:
+              result["billingInformation"]["billingInstructionId"] ?? 0,
+          isTaxInclusiveRate:
+              result["billingInformation"]["isTaxInclusiveRate"] ?? false,
+          taxRegistrationDate:
+              result["billingInformation"]["taxRegistrationDate"] ?? "",
+          billNumber: result["billingInformation"]["billNumber"] ?? "",
+          isCash: result["billingInformation"]["billingInstructionId"] ?? 0,
+          isComplementory:
+              result["billingInformation"]["isComplementory"] ?? false,
+          manualRate: result["billingInformation"]["manualRate"] ?? 0.0,
+          paymentMode: result["billingInformation"]["paymentMode"] ?? 0,
+          paymentModeCategory:
+              result["billingInformation"]["paymentModeCategory"] ?? 0,
+          rateSourceId: result["billingInformation"]["rateSourceId"] ?? 0,
+          releaseChargeAmountPercentage:
+              result["billingInformation"]["releaseChargeAmountPercentage"] ??
+              0.0,
+          releaseDate: result["billingInformation"]["releaseDate"] ?? "",
+          businessCategoryId: result["companyOther"]["businessCategoryId"] ?? 0,
+          businessSourceId: result["companyOther"]["businessSourceId"] ?? 0,
+          marketId: result["companyOther"]["marketId"] ?? 0,
+          isToBeReleased:
+              result["billingInformation"]["isToBeReleased"] ?? false,
+          maxDep: result["billingInformation"]["maxDep"] ?? "",
+          maxNights: result["billingInformation"]["maxNights"] ?? 0,
+          minArr: result["billingInformation"]["minArr"] ?? "",
+          pax: result["billingInformation"]["pax"] ?? 0,
+          vehiclePlate: result["billingInformation"]["vehiclePlate"] ?? "",
+          voucherNo: result["billingInformation"]["voucherNo"] ?? "",
+          resDate: result["billingInformation"]["resDate"] ?? "",
+          travelAgentCommisionPlanId:
+              result["bookingRoom"]["travelAgentCommisionPlanId"] ?? 0,
+          travelAgentCommisionPlanValue:
+              result["bookingRoom"]["travelAgentCommisionPlanValue"] ?? 0.00,
+          grCardNumber: result["billingInformation"]["grCardNumber"] ?? "",
+          masterFolioBookingTransId: result["masterFolioBookingTransId"] ?? 0,
+          folioCharges: folioCharges,
+        );
+        allGuestDetails.value = guestItem;
+      } else {
+        MessageHelper.error(
+          response["errors"][0] ?? 'Error getting guest data!',
+        );
+      }
+    } catch (e) {
+      MessageHelper.error('Error getting all Guest data: $e');
+      throw Exception('Error getting all Guest data: $e');
+    } finally {
+      isBottomSheetDataLoading.value = false;
+    }
+  }
+
+  String getFirstTenCharacters(String? str) {
+    if (str == null || str.isEmpty) {
+      return '';
+    }
+    return str.length > 10 ? str.substring(0, 10) : str;
+  }
+
+  Future<Map<String, dynamic>> getCancelReservationData(GuestItem item) async {
+    try {
+      Map<String, dynamic> guestData = {};
+      final response = await _reservationListService.getCancellationReasons();
+      if (response["isSuccessful"] == true) {
+        final reasonList = [];
+        final result = response["result"];
+        for (final item in result) {
+          reasonList.add({"id": item["reasonId"], "name": item["name"]});
+        }
+        guestData["reasons"] = reasonList;
+      }
+      return guestData;
+    } catch (e) {
+      throw Exception('Error getting all Guest data: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getNoShowReservationData(GuestItem item) async {
+    try {
+      Map<String, dynamic> data = {};
+      final response = await _reservationListService.getNoShowReasons();
+
+      if (response["isSuccessful"] == true) {
+        List<Map<String, dynamic>> reasonList = [];
+        final result = response["result"];
+        for (final item in result) {
+          reasonList.add({"id": item["reasonId"], "name": item["name"]});
+        }
+        data["reasons"] = reasonList;
+      } else {
+        MessageHelper.error(
+          response["errors"][0] ?? 'Error getting noshow data!',
+        );
+      }
+      return data;
+    } catch (e) {
+      MessageHelper.error('Error getting all Guest data: $e');
+      throw Exception('Error getting all Guest data: $e');
+    }
+  }
+
+  Future<void> unassignRoom(GuestItem item) async {
+    try {
+      final userId = await LocalStorageManager.getUserId();
+      final request = {
+        "BookingRoomList": [
+          {"BookingRoomId": int.tryParse(item.bookingRoomId)},
+        ],
+        "IsUnAssignRoom": true,
+        "currentUserId": int.tryParse(userId),
+      };
+      final response = await _reservationListService.updateBooking(request);
+      if (response["isSuccessful"] == true) {
+        final msg = response["message"].isNotEmpty
+            ? response["message"]
+            : 'Room unassigned successfully!';
+        MessageHelper.success(msg);
+      } else {
+        final msg = response["errors"][0] ?? 'Room unassign failed!';
+        MessageHelper.error(msg);
+      }
+    } catch (e) {
+      MessageHelper.error('Error unassign request: $e');
+      throw Exception('Error unassign request: $e');
+    }
   }
 }

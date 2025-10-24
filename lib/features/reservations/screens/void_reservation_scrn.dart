@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/void_reservation_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
-
 
 class VoidReservation extends StatefulWidget {
   final Map<String, dynamic> reservationData;
 
-  const VoidReservation({
-    Key? key,
-    required this.reservationData,
-  }) : super(key: key);
+  const VoidReservation({Key? key, required this.reservationData})
+    : super(key: key);
 
   @override
   State<VoidReservation> createState() => _VoidReservationState();
 }
 
 class _VoidReservationState extends State<VoidReservation> {
+  final _voidReservationVm = Get.find<VoidReservationVm>();
   String? selectedReason;
-  final List<String> reasons = [
-    'aaaa',
-    'add remark',
-    'Mistake',
-    'Mistakenly Entered',
-    'new void',
-    'Not interested',
-    'Test',
-    'the staff make a mistake',
-  ];
+  // final List<String> reasons = [
+  //   'aaaa',
+  //   'add remark',
+  //   'Mistake',
+  //   'Mistakenly Entered',
+  //   'new void',
+  //   'Not interested',
+  //   'Test',
+  //   'the staff make a mistake',
+  // ];
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +41,10 @@ class _VoidReservationState extends State<VoidReservation> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-       leading: 
-          IconButton(
-            icon: const Icon(Icons.close, color: AppColors.black),
-            onPressed: () => context.pop(),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: AppColors.black),
+          onPressed: () => context.pop(),
+        ),
         title: Text(
           'Void Reservation',
           style: textTheme.titleMedium?.copyWith(
@@ -52,7 +52,6 @@ class _VoidReservationState extends State<VoidReservation> {
             fontWeight: FontWeight.w500,
           ),
         ),
-       
       ),
       body: Column(
         children: [
@@ -86,23 +85,59 @@ class _VoidReservationState extends State<VoidReservation> {
       ),
       child: Column(
         children: [
-          _buildInfoRow('Guest Name', widget.reservationData['guestName'] ?? '', textTheme),
+          _buildInfoRow(
+            'Guest Name',
+            widget.reservationData['guestName'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Res #', widget.reservationData['resNumber'] ?? '', textTheme),
+          _buildInfoRow(
+            'Res #',
+            widget.reservationData['resNumber'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Folio', widget.reservationData['folio'] ?? '', textTheme),
+          _buildInfoRow(
+            'Folio',
+            widget.reservationData['folio'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Arrival Date', widget.reservationData['arrivalDate'] ?? '', textTheme),
+          _buildInfoRow(
+            'Arrival Date',
+            widget.reservationData['arrivalDate'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Departure Date', widget.reservationData['departureDate'] ?? '', textTheme),
+          _buildInfoRow(
+            'Departure Date',
+            widget.reservationData['departureDate'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Room Type', widget.reservationData['roomType'] ?? '', textTheme),
+          _buildInfoRow(
+            'Room Type',
+            widget.reservationData['roomType'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Room', widget.reservationData['room'] ?? '', textTheme),
+          _buildInfoRow(
+            'Room',
+            widget.reservationData['room'] ?? '',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Total', '\$ ${widget.reservationData['total'] ?? '0.00'}', textTheme),
+          _buildInfoRow(
+            'Total',
+            '\$ ${widget.reservationData['total'] ?? '0.00'}',
+            textTheme,
+          ),
           _buildDivider(),
-          _buildInfoRow('Deposit', '\$ ${widget.reservationData['deposit'] ?? '0.00'}', textTheme),
+          _buildInfoRow(
+            'Deposit',
+            '\$ ${widget.reservationData['deposit'] ?? '0.00'}',
+            textTheme,
+          ),
         ],
       ),
     );
@@ -137,11 +172,7 @@ class _VoidReservationState extends State<VoidReservation> {
   }
 
   Widget _buildDivider() {
-    return const Divider(
-      height: 1,
-      thickness: 1,
-      color: Color(0xFFE0E0E0),
-    );
+    return const Divider(height: 1, thickness: 1, color: Color(0xFFE0E0E0));
   }
 
   Widget _buildReasonSection(BuildContext context) {
@@ -180,10 +211,11 @@ class _VoidReservationState extends State<VoidReservation> {
           child: ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: reasons.length,
+            itemCount: widget.reservationData["reasons"].length,
             separatorBuilder: (context, index) => _buildDivider(),
             itemBuilder: (context, index) {
-              final reason = reasons[index];
+              final selected = widget.reservationData["reasons"][index];
+              final reason = selected["name"];
               return InkWell(
                 onTap: () {
                   setState(() {
@@ -191,7 +223,10 @@ class _VoidReservationState extends State<VoidReservation> {
                   });
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 14.0,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -208,13 +243,13 @@ class _VoidReservationState extends State<VoidReservation> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: selectedReason == reason 
-                                ? AppColors.primary 
+                            color: selectedReason == reason
+                                ? AppColors.primary
                                 : AppColors.lightgrey,
                             width: 2,
                           ),
-                          color: selectedReason == reason 
-                              ? AppColors.primary 
+                          color: selectedReason == reason
+                              ? AppColors.primary
                               : Colors.transparent,
                         ),
                         child: selectedReason == reason
@@ -243,9 +278,7 @@ class _VoidReservationState extends State<VoidReservation> {
       padding: const EdgeInsets.all(16.0),
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFE0E0E0), width: 1)),
       ),
       child: Row(
         children: [
@@ -272,9 +305,14 @@ class _VoidReservationState extends State<VoidReservation> {
           Expanded(
             child: ElevatedButton(
               onPressed: selectedReason != null
-                  ? () {
-                      // Handle save action
-                      Navigator.pop(context, selectedReason);
+                  ? () async {
+                      final data = {
+                        "bookingRoomId":
+                            widget.reservationData["bookingRoomId"],
+                        "reason": selectedReason,
+                      };
+                      await _voidReservationVm.voidReservation(data);
+                      if (!mounted) return;
                     }
                   : null,
               style: ElevatedButton.styleFrom(

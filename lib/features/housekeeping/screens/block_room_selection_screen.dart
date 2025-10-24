@@ -1,34 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class BlockRoomSelectionScreen extends StatefulWidget {
   const BlockRoomSelectionScreen({super.key});
 
   @override
-  State<BlockRoomSelectionScreen> createState() => _BlockRoomSelectionScreenState();
+  State<BlockRoomSelectionScreen> createState() =>
+      _BlockRoomSelectionScreenState();
 }
 
 class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
-  final Set<String> _selectedRooms = {};
+  final _maintenanceBlockVm = Get.find<MaintenanceBlockVm>();
+  final List<RoomResponse> _selectedRooms = [];
   bool _selectAll = false;
 
-  final List<String> _rooms = [
-    '501-1', '501-2', '501-3', '501-4', '501-5', '501-6',
-    '501-7', '501-8', '501-9', '501-10', '501-11', '501-12', '501-13', '501-14',
-    '501-15', '501-16', '501-17', '501-18', '501-19', '501-20', 
-  ];
+  // final List<String> _rooms = [
+  //   '501-1',
+  //   '501-2',
+  //   '501-3',
+  //   '501-4',
+  //   '501-5',
+  //   '501-6',
+  //   '501-7',
+  //   '501-8',
+  //   '501-9',
+  //   '501-10',
+  //   '501-11',
+  //   '501-12',
+  //   '501-13',
+  //   '501-14',
+  //   '501-15',
+  //   '501-16',
+  //   '501-17',
+  //   '501-18',
+  //   '501-19',
+  //   '501-20',
+  // ];
 
-  void _toggleRoom(String room) {
+  void _toggleRoom(RoomResponse room) {
     setState(() {
       if (_selectedRooms.contains(room)) {
         _selectedRooms.remove(room);
         _selectAll = false;
       } else {
         _selectedRooms.add(room);
-        if (_selectedRooms.length == _rooms.length) {
+        if (_selectedRooms.length == _maintenanceBlockVm.roomsList.length) {
           _selectAll = true;
         }
       }
@@ -39,7 +63,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
     setState(() {
       _selectAll = !_selectAll;
       if (_selectAll) {
-        _selectedRooms.addAll(_rooms);
+        _selectedRooms.addAll(_maintenanceBlockVm.roomsList);
       } else {
         _selectedRooms.clear();
       }
@@ -58,10 +82,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
     }
 
     // Navigate to the next screen with selected rooms
-    context.push(
-      AppRoutes.blockRoomDetails,
-      extra: _selectedRooms.toList(),
-    );
+    context.push(AppRoutes.blockRoomDetails, extra: _selectedRooms.toList());
   }
 
   @override
@@ -72,9 +93,9 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
         title: Text(
           'Block Room',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.black,
-                fontWeight: FontWeight.w600,
-              ),
+            color: AppColors.black,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -89,73 +110,75 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
           // Header
           Container(
             width: double.infinity,
-            padding: ResponsiveConfig.horizontalPadding(context).add(
-              const EdgeInsets.symmetric(vertical: 16),
-            ),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).add(const EdgeInsets.symmetric(vertical: 16)),
             color: AppColors.surface,
             child: Text(
               'Select Rooms',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
-          
 
           // Room Grid
-          Expanded(
-            child: SingleChildScrollView(
-              padding: ResponsiveConfig.horizontalPadding(context).add(
-                const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _rooms.map((room) {
-                  final isSelected = _selectedRooms.contains(room);
-                  return InkWell(
-                    onTap: () => _toggleRoom(room),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary.withOpacity(0.1)
-                            : AppColors.surface,
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.lightgrey,
-                          width: isSelected ? 2 : 1,
+          Obx(() {
+           return Expanded(
+              child: SingleChildScrollView(
+                padding: ResponsiveConfig.horizontalPadding(
+                  context,
+                ).add(const EdgeInsets.symmetric(vertical: 16)),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _maintenanceBlockVm.roomsList.map((room) {
+                    final isSelected = _selectedRooms.contains(room);
+                    return InkWell(
+                      onTap: () => _toggleRoom(room),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
-                        borderRadius: BorderRadius.circular(8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppColors.primary.withOpacity(0.1)
+                              : AppColors.surface,
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.lightgrey,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          room.name,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.black,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                        ),
                       ),
-                      child: Text(
-                        room,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : AppColors.black,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
 
           // Bottom Action Bar
           Container(
-            padding: ResponsiveConfig.horizontalPadding(context).add(
-              const EdgeInsets.symmetric(vertical: 16),
-            ),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).add(const EdgeInsets.symmetric(vertical: 16)),
             decoration: BoxDecoration(
               color: AppColors.surface,
               boxShadow: [
@@ -210,7 +233,9 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
                   const Spacer(),
                   // Next Button
                   ElevatedButton(
-                    onPressed: _selectedRooms.isEmpty ? null : _proceedToNextStep,
+                    onPressed: _selectedRooms.isEmpty
+                        ? null
+                        : _proceedToNextStep,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.onPrimary,

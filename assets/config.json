@@ -1,6 +1,5 @@
 {
     "baseUrl": "http://192.168.1.176:2233/api/",
-
     "propertyStatistics": {
         "isSuccessful": true,
         "result": [
@@ -42,14 +41,91 @@
             }
         ]
     },
-
-     "occupancyStatics": {
+    "occupancyStatics": {
         "isSuccessful": true,
-        "result": 
+        "result": {
+            "today": 23.4,
+            "yesterday": 10.3
+        }
+    },
+    "inhouseList": {
+        "isSuccessful": true,
+        "result": [
             {
-                "today": 23.4,
-                "yesterday": 10.3
+                "guestName": "John Smith",
+                "resId": "BH2500",
+                "folioId": "2250",
+                "startDate": "Oct 10",
+                "endDate": "Oct 15",
+                "nights": 5,
+                "roomType": "Deluxe Room",
+                "adults": 2,
+                "totalAmount": 400.00,
+                "balanceAmount": 50.00,
+                "remainingNights": 2,
+                "roomNumber": "Room 101",
+                "reservationType": "Online Booking"
+            },
+            {
+                "guestName": "Emily Johnson",
+                "resId": "BH2501",
+                "folioId": "2251",
+                "startDate": "Oct 12",
+                "endDate": "Oct 16",
+                "nights": 4,
+                "roomType": "Suite",
+                "adults": 3,
+                "totalAmount": 680.00,
+                "balanceAmount": 120.00,
+                "remainingNights": 1,
+                "roomNumber": "Room 305",
+                "reservationType": "Corporate"
+            },
+            {
+                "guestName": "Michael Brown",
+                "resId": "BH2502",
+                "folioId": "2252",
+                "startDate": "Oct 14",
+                "endDate": "Oct 18",
+                "nights": 4,
+                "roomType": "Standard Room",
+                "adults": 1,
+                "totalAmount": 320.00,
+                "balanceAmount": 0.00,
+                "remainingNights": 0,
+                "roomNumber": "Room 202",
+                "reservationType": "Walk-In"
+            },
+            {
+                "guestName": "Sophia Lee",
+                "resId": "BH2503",
+                "folioId": "2253",
+                "startDate": "Oct 15",
+                "endDate": "Oct 20",
+                "nights": 5,
+                "roomType": "Deluxe Twin",
+                "adults": 2,
+                "totalAmount": 550.00,
+                "balanceAmount": 80.00,
+                "remainingNights": 3,
+                "roomNumber": "Room 410",
+                "reservationType": "Travel Agency"
+            },
+            {
+                "guestName": "David Williams",
+                "resId": "BH2504",
+                "folioId": "2254",
+                "startDate": "Oct 11",
+                "endDate": "Oct 14",
+                "nights": 3,
+                "roomType": "Executive Suite",
+                "adults": 2,
+                "totalAmount": 900.00,
+                "balanceAmount": 300.00,
+                "remainingNights": 1,
+                "roomNumber": "Room 501",
+                "reservationType": "Direct Booking"
             }
-        
+        ]
     }
 }

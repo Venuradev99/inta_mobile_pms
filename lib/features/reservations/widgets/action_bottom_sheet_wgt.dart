@@ -1,5 +1,7 @@
 // lib/widgets/common/action_bottom_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class ActionBottomSheet extends StatelessWidget {
@@ -56,7 +58,7 @@ class ActionBottomSheet extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Get.back(),
                     icon: const Icon(Icons.close),
                     tooltip: 'Close',
                   ),
@@ -74,10 +76,8 @@ class ActionBottomSheet extends StatelessWidget {
                   height: 1,
                   indent: 56, // Align with icon
                 ),
-                itemBuilder: (context, index) => _buildActionItem(
-                  context, 
-                  actions[index],
-                ),
+                itemBuilder: (context, index) =>
+                    _buildActionItem(context, actions[index]),
               ),
             ),
           ],
@@ -88,22 +88,15 @@ class ActionBottomSheet extends StatelessWidget {
 
   Widget _buildActionItem(BuildContext context, ActionItem action) {
     return ListTile(
-      leading: Icon(
-        action.icon, 
-        color: Colors.grey[600],
-        size: 24,
-      ),
+      leading: Icon(action.icon, color: Colors.grey[600], size: 24),
       title: Text(
         action.label,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
+        style: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
       ),
       onTap: action.onTap, // This was missing!
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 4,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       // Add visual feedback
       hoverColor: Colors.grey[100],
       splashColor: Theme.of(context).primaryColor.withOpacity(0.1),

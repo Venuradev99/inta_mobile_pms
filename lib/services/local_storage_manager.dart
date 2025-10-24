@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:inta_mobile_pms/data/models/Base_currency_model.dart';
 import 'package:inta_mobile_pms/data/models/MasterData.model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +14,6 @@ class LocalStorageManager {
     String jsonString = prefs.getString('masterData') ?? "";
     if (jsonString.isNotEmpty) {
       final json = jsonDecode(jsonString);
-
       return MasterData.fromJson(json);
     } else {
       return MasterData(
@@ -23,6 +23,39 @@ class LocalStorageManager {
         menus: '',
         privileges: '',
       );
+    }
+  }
+
+  static Future<String> getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('masterData') ?? "";
+    if (jsonString.isNotEmpty) {
+      final json = jsonDecode(jsonString);
+      final masterData =  MasterData.fromJson(json);
+      return masterData.userId;
+    } else {
+      return '';
+    }
+  }
+
+
+
+  static Future<void> setBaseCurrencyData(
+    Map<String, dynamic> baseCurrencyData,
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('baseCurrency', jsonEncode(baseCurrencyData));
+  }
+
+  static Future<BaseCurrency> getBaseCurrencyData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('baseCurrency') ?? "";
+    if (jsonString.isNotEmpty) {
+      final json = jsonDecode(jsonString);
+
+      return BaseCurrency.fromJson(json);
+    } else {
+      return BaseCurrency.empty();
     }
   }
 

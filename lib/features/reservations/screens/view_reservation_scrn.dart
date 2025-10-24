@@ -3,14 +3,25 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 
-class ViewReservation extends StatelessWidget {
+class ViewReservation extends StatefulWidget {
   final GuestItem? item;
-
   const ViewReservation({super.key, this.item});
+  @override
+   State<ViewReservation> createState() => _ViewReservation();
+}
+
+class _ViewReservation extends State<ViewReservation>{
+  GuestItem? item;
+
+   @override
+  void initState() {
+    super.initState();
+    item = widget.item;
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (item == null) {
+    if (widget.item == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(title: 'View Reservation'),

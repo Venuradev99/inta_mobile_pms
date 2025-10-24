@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
+import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/stat_card.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
-
 
 class MaintenanceBlock extends StatefulWidget {
   const MaintenanceBlock({super.key});
@@ -18,219 +20,190 @@ class MaintenanceBlock extends StatefulWidget {
 
 class _MaintenanceBlockState extends State<MaintenanceBlock>
     with TickerProviderStateMixin {
+  final _maintenanceBlockVm = Get.find<MaintenanceBlockVm>();
+
   late TabController _tabController;
   String _selectedFilter = 'All';
   String _searchQuery = '';
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
-  // Sample data - replace with actual data source
-  final List<MaintenanceBlockItem> _allMaintenanceBlocks = [
-    MaintenanceBlockItem(
-      id: 'MB001',
-      title: 'HVAC System Maintenance',
-      description: 'Regular maintenance and inspection of HVAC system in Building A',
-      status: 'In Progress',
-      priority: 'High',
-      createdDate: DateTime.now().subtract(const Duration(days: 2)),
-      scheduledDate: DateTime.now().add(const Duration(days: 1)),
-      assignedTo: 'John Smith',
-      category: 'HVAC',
-      estimatedCost: 1200.0,
-      tags: ['Preventive', 'Scheduled'],
-    ),
-    MaintenanceBlockItem(
-      id: 'MB002',
-      title: 'Elevator Inspection',
-      description: 'Monthly safety inspection and maintenance of elevator systems',
-      status: 'Pending',
-      priority: 'Medium',
-      createdDate: DateTime.now().subtract(const Duration(days: 5)),
-      scheduledDate: DateTime.now().add(const Duration(days: 3)),
-      assignedTo: 'Mike Johnson',
-      category: 'Elevator',
-      estimatedCost: 800.0,
-      tags: ['Safety', 'Inspection'],
-    ),
-    MaintenanceBlockItem(
-      id: 'MB003',
-      title: 'Plumbing Repair - Unit 205',
-      description: 'Fix leaking pipes and replace faulty fixtures in apartment 205',
-      status: 'Completed',
-      priority: 'High',
-      createdDate: DateTime.now().subtract(const Duration(days: 10)),
-      assignedTo: 'Sarah Wilson',
-      category: 'Plumbing',
-      estimatedCost: 450.0,
-      tags: ['Emergency', 'Tenant Request'],
-    ),
-    MaintenanceBlockItem(
-      id: 'MB004',
-      title: 'Landscaping Service',
-      description: 'Monthly landscaping and garden maintenance for common areas',
-      status: 'Scheduled',
-      priority: 'Low',
-      createdDate: DateTime.now().subtract(const Duration(days: 1)),
-      scheduledDate: DateTime.now().add(const Duration(days: 7)),
-      assignedTo: 'Green Care Services',
-      category: 'Landscaping',
-      estimatedCost: 600.0,
-      tags: ['Recurring', 'Aesthetic'],
-    ),
-    MaintenanceBlockItem(
-      id: 'MB005',
-      title: 'Fire Safety System Check',
-      description: 'Annual fire safety system inspection and testing',
-      status: 'In Progress',
-      priority: 'High',
-      createdDate: DateTime.now().subtract(const Duration(days: 3)),
-      scheduledDate: DateTime.now(),
-      assignedTo: 'Safety First Inc.',
-      category: 'Safety',
-      estimatedCost: 2000.0,
-      tags: ['Annual', 'Compliance'],
-    ),
-  ];
+  // final List<MaintenanceBlockItem> _allMaintenanceBlocks = [
+  //   MaintenanceBlockItem(
+  //     id: 'MB001',
+  //     title: 'HVAC System Maintenance',
+  //     description:
+  //         'Regular maintenance and inspection of HVAC system in Building A',
+  //     status: 'In Progress',
+  //     priority: 'High',
+  //     createdDate: DateTime.now().subtract(const Duration(days: 2)),
+  //     scheduledDate: DateTime.now().add(const Duration(days: 1)),
+  //     assignedTo: 'John Smith',
+  //     category: 'HVAC',
+  //     estimatedCost: 1200.0,
+  //     tags: ['Preventive', 'Scheduled'],
+  //   ),
+  //   MaintenanceBlockItem(
+  //     id: 'MB002',
+  //     title: 'Elevator Inspection',
+  //     description:
+  //         'Monthly safety inspection and maintenance of elevator systems',
+  //     status: 'Pending',
+  //     priority: 'Medium',
+  //     createdDate: DateTime.now().subtract(const Duration(days: 5)),
+  //     scheduledDate: DateTime.now().add(const Duration(days: 3)),
+  //     assignedTo: 'Mike Johnson',
+  //     category: 'Elevator',
+  //     estimatedCost: 800.0,
+  //     tags: ['Safety', 'Inspection'],
+  //   ),
+  //   MaintenanceBlockItem(
+  //     id: 'MB003',
+  //     title: 'Plumbing Repair - Unit 205',
+  //     description:
+  //         'Fix leaking pipes and replace faulty fixtures in apartment 205',
+  //     status: 'Completed',
+  //     priority: 'High',
+  //     createdDate: DateTime.now().subtract(const Duration(days: 10)),
+  //     assignedTo: 'Sarah Wilson',
+  //     category: 'Plumbing',
+  //     estimatedCost: 450.0,
+  //     tags: ['Emergency', 'Tenant Request'],
+  //   ),
+  //   MaintenanceBlockItem(
+  //     id: 'MB004',
+  //     title: 'Landscaping Service',
+  //     description:
+  //         'Monthly landscaping and garden maintenance for common areas',
+  //     status: 'Scheduled',
+  //     priority: 'Low',
+  //     createdDate: DateTime.now().subtract(const Duration(days: 1)),
+  //     scheduledDate: DateTime.now().add(const Duration(days: 7)),
+  //     assignedTo: 'Green Care Services',
+  //     category: 'Landscaping',
+  //     estimatedCost: 600.0,
+  //     tags: ['Recurring', 'Aesthetic'],
+  //   ),
+  //   MaintenanceBlockItem(
+  //     id: 'MB005',
+  //     title: 'Fire Safety System Check',
+  //     description: 'Annual fire safety system inspection and testing',
+  //     status: 'In Progress',
+  //     priority: 'High',
+  //     createdDate: DateTime.now().subtract(const Duration(days: 3)),
+  //     scheduledDate: DateTime.now(),
+  //     assignedTo: 'Safety First Inc.',
+  //     category: 'Safety',
+  //     estimatedCost: 2000.0,
+  //     tags: ['Annual', 'Compliance'],
+  //   ),
+  // ];
 
-  List<MaintenanceBlockItem> get filteredMaintenanceBlocks {
-    List<MaintenanceBlockItem> filtered = _allMaintenanceBlocks;
+  // Map<String, int> get statusCounts {
+  //   final counts = <String, int>{
+  //     'All': _allMaintenanceBlocks.length,
+  //     'Pending': 0,
+  //     'In Progress': 0,
+  //     'Completed': 0,
+  //     'Scheduled': 0,
+  //   };
 
-    // Apply status filter
-    if (_selectedFilter != 'All') {
-      filtered = filtered
-          .where((block) => block.status == _selectedFilter)
-          .toList();
-    }
+  //   for (final block in _allMaintenanceBlocks) {
+  //     counts[block.status] = (counts[block.status] ?? 0) + 1;
+  //   }
 
-    // Apply search filter
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where((block) =>
-              block.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              block.description
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()) ||
-              block.assignedTo
-                  .toLowerCase()
-                  .contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-
-    return filtered;
-  }
-
-  Map<String, int> get statusCounts {
-    final counts = <String, int>{
-      'All': _allMaintenanceBlocks.length,
-      'Pending': 0,
-      'In Progress': 0,
-      'Completed': 0,
-      'Scheduled': 0,
-    };
-
-    for (final block in _allMaintenanceBlocks) {
-      counts[block.status] = (counts[block.status] ?? 0) + 1;
-    }
-
-    return counts;
-  }
+  //   return counts;
+  // }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() {
-          _selectedFilter = statusCounts.keys.elementAt(_tabController.index);
-        });
+    // _tabController = TabController(length: 5, vsync: this);
+    // _tabController.addListener(() {
+    //   if (!_tabController.indexIsChanging) {
+    //     setState(() {
+    //       _selectedFilter = statusCounts.keys.elementAt(_tabController.index);
+    //     });
+    //   }
+    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        await _maintenanceBlockVm.loadAllMaintenanceBlocks();
       }
     });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    // _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Completed':
-        return AppColors.green;
-      case 'In Progress':
-        return AppColors.yellow;
-      case 'Pending':
-        return AppColors.red;
-      case 'Scheduled':
-        return AppColors.secondary;
-      default:
-        return AppColors.lightgrey;
-    }
-  }
-
-  void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(ResponsiveConfig.cardRadius(context)),
-        ),
-      ),
-      builder: (context) => Container(
-        color: AppColors.surface,
-        padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.lightgrey,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Filter by Status',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16),
-            ...statusCounts.entries.map(
-              (entry) => ListTile(
-                title: Text(entry.key),
-                trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(entry.key).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${entry.value}',
-                    style: TextStyle(
-                      color: _getStatusColor(entry.key),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedFilter = entry.key;
-                    _tabController.animateTo(
-                      statusCounts.keys.toList().indexOf(entry.key),
-                    );
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showFilterBottomSheet() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(
+  //         top: Radius.circular(ResponsiveConfig.cardRadius(context)),
+  //       ),
+  //     ),
+  //     builder: (context) => Container(
+  //       color: AppColors.surface,
+  //       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Container(
+  //             width: 40,
+  //             height: 4,
+  //             decoration: BoxDecoration(
+  //               color: AppColors.lightgrey,
+  //               borderRadius: BorderRadius.circular(2),
+  //             ),
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Text(
+  //             'Filter by Status',
+  //             style: Theme.of(context).textTheme.titleMedium,
+  //           ),
+  //           const SizedBox(height: 16),
+  //           ...statusCounts.entries.map(
+  //             (entry) => ListTile(
+  //               title: Text(entry.key),
+  //               trailing: Container(
+  //                 padding: const EdgeInsets.symmetric(
+  //                   horizontal: 8,
+  //                   vertical: 4,
+  //                 ),
+  //                 decoration: BoxDecoration(
+  //                   color: _getStatusColor(entry.key).withOpacity(0.1),
+  //                   borderRadius: BorderRadius.circular(12),
+  //                 ),
+  //                 child: Text(
+  //                   '${entry.value}',
+  //                   style: TextStyle(
+  //                     color: _getStatusColor(entry.key),
+  //                     fontWeight: FontWeight.w500,
+  //                   ),
+  //                 ),
+  //               ),
+  //               onTap: () {
+  //                 setState(() {
+  //                   _selectedFilter = entry.key;
+  //                   _tabController.animateTo(
+  //                     statusCounts.keys.toList().indexOf(entry.key),
+  //                   );
+  //                 });
+  //                 Navigator.pop(context);
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -247,16 +220,17 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 ),
                 onChanged: (value) {
                   setState(() {
-                    _searchQuery = value;
+                    // _searchQuery = value;
+                    _maintenanceBlockVm.filteredMaintenanceBlocks(value);
                   });
                 },
               )
             : Text(
                 'Maintenance Block',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.black,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -273,7 +247,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 _searchController.clear();
               });
             } else {
-              context.go(AppRoutes.dashboard);
+              Get.toNamed(AppRoutes.dashboard);
             }
           },
         ),
@@ -294,142 +268,169 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 setState(() {
                   _searchQuery = '';
                   _searchController.clear();
+                  _isSearchVisible = false;
                 });
               },
             ),
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
-            onPressed: _showFilterBottomSheet,
+            // onPressed: _showFilterBottomSheet,
+            onPressed: () => {},
           ),
-         IconButton(
-          icon: const Icon(Icons.add, color: AppColors.black),
-          onPressed: () {
-            context.push(AppRoutes.blockRoomSelection);
-          },
-        ),
+          IconButton(
+            icon: const Icon(Icons.add, color: AppColors.black),
+            onPressed: () {
+              context.push(AppRoutes.blockRoomSelection);
+            },
+          ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48.0),
-          child: Container(
-            color: AppColors.surface,
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.lightgrey,
-              indicator: const UnderlineTabIndicator(
-                borderSide: BorderSide(color: AppColors.primary, width: 2),
-              ),
-              tabs: statusCounts.entries
-                  .map((entry) => Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(entry.key),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(entry.key).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${entry.value}',
-                                style: TextStyle(
-                                  color: _getStatusColor(entry.key),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ),
+        // bottom: PreferredSize(
+        //   preferredSize: const Size.fromHeight(48.0),
+        //   child: Container(
+        //     color: AppColors.surface,
+        //     child: TabBar(
+        //       controller: _tabController,
+        //       isScrollable: true,
+        //       labelColor: AppColors.primary,
+        //       unselectedLabelColor: AppColors.lightgrey,
+        //       indicator: const UnderlineTabIndicator(
+        //         borderSide: BorderSide(color: AppColors.primary, width: 2),
+        //       ),
+        //       tabs: statusCounts.entries
+        //           .map(
+        //             (entry) => Tab(
+        //               child: Row(
+        //                 mainAxisSize: MainAxisSize.min,
+        //                 children: [
+        //                   Text(entry.key),
+        //                   const SizedBox(width: 8),
+        //                   Container(
+        //                     padding: const EdgeInsets.symmetric(
+        //                       horizontal: 6,
+        //                       vertical: 2,
+        //                     ),
+        //                     decoration: BoxDecoration(
+        //                       color: _getStatusColor(
+        //                         entry.key,
+        //                       ).withOpacity(0.1),
+        //                       borderRadius: BorderRadius.circular(8),
+        //                     ),
+        //                     child: Text(
+        //                       '${entry.value}',
+        //                       style: TextStyle(
+        //                         color: _getStatusColor(entry.key),
+        //                         fontSize: 11,
+        //                         fontWeight: FontWeight.w500,
+        //                       ),
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //             ),
+        //           )
+        //           .toList(),
+        //     ),
+        //   ),
+        // ),
       ),
       body: Column(
         children: [
           // Statistics Header
-          Container(
-            width: double.infinity,
-            padding: ResponsiveConfig.horizontalPadding(context).add(
-              ResponsiveConfig.verticalPadding(context),
-            ),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: StatCard(
-                    title: 'Total Active',
-                    value: '${filteredMaintenanceBlocks.length}',
-                    color: AppColors.primary,
-                    icon: Icons.assignment,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: StatCard(
-                    title: 'High Priority',
-                    value: '${filteredMaintenanceBlocks.where((b) => b.priority == 'High').length}',
-                    color: AppColors.red,
-                    icon: Icons.priority_high,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: StatCard(
-                    title: 'Completed',
-                    value: '${statusCounts['Completed']}',
-                    color: AppColors.green,
-                    icon: Icons.check_circle,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Container(
+          //   width: double.infinity,
+          //   padding: ResponsiveConfig.horizontalPadding(
+          //     context,
+          //   ).add(ResponsiveConfig.verticalPadding(context)),
+          //   decoration: const BoxDecoration(
+          //     color: AppColors.surface,
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: Colors.black12,
+          //         blurRadius: 4,
+          //         offset: Offset(0, 2),
+          //       ),
+          //     ],
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       Expanded(
+          //         child: StatCard(
+          //           title: 'Total Active',
+          //           value: '${filteredMaintenanceBlocks.length}',
+          //           color: AppColors.primary,
+          //           icon: Icons.assignment,
+          //         ),
+          //       ),
+          //       const SizedBox(width: 16),
+          //       Expanded(
+          //         child: StatCard(
+          //           title: 'High Priority',
+          //           value:
+          //               '${filteredMaintenanceBlocks.where((b) => b.priority == 'High').length}',
+          //           color: AppColors.red,
+          //           icon: Icons.priority_high,
+          //         ),
+          //       ),
+          //       const SizedBox(width: 16),
+          //       Expanded(
+          //         child: StatCard(
+          //           title: 'Completed',
+          //           value: '${statusCounts['Completed']}',
+          //           color: AppColors.green,
+          //           icon: Icons.check_circle,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           // Maintenance Block List
           Expanded(
-            child: filteredMaintenanceBlocks.isEmpty
-                ? EmptyState(
-                    title: 'No Maintenance Blocks',
-                    subMessage: 'No in-house guests at the moment',
-               )
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      await Future.delayed(const Duration(seconds: 1));
-                    },
-                    child: ListView.builder(
-                      padding: ResponsiveConfig.horizontalPadding(context)
-                          .add(const EdgeInsets.symmetric(vertical: 8)),
-                      itemCount: filteredMaintenanceBlocks.length,
-                      itemBuilder: (context, index) {
-                        final block = filteredMaintenanceBlocks[index];
-                        return MaintenanceBlockCard(
-                          block: block,
-                          onTap: () {
-                            // Navigate to detailed view
-                          },
-                        );
+            child: Obx(() {
+              if (_maintenanceBlockVm.isLoading.value) {
+                return ListView.builder(
+                  padding: ResponsiveConfig.horizontalPadding(
+                    context,
+                  ).add(const EdgeInsets.symmetric(vertical: 8)),
+                  itemCount: 8, 
+                  itemBuilder: (context, index) =>
+                      const MaintenanceBlockCardShimmer(),
+                );
+              }
+
+              if (_maintenanceBlockVm.maintenanceBlockListFiltered.isEmpty) {
+                return const EmptyState(
+                  title: 'No Maintenance Blocks',
+                  subMessage: 'No in-house guests at the moment',
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  await _maintenanceBlockVm.loadAllMaintenanceBlocks();
+                },
+                child: ListView.builder(
+                  padding: ResponsiveConfig.horizontalPadding(
+                    context,
+                  ).add(const EdgeInsets.symmetric(vertical: 8)),
+                  itemCount:
+                      _maintenanceBlockVm.maintenanceBlockListFiltered.length,
+                  itemBuilder: (context, index) {
+                    final block =
+                        _maintenanceBlockVm.maintenanceBlockListFiltered[index];
+                    return MaintenanceBlockCard(
+                      block: block,
+                      onTap: () {
+                        // Navigate to detailed view
                       },
-                    ),
-             ),
+                    );
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),
-     floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           context.push(AppRoutes.blockRoomSelection);
         },
@@ -443,5 +444,3 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     );
   }
 }
-
-
