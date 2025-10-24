@@ -60,7 +60,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => context.pop(),
+        onPressed: () => Get.back(),
       ),
       title: Text(
         'Room Move',
@@ -482,7 +482,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => context.pop(),
+              onPressed: () => Get.back(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightgrey),
                 padding: EdgeInsets.symmetric(

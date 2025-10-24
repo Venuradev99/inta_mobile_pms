@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 
 class AuditTrail extends StatefulWidget {
   final GuestItem? guestItem;
-  AuditTrail({super.key, required this.guestItem});
+  const AuditTrail({super.key, required this.guestItem});
 
   @override
   State<AuditTrail> createState() => _AuditTrailState();
@@ -22,9 +22,11 @@ class _AuditTrailState extends State<AuditTrail> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _auditTrailVm.loadAuditTrails(widget.guestItem!);
-    });
+    if (widget.guestItem != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await _auditTrailVm.loadAuditTrails(widget.guestItem!);
+      });
+    }
   }
 
   @override
@@ -48,12 +50,12 @@ class _AuditTrailState extends State<AuditTrail> {
         centerTitle: false,
       ),
       body: Obx(() {
+        // Loading shimmer
         if (_auditTrailVm.isLoading.value) {
-          // Show shimmer while loading
           return ListView.builder(
             padding: ResponsiveConfig.verticalPadding(context)
                 .add(ResponsiveConfig.horizontalPadding(context)),
-            itemCount: 6, // number of shimmer cards
+            itemCount: 6,
             itemBuilder: (_, __) => _buildShimmerCard(context),
           );
         }
@@ -69,14 +71,15 @@ class _AuditTrailState extends State<AuditTrail> {
               .add(ResponsiveConfig.horizontalPadding(context)),
           itemCount: list.length,
           itemBuilder: (context, index) =>
-              _buildAuditCard(list[index], context),
+              _buildAuditCard(list[index], context, key: ValueKey(list[index].transactionLog)),
         );
       }),
     );
   }
 
-  Widget _buildAuditCard(item, BuildContext context) {
+  Widget _buildAuditCard(item, BuildContext context, {Key? key}) {
     return Padding(
+      key: key,
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Container(
         decoration: BoxDecoration(
@@ -102,7 +105,7 @@ class _AuditTrailState extends State<AuditTrail> {
                 children: [
                   Expanded(
                     child: Text(
-                      item.transactionTypeName,
+                      item.transactionTypeName ?? '',
                       style: AppTextTheme.lightTextTheme.titleMedium
                           ?.copyWith(color: AppColors.black),
                     ),
@@ -115,7 +118,7 @@ class _AuditTrailState extends State<AuditTrail> {
               ),
               const SizedBox(height: 8),
               Text(
-                item.description,
+                item.description ?? '',
                 style: AppTextTheme.lightTextTheme.bodyMedium
                     ?.copyWith(color: AppColors.darkgrey),
               ),
@@ -129,7 +132,7 @@ class _AuditTrailState extends State<AuditTrail> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    item.userName,
+                    item.userName ?? '',
                     style: AppTextTheme.lightTextTheme.bodySmall
                         ?.copyWith(color: AppColors.black),
                   ),
@@ -142,7 +145,7 @@ class _AuditTrailState extends State<AuditTrail> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    '${item.sysDateCreated.split('T')[0]} ${formatTo12Hour(item.sysDateCreated)}',
+                    '${_formatDate(item.sysDateCreated)} ${_formatTime(item.sysDateCreated)}',
                   ),
                 ],
               ),
@@ -172,15 +175,25 @@ class _AuditTrailState extends State<AuditTrail> {
     );
   }
 
-  String formatTo12Hour(String dateTimeString) {
+  String _formatDate(String? dateTimeString) {
+    if (dateTimeString == null) return '';
+    try {
+      return dateTimeString.split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  }
+
+  String _formatTime(String? dateTimeString) {
+    if (dateTimeString == null) return '';
     try {
       final parts = dateTimeString.split('T');
-      final datePart = parts[0];
+      if (parts.length != 2) return '';
       final timePart = parts[1].split('.').first;
-      final dateTime = DateTime.parse('$datePart $timePart');
+      final dateTime = DateTime.parse('${parts[0]}T$timePart');
       return DateFormat('hh:mm a').format(dateTime);
     } catch (e) {
-      return 'Invalid time';
+      return '';
     }
   }
 }

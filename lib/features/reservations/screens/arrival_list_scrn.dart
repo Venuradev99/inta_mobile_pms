@@ -9,6 +9,7 @@ import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/audit_trail_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
@@ -502,7 +503,7 @@ class _ArrivalListState extends State<ArrivalList> {
             onTap: () async {
               Get.back();
               Get.to(
-                () => RoomMovePage(guestItem: guestData),
+                () => AuditTrail(guestItem: guestData),
                 transition: Transition
                     .downToUp,
                 curve: Curves.ease,

@@ -43,7 +43,7 @@ class _VoidReservationState extends State<VoidReservation> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.black),
-          onPressed: () => context.pop(),
+          onPressed: () => Get.back(),
         ),
         title: Text(
           'Void Reservation',

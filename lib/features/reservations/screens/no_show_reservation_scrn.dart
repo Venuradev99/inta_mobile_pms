@@ -161,7 +161,7 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
             color: AppColors.black,
             size: ResponsiveConfig.iconSize(context),
           ),
-          onPressed: () => context.pop(),
+          onPressed: () => Get.back(),
         ),
         title: Text(
           'No Show Reservation',

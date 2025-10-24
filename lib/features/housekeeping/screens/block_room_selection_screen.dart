@@ -101,7 +101,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.black),
-          onPressed: () => context.pop(),
+          onPressed: () => Get.back(),
         ),
       ),
       body: Column(

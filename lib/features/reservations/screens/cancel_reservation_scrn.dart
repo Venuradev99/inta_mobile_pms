@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/cancel_reservation_vm.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class CancelReservation extends StatefulWidget {
   final Map<String, dynamic> reservationData;
@@ -429,7 +427,7 @@ class _CancelReservationState extends State<CancelReservation> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => context.pop(),
+              onPressed: () => Get.back(),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14.0),
                 side: const BorderSide(color: AppColors.lightgrey),

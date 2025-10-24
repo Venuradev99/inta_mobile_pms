@@ -149,5 +149,5 @@ final appRoutes = [
     name: AppRoutes.blockRoomDetails,
     page: () => BlockRoomDetailsScreen(selectedRooms: Get.arguments as List<RoomResponse>),
   ),
-  GetPage(name: AppRoutes.auditTrail, page: () => AuditTrail(guestItem: Get.arguments as GuestItem?)),
+  GetPage(name: AppRoutes.auditTrail, page: () => AuditTrail(guestItem: Get.arguments as GuestItem)),
 ];

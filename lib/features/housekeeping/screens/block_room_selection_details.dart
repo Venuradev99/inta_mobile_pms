@@ -158,9 +158,9 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      context.pop();
-                      context.pop();
-                      context.pop();
+                    Get.back();
+                     Get.back();
+                      Get.back();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -484,7 +484,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
             color: AppColors.black,
             size: 20,
           ),
-          onPressed: () => context.pop(),
+          onPressed: () => Get.back(),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -620,7 +620,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => Get.back(),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: BorderSide(
