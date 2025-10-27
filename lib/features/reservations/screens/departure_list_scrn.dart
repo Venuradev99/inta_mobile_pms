@@ -356,7 +356,14 @@ class _DepartureListState extends State<DepartureList> {
           //     );
           //   },
           // ),
-          ActionItem(icon: Icons.person, label: 'Edit Guest Details'),
+          ActionItem(
+            icon: Icons.person,
+            label: 'Edit Guest Details',
+            onTap: () {
+              context.pop();
+              context.push(AppRoutes.editGuestDetails);
+            },
+          ),
           ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
           ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
           ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),

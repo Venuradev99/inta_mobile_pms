@@ -11,6 +11,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/cancel_reservation
 import 'package:inta_mobile_pms/features/reservations/screens/departure_list_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/settings_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/house_status_screen.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/edit_guest_details_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/inhouse_list_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/maintenance_block_screen.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
@@ -155,6 +156,11 @@ final appRouter = GoRouter(
       path: AppRoutes.auditTrail,
       builder: (context, state) =>
           AuditTrail(guestItem: state.extra as GuestItem),
+    ),
+    GoRoute(
+      path: AppRoutes.editGuestDetails,
+      builder: (context, state) =>
+          EditGuestDetails(guestItem: state.extra as GuestItem?),
     ),
   ],
 );
