@@ -8,6 +8,7 @@ import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class DashboardVm extends GetxController {
   final DashboardService _dashboardService;
@@ -85,7 +86,7 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-        MessageHelper.error(bookingResponse["errors"][0] ?? 'Error getting booking details!');
+        MessageService().error(bookingResponse["errors"][0] ?? 'Error getting booking details!');
       }
 
       if (inventoryResponse["isSuccessful"] == true) {
@@ -143,8 +144,6 @@ class DashboardVm extends GetxController {
         final todayInventory = futureInventoryModel.isNotEmpty
             ? futureInventoryModel[0]
             : 0;
-        print('totalRoomSold$totalRoomSold');
-        print('totalRoomsToSell$totalRoomsToSell');
         totalAvailableRooms.value = totalRoomsToSell - todayInventory;
         totalRoomSoldRate.value =  totalRoomsToSell == 0 ? 0 : (totalRoomSold / totalRoomsToSell);
         totalAvailableRoomsRate.value = totalRoomsToSell == 0 ? 0 :
@@ -152,7 +151,7 @@ class DashboardVm extends GetxController {
         complementaryRoomsRate.value = totalRoomsToSell == 0 ? 0 :  (complementaryRooms / totalRoomsToSell);
         outOfOrderRoomsRate.value = totalRoomsToSell == 0 ? 0 : (outOfOrderRooms / totalRoomsToSell);
       } else {
-       MessageHelper.error(inventoryResponse["errors"][0] ?? 'Error getting inventory details!');
+       MessageService().error(inventoryResponse["errors"][0] ?? 'Error getting inventory details!');
       }
 
       if (propertyStatisticsResponse["isSuccessful"] == true) {
@@ -182,7 +181,7 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-       MessageHelper.error(propertyStatisticsResponse["errors"][0] ?? 'Error getting property statistics details!');
+       MessageService().error(propertyStatisticsResponse["errors"][0] ?? 'Error getting property statistics details!');
       }
 
       if (occupancyStaticsResponse["isSuccessful"] == true) {
@@ -190,10 +189,10 @@ class DashboardVm extends GetxController {
         final data = OccupancyData.fromJson(result);
         occupancyData.value = data;
       } else {
-       MessageHelper.error(occupancyStaticsResponse["errors"][0] ?? 'Error getting booking details!');
+       MessageService().error(occupancyStaticsResponse["errors"][0] ?? 'Error getting booking details!');
       }
     } catch (e) {
-      MessageHelper.error('Error loading dashboard data: $e');
+      MessageService().error('Error loading dashboard data: $e');
     } finally {
       isLoading.value = false;
       

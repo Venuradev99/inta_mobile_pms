@@ -38,7 +38,7 @@ class _AuditTrailState extends State<AuditTrail> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.black),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'Audit Trail',

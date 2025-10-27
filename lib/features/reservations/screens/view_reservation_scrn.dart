@@ -66,7 +66,7 @@ class _ViewReservation extends State<ViewReservation>{
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton.icon(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Navigator.of(context).pop(),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Go Back'),
                   style: ElevatedButton.styleFrom(

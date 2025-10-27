@@ -1,14 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
-import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/data/models/Api_response_model.dart';
-import 'package:inta_mobile_pms/router/app_router.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class DataAccessService {
   Map<String, dynamic>? configData;
@@ -28,12 +25,12 @@ class DataAccessService {
     final Map<String, dynamic> responseBody = json.decode(response.body);
 
     if (response.statusCode == 401) {
-      Get.toNamed(AppRoutes.login);
+       NavigationService().go(AppRoutes.login);
       await LocalStorageManager.clearUserData();
 
       String errorMsg =
           responseBody["errors"][0] ?? 'Unauthorized, try login again!';
-      MessageHelper.error(errorMsg);
+      MessageService().error(errorMsg);
       return ApiResponse(
         errors: [errorMsg],
         isSuccessful: responseBody['isSuccessful'] ?? false,

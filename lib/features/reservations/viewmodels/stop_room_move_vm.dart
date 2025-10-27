@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class StopRoomMoveVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -20,7 +22,7 @@ class StopRoomMoveVm extends GetxController {
             .map((item) => {"id": item["reasonId"], "name": item["name"]})
             .toList();
       } else {
-        MessageHelper.error(response["errors"][0] ?? 'Error getting reasons!');
+        MessageService().error(response["errors"][0] ?? 'Error getting reasons!');
       }
     } catch (e) {
       throw Exception('Error while loading stop moving room reasons: $e');
@@ -44,15 +46,15 @@ class StopRoomMoveVm extends GetxController {
       };
       final response = await _reservationListService.saveReason(requestBody);
       if (response["isSuccessful"] == true) {
-        Get.back();
+         NavigationService().back();
         String msg = response["message"] ?? 'Stop room move successfully!';
-        MessageHelper.success(msg);
+        MessageService().success(msg);
       } else {
         String msg = response["errors"][0] ?? 'Error stop room move!';
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
     } catch (e) {
-      MessageHelper.success('Error saving reason:$e');
+      MessageService().success('Error saving reason:$e');
       throw Exception('Error saving reason:$e');
     }
   }

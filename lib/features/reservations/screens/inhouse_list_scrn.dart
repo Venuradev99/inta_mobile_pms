@@ -139,31 +139,31 @@ class _InHouseListState extends State<InHouseList> {
             icon: Icons.move_to_inbox,
             label: 'Room Move',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.roomMove);
+              context.pop();
+              context.push(AppRoutes.roomMove);
             },
           ),
           ActionItem(
             icon: Icons.stop_circle_outlined,
             label: 'Stop Room Move',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.stopRoomMove);
+              context.pop();
+              context.push(AppRoutes.stopRoomMove);
             },
           ),
           ActionItem(
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.amendstay, arguments: item);
+              context.pop();
+              context.push(AppRoutes.amendstay, extra: item);
             },
           ),
           ActionItem(
             icon: Icons.block,
             label: 'Void Reservation',
             onTap: () {
-              Get.back();
+              context.pop();
               final data = {
                 'guestName': item.guestName,
                 'resNumber': item.resId,
@@ -175,13 +175,26 @@ class _InHouseListState extends State<InHouseList> {
                 'total': item.totalAmount,
                 'deposit': item.totalAmount - item.balanceAmount,
               };
-              Get.to(
-                () => VoidReservation(reservationData: data),
-                transition: Transition
-                    .downToUp, 
-                curve: Curves.ease,
-                duration: const Duration(
-                  milliseconds: 300,
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      VoidReservation(reservationData: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0); // Slide from bottom
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
                 ),
               );
             },
@@ -200,5 +213,4 @@ class _InHouseListState extends State<InHouseList> {
       ),
     );
   }
-
 }

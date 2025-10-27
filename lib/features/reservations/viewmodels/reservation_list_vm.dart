@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class ReservationListVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -111,7 +112,7 @@ class ReservationListVm extends GetxController {
         reservationList.refresh();
         reservationFilteredList.refresh();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           reservationResponse["errors"][0] ?? 'Error getting reservation data!',
         );
       }
@@ -129,7 +130,7 @@ class ReservationListVm extends GetxController {
           statusList.add(data);
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           statusResponse["errors"][0] ?? 'Error getting status data!',
         );
       }
@@ -146,7 +147,7 @@ class ReservationListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room details!',
         );
       }
@@ -163,7 +164,7 @@ class ReservationListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           reservationTypeResponse["errors"][0] ??
               'Error getting reservation types!',
         );
@@ -181,7 +182,7 @@ class ReservationListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
         );
       }
@@ -198,13 +199,13 @@ class ReservationListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           businessSourcesResponse["errors"][0] ??
               'Error getting business sources!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error getting reservation list: $e');
+      MessageService().error('Error getting reservation list: $e');
       throw Exception('Error getting reservation list: $e');
     } finally {
       isLoading.value = false;
@@ -489,12 +490,12 @@ class ReservationListVm extends GetxController {
         );
         allGuestDetails.value = guestItem;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting guest data!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     } finally {
       isBottomSheetDataLoading.value = false;
@@ -539,13 +540,13 @@ class ReservationListVm extends GetxController {
         }
         data["reasons"] = reasonList;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting noshow data!',
         );
       }
       return data;
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     }
   }
@@ -565,13 +566,13 @@ class ReservationListVm extends GetxController {
         final msg = response["message"].isNotEmpty
             ? response["message"]
             : 'Room unassigned successfully!';
-        MessageHelper.success(msg);
+        MessageService().success(msg);
       } else {
         final msg = response["errors"][0] ?? 'Room unassign failed!';
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
     } catch (e) {
-      MessageHelper.error('Error unassign request: $e');
+      MessageService().error('Error unassign request: $e');
       throw Exception('Error unassign request: $e');
     }
   }

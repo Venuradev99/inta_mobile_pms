@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
@@ -17,7 +19,7 @@ class UserApiService {
       return response;
     } catch (e) {
       String msg = 'Failed to load configuration: $e';
-      MessageHelper.error(msg);
+      MessageService().error(msg);
       throw Exception(msg);
     }
   }
@@ -78,19 +80,19 @@ class UserApiService {
             );
           }
           // Show success
-          Get.toNamed(AppRoutes.dashboard);
-          MessageHelper.success("Login successful");
+          NavigationService().go(AppRoutes.dashboard);
+          MessageService().success("Login successful");
         } else {
-          MessageHelper.error("No access token found in response");
+          MessageService().error("No access token found in response");
         }
       } else {
         //login failed message
-        MessageHelper.error(
+        MessageService().error(
           "${jsonDecode(response.body)["error_description"]}",
         );
       }
     } catch (e) {
-      MessageHelper.error("An error occurred while login: $e");
+      MessageService().error("An error occurred while login: $e");
     }
   }
 
@@ -122,14 +124,14 @@ class UserApiService {
         return jsonDecode(response.body);
       } else {
         final responseBody = jsonDecode(response.body);
-        MessageHelper.error(
+        MessageService().error(
           responseBody["errors"] ?? "Error loading system information!",
         );
         throw Exception();
       }
     } catch (e) {
       String msg = 'Failed to load system information : $e';
-      MessageHelper.error(msg);
+      MessageService().error(msg);
       throw Exception(msg);
     }
   }
@@ -162,12 +164,12 @@ class UserApiService {
         return jsonDecode(response.body);
       } else {
         String msg = 'Failed to load system information';
-        MessageHelper.error(msg);
+        MessageService().error(msg);
         throw Exception(msg);
       }
     } catch (e) {
       String msg = 'Error loading system information: $e';
-      MessageHelper.error(msg);
+      MessageService().error(msg);
       throw Exception(msg);
     }
   }
@@ -177,10 +179,11 @@ class UserApiService {
       await LocalStorageManager.clearUserData();
       // final logoutUrl = AppResources.logoutUrl;
       // final response = await http.post(Uri.parse(logoutUrl));
-      Get.toNamed(AppRoutes.login);
+
+      NavigationService().go(AppRoutes.login);
     } catch (e) {
       String msg = 'Error occured while logout: $e';
-      MessageHelper.error(msg);
+      MessageService().error(msg);
       throw Exception(msg);
     }
   }

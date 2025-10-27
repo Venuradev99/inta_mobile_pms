@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class CancelReservationVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -30,14 +32,14 @@ class CancelReservationVm extends GetxController {
         final msg = response["message"].isNotEmpty
             ? response["message"]
             : 'Reservation Cancelled successfully!';
-        MessageHelper.success(msg);
-        Get.back();
+        MessageService().success(msg);
+         NavigationService().back();
       } else {
         final msg = response["errors"][0];
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
     } catch (e) {
-        MessageHelper.error('Error Cancelling request: $e');
+        MessageService().error('Error Cancelling request: $e');
       throw Exception('Error Cancelling request: $e');
     }
   }

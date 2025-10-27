@@ -5,6 +5,7 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class InhouseListVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -78,12 +79,12 @@ class InhouseListVm extends GetxController {
         inhouseList.refresh();
         inhouseFilteredList.refresh();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting inhouse data!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error getting reservation list: $e');
+      MessageService().error('Error getting reservation list: $e');
       throw Exception('Error getting reservation list: $e');
     } finally {
       isLoading.value = false;

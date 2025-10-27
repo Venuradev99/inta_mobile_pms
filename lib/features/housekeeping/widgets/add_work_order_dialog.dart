@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
@@ -74,7 +75,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () => Get.back(),
+                  onPressed: () => context.pop(),
                 ),
               ],
             ),
@@ -410,7 +411,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () =>Get.back(),
+                  onPressed: () =>context.pop(),
                   child: const Text('Cancel'),
                 ),
                 const SizedBox(width: 16),
@@ -518,7 +519,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
         description: _descriptionController.text,
         reason: _selectedReason,
       );
-     Get.back();
+     context.pop();
     }
   }
 

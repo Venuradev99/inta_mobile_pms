@@ -7,6 +7,8 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class ChangeReservationTypeVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -104,18 +106,18 @@ class ChangeReservationTypeVm extends GetxController {
       final response = await _reservationListService.saveOtherInformation(
         payload,
       );
-      Get.back();
+       NavigationService().back();
       if (response["isSuccessful"] == true) {
         String msg =
             response["message"] ?? 'Changed Reservation Type Successfully!';
-       MessageHelper.success(msg);
+       MessageService().success(msg);
       } else {
         String msg =
             response["errors"][0] ?? 'Error while changing reservation type!';
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
     } catch (e) {
-      MessageHelper.error('Error while changing reservation!:$e');
+      MessageService().error('Error while changing reservation!:$e');
       throw Exception('Error while changing reservation!:$e');
     }
   }

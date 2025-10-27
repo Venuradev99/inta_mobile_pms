@@ -41,7 +41,7 @@ class _HouseStatusState extends State<HouseStatus> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Get.toNamed(AppRoutes.dashboard),
+          onPressed: () =>context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'House Status',
@@ -466,7 +466,7 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 
   void _handleRoomAction(String action, RoomItem room) {
-  Get.back();
+  context.pop();
 
     // Handle different actions
     switch (action) {
@@ -632,7 +632,7 @@ class _HouseStatusState extends State<HouseStatus> {
                         ),
                         const Spacer(),
                         IconButton(
-                          onPressed: () =>Get.back(),
+                          onPressed: () =>context.pop(),
                           icon: Icon(
                             Icons.close,
                             color: Colors.grey[600],
@@ -692,7 +692,7 @@ class _HouseStatusState extends State<HouseStatus> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => Get.back(),
+                        onPressed: () => context.pop(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.onPrimary,
@@ -878,7 +878,7 @@ class _RoomActionsSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => context.pop(),
                       icon: Icon(Icons.close, color: Colors.grey[600]),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),

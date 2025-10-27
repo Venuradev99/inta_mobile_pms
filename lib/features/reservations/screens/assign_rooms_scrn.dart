@@ -9,11 +9,8 @@ import 'package:inta_mobile_pms/features/reservations/viewmodels/assign_rooms_vm
 class AssignRoomsBottomSheet extends StatefulWidget {
   final GuestItem guestItem;
 
-  const AssignRoomsBottomSheet({
-    Key? key,
-    required this.guestItem,
-
-  }) : super(key: key);
+  const AssignRoomsBottomSheet({Key? key, required this.guestItem})
+    : super(key: key);
 
   @override
   State<AssignRoomsBottomSheet> createState() => _AssignRoomsBottomSheetState();
@@ -22,7 +19,6 @@ class AssignRoomsBottomSheet extends StatefulWidget {
   static Future<Map<String, String>?> show({
     required BuildContext context,
     required GuestItem guestItem,
-
   }) {
     return showModalBottomSheet<Map<String, String>>(
       context: context,
@@ -30,9 +26,7 @@ class AssignRoomsBottomSheet extends StatefulWidget {
       backgroundColor: Colors.transparent,
       enableDrag: true,
       isDismissible: true,
-      builder: (context) => AssignRoomsBottomSheet(
-        guestItem: guestItem,
-      ),
+      builder: (context) => AssignRoomsBottomSheet(guestItem: guestItem),
     );
   }
 }
@@ -80,7 +74,6 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
       };
       await _assignRoomsVm.assignRoom(saveData);
       if (!mounted) return;
-      
     } catch (e) {
       throw Exception('Error while saving: $e');
     }
@@ -92,7 +85,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
     final bottomPadding = mediaQuery.viewInsets.bottom;
 
     return GestureDetector(
-      onTap: () => Get.back(),
+      onTap: () => Navigator.of(context).pop(),
       child: Container(
         color: Colors.transparent,
         child: GestureDetector(
@@ -136,7 +129,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () => Get.back(),
+                            onPressed: () => Navigator.of(context).pop(),
                             icon: const Icon(Icons.close),
                             color: AppColors.darkgrey,
                             splashRadius: 20,
@@ -187,7 +180,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                             return _buildDropdownField(
                               label: 'Room',
                               value: selectedRoom,
-                              hint:  _assignRoomsVm.availableRooms.isEmpty
+                              hint: _assignRoomsVm.availableRooms.isEmpty
                                   ? 'No Available Rooms'
                                   : 'Select',
                               items: _assignRoomsVm.availableRooms,
@@ -209,7 +202,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                                 child: OutlinedButton(
                                   onPressed: isLoading
                                       ? null
-                                      : () => Get.back(),
+                                      : () => Navigator.of(context).pop(),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 14,

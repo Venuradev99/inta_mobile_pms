@@ -40,7 +40,7 @@ class StatusInfoDialog extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(Icons.close, color: Colors.grey[600], size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -66,7 +66,7 @@ class StatusInfoDialog extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Get.back(),
+                onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.onPrimary,

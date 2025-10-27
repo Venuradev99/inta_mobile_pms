@@ -46,7 +46,7 @@ class _WorkOrderListState extends State<WorkOrderList> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => Get.toNamed(AppRoutes.dashboard),
+          onPressed: () =>context.go(AppRoutes.dashboard),
         ),
         actions: [
           IconButton(

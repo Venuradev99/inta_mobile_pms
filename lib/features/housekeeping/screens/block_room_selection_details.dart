@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/block_room_reason_response.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/maintenanceblock_save_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 
@@ -158,9 +157,9 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                    Get.back();
-                     Get.back();
-                      Get.back();
+                      context.pop();
+                      context.pop();
+                      context.pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -232,7 +231,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                    Get.back();
+                    context.pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -484,7 +483,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
             color: AppColors.black,
             size: 20,
           ),
-          onPressed: () => Get.back(),
+          onPressed: () =>context.pop(),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -620,7 +619,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => Get.back(),
+                  onPressed: () => context.pop(),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     side: BorderSide(

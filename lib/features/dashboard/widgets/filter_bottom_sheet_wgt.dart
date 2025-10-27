@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:intl/intl.dart';
@@ -139,7 +140,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     }
 
     widget.onApply(filters);
-    Get.back();
+   context.pop();
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {

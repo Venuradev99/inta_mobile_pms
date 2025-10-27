@@ -27,7 +27,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: AppColors.black),
-        onPressed: () => Get.toNamed(AppRoutes.dashboard),
+        onPressed: () => context.go(AppRoutes.dashboard),
       ),
       title: Text(
         title,

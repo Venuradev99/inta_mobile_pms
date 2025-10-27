@@ -5,6 +5,7 @@ import 'package:inta_mobile_pms/features/reservations/models/amend_stay_save_dat
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_details_response.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class AmendStayVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -59,7 +60,7 @@ class AmendStayVm extends GetxController {
           hotelId: result["hotelId"],
         );
       }else{
-          MessageHelper.error(amendStayResponse["errors"][0] ?? 'Error getting work orders!');
+          MessageService().error(amendStayResponse["errors"][0] ?? 'Error getting work orders!');
       }
 
       if (folioDetailsResponse["isSuccessful"] == true) {
@@ -88,10 +89,10 @@ class AmendStayVm extends GetxController {
           conversionRate: result["conversionRate"],
         );
       }else{
-         MessageHelper.error(folioDetailsResponse["errors"][0] ?? 'Error getting folio details!');
+         MessageService().error(folioDetailsResponse["errors"][0] ?? 'Error getting folio details!');
       }
     } catch (e) {
-       MessageHelper.error('Error while loading Amend Stay data: $e');
+       MessageService().error('Error while loading Amend Stay data: $e');
       throw Exception('Error while loading Amend Stay data: $e');
     }
   }
@@ -121,13 +122,13 @@ class AmendStayVm extends GetxController {
       };
       final response = await _reservationListService.updateBooking(payload);
      if (response["isSuccessful"] == true) {
-       MessageHelper.success(response["message"] ?? 'Amend stayed Successfully!');
+       MessageService().success(response["message"] ?? 'Amend stayed Successfully!');
     } else {
       String msg = response["errors"][0] ?? 'Error while amend Staying!';
-      MessageHelper.error(msg);
+      MessageService().error(msg);
     }
     } catch (e) {
-       MessageHelper.error('Error while Assigning room: $e');
+       MessageService().error('Error while Assigning room: $e');
       throw Exception('Error while Assigning room: $e');
     }
   }

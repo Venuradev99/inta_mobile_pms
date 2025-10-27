@@ -3,6 +3,8 @@ import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class AssignRoomsVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -29,12 +31,12 @@ class AssignRoomsVm extends GetxController {
         );
         await loadAvailableRooms(selectedItem["id"].toString(), guestItem);
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading room types!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error loading room types!:$e');
+      MessageService().error('Error loading room types!:$e');
       throw Exception('Error while loading room types:$e');
     }
   }
@@ -62,12 +64,12 @@ class AssignRoomsVm extends GetxController {
             .map((item) => {"id": item["roomId"], "name": item["name"]})
             .toList();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading available rooms!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error loading available rooms: $e');
+      MessageService().error('Error loading available rooms: $e');
       throw Exception('Error while loading available rooms: $e');
     } finally {}
   }
@@ -89,13 +91,13 @@ class AssignRoomsVm extends GetxController {
       };
       final response = await _reservationListService.updateBooking(payload);
       if (response["isSuccessful"] == true) {
-        Get.back();
-        MessageHelper.success(response["message"] ?? 'Room assigned successfully!');
+        NavigationService().back();
+        MessageService().success(response["message"] ?? 'Room assigned successfully!');
       } else {
-        MessageHelper.error(response["errors"][0] ?? 'Error while assigning room!');
+        MessageService().error(response["errors"][0] ?? 'Error while assigning room!');
       }
     } catch (e) {
-      MessageHelper.error('Error while Assigning room: $e');
+      MessageService().error('Error while Assigning room: $e');
       throw Exception('Error while Assigning room: $e');
     }
   }

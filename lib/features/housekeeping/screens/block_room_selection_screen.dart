@@ -82,7 +82,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
     }
 
     // Navigate to the next screen with selected rooms
-   Get.toNamed(AppRoutes.blockRoomDetails, arguments: _selectedRooms.toList());
+  context.go(AppRoutes.blockRoomDetails, extra: _selectedRooms.toList());
   }
 
   @override
@@ -101,7 +101,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.black),
-          onPressed: () => Get.back(),
+          onPressed: () =>context.pop(),
         ),
       ),
       body: Column(

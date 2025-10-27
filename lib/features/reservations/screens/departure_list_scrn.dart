@@ -57,10 +57,10 @@ class _DepartureListState extends State<DepartureList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'departure',
-                  roomTypes:_departureListVm.roomTypes.toList(),
-                  reservationTypes:_departureListVm.reservationTypes.toList(),
-                  statuses:_departureListVm.statuses.toList(),
-                  businessSources:_departureListVm.businessSources.toList(),
+                  roomTypes: _departureListVm.roomTypes.toList(),
+                  reservationTypes: _departureListVm.reservationTypes.toList(),
+                  statuses: _departureListVm.statuses.toList(),
+                  businessSources: _departureListVm.businessSources.toList(),
                   filteredData: _departureListVm.receivedFilters.value ?? {},
                   onApply: _departureListVm.applydepartureFilters,
                   scrollController: scrollController,
@@ -204,7 +204,7 @@ class _DepartureListState extends State<DepartureList> {
             icon: Icons.visibility,
             label: 'View Reservation',
             onTap: () async {
-              Get.toNamed(AppRoutes.viewReservation, arguments: guestData);
+              context.push(AppRoutes.viewReservation, extra: guestData);
             },
           ),
           ActionItem(
@@ -212,7 +212,7 @@ class _DepartureListState extends State<DepartureList> {
             label: 'Room Move',
             onTap: () async {
               if (!mounted) return;
-              Get.back();
+              context.pop();
               GuestItem data = GuestItem(
                 bookingRoomId: guestData?.bookingRoomId ?? '',
                 guestName: guestData?.guestName ?? '',
@@ -227,14 +227,28 @@ class _DepartureListState extends State<DepartureList> {
                 roomType: guestData?.roomType ?? '',
                 room: guestData?.room ?? '',
               );
-              Get.to(
-                () => RoomMovePage(guestItem: data),
-                transition: Transition
-                    .downToUp, 
-                curve: Curves.ease,
-                duration: const Duration(
-                  milliseconds: 300,
-                ), 
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      RoomMovePage(guestItem: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -243,14 +257,30 @@ class _DepartureListState extends State<DepartureList> {
             label: 'Stop Room Move',
             onTap: () async {
               if (!mounted) return;
-              Get.back();
-              Get.to(
-                () => StopRoomMoveScreen(
-                  bookingRoomId: guestData?.bookingRoomId ?? '',
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      StopRoomMoveScreen(
+                        bookingRoomId: guestData?.bookingRoomId ?? '',
+                      ),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0); // Start from bottom
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
                 ),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
               );
             },
           ),
@@ -258,12 +288,28 @@ class _DepartureListState extends State<DepartureList> {
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
             onTap: () {
-              Get.back();
-              Get.to(
-                () => AmendStay(guestItem: guestData),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AmendStay(guestItem: guestData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0); // Slide from bottom
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -271,7 +317,7 @@ class _DepartureListState extends State<DepartureList> {
           //   icon: Icons.not_interested,
           //   label: 'No Show Reservation',
           //   onTap: () {
-          //  Get.back();
+          //  context.pop();
           //     final noShowData = NoShowReservationData(
           //       reasons: [],
           //       bookingRoomId: '',
@@ -287,7 +333,7 @@ class _DepartureListState extends State<DepartureList> {
           //       balance: item.balanceAmount,
           //       initialNoShowFee: null,
           //     );
-          //     Get.toNamed(
+          //     context.push(
           //       context,
           //       PageRouteBuilder(
           //         pageBuilder: (context, animation, secondaryAnimation) =>

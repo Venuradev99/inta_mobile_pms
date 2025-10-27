@@ -47,7 +47,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => Get.back(),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Stop Room Move',
@@ -232,7 +232,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Get.back(),
+              onPressed: () => context.pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightgrey),
                 padding: EdgeInsets.symmetric(
@@ -332,7 +332,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => context.pop(),
               child: Text(
                 'Cancel',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
@@ -390,7 +390,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
-      Get.back();
+      context.pop();
     } else {
       final msg = response["errors"][0] ?? "";
       _showErrorSnackBar(msg);

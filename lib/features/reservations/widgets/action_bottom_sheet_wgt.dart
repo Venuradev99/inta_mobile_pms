@@ -58,7 +58,7 @@ class ActionBottomSheet extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => Get.back(),
+                    onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close),
                     tooltip: 'Close',
                   ),

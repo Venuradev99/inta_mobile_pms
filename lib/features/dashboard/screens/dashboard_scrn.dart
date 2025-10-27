@@ -58,7 +58,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              Get.toNamed(AppRoutes.quickReservation);
+             context.go(AppRoutes.quickReservation);
             },
           ),
           IconButton(
@@ -68,7 +68,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              Get.toNamed(AppRoutes.stayView);
+              context.go(AppRoutes.stayView);
             },
           ),
           IconButton(
@@ -78,7 +78,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              Get.toNamed(AppRoutes.notifications);
+              context.go(AppRoutes.notifications);
             },
           ),
         ],
@@ -627,7 +627,7 @@ class _DashboardState extends State<Dashboard> {
                             size: iconSize,
                           ),
                           onPressed: () {
-                            () => Get.toNamed(AppRoutes.settings);
+                            () => context.go(AppRoutes.settings);
                           },
                         ),
                       ],
@@ -664,7 +664,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.home,
                   'Dashboard',
-                  () => Get.toNamed(AppRoutes.dashboard),
+                  () => context.go(AppRoutes.dashboard),
                   config,
                   isActive: true, // Assuming dashboard is active
                 ),
@@ -673,7 +673,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.grid_view,
                   'Stay View',
-                  () => Get.toNamed(AppRoutes.stayView),
+                  () => context.go(AppRoutes.stayView),
                   config,
                 ),
                 _buildMenuTile(
@@ -681,7 +681,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_today,
                   'Quick Reservation',
-                  () => Get.toNamed(AppRoutes.quickReservation),
+                  () => context.go(AppRoutes.quickReservation),
                   config,
                 ),
                 _buildMenuTile(
@@ -689,7 +689,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_month,
                   'Reservation List',
-                  () => Get.toNamed(AppRoutes.reservationList),
+                  () => context.go(AppRoutes.reservationList),
                   config,
                 ),
                 _buildMenuTile(
@@ -697,7 +697,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.airplanemode_on,
                   'Arrival List',
-                  () => Get.toNamed(AppRoutes.arrivalList),
+                  () => context.go(AppRoutes.arrivalList),
                   config,
                 ),
                 _buildMenuTile(
@@ -705,7 +705,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.hotel,
                   'In-house List',
-                  () => Get.toNamed(AppRoutes.inhouseList),
+                  () => context.go(AppRoutes.inhouseList),
                   config,
                 ),
                 _buildMenuTile(
@@ -713,7 +713,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.emoji_transportation_rounded,
                   'Departure List',
-                  () => Get.toNamed(AppRoutes.departureList),
+                  () => context.go(AppRoutes.departureList),
                   config,
                 ),
                 _buildMenuTile(
@@ -721,7 +721,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.attach_money,
                   'Rates & Inventory',
-                  () => Get.toNamed(AppRoutes.ratesInventory),
+                  () => context.go(AppRoutes.ratesInventory),
                   config,
                 ),
                 _buildMenuTile(
@@ -729,7 +729,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.bar_chart,
                   'Manager Report',
-                  () => Get.toNamed(AppRoutes.managerReport),
+                  () => context.go(AppRoutes.managerReport),
                   config,
                 ),
                 Divider(
@@ -746,7 +746,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.tire_repair_sharp,
                   'Maintenance Block',
-                  () => Get.toNamed(AppRoutes.maintenanceBlock),
+                  () => context.go(AppRoutes.maintenanceBlock),
                   config,
                 ),
                 _buildMenuTile(
@@ -754,7 +754,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.checklist,
                   'Work Order List',
-                  () => Get.toNamed(AppRoutes.workOrderList),
+                  () => context.go(AppRoutes.workOrderList),
                   config,
                 ),
                 _buildMenuTile(
@@ -762,7 +762,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.house,
                   'House Status',
-                  () => Get.toNamed(AppRoutes.houseStatus),
+                  () => context.go(AppRoutes.houseStatus),
                   config,
                 ),
                 Divider(
@@ -779,7 +779,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.lock,
                   'Net Lock',
-                  () => Get.toNamed(AppRoutes.netLock),
+                  () => context.go(AppRoutes.netLock),
                   config,
                 ),
                 _buildMenuTile(
@@ -787,7 +787,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.notifications,
                   'Notification',
-                  () => Get.toNamed(AppRoutes.notifications),
+                  () => context.go(AppRoutes.notifications),
                   config,
                 ),
                 _buildMenuTile(
@@ -795,7 +795,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.settings,
                   'Settings',
-                  () => Get.toNamed(AppRoutes.settings),
+                  () => context.go(AppRoutes.settings),
                   config,
                 ),
               ],
@@ -971,7 +971,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => Get.toNamed(AppRoutes.arrivalList),
+                        () => context.go(AppRoutes.arrivalList),
                       ),
                     ),
                     SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
@@ -988,7 +988,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => Get.toNamed(AppRoutes.departureList),
+                        () => context.go(AppRoutes.departureList),
                       ),
                     ),
                   ],
@@ -1012,7 +1012,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => Get.toNamed(AppRoutes.arrivalList),
+                  () => context.go(AppRoutes.arrivalList),
                 ),
                 SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
                 _buildOccupancyCard(
@@ -1027,7 +1027,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => Get.toNamed(AppRoutes.departureList),
+                  () => context.go(AppRoutes.departureList),
                 ),
               ],
             ),
@@ -1036,7 +1036,7 @@ class _DashboardState extends State<Dashboard> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.inhouseList),
+                  onTap: () => context.go(AppRoutes.inhouseList),
                   child: _buildInHouseCard(
                     context,
                     textTheme,
@@ -1050,7 +1050,7 @@ class _DashboardState extends State<Dashboard> {
               SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.reservationList),
+                  onTap: () => context.go(AppRoutes.reservationList),
                   child: _buildBookingCard(
                     context,
                     textTheme,
@@ -1778,9 +1778,6 @@ class _DashboardState extends State<Dashboard> {
           _dashboardVm.totalAvailableRoomsRate.value;
       final outOfOrderRoomsRate = _dashboardVm.outOfOrderRoomsRate.value;
       final complementaryRoomsRate = _dashboardVm.complementaryRoomsRate.value;
-
-      print('totalRoomSoldRate$totalRoomSoldRate');
-      
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

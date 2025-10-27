@@ -30,6 +30,7 @@ import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart'
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:inta_mobile_pms/services/data_access_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 void main() async {
@@ -94,22 +95,23 @@ void main() async {
   Get.put<NetLockVm>(NetLockVm(Get.find<DashboardService>()));
   Get.put<AuditTrailVm>(AuditTrailVm(Get.find<ReservationListService>()));
 
-  runApp(const PMSApp());
+  runApp(PMSApp());
 }
 
 class PMSApp extends StatelessWidget {
-  const PMSApp({super.key});
+  final MessageService _messageService = MessageService();
+  PMSApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp.router(
       title: 'Inta Mobile PMS',
+      scaffoldMessengerKey: _messageService.messengerKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      initialRoute: AppRoutes.login,
-      getPages: appRoutes,
+      routerConfig: appRouter,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/save_work_order_req
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_orders_search_request.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:intl/intl.dart';
 
 class WorkOrderListVm extends GetxController {
@@ -48,7 +49,7 @@ class WorkOrderListVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           workOrderStatusResponse["errors"][0] ??
               'Error getting work order status!',
         );
@@ -73,12 +74,12 @@ class WorkOrderListVm extends GetxController {
           workOrders.add(data);
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting work orders!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Work order loading error: $e');
+      MessageService().error('Work order loading error: $e');
       throw Exception('Work order loading error: $e');
     } finally {
       isLoading.value = false;
@@ -109,7 +110,7 @@ class WorkOrderListVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           priorityResponse["errors"][0] ?? 'Error getting priorities!',
         );
       }
@@ -122,7 +123,7 @@ class WorkOrderListVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           workOrderCategories["errors"][0] ?? 'Error getting categories!',
         );
       }
@@ -135,7 +136,7 @@ class WorkOrderListVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           houseKeepers["errors"][0] ?? 'Error getting House Keepers!',
         );
       }
@@ -144,7 +145,7 @@ class WorkOrderListVm extends GetxController {
           unitRoomList.add({"id": item["id"], "description": item["name"]});
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           unitRooms["errors"][0] ?? 'Error getting unit rooms!',
         );
       }
@@ -153,10 +154,10 @@ class WorkOrderListVm extends GetxController {
           reasonList.add({"id": item["reasonId"], "description": item["name"]});
         }
       } else {
-        MessageHelper.error(reasons["errors"][0] ?? 'Error getting reasons!');
+        MessageService().error(reasons["errors"][0] ?? 'Error getting reasons!');
       }
     } catch (e) {
-      MessageHelper.error('Work order loading error: $e');
+      MessageService().error('Work order loading error: $e');
       throw Exception('Error loading data for add work order: $e');
     }
   }
@@ -230,16 +231,16 @@ class WorkOrderListVm extends GetxController {
         saveRequest,
       );
       if (response["isSuccessful"] == true) {
-        MessageHelper.success(
+        MessageService().success(
           response["message"] ?? 'Work order saved Successfully!',
         );
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error saving work orders!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error Saving new work order: $e');
+      MessageService().error('Error Saving new work order: $e');
       throw Exception('Error Saving new work order: $e');
     }
   }

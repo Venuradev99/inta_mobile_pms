@@ -137,7 +137,7 @@ class _ManagerReportState extends State<ManagerReport> {
         content: const Text('This report shows financial data and room statistics. Select a time period (Today, PDT, or YTD) to view corresponding data.'),
         actions: [
           TextButton(
-            onPressed: () =>Get.back(),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close'),
           ),
         ],

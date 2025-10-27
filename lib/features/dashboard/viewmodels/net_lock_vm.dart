@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class NetLockVm extends GetxController {
   final DashboardService _dashboardService;
@@ -47,12 +48,12 @@ class NetLockVm extends GetxController {
             .toList();
         netlockDataFiltered.value = netlockData;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting lock data!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error while loading net locks: $e');
+      MessageService().error('Error while loading net locks: $e');
       throw Exception('Error while loading net locks: $e');
     } finally {
       isLoading.value = false;
@@ -94,16 +95,16 @@ class NetLockVm extends GetxController {
       };
       final response = await _dashboardService.lockBooking(payload);
       if (response["isSuccessful"] == true) {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ??
               '${selectedIndexes.length} reservation${selectedIndexes.length > 1 ? 's' : ''} unlocked and removed',
         );
         await loadInitialData();
       } else {
-        MessageHelper.error(response["errors"][0] ?? 'Error while unlocking!');
+        MessageService().error(response["errors"][0] ?? 'Error while unlocking!');
       }
     } catch (e) {
-      MessageHelper.error('Error while unlocking: $e');
+      MessageService().error('Error while unlocking: $e');
       throw Exception('Error while unlocking: $e');
     }
   }

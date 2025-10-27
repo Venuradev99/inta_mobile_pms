@@ -189,7 +189,7 @@ class _AmendStayState extends State<AmendStay> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => Get.back(),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Amend Stay',
@@ -693,7 +693,7 @@ class _AmendStayState extends State<AmendStay> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Get.back(),
+              onPressed: () => context.pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightgrey),
                 padding: EdgeInsets.symmetric(
@@ -814,7 +814,7 @@ class _AmendStayState extends State<AmendStay> {
     );
     await _amendStayVm.saveAmendStay(saveData);
     if (!mounted) return;
-    Get.back();
+    context.pop();
   }
 
   String convertTo24HourFormat(String time12) {

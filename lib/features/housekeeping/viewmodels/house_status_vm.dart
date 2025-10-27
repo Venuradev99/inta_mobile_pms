@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class HouseStatusVm extends GetxController {
   final HouseKeepingService _houseKeepingServices;
@@ -49,7 +50,7 @@ class HouseStatusVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           houseKeepingStatus["errors"][0] ??
               'Error getting House Keeping Status!',
         );
@@ -64,7 +65,7 @@ class HouseStatusVm extends GetxController {
           });
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           houseKeepers["errors"][0] ?? 'Error getting House Keepers!',
         );
       }
@@ -84,11 +85,11 @@ class HouseStatusVm extends GetxController {
           roomList.add(data);
         }
       } else {
-        MessageHelper.error(roomResult["errors"][0] ?? 'Error getting rooms!');
+        MessageService().error(roomResult["errors"][0] ?? 'Error getting rooms!');
       }
       groupRoomsBySection(roomList);
     } catch (e) {
-      MessageHelper.error('Error loading rooms: $e');
+      MessageService().error('Error loading rooms: $e');
       throw Exception('Error loading rooms: $e');
     } finally {
       isLoading.value = false;

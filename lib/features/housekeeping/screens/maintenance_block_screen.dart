@@ -193,7 +193,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   //                     statusCounts.keys.toList().indexOf(entry.key),
   //                   );
   //                 });
-  //                Get.back();
+  //                context.go();
   //               },
   //             ),
   //           ),
@@ -245,7 +245,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 _searchController.clear();
               });
             } else {
-              Get.toNamed(AppRoutes.dashboard);
+             context.go(AppRoutes.dashboard);
             }
           },
         ),
@@ -278,7 +278,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-              Get.toNamed(AppRoutes.blockRoomSelection);
+             context.push(AppRoutes.blockRoomSelection);
             },
           ),
         ],
@@ -430,7 +430,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Get.toNamed(AppRoutes.blockRoomSelection);
+         context.go(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),

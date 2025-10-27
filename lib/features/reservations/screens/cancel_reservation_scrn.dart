@@ -54,7 +54,7 @@ class _CancelReservationState extends State<CancelReservation> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close, color: AppColors.black),
-          onPressed: () => Get.back(),
+          onPressed: () =>Navigator.of(context).pop(),
         ),
 
         title: Text(
@@ -427,7 +427,7 @@ class _CancelReservationState extends State<CancelReservation> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Get.back(),
+              onPressed: () => Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14.0),
                 side: const BorderSide(color: AppColors.lightgrey),

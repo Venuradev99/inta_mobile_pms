@@ -4,6 +4,8 @@ import 'package:inta_mobile_pms/features/reservations/models/folio_payment_detai
 import 'package:inta_mobile_pms/features/reservations/models/room_move_save_data.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class RoomMoveVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -33,7 +35,7 @@ class RoomMoveVm extends GetxController {
             .map((item) => {"id": item["roomTypeId"], "name": item["name"]})
             .toList();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room type data!',
         );
       }
@@ -64,7 +66,7 @@ class RoomMoveVm extends GetxController {
           conversionRate: result["conversionRate"],
         );
       } else {
-        MessageHelper.error(
+        MessageService().error(
           folioDetailsResponse["errors"][0] ?? 'Error getting folio data!',
         );
       }
@@ -93,12 +95,12 @@ class RoomMoveVm extends GetxController {
             .map((item) => {"id": item["roomId"], "name": item["name"]})
             .toList();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error getting available rooms!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error while loading available rooms: $e');
+      MessageService().error('Error while loading available rooms: $e');
       throw Exception('Error while loading available rooms: $e');
     } finally {}
   }
@@ -130,14 +132,14 @@ class RoomMoveVm extends GetxController {
         final selectedRoom = getRoom(saveData.roomId!);
         String msg =
             'Room moved successfully to $selectedRoomType - $selectedRoom';
-        MessageHelper.success(msg);
-        Get.back();
+        MessageService().success(msg);
+         NavigationService().back();
       } else {
         String msg = response["errors"][0] ?? "Error while Saving!";
-        MessageHelper.success(msg);
+        MessageService().success(msg);
       }
     } catch (e) {
-       MessageHelper.success('Error saving Room Move: $e');
+       MessageService().success('Error saving Room Move: $e');
       throw Exception('Error saving Room Move: $e');
     }
   }

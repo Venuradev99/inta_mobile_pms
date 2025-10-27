@@ -114,7 +114,7 @@ class _MessageDialogState extends State<MessageDialog>
   void _handleDismiss() {
     _controller.reverse().then((_) {
       if (mounted) {
-       Get.back();
+       Navigator.of(context).pop();
         widget.onDismiss?.call();
       }
     });

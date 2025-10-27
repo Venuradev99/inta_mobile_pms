@@ -8,6 +8,7 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class ArrivalListVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -118,7 +119,7 @@ class ArrivalListVm extends GetxController {
         arrivalList.refresh();
         arrivalFilteredList.refresh();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           arrivalListResponse["errors"][0] ?? 'Error loading arrival list!',
         );
       }
@@ -136,7 +137,7 @@ class ArrivalListVm extends GetxController {
           statusList.add(data);
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           statusResponse["errors"][0] ?? 'Error loading status!',
         );
       }
@@ -153,7 +154,7 @@ class ArrivalListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room details!',
         );
       }
@@ -170,7 +171,7 @@ class ArrivalListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           reservationTypeResponse["errors"][0] ??
               'Error getting reservation types!',
         );
@@ -188,7 +189,7 @@ class ArrivalListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
         );
       }
@@ -205,13 +206,13 @@ class ArrivalListVm extends GetxController {
           roomTypes.refresh();
         }
       } else {
-        MessageHelper.error(
+        MessageService().error(
           businessSourcesResponse["errors"][0] ??
               'Error getting business sources!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error getting reservation list: $e');
+      MessageService().error('Error getting reservation list: $e');
       throw Exception('Error getting reservation list: $e');
     } finally {
       isLoading.value = false;
@@ -495,12 +496,12 @@ class ArrivalListVm extends GetxController {
         );
         allGuestDetails.value = guestItem;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading guest data!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     } finally {
       isBottomSheetDataLoading.value = false;
@@ -526,13 +527,13 @@ class ArrivalListVm extends GetxController {
         }
         guestData["reasons"] = reasonList;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading cancel data!',
         );
       }
       return guestData;
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     }
   }
@@ -550,13 +551,13 @@ class ArrivalListVm extends GetxController {
         }
         data["reasons"] = reasonList;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading noshow data!',
         );
       }
       return data;
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     }
   }
@@ -574,14 +575,14 @@ class ArrivalListVm extends GetxController {
         }
         guestData["reasons"] = reasonList;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           response["errors"][0] ?? 'Error loading void data!',
         );
       }
 
       return guestData;
     } catch (e) {
-      MessageHelper.error('Error getting all Guest data: $e');
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     }
   }
@@ -614,13 +615,13 @@ class ArrivalListVm extends GetxController {
         final msg = response["message"].isNotEmpty
             ? response["message"]
             : 'Room unassigned successfully!';
-        MessageHelper.success(msg);
+        MessageService().success(msg);
       } else {
         final msg = response["errors"][0] ?? 'Room unassign failed!';
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
     } catch (e) {
-      MessageHelper.error('Error unassign request: $e');
+      MessageService().error('Error unassign request: $e');
       throw Exception('Error unassign request: $e');
     }
   }

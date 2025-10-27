@@ -128,7 +128,7 @@ class _ChangeReservationTypeDialogState
             ),
           ),
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.of(context).pop(),
             icon: const Icon(Icons.close, color: AppColors.lightgrey),
             iconSize: ResponsiveConfig.iconSize(context),
           ),
@@ -356,7 +356,7 @@ class _ChangeReservationTypeDialogState
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Get.back(),
+              onPressed: () =>  Navigator.of(context).pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightgrey),
                 padding: EdgeInsets.symmetric(

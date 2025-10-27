@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/maintenanceblock_sa
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
 
 class MaintenanceBlockVm extends GetxController {
   final HouseKeepingService _houseKeepingService;
@@ -73,7 +74,7 @@ class MaintenanceBlockVm extends GetxController {
             .toList();
         maintenanceBlockListFiltered.value = maintenanceBlockList;
       } else {
-        MessageHelper.error(
+        MessageService().error(
           maintenanceblockResponse["errors"][0] ??
               'Error getting maintenance blocks!',
         );
@@ -87,7 +88,7 @@ class MaintenanceBlockVm extends GetxController {
             )
             .toList();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           roomResponse["errors"][0] ?? 'Error getting rooms!',
         );
       }
@@ -103,12 +104,12 @@ class MaintenanceBlockVm extends GetxController {
             )
             .toList();
       } else {
-        MessageHelper.error(
+        MessageService().error(
           reasonResponse["errors"][0] ?? 'Error getting reasons!',
         );
       }
     } catch (e) {
-      MessageHelper.error('Error in loading maintenance blocks: $e');
+      MessageService().error('Error in loading maintenance blocks: $e');
       throw Exception('Error in loading maintenance blocks: $e');
     } finally {
       isLoading.value = false;

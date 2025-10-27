@@ -200,8 +200,8 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'View Reservation',
             onTap: () async {
               if (!mounted) return;
-              Get.back();
-              Get.toNamed(AppRoutes.viewReservation, arguments: guestData);
+              context.pop();
+              context.push(AppRoutes.viewReservation, extra: guestData);
             },
           ),
           if (isAssign == true)
@@ -209,7 +209,7 @@ class _ArrivalListState extends State<ArrivalList> {
               icon: Icons.meeting_room,
               label: 'Assign Rooms',
               onTap: () async {
-                Get.back();
+                context.pop();
                 await AssignRoomsBottomSheet.show(
                   context: context,
                   guestItem: guestData!,
@@ -221,7 +221,7 @@ class _ArrivalListState extends State<ArrivalList> {
               icon: Icons.meeting_room,
               label: 'Unassign Rooms',
               onTap: () async {
-                Get.back();
+                context.pop();
                 final confirmed = await ConfirmationDialog.show(
                   context: Get.context!,
                   title: 'Unassign Rooms',
@@ -233,7 +233,7 @@ class _ArrivalListState extends State<ArrivalList> {
                   icon: Icons.meeting_room,
                 );
                 if (confirmed == true) {
-                  Get.back();
+                  context.pop();
                   await _arrivalListVm.unassignRoom(guestData!);
                   if (!mounted) return;
                 }
@@ -244,12 +244,28 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.edit_calendar,
             label: 'Amend Stay',
             onTap: () {
-              Get.back();
-              Get.to(
-                () => AmendStay(guestItem: guestData),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AmendStay(guestItem: guestData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0); // slide from bottom
+                        const end = Offset.zero;
+                        const curve = Curves.ease;
+
+                        var tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: curve));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -257,7 +273,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.swap_horiz,
             label: 'Change Reservation Type',
             onTap: () async {
-              Get.back();
+              context.pop();
 
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 await context.showChangeReservationTypeDialog(
@@ -288,12 +304,29 @@ class _ArrivalListState extends State<ArrivalList> {
                     (guestData?.totalAmount ?? 0.0) -
                     (guestData?.balanceAmount ?? 0.0),
               };
-              Get.back();
-              Get.to(
-                () => CancelReservation(reservationData: data),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      CancelReservation(reservationData: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -304,7 +337,7 @@ class _ArrivalListState extends State<ArrivalList> {
               final voidReservationData = await _arrivalListVm
                   .getVoidReservationData(item);
               if (!mounted) return;
-              Get.back();
+              context.pop();
               final data = {
                 'reasons': voidReservationData["reasons"],
                 'bookingRoomId': guestData?.bookingRoomId,
@@ -320,11 +353,28 @@ class _ArrivalListState extends State<ArrivalList> {
                     (guestData?.totalAmount ?? 0.0) -
                     (guestData?.balanceAmount ?? 0.0),
               };
-              Get.to(
-                () => VoidReservation(reservationData: data),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      VoidReservation(reservationData: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -336,7 +386,7 @@ class _ArrivalListState extends State<ArrivalList> {
                 final noShowReservationData = await _arrivalListVm
                     .getNoShowReservationData(item);
                 if (!mounted) return;
-                Get.back();
+                context.pop();
                 final noShowData = NoShowReservationData(
                   reasons: noShowReservationData["reasons"],
                   bookingRoomId: guestData?.bookingRoomId ?? '',
@@ -354,11 +404,28 @@ class _ArrivalListState extends State<ArrivalList> {
                   balance: guestData?.balanceAmount ?? 0.0,
                   initialNoShowFee: null,
                 );
-                Get.to(
-                  () => NoShowReservationPage(data: noShowData),
-                  transition: Transition.downToUp,
-                  curve: Curves.ease,
-                  duration: const Duration(milliseconds: 300),
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        NoShowReservationPage(data: noShowData),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          // Slide from bottom to top (downToUp)
+                          const begin = Offset(0.0, 1.0);
+                          const end = Offset.zero;
+                          final tween = Tween(
+                            begin: begin,
+                            end: end,
+                          ).chain(CurveTween(curve: Curves.ease));
+                          final offsetAnimation = animation.drive(tween);
+
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                    transitionDuration: const Duration(milliseconds: 300),
+                  ),
                 );
               },
             ),
@@ -366,8 +433,8 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.person,
             label: 'Edit Guest Details',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.maintenanceBlock);
+              context.pop();
+              context.push(AppRoutes.maintenanceBlock);
             },
           ),
           ActionItem(
@@ -375,7 +442,7 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Room Move',
             onTap: () async {
               if (!mounted) return;
-              Get.back();
+              context.pop();
               GuestItem data = GuestItem(
                 bookingRoomId: guestData?.bookingRoomId ?? '',
                 guestName: guestData?.guestName ?? '',
@@ -390,12 +457,28 @@ class _ArrivalListState extends State<ArrivalList> {
                 roomType: guestData?.roomType ?? '',
                 room: guestData?.room ?? '',
               );
-              Get.to(
-                () => RoomMovePage(guestItem: data),
-                transition: Transition
-                    .downToUp, // slides from bottom like Offset(0.0, 1.0)
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      RoomMovePage(guestItem: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),
@@ -404,14 +487,31 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Stop Room Move',
             onTap: () async {
               if (!mounted) return;
-              Get.back();
-              Get.to(
-                () => StopRoomMoveScreen(
-                  bookingRoomId: guestData?.bookingRoomId ?? '',
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      StopRoomMoveScreen(
+                        bookingRoomId: guestData?.bookingRoomId ?? '',
+                      ),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
                 ),
-                transition: Transition.downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
               );
             },
           ),
@@ -419,16 +519,16 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.receipt,
             label: 'Print Invoice',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.maintenanceBlock);
+              context.pop();
+              context.push(AppRoutes.maintenanceBlock);
             },
           ),
           ActionItem(
             icon: Icons.description,
             label: 'Print Res. Voucher',
             onTap: () {
-              Get.back();
-              Get.toNamed(AppRoutes.maintenanceBlock);
+              context.pop();
+              context.push(AppRoutes.maintenanceBlock);
             },
           ),
           // UPDATED: Send Res. Voucher with MessageDialog
@@ -436,7 +536,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.email,
             label: 'Send Res. Voucher',
             onTap: () async {
-              Get.back();
+              context.pop();
 
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
@@ -458,7 +558,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.email,
             label: 'Resend Booking Email',
             onTap: () async {
-              Get.back();
+              context.pop();
 
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
@@ -480,7 +580,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.mark_email_unread,
             label: 'Resend Review Email',
             onTap: () async {
-              Get.back();
+              context.pop();
 
               // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
@@ -501,13 +601,29 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.assignment,
             label: 'Audit Trail',
             onTap: () async {
-              Get.back();
-              Get.to(
-                () => AuditTrail(guestItem: guestData),
-                transition: Transition
-                    .downToUp,
-                curve: Curves.ease,
-                duration: const Duration(milliseconds: 300),
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AuditTrail(guestItem: guestData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top (downToUp)
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
               );
             },
           ),

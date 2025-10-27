@@ -45,7 +45,7 @@ class _SettingsState extends State<Settings> {
             Icons.arrow_back_ios,
             color: AppColors.onSurface,
           ),
-          onPressed: () => Get.toNamed(AppRoutes.dashboard),
+          onPressed: () => context.go(AppRoutes.dashboard),
         ),
       ),
       body: SingleChildScrollView(

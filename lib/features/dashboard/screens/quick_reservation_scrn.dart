@@ -145,7 +145,7 @@ TextEditingController emailController = TextEditingController();
     final iconSize = ResponsiveConfig.iconSize(context);
     final listItemSpacing = ResponsiveConfig.listItemSpacing(context);
     final fontScale = ResponsiveConfig.fontScale(context);
-
+    
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(fontScale)),
       child: Scaffold(

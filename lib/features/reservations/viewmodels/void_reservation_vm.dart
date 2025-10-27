@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class VoidReservationVm extends GetxController {
   final ReservationListService _reservationListService;
@@ -24,14 +26,14 @@ class VoidReservationVm extends GetxController {
         final msg = response["message"].isNotEmpty
             ? response["message"]
             : 'Reservation void successfully!';
-        MessageHelper.success(msg);
+        MessageService().success(msg);
       } else {
         final msg = response["errors"][0];
-        MessageHelper.error(msg);
+        MessageService().error(msg);
       }
-      Get.back();
+       NavigationService().back();
     } catch (e) {
-      MessageHelper.success('Error void room request: $e');
+      MessageService().success('Error void room request: $e');
       throw Exception('Error void room request: $e');
     }
   }

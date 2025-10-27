@@ -60,7 +60,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.close, color: AppColors.black),
-        onPressed: () => Get.back(),
+        onPressed: () => context.pop(),
       ),
       title: Text(
         'Room Move',
@@ -482,7 +482,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Get.back(),
+              onPressed: () => context.pop(),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.lightgrey),
                 padding: EdgeInsets.symmetric(
@@ -591,7 +591,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => context.pop(),
               child: Text(
                 'Cancel',
                 style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
@@ -603,7 +603,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
             ElevatedButton(
               onPressed: () async {
                 try {
-                  Get.back();
+                  context.pop();
                   final roomMoveVm = Get.find<RoomMoveVm>();
                   final folioDetails = roomMoveVm.folioDetails.value;
 

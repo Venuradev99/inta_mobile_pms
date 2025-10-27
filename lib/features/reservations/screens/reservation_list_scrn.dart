@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
@@ -56,10 +57,11 @@ class _ReservationListState extends State<ReservationList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'reservation',
-                  roomTypes:_reservationListVm.roomTypes.toList(),
-                  reservationTypes:_reservationListVm.reservationTypes.toList(),
-                  statuses:_reservationListVm.statuses.toList(),
-                  businessSources:_reservationListVm.businessSources.toList(),
+                  roomTypes: _reservationListVm.roomTypes.toList(),
+                  reservationTypes: _reservationListVm.reservationTypes
+                      .toList(),
+                  statuses: _reservationListVm.statuses.toList(),
+                  businessSources: _reservationListVm.businessSources.toList(),
                   filteredData: _reservationListVm.receivedFilters.value ?? {},
                   onApply: _reservationListVm.applyReservationFilters,
                   scrollController: scrollController,
@@ -176,7 +178,7 @@ class _ReservationListState extends State<ReservationList> {
     bool isNoshow = int.tryParse(item.status.toString()) == 2;
     int status = int.tryParse(guestData?.status.toString() ?? '') ?? 0;
     bool isAssign = guestData?.roomId == 0;
-    bool isUnAssignRoom =  _reservationListVm.isUnAssign(guestData!);
+    bool isUnAssignRoom = _reservationListVm.isUnAssign(guestData!);
 
     showModalBottomSheet(
       context: context,
@@ -193,10 +195,10 @@ class _ReservationListState extends State<ReservationList> {
               icon: Icons.visibility,
               label: 'View Reservation',
               onTap: () {
-                Get.back();
-                Get.toNamed(
+                Navigator.of(context).pop();
+                context.push(
                   AppRoutes.viewReservation,
-                  arguments: _reservationListVm.allGuestDetails.value,
+                  extra: _reservationListVm.allGuestDetails.value,
                 );
               },
             ),
@@ -226,15 +228,28 @@ class _ReservationListState extends State<ReservationList> {
                     balance: guestData?.balanceAmount ?? 0.0,
                     initialNoShowFee: null,
                   );
-                  Get.back();
-                  Get.to(
-                    () => NoShowReservationPage(data: noShowData),
-                    transition: Transition
-                        .downToUp, // slides from bottom (like Offset(0.0, 1.0))
-                    curve: Curves.ease,
-                    duration: const Duration(
-                      milliseconds: 300,
-                    ), // optional, same speed as original
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          NoShowReservationPage(data: noShowData),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0); // start from bottom
+                            const end = Offset.zero;
+                            final tween = Tween(
+                              begin: begin,
+                              end: end,
+                            ).chain(CurveTween(curve: Curves.ease));
+                            final offsetAnimation = animation.drive(tween);
+
+                            return SlideTransition(
+                              position: offsetAnimation,
+                              child: child,
+                            );
+                          },
+                      transitionDuration: const Duration(milliseconds: 300),
+                    ),
                   );
                 },
               ),
@@ -261,8 +276,8 @@ class _ReservationListState extends State<ReservationList> {
                       (guestData?.balanceAmount ?? 0.0),
                 };
 
-                Get.back();
-                Get.toNamed(AppRoutes.cancelReservation, arguments: data);
+                Navigator.of(context).pop();
+                context.push(AppRoutes.cancelReservation, extra: data);
               },
             ),
             if (isAssign == true)
@@ -270,7 +285,7 @@ class _ReservationListState extends State<ReservationList> {
                 icon: Icons.meeting_room,
                 label: 'Assign Rooms',
                 onTap: () async {
-                  Get.back();
+                  Navigator.of(context).pop();
                   await AssignRoomsBottomSheet.show(
                     context: context,
                     guestItem: guestData!,
@@ -282,7 +297,7 @@ class _ReservationListState extends State<ReservationList> {
                 icon: Icons.meeting_room,
                 label: 'Unassign Rooms',
                 onTap: () async {
-                  Get.back();
+                  Navigator.of(context).pop();
                   final confirmed = await ConfirmationDialog.show(
                     context: context,
                     title: 'Unassign Rooms',
@@ -303,7 +318,7 @@ class _ReservationListState extends State<ReservationList> {
               icon: Icons.swap_horiz,
               label: 'Change Reservation Type',
               onTap: () async {
-                Get.back();
+                Navigator.of(context).pop();
 
                 WidgetsBinding.instance.addPostFrameCallback((_) async {
                   await context.showChangeReservationTypeDialog(
@@ -320,26 +335,6 @@ class _ReservationListState extends State<ReservationList> {
           ],
         );
       },
-    );
-  }
-
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
     );
   }
 }

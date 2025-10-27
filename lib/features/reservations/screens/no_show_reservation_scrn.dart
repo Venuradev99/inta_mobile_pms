@@ -142,7 +142,7 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
 
     await _noShowReservationVm.noShowReservation(result);
     if (!mounted) return;
-    Get.back();
+   context.pop();
   }
 
   @override
@@ -161,7 +161,7 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
             color: AppColors.black,
             size: ResponsiveConfig.iconSize(context),
           ),
-          onPressed: () => Get.back(),
+          onPressed: () =>context.pop(),
         ),
         title: Text(
           'No Show Reservation',
@@ -597,7 +597,7 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => Get.back(),
+                onPressed: () =>context.pop(),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: const BorderSide(color: AppColors.lightgrey),

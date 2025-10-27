@@ -475,7 +475,7 @@ class _LoginPageState extends State<LoginPage>
               // Ensure navigation to dashboard after login
 
               // if (mounted) {
-              //   Get.toNamed(AppRoutes.dashboard);
+              //  context.go(AppRoutes.dashboard);
               // }
             },
       style: ElevatedButton.styleFrom(
