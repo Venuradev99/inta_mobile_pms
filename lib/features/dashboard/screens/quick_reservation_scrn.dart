@@ -10,11 +10,13 @@ class QuickReservation extends StatefulWidget {
   State<QuickReservation> createState() => _QuickReservationState();
 }
 
-class _QuickReservationState extends State<QuickReservation> {
+class _QuickReservationState extends State<QuickReservation> with SingleTickerProviderStateMixin {
+  late AnimationController _shimmerController;
+  bool _isLoading = true;
   int selectedIndex = 0;
   DateTime checkInDate = DateTime.now();
   DateTime checkOutDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // Updated to ~1 PM as per screenshot
+  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // ~1 PM as per screenshot
   TimeOfDay checkOutTime = const TimeOfDay(hour: 13, minute: 0);
   int nights = 1;
   String? selectedBusinessSource;
@@ -98,12 +100,25 @@ class _QuickReservationState extends State<QuickReservation> {
   @override
   void initState() {
     super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+
+    // Simulate loading (replace with real async data fetch, e.g., API call)
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    });
+
     _calculateNights();
     _updateTotals();
   }
 
   @override
   void dispose() {
+    _shimmerController.dispose();
     guestNameController.dispose();
     mobileNumberController.dispose();
     emailController.dispose();
@@ -201,261 +216,165 @@ class _QuickReservationState extends State<QuickReservation> {
           title: 'Quick Reservation',
           onRefreshTap: () {},
         ),
-        bottomNavigationBar: _buildBottomBar(theme, fontScale, defaultPadding, cardRadius, isMobile),
+        bottomNavigationBar: _isLoading ? null : _buildBottomBar(theme, fontScale, defaultPadding, cardRadius, isMobile),
         body: SingleChildScrollView(
           padding: horizontalPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(height: defaultPadding),
-              // Toggle Bar (Segmented Buttons)
-              Container(
-                padding: EdgeInsets.all(defaultPadding / 4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(cardRadius),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(options.length, (index) {
-                    final bool isSelected = selectedIndex == index;
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedIndex = index;
-                            // Reset conditional fields on tab change
-                            selectedOta = null;
-                            selectedTravelAgent = null;
-                            selectedBusinessSource = null;
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: defaultPadding),
-                          margin: EdgeInsets.symmetric(horizontal: defaultPadding / 4),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primary : AppColors.surface,
-                            borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                            border: Border.all(
-                              color: isSelected ? AppColors.primary : Colors.transparent,
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              options[index],
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontSize: 14 * fontScale,
-                                fontWeight: FontWeight.w600,
-                                color: isSelected ? AppColors.onPrimary : AppColors.darkgrey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              SizedBox(height: listItemSpacing * 1.25),
-
-              // Check-in/Check-out Section
-              _buildCheckInOutSection(
-                theme: theme,
-                isMobile: isMobile,
-                defaultPadding: defaultPadding,
-                iconSize: iconSize,
-                fontScale: fontScale,
-                listItemSpacing: listItemSpacing,
-              ),
-              SizedBox(height: listItemSpacing * 1.25),
-
-              // Conditional Extra Dropdowns based on selected tab
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: (selectedIndex == 2)
-                    ? _buildDropdownField(
-                        key: const ValueKey('ota'),
-                        label: 'OTA *',
-                        value: selectedOta,
-                        hint: 'Select OTA',
-                        items: otas,
-                        onChanged: (value) => setState(() => selectedOta = value),
-                        theme: theme,
-                        fontScale: fontScale,
-                        cardRadius: cardRadius,
-                      )
-                    : (selectedIndex == 3)
-                        ? _buildDropdownField(
-                            key: const ValueKey('travel_agent'),
-                            label: 'Travel Agent *',
-                            value: selectedTravelAgent,
-                            hint: 'Select Travel Agent',
-                            items: travelAgents,
-                            onChanged: (value) => setState(() => selectedTravelAgent = value),
-                            theme: theme,
-                            fontScale: fontScale,
-                            cardRadius: cardRadius,
-                          )
-                        : const SizedBox.shrink(key: ValueKey('none')),
-              ),
-              if (selectedIndex == 2 || selectedIndex == 3) SizedBox(height: listItemSpacing),
-
-              // Business Source (always shown)
-              _buildDropdownField(
-                label: 'Business Source',
-                value: selectedBusinessSource,
-                hint: 'Select Business Source',
-                items: businessSources,
-                onChanged: (value) => setState(() => selectedBusinessSource = value),
-                theme: theme,
-                fontScale: fontScale,
-                cardRadius: cardRadius,
-              ),
-              SizedBox(height: listItemSpacing),
-
-              // Reservation Type and Rooms
-              if (isMobile)
-                Column(
-                  children: [
-                    _buildDropdownField(
-                      label: 'Reservation Type *',
-                      value: reservationType,
-                      hint: 'Select Type',
-                      items: reservationTypes,
-                      onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
-                      theme: theme,
-                      fontScale: fontScale,
-                      cardRadius: cardRadius,
-                    ),
-                    SizedBox(height: listItemSpacing),
-                    _buildStepperField(
-                      label: 'Rooms *',
-                      value: roomCount,
-                      onChanged: (value) {
-                        setState(() {
-                          roomCount = value;
-                          _updateTotals();
-                        });
-                      },
-                      theme: theme,
-                      fontScale: fontScale,
-                      cardRadius: cardRadius,
-                      minValue: 1,
-                    ),
-                  ],
-                )
-              else
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDropdownField(
-                        label: 'Reservation Type *',
-                        value: reservationType,
-                        hint: 'Select Type',
-                        items: reservationTypes,
-                        onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
-                        theme: theme,
-                        fontScale: fontScale,
-                        cardRadius: cardRadius,
-                      ),
-                    ),
-                    SizedBox(width: defaultPadding),
-                    Expanded(
-                      child: _buildStepperField(
-                        label: 'Rooms *',
-                        value: roomCount,
-                        onChanged: (value) {
-                          setState(() {
-                            roomCount = value;
-                            _updateTotals();
-                          });
-                        },
-                        theme: theme,
-                        fontScale: fontScale,
-                        cardRadius: cardRadius,
-                        minValue: 1,
-                      ),
-                    ),
-                  ],
-                ),
-              SizedBox(height: listItemSpacing * 1.5),
-
-              // Room Details Card
-              Card(
-                color: AppColors.surface,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
-                elevation: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(defaultPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _isLoading
+                ? _buildShimmerLayout(
+                    theme: theme,
+                    isMobile: isMobile,
+                    defaultPadding: defaultPadding,
+                    listItemSpacing: listItemSpacing,
+                    cardRadius: cardRadius,
+                  )
+                : Column(
+                    key: const ValueKey('loaded'),
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Room Details',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 18 * fontScale,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.darkgrey,
+                      SizedBox(height: defaultPadding),
+                      // Toggle Bar (Segmented Buttons)
+                      Container(
+                        padding: EdgeInsets.all(defaultPadding / 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(cardRadius),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
                             ),
-                          ),
-                          Tooltip(
-                            message: 'Override the default rate',
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Rate Override',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(options.length, (index) {
+                            final bool isSelected = selectedIndex == index;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedIndex = index;
+                                    // Reset conditional fields on tab change
+                                    selectedOta = null;
+                                    selectedTravelAgent = null;
+                                    selectedBusinessSource = null;
+                                  });
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: defaultPadding),
+                                  margin: EdgeInsets.symmetric(horizontal: defaultPadding / 4),
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? AppColors.primary : AppColors.surface,
+                                    borderRadius: BorderRadius.circular(cardRadius / 1.5),
+                                    border: Border.all(
+                                      color: isSelected ? AppColors.primary : Colors.transparent,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      options[index],
+                                      textAlign: TextAlign.center,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 14 * fontScale,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected ? AppColors.onPrimary : AppColors.darkgrey,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                                SizedBox(width: 8),
-                                Switch(
-                                  value: rateOverride,
-                                  onChanged: (value) => setState(() => rateOverride = value),
-                                  activeColor: AppColors.primary,
-                                  inactiveThumbColor: AppColors.lightgrey,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      SizedBox(height: listItemSpacing * 1.25),
+
+                      // Check-in/Check-out Section
+                      _buildCheckInOutSection(
+                        theme: theme,
+                        isMobile: isMobile,
+                        defaultPadding: defaultPadding,
+                        iconSize: iconSize,
+                        fontScale: fontScale,
+                        listItemSpacing: listItemSpacing,
+                      ),
+                      SizedBox(height: listItemSpacing * 1.25),
+
+                      // Conditional Extra Dropdowns based on selected tab
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: (selectedIndex == 2)
+                            ? _buildDropdownField(
+                                key: const ValueKey('ota'),
+                                label: 'OTA *',
+                                value: selectedOta,
+                                hint: 'Select OTA',
+                                items: otas,
+                                onChanged: (value) => setState(() => selectedOta = value),
+                                theme: theme,
+                                fontScale: fontScale,
+                                cardRadius: cardRadius,
+                              )
+                            : (selectedIndex == 3)
+                                ? _buildDropdownField(
+                                    key: const ValueKey('travel_agent'),
+                                    label: 'Travel Agent *',
+                                    value: selectedTravelAgent,
+                                    hint: 'Select Travel Agent',
+                                    items: travelAgents,
+                                    onChanged: (value) => setState(() => selectedTravelAgent = value),
+                                    theme: theme,
+                                    fontScale: fontScale,
+                                    cardRadius: cardRadius,
+                                  )
+                                : const SizedBox.shrink(key: ValueKey('none')),
+                      ),
+                      if (selectedIndex == 2 || selectedIndex == 3) SizedBox(height: listItemSpacing),
+
+                      // Business Source (always shown)
+                      _buildDropdownField(
+                        label: 'Business Source',
+                        value: selectedBusinessSource,
+                        hint: 'Select Business Source',
+                        items: businessSources,
+                        onChanged: (value) => setState(() => selectedBusinessSource = value),
+                        theme: theme,
+                        fontScale: fontScale,
+                        cardRadius: cardRadius,
                       ),
                       SizedBox(height: listItemSpacing),
+
+                      // Reservation Type and Rooms
                       if (isMobile)
                         Column(
                           children: [
                             _buildDropdownField(
-                              label: 'Room Type *',
-                              value: selectedRoomType,
-                              hint: 'Select Room Type',
-                              items: roomTypes,
-                              onChanged: (value) => setState(() => selectedRoomType = value),
+                              label: 'Reservation Type *',
+                              value: reservationType,
+                              hint: 'Select Type',
+                              items: reservationTypes,
+                              onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
                               theme: theme,
                               fontScale: fontScale,
                               cardRadius: cardRadius,
                             ),
                             SizedBox(height: listItemSpacing),
-                            _buildDropdownField(
-                              label: 'Rate Type *',
-                              value: selectedRateType,
-                              hint: 'Select Rate Type',
-                              items: rateTypes,
-                              onChanged: (value) => setState(() => selectedRateType = value),
+                            _buildStepperField(
+                              label: 'Rooms *',
+                              value: roomCount,
+                              onChanged: (value) {
+                                setState(() {
+                                  roomCount = value;
+                                  _updateTotals();
+                                });
+                              },
                               theme: theme,
                               fontScale: fontScale,
                               cardRadius: cardRadius,
+                              minValue: 1,
                             ),
                           ],
                         )
@@ -464,11 +383,11 @@ class _QuickReservationState extends State<QuickReservation> {
                           children: [
                             Expanded(
                               child: _buildDropdownField(
-                                label: 'Room Type *',
-                                value: selectedRoomType,
-                                hint: 'Select Room Type',
-                                items: roomTypes,
-                                onChanged: (value) => setState(() => selectedRoomType = value),
+                                label: 'Reservation Type *',
+                                value: reservationType,
+                                hint: 'Select Type',
+                                items: reservationTypes,
+                                onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
                                 theme: theme,
                                 fontScale: fontScale,
                                 cardRadius: cardRadius,
@@ -476,351 +395,459 @@ class _QuickReservationState extends State<QuickReservation> {
                             ),
                             SizedBox(width: defaultPadding),
                             Expanded(
-                              child: _buildDropdownField(
-                                label: 'Rate Type *',
-                                value: selectedRateType,
-                                hint: 'Select Rate Type',
-                                items: rateTypes,
-                                onChanged: (value) => setState(() => selectedRateType = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              ),
-                            ),
-                          ],
-                        ),
-                      SizedBox(height: listItemSpacing),
-                      _buildDropdownField(
-                        label: 'Room',
-                        value: selectedRoom,
-                        hint: 'Select Room',
-                        items: rooms,
-                        onChanged: (value) => setState(() => selectedRoom = value),
-                        theme: theme,
-                        fontScale: fontScale,
-                        cardRadius: cardRadius,
-                      ),
-                      SizedBox(height: listItemSpacing),
-                      if (isMobile)
-                        Column(
-                          children: [
-                            _buildStepperField(
-                              label: 'Adult *',
-                              value: adultCount,
-                              onChanged: (value) => setState(() => adultCount = value),
-                              theme: theme,
-                              fontScale: fontScale,
-                              cardRadius: cardRadius,
-                              minValue: 1,
-                            ),
-                            SizedBox(height: listItemSpacing),
-                            _buildStepperField(
-                              label: 'Child *',
-                              value: childCount,
-                              onChanged: (value) => setState(() => childCount = value),
-                              theme: theme,
-                              fontScale: fontScale,
-                              cardRadius: cardRadius,
-                            ),
-                            SizedBox(height: listItemSpacing),
-                            _buildRateField(
-                              theme: theme,
-                              fontScale: fontScale,
-                              cardRadius: cardRadius,
-                            ),
-                          ],
-                        )
-                      else
-                        Row(
-                          children: [
-                            Expanded(
                               child: _buildStepperField(
-                                label: 'Adult *',
-                                value: adultCount,
-                                onChanged: (value) => setState(() => adultCount = value),
+                                label: 'Rooms *',
+                                value: roomCount,
+                                onChanged: (value) {
+                                  setState(() {
+                                    roomCount = value;
+                                    _updateTotals();
+                                  });
+                                },
                                 theme: theme,
                                 fontScale: fontScale,
                                 cardRadius: cardRadius,
                                 minValue: 1,
                               ),
                             ),
-                            SizedBox(width: defaultPadding),
-                            Expanded(
-                              child: _buildStepperField(
-                                label: 'Child *',
-                                value: childCount,
-                                onChanged: (value) => setState(() => childCount = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              ),
-                            ),
-                            SizedBox(width: defaultPadding),
-                            Expanded(
-                              child: _buildRateField(
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              ),
-                            ),
                           ],
                         ),
                       SizedBox(height: listItemSpacing * 1.5),
-                      Container(
-                        padding: EdgeInsets.all(defaultPadding),
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildRateSummaryItem('Room Charges', '\$${roomCharges.toStringAsFixed(2)}', theme, fontScale),
-                            _buildRateSummaryItem('Tax', '\$${tax.toStringAsFixed(2)}', theme, fontScale),
-                            _buildRateSummaryItem('Total Rate', '\$${total.toStringAsFixed(2)}', theme, fontScale),
-                          ],
+
+                      // Room Details Card
+                      Card(
+                        color: AppColors.surface,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+                        elevation: 2,
+                        child: Padding(
+                          padding: EdgeInsets.all(defaultPadding),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Room Details',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontSize: 18 * fontScale,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.darkgrey,
+                                    ),
+                                  ),
+                                  Tooltip(
+                                    message: 'Override the default rate',
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Rate Override',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Switch(
+                                          value: rateOverride,
+                                          onChanged: (value) => setState(() => rateOverride = value),
+                                          activeColor: AppColors.primary,
+                                          inactiveThumbColor: AppColors.lightgrey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: listItemSpacing),
+                              if (isMobile)
+                                Column(
+                                  children: [
+                                    _buildDropdownField(
+                                      label: 'Room Type *',
+                                      value: selectedRoomType,
+                                      hint: 'Select Room Type',
+                                      items: roomTypes,
+                                      onChanged: (value) => setState(() => selectedRoomType = value),
+                                      theme: theme,
+                                      fontScale: fontScale,
+                                      cardRadius: cardRadius,
+                                    ),
+                                    SizedBox(height: listItemSpacing),
+                                    _buildDropdownField(
+                                      label: 'Rate Type *',
+                                      value: selectedRateType,
+                                      hint: 'Select Rate Type',
+                                      items: rateTypes,
+                                      onChanged: (value) => setState(() => selectedRateType = value),
+                                      theme: theme,
+                                      fontScale: fontScale,
+                                      cardRadius: cardRadius,
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildDropdownField(
+                                        label: 'Room Type *',
+                                        value: selectedRoomType,
+                                        hint: 'Select Room Type',
+                                        items: roomTypes,
+                                        onChanged: (value) => setState(() => selectedRoomType = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      child: _buildDropdownField(
+                                        label: 'Rate Type *',
+                                        value: selectedRateType,
+                                        hint: 'Select Rate Type',
+                                        items: rateTypes,
+                                        onChanged: (value) => setState(() => selectedRateType = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              SizedBox(height: listItemSpacing),
+                              _buildDropdownField(
+                                label: 'Room',
+                                value: selectedRoom,
+                                hint: 'Select Room',
+                                items: rooms,
+                                onChanged: (value) => setState(() => selectedRoom = value),
+                                theme: theme,
+                                fontScale: fontScale,
+                                cardRadius: cardRadius,
+                              ),
+                              SizedBox(height: listItemSpacing),
+                              if (isMobile)
+                                Column(
+                                  children: [
+                                    _buildStepperField(
+                                      label: 'Adult *',
+                                      value: adultCount,
+                                      onChanged: (value) => setState(() => adultCount = value),
+                                      theme: theme,
+                                      fontScale: fontScale,
+                                      cardRadius: cardRadius,
+                                      minValue: 1,
+                                    ),
+                                    SizedBox(height: listItemSpacing),
+                                    _buildStepperField(
+                                      label: 'Child *',
+                                      value: childCount,
+                                      onChanged: (value) => setState(() => childCount = value),
+                                      theme: theme,
+                                      fontScale: fontScale,
+                                      cardRadius: cardRadius,
+                                    ),
+                                    SizedBox(height: listItemSpacing),
+                                    _buildRateField(
+                                      theme: theme,
+                                      fontScale: fontScale,
+                                      cardRadius: cardRadius,
+                                    ),
+                                  ],
+                                )
+                              else
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildStepperField(
+                                        label: 'Adult *',
+                                        value: adultCount,
+                                        onChanged: (value) => setState(() => adultCount = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                        minValue: 1,
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      child: _buildStepperField(
+                                        label: 'Child *',
+                                        value: childCount,
+                                        onChanged: (value) => setState(() => childCount = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      child: _buildRateField(
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              SizedBox(height: listItemSpacing * 1.5),
+                              Container(
+                                padding: EdgeInsets.all(defaultPadding),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(cardRadius / 1.5),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _buildRateSummaryItem('Room Charges', '\$${roomCharges.toStringAsFixed(2)}', theme, fontScale),
+                                    _buildRateSummaryItem('Tax', '\$${tax.toStringAsFixed(2)}', theme, fontScale),
+                                    _buildRateSummaryItem('Total Rate', '\$${total.toStringAsFixed(2)}', theme, fontScale),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: listItemSpacing * 1.5),
+                      SizedBox(height: listItemSpacing * 1.5),
 
-              // Guest Information Card (removed total/confirm; moved to bottom bar)
-              Card(
-                color: AppColors.surface,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
-                elevation: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(defaultPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Guest Information',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontSize: 18 * fontScale,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.darkgrey,
-                            ),
-                          ),
-                          Tooltip(
-                            message: 'Mark if guest has stayed before',
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Returning Guest',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
+                      // Guest Information Card (removed total/confirm; moved to bottom bar)
+                      Card(
+                        color: AppColors.surface,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+                        elevation: 2,
+                        child: Padding(
+                          padding: EdgeInsets.all(defaultPadding),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Guest Information',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontSize: 18 * fontScale,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.darkgrey,
+                                    ),
+                                  ),
+                                  Tooltip(
+                                    message: 'Mark if guest has stayed before',
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'Returning Guest',
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Switch(
+                                          value: returningGuest,
+                                          onChanged: (value) => setState(() => returningGuest = value),
+                                          activeColor: AppColors.primary,
+                                          inactiveThumbColor: AppColors.lightgrey,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: listItemSpacing * 1.5),
+                              if (isMobile) ...[
+                                // Mobile: Salutation and Guest Name in Row
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: _buildDropdownField(
+                                        label: 'Salutation',
+                                        value: selectedSalutation,
+                                        hint: 'Select',
+                                        items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                        onChanged: (value) => setState(() => selectedSalutation = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      flex: 2,
+                                      child: TextFormField(
+                                        controller: guestNameController,
+                                        decoration: InputDecoration(
+                                          labelText: 'Guest Name',
+                                          labelStyle: TextStyle(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                          hintText: 'Guest Name',
+                                          hintStyle: TextStyle(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey.withOpacity(0.6),
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                          ),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          filled: true,
+                                          fillColor: AppColors.surface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: listItemSpacing),
+                                TextFormField(
+                                  controller: mobileNumberController,
+                                  keyboardType: TextInputType.phone,
+                                  decoration: InputDecoration(
+                                    labelText: 'Mobile Number',
+                                    labelStyle: TextStyle(
+                                      fontSize: 14 * fontScale,
+                                      color: AppColors.lightgrey,
+                                    ),
+                                    hintText: 'Mobile Number',
+                                    hintStyle: TextStyle(
+                                      fontSize: 14 * fontScale,
+                                      color: AppColors.lightgrey.withOpacity(0.6),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: AppColors.lightgrey),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    filled: true,
+                                    fillColor: AppColors.surface,
                                   ),
                                 ),
-                                SizedBox(width: 8),
-                                Switch(
-                                  value: returningGuest,
-                                  onChanged: (value) => setState(() => returningGuest = value),
-                                  activeColor: AppColors.primary,
-                                  inactiveThumbColor: AppColors.lightgrey,
+                                SizedBox(height: listItemSpacing),
+                                TextFormField(
+                                  controller: emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: InputDecoration(
+                                    labelText: 'Email ID',
+                                    labelStyle: TextStyle(
+                                      fontSize: 14 * fontScale,
+                                      color: AppColors.lightgrey,
+                                    ),
+                                    hintText: 'Email ID',
+                                    hintStyle: TextStyle(
+                                      fontSize: 14 * fontScale,
+                                      color: AppColors.lightgrey.withOpacity(0.6),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(color: AppColors.lightgrey),
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    filled: true,
+                                    fillColor: AppColors.surface,
+                                  ),
+                                ),
+                              ] else ...[
+                                // Desktop layout
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: _buildDropdownField(
+                                        label: 'Salutation',
+                                        value: selectedSalutation,
+                                        hint: 'Select',
+                                        items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                        onChanged: (value) => setState(() => selectedSalutation = value),
+                                        theme: theme,
+                                        fontScale: fontScale,
+                                        cardRadius: cardRadius,
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      flex: 2,
+                                      child: TextFormField(
+                                        controller: guestNameController,
+                                        decoration: InputDecoration(
+                                          labelText: 'Guest Name',
+                                          labelStyle: TextStyle(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                          hintText: 'Guest Name',
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                          ),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          filled: true,
+                                          fillColor: AppColors.surface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: listItemSpacing),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: mobileNumberController,
+                                        keyboardType: TextInputType.phone,
+                                        decoration: InputDecoration(
+                                          labelText: 'Mobile Number',
+                                          labelStyle: TextStyle(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                          hintText: 'Mobile Number',
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                          ),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          filled: true,
+                                          fillColor: AppColors.surface,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: defaultPadding),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: emailController,
+                                        keyboardType: TextInputType.emailAddress,
+                                        decoration: InputDecoration(
+                                          labelText: 'Email ID',
+                                          labelStyle: TextStyle(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
+                                          hintText: 'Email ID',
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                          ),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          filled: true,
+                                          fillColor: AppColors.surface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                      SizedBox(height: listItemSpacing * 1.5),
-                      if (isMobile) ...[
-                        // Mobile: Salutation and Guest Name in Row
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: _buildDropdownField(
-                                label: 'Salutation',
-                                value: selectedSalutation,
-                                hint: 'Select',
-                                items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
-                                onChanged: (value) => setState(() => selectedSalutation = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              ),
-                            ),
-                            SizedBox(width: defaultPadding),
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: guestNameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Guest Name',
-                                  labelStyle: TextStyle(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
-                                  ),
-                                  hintText: 'Guest Name',
-                                  hintStyle: TextStyle(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey.withOpacity(0.6),
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: AppColors.lightgrey),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: listItemSpacing),
-                        TextFormField(
-                          controller: mobileNumberController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            labelText: 'Mobile Number',
-                            labelStyle: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey,
-                            ),
-                            hintText: 'Mobile Number',
-                            hintStyle: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey.withOpacity(0.6),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: AppColors.lightgrey),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            filled: true,
-                            fillColor: AppColors.surface,
-                          ),
-                        ),
-                        SizedBox(height: listItemSpacing),
-                        TextFormField(
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: 'Email ID',
-                            labelStyle: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey,
-                            ),
-                            hintText: 'Email ID',
-                            hintStyle: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey.withOpacity(0.6),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: AppColors.lightgrey),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            filled: true,
-                            fillColor: AppColors.surface,
-                          ),
-                        ),
-                      ] else ...[
-                        // Desktop layout
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: _buildDropdownField(
-                                label: 'Salutation',
-                                value: selectedSalutation,
-                                hint: 'Select',
-                                items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
-                                onChanged: (value) => setState(() => selectedSalutation = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              ),
-                            ),
-                            SizedBox(width: defaultPadding),
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: guestNameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Guest Name',
-                                  labelStyle: TextStyle(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
-                                  ),
-                                  hintText: 'Guest Name',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: AppColors.lightgrey),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: listItemSpacing),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: mobileNumberController,
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                  labelText: 'Mobile Number',
-                                  labelStyle: TextStyle(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
-                                  ),
-                                  hintText: 'Mobile Number',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: AppColors.lightgrey),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: defaultPadding),
-                            Expanded(
-                              child: TextFormField(
-                                controller: emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: InputDecoration(
-                                  labelText: 'Email ID',
-                                  labelStyle: TextStyle(
-                                    fontSize: 14 * fontScale,
-                                    color: AppColors.lightgrey,
-                                  ),
-                                  hintText: 'Email ID',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: AppColors.lightgrey),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  filled: true,
-                                  fillColor: AppColors.surface,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      SizedBox(height: defaultPadding * 2),
                     ],
                   ),
-                ),
-              ),
-              SizedBox(height: defaultPadding * 2),
-            ],
           ),
         ),
       ),
@@ -917,8 +944,8 @@ class _QuickReservationState extends State<QuickReservation> {
   }) {
     return Row(
       children: [
-        if (isMobile) ...[
-          _buildDateTimeField(
+        Expanded(
+          child: _buildDateTimeField(
             label: 'Check In *',
             date: checkInDate,
             time: checkInTime,
@@ -928,16 +955,16 @@ class _QuickReservationState extends State<QuickReservation> {
             iconSize: iconSize,
             fontScale: fontScale,
           ),
-          SizedBox(width: listItemSpacing * 1.5),
-          Center(
-            child: _buildNightsIndicator(
-              theme: theme,
-              defaultPadding: defaultPadding,
-              fontScale: fontScale,
-            ),
-          ),
-          SizedBox(width: listItemSpacing * 1.5),
-          _buildDateTimeField(
+        ),
+        SizedBox(width: defaultPadding),
+        _buildNightsIndicator(
+          theme: theme,
+          defaultPadding: defaultPadding,
+          fontScale: fontScale,
+        ),
+        SizedBox(width: defaultPadding),
+        Expanded(
+          child: _buildDateTimeField(
             label: 'Check Out *',
             date: checkOutDate,
             time: checkOutTime,
@@ -947,43 +974,7 @@ class _QuickReservationState extends State<QuickReservation> {
             iconSize: iconSize,
             fontScale: fontScale,
           ),
-        ] else ...[
-          Row(
-            children: [
-              Expanded(
-                child: _buildDateTimeField(
-                  label: 'Check In *',
-                  date: checkInDate,
-                  time: checkInTime,
-                  onDateTap: () => _selectDate(context, true),
-                  onTimeTap: () => _selectTime(context, true),
-                  theme: theme,
-                  iconSize: iconSize,
-                  fontScale: fontScale,
-                ),
-              ),
-              SizedBox(width: defaultPadding),
-              _buildNightsIndicator(
-                theme: theme,
-                defaultPadding: defaultPadding,
-                fontScale: fontScale,
-              ),
-              SizedBox(width: defaultPadding),
-              Expanded(
-                child: _buildDateTimeField(
-                  label: 'Check Out *',
-                  date: checkOutDate,
-                  time: checkOutTime,
-                  onDateTap: () => _selectDate(context, false),
-                  onTimeTap: () => _selectTime(context, false),
-                  theme: theme,
-                  iconSize: iconSize,
-                  fontScale: fontScale,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ],
     );
   }
@@ -1067,7 +1058,6 @@ class _QuickReservationState extends State<QuickReservation> {
                     color: AppColors.darkgrey,
                   ),
                 ),
-                SizedBox(width:0.5),
                 Icon(
                   Icons.calendar_today_outlined,
                   size: iconSize,
@@ -1102,7 +1092,7 @@ class _QuickReservationState extends State<QuickReservation> {
   }
 
   Widget _buildDropdownField({
-    ValueKey? key,
+    ValueKey<String>? key,
     required String label,
     required String? value,
     required String hint,
@@ -1137,11 +1127,9 @@ class _QuickReservationState extends State<QuickReservation> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-      
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-          
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -1224,7 +1212,7 @@ class _QuickReservationState extends State<QuickReservation> {
     );
   }
 
- Widget _buildRateField({
+  Widget _buildRateField({
     required ThemeData theme,
     required double fontScale,
     required double cardRadius,
@@ -1276,6 +1264,7 @@ class _QuickReservationState extends State<QuickReservation> {
       ],
     );
   }
+
   Widget _buildRateSummaryItem(String label, String amount, ThemeData theme, double fontScale) {
     return Column(
       children: [
@@ -1297,5 +1286,220 @@ class _QuickReservationState extends State<QuickReservation> {
         ),
       ],
     );
+  }
+
+  Widget _buildShimmerLayout({
+    required ThemeData theme,
+    required bool isMobile,
+    required double defaultPadding,
+    required double listItemSpacing,
+    required double cardRadius,
+  }) {
+    return Column(
+      key: const ValueKey('shimmer'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: defaultPadding),
+        // Shimmer for Toggle Bar
+        _buildShimmerContainer(height: 50, width: double.infinity, radius: cardRadius),
+        SizedBox(height: listItemSpacing * 1.25),
+        // Shimmer for Check-in/Check-out
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(child: _buildShimmerContainer(height: 100, width: double.infinity)),
+            SizedBox(width: listItemSpacing),
+            _buildShimmerContainer(height: 50, width: 60),
+            SizedBox(width: listItemSpacing),
+            Expanded(child: _buildShimmerContainer(height: 100, width: double.infinity)),
+          ],
+        ),
+        SizedBox(height: listItemSpacing * 1.25),
+        // Shimmer for Dropdowns (Business Source, etc.)
+        _buildShimmerContainer(height: 60, width: double.infinity),
+        SizedBox(height: listItemSpacing),
+        if (isMobile)
+          Column(
+            children: [
+              _buildShimmerContainer(height: 60, width: double.infinity),
+              SizedBox(height: listItemSpacing),
+              _buildShimmerContainer(height: 60, width: double.infinity),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Expanded(child: _buildShimmerContainer(height: 60, width: double.infinity)),
+              SizedBox(width: defaultPadding),
+              Expanded(child: _buildShimmerContainer(height: 60, width: double.infinity)),
+            ],
+          ),
+        SizedBox(height: listItemSpacing * 1.5),
+        // Shimmer for Room Details Card
+        _buildShimmerCard(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildShimmerContainer(height: 20, width: 150),
+                  _buildShimmerContainer(height: 20, width: 100),
+                ],
+              ),
+              SizedBox(height: listItemSpacing),
+              if (isMobile)
+                Column(
+                  children: List.generate(5, (_) => Padding(
+                    padding: EdgeInsets.only(bottom: listItemSpacing),
+                    child: _buildShimmerContainer(height: 60, width: double.infinity),
+                  )),
+                )
+              else
+                Column(
+                  children: [
+                    Row(
+                      children: List.generate(2, (_) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: defaultPadding),
+                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                        ),
+                      )),
+                    ),
+                    SizedBox(height: listItemSpacing),
+                    _buildShimmerContainer(height: 60, width: double.infinity),
+                    SizedBox(height: listItemSpacing),
+                    Row(
+                      children: List.generate(3, (_) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: defaultPadding),
+                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                        ),
+                      )),
+                    ),
+                  ],
+                ),
+              SizedBox(height: listItemSpacing * 1.5),
+              _buildShimmerContainer(height: 80, width: double.infinity),
+            ],
+          ),
+          defaultPadding: defaultPadding,
+          cardRadius: cardRadius,
+        ),
+        SizedBox(height: listItemSpacing * 1.5),
+        // Shimmer for Guest Information Card
+        _buildShimmerCard(
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildShimmerContainer(height: 20, width: 150),
+                  _buildShimmerContainer(height: 20, width: 100),
+                ],
+              ),
+              SizedBox(height: listItemSpacing * 1.5),
+              if (isMobile)
+                Column(
+                  children: List.generate(4, (_) => Padding(
+                    padding: EdgeInsets.only(bottom: listItemSpacing),
+                    child: _buildShimmerContainer(height: 60, width: double.infinity),
+                  )),
+                )
+              else
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(flex: 1, child: _buildShimmerContainer(height: 60, width: double.infinity)),
+                        SizedBox(width: defaultPadding),
+                        Expanded(flex: 2, child: _buildShimmerContainer(height: 60, width: double.infinity)),
+                      ],
+                    ),
+                    SizedBox(height: listItemSpacing),
+                    Row(
+                      children: List.generate(2, (_) => Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: defaultPadding),
+                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                        ),
+                      )),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          defaultPadding: defaultPadding,
+          cardRadius: cardRadius,
+        ),
+        SizedBox(height: defaultPadding * 2),
+      ],
+    );
+  }
+
+  Widget _buildShimmerCard({
+    required Widget child,
+    required double defaultPadding,
+    required double cardRadius,
+  }) {
+    return Card(
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+      elevation: 2,
+      child: Padding(
+        padding: EdgeInsets.all(defaultPadding),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildShimmerContainer({
+    required double height,
+    double? width,
+    double radius = 8.0,
+  }) {
+    return AnimatedBuilder(
+      animation: _shimmerController,
+      builder: (context, child) {
+        return Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          child: ShaderMask(
+            shaderCallback: (bounds) {
+              return LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Colors.grey[300]!,
+                  Colors.grey[100]!,
+                  Colors.grey[300]!,
+                ],
+                stops: const [0.0, 0.5, 1.0],
+                transform: _ShimmerGradientTransform(_shimmerController.value),
+              ).createShader(bounds);
+            },
+            blendMode: BlendMode.srcATop,
+            child: Container(
+              color: Colors.grey[300],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Custom transform for shimmering effect
+class _ShimmerGradientTransform extends GradientTransform {
+  final double percent;
+
+  const _ShimmerGradientTransform(this.percent);
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(bounds.width * (percent - 0.5) * 2, 0, 0);
   }
 }
