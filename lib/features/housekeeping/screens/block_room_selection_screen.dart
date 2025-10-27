@@ -82,7 +82,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
     }
 
     // Navigate to the next screen with selected rooms
-    context.push(AppRoutes.blockRoomDetails, extra: _selectedRooms.toList());
+   Get.toNamed(AppRoutes.blockRoomDetails, arguments: _selectedRooms.toList());
   }
 
   @override

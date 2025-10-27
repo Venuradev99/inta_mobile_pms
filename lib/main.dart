@@ -28,6 +28,7 @@ import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:inta_mobile_pms/services/data_access_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
@@ -42,6 +43,7 @@ void main() async {
   final dataAccessService = DataAccessService();
 
   //services
+  final userApiService = UserApiService();
   final dashboardService = DashboardService(dataAccessService, appResources);
   final reservationListService = ReservationListService(
     dataAccessService,
@@ -56,9 +58,12 @@ void main() async {
   Get.put<DashboardService>(dashboardService);
   Get.put<ReservationListService>(reservationListService);
   Get.put<HouseKeepingService>(houseKeepingService);
+  Get.put<UserApiService>(userApiService);
 
-  //register viewmodel and inject services
-  Get.put<DashboardVm>(DashboardVm(Get.find<DashboardService>()));
+  //Inject services
+  Get.put<DashboardVm>(
+    DashboardVm(Get.find<DashboardService>(), Get.find<UserApiService>()),
+  );
   Get.put<ArrivalListVm>(ArrivalListVm(Get.find<ReservationListService>()));
   Get.put<VoidReservationVm>(
     VoidReservationVm(Get.find<ReservationListService>()),

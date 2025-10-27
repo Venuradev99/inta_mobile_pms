@@ -5,10 +5,13 @@ import 'package:inta_mobile_pms/features/dashboard/models/hotel_inventory_data.d
 import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 
 class DashboardVm extends GetxController {
   final DashboardService _dashboardService;
+   final UserApiService _userApiService;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -42,7 +45,7 @@ class DashboardVm extends GetxController {
 
   final isLoading = true.obs;
 
-  DashboardVm(this._dashboardService);
+  DashboardVm(this._dashboardService,this._userApiService);
 
   Future<void> loadBookingStaticData() async {
     isLoading.value = true;
@@ -140,7 +143,8 @@ class DashboardVm extends GetxController {
         final todayInventory = futureInventoryModel.isNotEmpty
             ? futureInventoryModel[0]
             : 0;
-
+        print('totalRoomSold$totalRoomSold');
+        print('totalRoomsToSell$totalRoomsToSell');
         totalAvailableRooms.value = totalRoomsToSell - todayInventory;
         totalRoomSoldRate.value =  totalRoomsToSell == 0 ? 0 : (totalRoomSold / totalRoomsToSell);
         totalAvailableRoomsRate.value = totalRoomsToSell == 0 ? 0 :
@@ -194,5 +198,9 @@ class DashboardVm extends GetxController {
       isLoading.value = false;
       
     }
+  }
+
+    Future<void> handleLogout() async {
+   await _userApiService.logout();
   }
 }

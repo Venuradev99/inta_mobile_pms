@@ -466,7 +466,7 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 
   void _handleRoomAction(String action, RoomItem room) {
-    Navigator.pop(context);
+  Get.back();
 
     // Handle different actions
     switch (action) {
@@ -878,7 +878,7 @@ class _RoomActionsSheet extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Get.back(),
                       icon: Icon(Icons.close, color: Colors.grey[600]),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),

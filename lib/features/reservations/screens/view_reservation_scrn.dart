@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
@@ -64,7 +66,7 @@ class _ViewReservation extends State<ViewReservation>{
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton.icon(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Get.back(),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Go Back'),
                   style: ElevatedButton.styleFrom(

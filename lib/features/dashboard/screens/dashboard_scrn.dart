@@ -20,7 +20,7 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final UserApiService _userApiService = UserApiService();
+ 
   final _dashboardVm = Get.find<DashboardVm>();
 
   @override
@@ -33,12 +33,7 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  Future<void> handleLogout(BuildContext context) async {
-    final result = await _userApiService.logout();
-    if (result["isUserLogout"]) {
-      Get.toNamed(AppRoutes.login);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -835,7 +830,7 @@ class _DashboardState extends State<Dashboard> {
                 size: iconSize * 0.8,
                 color: AppColors.error,
               ),
-              onTap: () => handleLogout(context),
+              onTap: () => _dashboardVm.handleLogout(),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -1783,6 +1778,8 @@ class _DashboardState extends State<Dashboard> {
           _dashboardVm.totalAvailableRoomsRate.value;
       final outOfOrderRoomsRate = _dashboardVm.outOfOrderRoomsRate.value;
       final complementaryRoomsRate = _dashboardVm.complementaryRoomsRate.value;
+
+      print('totalRoomSoldRate$totalRoomSoldRate');
       
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

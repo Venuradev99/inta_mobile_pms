@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:intl/intl.dart';
@@ -135,7 +137,7 @@ class _ManagerReportState extends State<ManagerReport> {
         content: const Text('This report shows financial data and room statistics. Select a time period (Today, PDT, or YTD) to view corresponding data.'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () =>Get.back(),
             child: const Text('Close'),
           ),
         ],

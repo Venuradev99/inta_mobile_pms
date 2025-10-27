@@ -4,11 +4,9 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card.dart';
-import 'package:inta_mobile_pms/features/housekeeping/widgets/stat_card.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class MaintenanceBlock extends StatefulWidget {
@@ -195,7 +193,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   //                     statusCounts.keys.toList().indexOf(entry.key),
   //                   );
   //                 });
-  //                 Navigator.pop(context);
+  //                Get.back();
   //               },
   //             ),
   //           ),
@@ -280,7 +278,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-              context.push(AppRoutes.blockRoomSelection);
+              Get.toNamed(AppRoutes.blockRoomSelection);
             },
           ),
         ],
@@ -432,7 +430,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          context.push(AppRoutes.blockRoomSelection);
+          Get.toNamed(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),

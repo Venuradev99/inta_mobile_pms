@@ -92,7 +92,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
     final bottomPadding = mediaQuery.viewInsets.bottom;
 
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: () => Get.back(),
       child: Container(
         color: Colors.transparent,
         child: GestureDetector(
@@ -136,7 +136,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Get.back(),
                             icon: const Icon(Icons.close),
                             color: AppColors.darkgrey,
                             splashRadius: 20,
@@ -209,7 +209,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
                                 child: OutlinedButton(
                                   onPressed: isLoading
                                       ? null
-                                      : () => Navigator.pop(context),
+                                      : () => Get.back(),
                                   style: OutlinedButton.styleFrom(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 14,

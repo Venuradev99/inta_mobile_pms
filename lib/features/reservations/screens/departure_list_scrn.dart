@@ -287,7 +287,7 @@ class _DepartureListState extends State<DepartureList> {
           //       balance: item.balanceAmount,
           //       initialNoShowFee: null,
           //     );
-          //     Navigator.push(
+          //     Get.toNamed(
           //       context,
           //       PageRouteBuilder(
           //         pageBuilder: (context, animation, secondaryAnimation) =>

@@ -84,7 +84,7 @@ class UserApiService {
           MessageHelper.error("No access token found in response");
         }
       } else {
-        //login failed
+        //login failed message
         MessageHelper.error(
           "${jsonDecode(response.body)["error_description"]}",
         );
@@ -172,12 +172,12 @@ class UserApiService {
     }
   }
 
-  Future<Map<String, dynamic>> logout() async {
+  Future<void> logout() async {
     try {
       await LocalStorageManager.clearUserData();
       // final logoutUrl = AppResources.logoutUrl;
       // final response = await http.post(Uri.parse(logoutUrl));
-      return {"isUserLogout": true, "message": "User Logged out!"};
+      Get.toNamed(AppRoutes.login);
     } catch (e) {
       String msg = 'Error occured while logout: $e';
       MessageHelper.error(msg);

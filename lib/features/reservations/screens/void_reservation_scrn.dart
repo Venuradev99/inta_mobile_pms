@@ -284,7 +284,7 @@ class _VoidReservationState extends State<VoidReservation> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Get.back(),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14.0),
                 side: const BorderSide(color: AppColors.lightgrey),
