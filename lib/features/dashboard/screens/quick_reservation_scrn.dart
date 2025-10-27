@@ -10,14 +10,16 @@ class QuickReservation extends StatefulWidget {
   State<QuickReservation> createState() => _QuickReservationState();
 }
 
-  class _QuickReservationState extends State<QuickReservation> {
+class _QuickReservationState extends State<QuickReservation> {
   int selectedIndex = 0;
   DateTime checkInDate = DateTime.now();
   DateTime checkOutDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay checkInTime = const TimeOfDay(hour: 11, minute: 0);
+  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // Updated to ~1 PM as per screenshot
   TimeOfDay checkOutTime = const TimeOfDay(hour: 13, minute: 0);
   int nights = 1;
   String? selectedBusinessSource;
+  String? selectedOta;
+  String? selectedTravelAgent;
   String reservationType = 'Confirm';
   int roomCount = 1;
   String? selectedRoomType;
@@ -29,15 +31,34 @@ class QuickReservation extends StatefulWidget {
   bool rateOverride = false;
   bool returningGuest = false;
   String? selectedSalutation;
-TextEditingController guestNameController = TextEditingController();
-TextEditingController mobileNumberController = TextEditingController();
-TextEditingController emailController = TextEditingController();
+  TextEditingController guestNameController = TextEditingController();
+  TextEditingController mobileNumberController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+
+  // Dynamic totals
+  double roomCharges = 0.0;
+  double tax = 0.0;
+  double total = 0.0;
 
   final List<String> options = [
     'Walk In',
     'Booking Engine',
     'OTA',
     'Travel Agent',
+  ];
+
+  final List<String> otas = [
+    'Booking.com',
+    'Expedia',
+    'Agoda',
+    'Hotels.com',
+  ];
+
+  final List<String> travelAgents = [
+    'Agent A',
+    'Agent B',
+    'Corporate Travel Inc.',
+    'Global Agents',
   ];
 
   final List<String> businessSources = [
@@ -78,12 +99,28 @@ TextEditingController emailController = TextEditingController();
   void initState() {
     super.initState();
     _calculateNights();
+    _updateTotals();
+  }
+
+  @override
+  void dispose() {
+    guestNameController.dispose();
+    mobileNumberController.dispose();
+    emailController.dispose();
+    super.dispose();
   }
 
   void _calculateNights() {
     nights = checkOutDate.difference(checkInDate).inDays;
     if (nights <= 0) nights = 1;
+    _updateTotals();
     setState(() {});
+  }
+
+  void _updateTotals() {
+    roomCharges = rate * nights * roomCount;
+    tax = roomCharges * 0.1; // 10% tax; adjust as needed
+    total = roomCharges + tax;
   }
 
   Future<void> _selectDate(BuildContext context, bool isCheckIn) async {
@@ -135,6 +172,16 @@ TextEditingController emailController = TextEditingController();
     return '$hour:$minute $period';
   }
 
+  bool _validateForm() {
+    // Basic validation for required fields
+    if (selectedRoomType == null || selectedRateType == null || adultCount < 1) {
+      return false;
+    }
+    if (selectedIndex == 2 && selectedOta == null) return false;
+    if (selectedIndex == 3 && selectedTravelAgent == null) return false;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -145,7 +192,7 @@ TextEditingController emailController = TextEditingController();
     final iconSize = ResponsiveConfig.iconSize(context);
     final listItemSpacing = ResponsiveConfig.listItemSpacing(context);
     final fontScale = ResponsiveConfig.fontScale(context);
-    
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(fontScale)),
       child: Scaffold(
@@ -154,13 +201,14 @@ TextEditingController emailController = TextEditingController();
           title: 'Quick Reservation',
           onRefreshTap: () {},
         ),
+        bottomNavigationBar: _buildBottomBar(theme, fontScale, defaultPadding, cardRadius, isMobile),
         body: SingleChildScrollView(
           padding: horizontalPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: defaultPadding),
-              // Tab Selector
+              // Toggle Bar (Segmented Buttons)
               Container(
                 padding: EdgeInsets.all(defaultPadding / 4),
                 decoration: BoxDecoration(
@@ -183,6 +231,10 @@ TextEditingController emailController = TextEditingController();
                         onTap: () {
                           setState(() {
                             selectedIndex = index;
+                            // Reset conditional fields on tab change
+                            selectedOta = null;
+                            selectedTravelAgent = null;
+                            selectedBusinessSource = null;
                           });
                         },
                         child: Container(
@@ -198,7 +250,6 @@ TextEditingController emailController = TextEditingController();
                           child: Center(
                             child: Text(
                               options[index],
-
                               textAlign: TextAlign.center,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 fontSize: 14 * fontScale,
@@ -226,7 +277,38 @@ TextEditingController emailController = TextEditingController();
               ),
               SizedBox(height: listItemSpacing * 1.25),
 
-              // Business Source
+              // Conditional Extra Dropdowns based on selected tab
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: (selectedIndex == 2)
+                    ? _buildDropdownField(
+                        key: const ValueKey('ota'),
+                        label: 'OTA *',
+                        value: selectedOta,
+                        hint: 'Select OTA',
+                        items: otas,
+                        onChanged: (value) => setState(() => selectedOta = value),
+                        theme: theme,
+                        fontScale: fontScale,
+                        cardRadius: cardRadius,
+                      )
+                    : (selectedIndex == 3)
+                        ? _buildDropdownField(
+                            key: const ValueKey('travel_agent'),
+                            label: 'Travel Agent *',
+                            value: selectedTravelAgent,
+                            hint: 'Select Travel Agent',
+                            items: travelAgents,
+                            onChanged: (value) => setState(() => selectedTravelAgent = value),
+                            theme: theme,
+                            fontScale: fontScale,
+                            cardRadius: cardRadius,
+                          )
+                        : const SizedBox.shrink(key: ValueKey('none')),
+              ),
+              if (selectedIndex == 2 || selectedIndex == 3) SizedBox(height: listItemSpacing),
+
+              // Business Source (always shown)
               _buildDropdownField(
                 label: 'Business Source',
                 value: selectedBusinessSource,
@@ -257,7 +339,12 @@ TextEditingController emailController = TextEditingController();
                     _buildStepperField(
                       label: 'Rooms *',
                       value: roomCount,
-                      onChanged: (value) => setState(() => roomCount = value),
+                      onChanged: (value) {
+                        setState(() {
+                          roomCount = value;
+                          _updateTotals();
+                        });
+                      },
                       theme: theme,
                       fontScale: fontScale,
                       cardRadius: cardRadius,
@@ -285,7 +372,12 @@ TextEditingController emailController = TextEditingController();
                       child: _buildStepperField(
                         label: 'Rooms *',
                         value: roomCount,
-                        onChanged: (value) => setState(() => roomCount = value),
+                        onChanged: (value) {
+                          setState(() {
+                            roomCount = value;
+                            _updateTotals();
+                          });
+                        },
                         theme: theme,
                         fontScale: fontScale,
                         cardRadius: cardRadius,
@@ -317,23 +409,26 @@ TextEditingController emailController = TextEditingController();
                               color: AppColors.darkgrey,
                             ),
                           ),
-                          Row(
-                            children: [
-                              Text(
-                                'Rate Override',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontSize: 14 * fontScale,
-                                  color: AppColors.lightgrey,
+                          Tooltip(
+                            message: 'Override the default rate',
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Rate Override',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 8),
-                              Switch(
-                                value: rateOverride,
-                                onChanged: (value) => setState(() => rateOverride = value),
-                                activeColor: AppColors.primary,
-                                inactiveThumbColor: AppColors.lightgrey,
-                              ),
-                            ],
+                                SizedBox(width: 8),
+                                Switch(
+                                  value: rateOverride,
+                                  onChanged: (value) => setState(() => rateOverride = value),
+                                  activeColor: AppColors.primary,
+                                  inactiveThumbColor: AppColors.lightgrey,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -477,25 +572,14 @@ TextEditingController emailController = TextEditingController();
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(cardRadius / 1.5),
                         ),
-                        child: isMobile
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _buildRateSummaryItem('Room Charges', '\$ 0.00', theme, fontScale),
-                                  SizedBox(height: listItemSpacing),
-                                  _buildRateSummaryItem('Tax', '\$ 0.00', theme, fontScale),
-                                  SizedBox(height: listItemSpacing),
-                                  _buildRateSummaryItem('Total Rate', '\$ 0.00', theme, fontScale),
-                                ],
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _buildRateSummaryItem('Room Charges', '\$ 0.00', theme, fontScale),
-                                  _buildRateSummaryItem('Tax', '\$ 0.00', theme, fontScale),
-                                  _buildRateSummaryItem('Total Rate', '\$ 0.00', theme, fontScale),
-                                ],
-                              ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildRateSummaryItem('Room Charges', '\$${roomCharges.toStringAsFixed(2)}', theme, fontScale),
+                            _buildRateSummaryItem('Tax', '\$${tax.toStringAsFixed(2)}', theme, fontScale),
+                            _buildRateSummaryItem('Total Rate', '\$${total.toStringAsFixed(2)}', theme, fontScale),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -503,109 +587,107 @@ TextEditingController emailController = TextEditingController();
               ),
               SizedBox(height: listItemSpacing * 1.5),
 
-             // Guest Information Card
-Card(
-  
-  color: AppColors.surface,
-  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
-  elevation: 2,
-  child: Padding(
-    padding: EdgeInsets.all(defaultPadding),
-    child: isMobile
-        ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Guest Information',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize: 18 * fontScale,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.darkgrey,
-                    ),
-                  ),
-                  Row(
+              // Guest Information Card (removed total/confirm; moved to bottom bar)
+              Card(
+                color: AppColors.surface,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+                elevation: 2,
+                child: Padding(
+                  padding: EdgeInsets.all(defaultPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Returning Guest',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontSize: 14 * fontScale,
-                          color: AppColors.lightgrey,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Switch(
-                        value: returningGuest,
-                        onChanged: (value) => setState(() => returningGuest = value),
-                        activeColor: AppColors.primary,
-                        inactiveThumbColor: AppColors.lightgrey,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: listItemSpacing * 1.5),
-              
-              // Salutation and Guest Name Row
-              Row(
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        DropdownButtonFormField<String>(
-                          value: selectedSalutation,
-                          decoration: InputDecoration(
-                            labelText: 'Salutation',
-                            labelStyle: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: AppColors.lightgrey),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Guest Information',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontSize: 18 * fontScale,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.darkgrey,
                             ),
                           ),
-                          items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
-                              .map((salutation) => DropdownMenuItem(
-                                    value: salutation,
-                                    child: Text(salutation),
-                                  ))
-                              .toList(),
-                          onChanged: (value) => setState(() => selectedSalutation = value),
-                          hint: Text(
-                            'Select',
-                            style: TextStyle(
-                              fontSize: 14 * fontScale,
-                              color: AppColors.lightgrey,
+                          Tooltip(
+                            message: 'Mark if guest has stayed before',
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Returning Guest',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Switch(
+                                  value: returningGuest,
+                                  onChanged: (value) => setState(() => returningGuest = value),
+                                  activeColor: AppColors.primary,
+                                  inactiveThumbColor: AppColors.lightgrey,
+                                ),
+                              ],
                             ),
                           ),
+                        ],
+                      ),
+                      SizedBox(height: listItemSpacing * 1.5),
+                      if (isMobile) ...[
+                        // Mobile: Salutation and Guest Name in Row
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: _buildDropdownField(
+                                label: 'Salutation',
+                                value: selectedSalutation,
+                                hint: 'Select',
+                                items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                onChanged: (value) => setState(() => selectedSalutation = value),
+                                theme: theme,
+                                fontScale: fontScale,
+                                cardRadius: cardRadius,
+                              ),
+                            ),
+                            SizedBox(width: defaultPadding),
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: guestNameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Guest Name',
+                                  labelStyle: TextStyle(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  hintText: 'Guest Name',
+                                  hintStyle: TextStyle(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey.withOpacity(0.6),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: AppColors.lightgrey),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  filled: true,
+                                  fillColor: AppColors.surface,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                        SizedBox(height: listItemSpacing),
                         TextFormField(
-                          controller: guestNameController,
+                          controller: mobileNumberController,
+                          keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
-                            labelText: 'Guest Name',
+                            labelText: 'Mobile Number',
                             labelStyle: TextStyle(
                               fontSize: 14 * fontScale,
                               color: AppColors.lightgrey,
                             ),
-                            hintText: 'Guest Name',
+                            hintText: 'Mobile Number',
                             hintStyle: TextStyle(
                               fontSize: 14 * fontScale,
                               color: AppColors.lightgrey.withOpacity(0.6),
@@ -614,335 +696,213 @@ Card(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: AppColors.lightgrey),
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            filled: true,
+                            fillColor: AppColors.surface,
                           ),
                         ),
+                        SizedBox(height: listItemSpacing),
+                        TextFormField(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            labelText: 'Email ID',
+                            labelStyle: TextStyle(
+                              fontSize: 14 * fontScale,
+                              color: AppColors.lightgrey,
+                            ),
+                            hintText: 'Email ID',
+                            hintStyle: TextStyle(
+                              fontSize: 14 * fontScale,
+                              color: AppColors.lightgrey.withOpacity(0.6),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(color: AppColors.lightgrey),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            filled: true,
+                            fillColor: AppColors.surface,
+                          ),
+                        ),
+                      ] else ...[
+                        // Desktop layout
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: _buildDropdownField(
+                                label: 'Salutation',
+                                value: selectedSalutation,
+                                hint: 'Select',
+                                items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                onChanged: (value) => setState(() => selectedSalutation = value),
+                                theme: theme,
+                                fontScale: fontScale,
+                                cardRadius: cardRadius,
+                              ),
+                            ),
+                            SizedBox(width: defaultPadding),
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: guestNameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Guest Name',
+                                  labelStyle: TextStyle(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  hintText: 'Guest Name',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: AppColors.lightgrey),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  filled: true,
+                                  fillColor: AppColors.surface,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: listItemSpacing),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: mobileNumberController,
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  labelText: 'Mobile Number',
+                                  labelStyle: TextStyle(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  hintText: 'Mobile Number',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: AppColors.lightgrey),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  filled: true,
+                                  fillColor: AppColors.surface,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: defaultPadding),
+                            Expanded(
+                              child: TextFormField(
+                                controller: emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: InputDecoration(
+                                  labelText: 'Email ID',
+                                  labelStyle: TextStyle(
+                                    fontSize: 14 * fontScale,
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  hintText: 'Email ID',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(color: AppColors.lightgrey),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  filled: true,
+                                  fillColor: AppColors.surface,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: listItemSpacing),
-              
-              // Mobile Number Field
-              TextFormField(
-                controller: mobileNumberController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Mobile Number',
-                  labelStyle: TextStyle(
-                    fontSize: 14 * fontScale,
-                    color: AppColors.lightgrey,
-                  ),
-                  hintText: 'Mobile Number',
-                  hintStyle: TextStyle(
-                    fontSize: 14 * fontScale,
-                    color: AppColors.lightgrey.withOpacity(0.6),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.lightgrey),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                    ],
                   ),
                 ),
               ),
-              SizedBox(height: listItemSpacing),
-              
-              // Email ID Field
-              TextFormField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email ID',
-                  labelStyle: TextStyle(
-                    fontSize: 14 * fontScale,
-                    color: AppColors.lightgrey,
-                  ),
-                  hintText: 'Email ID',
-                  hintStyle: TextStyle(
-                    fontSize: 14 * fontScale,
-                    color: AppColors.lightgrey.withOpacity(0.6),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppColors.lightgrey),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                ),
-              ),
-              SizedBox(height: listItemSpacing * 1.5),
-              
+              SizedBox(height: defaultPadding * 2),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(ThemeData theme, double fontScale, double defaultPadding, double cardRadius, bool isMobile) {
+    return Container(
+      padding: EdgeInsets.all(defaultPadding),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
                 'Total Amount',
                 style: theme.textTheme.titleMedium?.copyWith(
-                  fontSize: 18 * fontScale,
+                  fontSize: 16 * fontScale,
                   fontWeight: FontWeight.w600,
                   color: AppColors.darkgrey,
                 ),
               ),
               Text(
-                '\$ 0.00',
+                '\$${total.toStringAsFixed(2)}',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: 22 * fontScale,
+                  fontSize: 20 * fontScale,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
-              SizedBox(height: listItemSpacing * 1.5),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Reservation confirmed!'),
-                        backgroundColor: AppColors.green,
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: AppColors.onPrimary,
-                    padding: EdgeInsets.symmetric(vertical: defaultPadding * 1.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                    ),
-                  ),
-                  child: Text(
-                    'Confirm',
-                    style: TextStyle(
-                      fontSize: 16 * fontScale,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Guest Information',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 18 * fontScale,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.darkgrey,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'Returning Guest',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontSize: 14 * fontScale,
-                                color: AppColors.lightgrey,
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Switch(
-                              value: returningGuest,
-                              onChanged: (value) => setState(() => returningGuest = value),
-                              activeColor: AppColors.primary,
-                              inactiveThumbColor: AppColors.lightgrey,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: listItemSpacing * 1.5),
-                    
-                    // Desktop layout for guest fields
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: DropdownButtonFormField<String>(
-                            value: selectedSalutation,
-                            decoration: InputDecoration(
-                              labelText: 'Salutation',
-                              labelStyle: TextStyle(
-                                fontSize: 14 * fontScale,
-                                color: AppColors.lightgrey,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.lightgrey),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                            items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.']
-                                .map((salutation) => DropdownMenuItem(
-                                      value: salutation,
-                                      child: Text(salutation),
-                                    ))
-                                .toList(),
-                            onChanged: (value) => setState(() => selectedSalutation = value),
-                            hint: Text('Select'),
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          flex: 2,
-                          child: TextFormField(
-                            controller: guestNameController,
-                            decoration: InputDecoration(
-                              labelText: 'Guest Name',
-                              labelStyle: TextStyle(
-                                fontSize: 14 * fontScale,
-                                color: AppColors.lightgrey,
-                              ),
-                              hintText: 'Guest Name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.lightgrey),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: listItemSpacing),
-                    
-                    // Mobile and Email row
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: mobileNumberController,
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(
-                              labelText: 'Mobile Number',
-                              labelStyle: TextStyle(
-                                fontSize: 14 * fontScale,
-                                color: AppColors.lightgrey,
-                              ),
-                              hintText: 'Mobile Number',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.lightgrey),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              labelText: 'Email ID',
-                              labelStyle: TextStyle(
-                                fontSize: 14 * fontScale,
-                                color: AppColors.lightgrey,
-                              ),
-                              hintText: 'Email ID',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: AppColors.lightgrey),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: listItemSpacing * 1.5),
-                    
-                    Text(
-                      'Total Amount',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 18 * fontScale,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.darkgrey,
-                      ),
-                    ),
-                    Text(
-                      '\$ 0.00',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontSize: 22 * fontScale,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: defaultPadding * 2),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  SizedBox(height: listItemSpacing * 4), // Space for alignment
-                  ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Reservation confirmed!'),
-                          backgroundColor: AppColors.green,
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: defaultPadding * 2,
-                        vertical: defaultPadding * 1.2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                      ),
-                    ),
-                    child: Text(
-                      'Confirm',
-                      style: TextStyle(
-                        fontSize: 16 * fontScale,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
-  ),
-),
-SizedBox(height: defaultPadding * 2),
-            ],
+          ElevatedButton(
+            onPressed: () {
+              if (_validateForm()) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Reservation confirmed!'),
+                    backgroundColor: AppColors.green,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please fill all required fields.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              padding: EdgeInsets.symmetric(
+                horizontal: defaultPadding * 2,
+                vertical: defaultPadding * 1.2,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(cardRadius / 1.5),
+              ),
+            ),
+            child: Text(
+              'Confirm',
+              style: TextStyle(
+                fontSize: 16 * fontScale,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1142,6 +1102,7 @@ SizedBox(height: defaultPadding * 2),
   }
 
   Widget _buildDropdownField({
+    ValueKey? key,
     required String label,
     required String? value,
     required String hint,
@@ -1263,7 +1224,7 @@ SizedBox(height: defaultPadding * 2),
     );
   }
 
-  Widget _buildRateField({
+ Widget _buildRateField({
     required ThemeData theme,
     required double fontScale,
     required double cardRadius,
@@ -1284,7 +1245,11 @@ SizedBox(height: defaultPadding * 2),
           initialValue: rate.toStringAsFixed(2),
           enabled: rateOverride,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) => setState(() => rate = double.tryParse(value) ?? 0.0),
+          onChanged: (value) {
+            rate = double.tryParse(value) ?? 0.0;
+            _updateTotals();
+            setState(() {});
+          },
           decoration: InputDecoration(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             border: OutlineInputBorder(
@@ -1298,7 +1263,7 @@ SizedBox(height: defaultPadding * 2),
               borderSide: BorderSide(color: AppColors.primary, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8), 
+              borderRadius: BorderRadius.circular(8),
             ),
             filled: true,
             fillColor: rateOverride ? AppColors.surface : Colors.grey.shade100,
@@ -1311,7 +1276,6 @@ SizedBox(height: defaultPadding * 2),
       ],
     );
   }
-
   Widget _buildRateSummaryItem(String label, String amount, ThemeData theme, double fontScale) {
     return Column(
       children: [
