@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/models/update_guest_payload.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/edit_guest_details_vm.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 
 enum GuestType { adult, child }
+
 enum Gender { male, female, other }
 
 class EditGuestDetails extends StatefulWidget {
@@ -16,20 +21,24 @@ class EditGuestDetails extends StatefulWidget {
   State<EditGuestDetails> createState() => _EditGuestDetailsState();
 }
 
-class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerProviderStateMixin {
+class _EditGuestDetailsState extends State<EditGuestDetails>
+    with SingleTickerProviderStateMixin {
+  final _editGuestDetailsVm = Get.find<EditGuestDetailsVm>();
   final _formKey = GlobalKey<FormState>();
   late TabController _tabController;
   bool _isSaving = false;
+  String _title = '';
 
   // Controllers
-  final TextEditingController _nameController = TextEditingController(text: 'Pabasara Dissanayake');
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController(text: '11300');
-  final TextEditingController _mobileNoController = TextEditingController(text: '0770516585');
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _mobileNoController = TextEditingController();
   final TextEditingController _phoneNoController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController(text: 'abc@gmail.com');
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _faxController = TextEditingController();
-  final TextEditingController _registrationNoController = TextEditingController();
+  final TextEditingController _registrationNoController =
+      TextEditingController();
   final TextEditingController _idNumberController = TextEditingController();
   final TextEditingController _issuingCityController = TextEditingController();
   final TextEditingController _birthCityController = TextEditingController();
@@ -54,15 +63,77 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
 
   final DateFormat _dateFormat = DateFormat('MMM dd, yyyy');
 
-  // Data
-  final List<String> _countries = ['Sri Lanka', 'India', 'USA', 'UK', 'Other'];
-  final List<String> _idTypes = ['Passport', 'National ID', 'Driver\'s License', 'Other'];
-  final List<String> _vipStatuses = ['None', 'VIP', 'VVIP'];
-  final List<String> _purposes = ['Business', 'Leisure', 'Medical', 'Other'];
-
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final guestDetails = widget.guestItem;
+      if (mounted && guestDetails != null) {
+        await _editGuestDetailsVm.loadGuestDetails(guestDetails);
+
+        _nameController.text = guestDetails.guestName;
+        _addressController.text = guestDetails.fullAddress ?? '';
+        _cityController.text =
+            guestDetails.cityName ?? guestDetails.zipCode ?? '';
+        _mobileNoController.text = guestDetails.mobile ?? '';
+        _phoneNoController.text = guestDetails.phone ?? '';
+        _emailController.text = guestDetails.email ?? '';
+        _faxController.text = guestDetails.fax ?? '';
+        _registrationNoController.text = guestDetails.resId;
+        _idNumberController.text = guestDetails.idNumber ?? '';
+        _issuingCityController.text = _editGuestDetailsVm.getCity(
+          guestDetails.identityIssuingCityId,
+        );
+        _companyController.text = guestDetails.company ?? '';
+        _birthCityController.text = _editGuestDetailsVm.getCity(
+          guestDetails.birthCityId,
+        );
+
+        setState(() {
+          _guestType = switch (guestDetails.isAdult!) {
+            true => GuestType.adult,
+            false => GuestType.child,
+          };
+          _gender = switch (guestDetails.gender) {
+            'Male' => Gender.male,
+            'Female' => Gender.female,
+            'Other' => Gender.other,
+            _ => Gender.other,
+          };
+          _title = _editGuestDetailsVm.getTitle(guestDetails.titleId);
+             
+          _idType = _editGuestDetailsVm.getIdType(guestDetails.identityType);
+          _issuingCountry = _editGuestDetailsVm.getCountry(
+            guestDetails.identityIssuingCountryId,
+          );
+          if (guestDetails.vipStatusId != null) {
+        
+            _vipStatus = _editGuestDetailsVm.getVipStatus(guestDetails.vipStatusId);
+          }
+
+          _nationality = _editGuestDetailsVm.getNationality(
+            guestDetails.nationalityId,
+          );
+          if (guestDetails.dateofBirth!.isNotEmpty) {
+            _birthDate = _editGuestDetailsVm.getDateTime(
+              guestDetails.dateofBirth!,
+            );
+          }
+
+          if (guestDetails.anniversaryDate!.isNotEmpty) {
+            _birthDate = _editGuestDetailsVm.getDateTime(
+              guestDetails.anniversaryDate!,
+            );
+          }
+          if (guestDetails.spouseDateofBirth!.isNotEmpty) {
+            _birthDate = _editGuestDetailsVm.getDateTime(
+              guestDetails.spouseDateofBirth!,
+            );
+          }
+        });
+      }
+    });
     _tabController = TabController(length: 4, vsync: this);
   }
 
@@ -84,7 +155,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context, DateTime? initialDate, Function(DateTime) onDateSelected) async {
+  Future<void> _selectDate(
+    BuildContext context,
+    DateTime? initialDate,
+    Function(DateTime) onDateSelected,
+  ) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: initialDate ?? DateTime.now(),
@@ -111,30 +186,75 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
   Future<void> _handleSave() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isSaving = true);
-      
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 800));
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Guest details saved successfully'),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+
+      final guestDetails = widget.guestItem;
+      final gender = switch (_gender) {
+        Gender.male => 'Male',
+        Gender.female => 'Female',
+        Gender.other => 'Other',
+      };
+
+      final isAdult = switch (_guestType) {
+        GuestType.adult => true,
+        GuestType.child => false,
+      };
+
+      if (guestDetails != null) {
+        await _editGuestDetailsVm.updateGuestDetails(
+          UpdateGuestPayload(
+            guestId: guestDetails.guestId,
+            firstName: _nameController.text,
+            lastName: '',
+            email: _emailController.text,
+            mobile: _mobileNoController.text,
+            homeTel: _phoneNoController.text,
+            phone1: '',
+            phone2: '',
+            address1: _addressController.text,
+            fullAddress: _addressController.text,
+            cityId: _editGuestDetailsVm.getCityId(_cityController.text),
+            state: guestDetails.state,
+            countryId: _editGuestDetailsVm.getCountryId(_country),
+            zipCode: guestDetails.zipCode,
+            gender: gender,
+            isAdult: isAdult,
+            isBlackListed: guestDetails.isBlackListed,
+            isMainGuest: guestDetails.isMainGuest,
+            identityNumber: _idNumberController.text,
+            identityType: _editGuestDetailsVm.getIdentidyTypeId(_idType),
+            identityIssuingCityId: _editGuestDetailsVm.getCityId(_issuingCityController.text),
+            identityIssuingCountryId: _editGuestDetailsVm.getCountryId(_issuingCountry),
+            imagePath: guestDetails.imagePath,
+            titleId: _editGuestDetailsVm.getTitleId(_title),
+            vipStatusId:_editGuestDetailsVm.getVipStatusId(_vipStatus),
+            vIPStatusId: _editGuestDetailsVm.getVipStatusId(_vipStatus),
+            workPlace: guestDetails.workPlace,
+            salutation: 0,
+            blackListedReason: '',
+            designation:'',
+            remark:guestDetails.remarks,
+            fax: _faxController.text,
+            specialReq:'',
+            registrationId: "0",
+            formOfCommunication: 0,
+            birthCityId: _editGuestDetailsVm.getCityId(_birthCityController.text),
+            birthCountryId: _editGuestDetailsVm.getCountryId(_birthCountry),
+            dateofBirth: _birthDate != null ? _birthDate.toString() : '',
+            spouseDateofBirth: _spouseBirthDate != null ?  _spouseBirthDate.toString() : '',
+            anniversaryDate:_weddingAnniversary != null ? _weddingAnniversary.toString() : '',
+            guestAddresses: [],
+            alllergies:'',
+            civilStatus:'',
+            expiryDate: _expiryDate != null ? _expiryDate.toString() : '',
+            guestIdentityImage:  guestDetails.imagePath,
+            nationalityId: _editGuestDetailsVm.getNationalityId(_nationality),
+            status: int.tryParse(guestDetails.status!),
+            swipeCardId:guestDetails.swipeCardId.toString(),
           ),
         );
-        Navigator.of(context).pop();
+
+        setState(() => _isSaving = false);
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please fill in all required fields'),
-          backgroundColor: Colors.red.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
     }
   }
 
@@ -172,7 +292,9 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               unselectedLabelColor: AppColors.darkgrey,
               indicatorColor: AppColors.primary,
               indicatorWeight: 3,
-              labelStyle: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+              labelStyle: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
               unselectedLabelStyle: textTheme.titleSmall,
               tabs: const [
                 Tab(text: 'Guest Info'),
@@ -200,7 +322,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildGuestInfoTab(EdgeInsets padding, double spacing, TextTheme textTheme) {
+  Widget _buildGuestInfoTab(
+    EdgeInsets padding,
+    double spacing,
+    TextTheme textTheme,
+  ) {
     return SingleChildScrollView(
       padding: padding.copyWith(top: spacing * 1.5, bottom: spacing * 2),
       child: Column(
@@ -213,7 +339,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                 label: 'Full Name',
                 icon: Icons.person_outline,
                 isRequired: true,
-                prefixText: 'Ms. ',
+                prefixText: '${_title} ',
               ),
               SizedBox(height: spacing * 1.5),
               _buildModernRadioGroup<GuestType>(
@@ -243,7 +369,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildContactTab(EdgeInsets padding, double spacing, TextTheme textTheme) {
+  Widget _buildContactTab(
+    EdgeInsets padding,
+    double spacing,
+    TextTheme textTheme,
+  ) {
     return SingleChildScrollView(
       padding: padding.copyWith(top: spacing * 1.5, bottom: spacing * 2),
       child: Column(
@@ -257,13 +387,16 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                 maxLines: 2,
               ),
               SizedBox(height: spacing * 1.5),
-              _buildDropdown(
-                value: _country,
-                items: _countries,
-                label: 'Country',
-                icon: Icons.public,
-                onChanged: (val) => setState(() => _country = val),
+              Obx(
+                () => _buildDropdown(
+                  value: _country,
+                  items: _editGuestDetailsVm.countries,
+                  label: 'Country',
+                  icon: Icons.public,
+                  onChanged: (val) => setState(() => _country = val),
+                ),
               ),
+
               SizedBox(height: spacing * 1.5),
               _buildTextField(
                 controller: _cityController,
@@ -326,7 +459,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildIdentityTab(EdgeInsets padding, double spacing, TextTheme textTheme) {
+  Widget _buildIdentityTab(
+    EdgeInsets padding,
+    double spacing,
+    TextTheme textTheme,
+  ) {
     return SingleChildScrollView(
       padding: padding.copyWith(top: spacing * 1.5, bottom: spacing * 2),
       child: Column(
@@ -336,14 +473,24 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               Row(
                 children: [
                   Expanded(
-                    child: _buildDropdown(
-                      value: _idType,
-                      items: _idTypes,
-                      label: 'ID Type',
-                      icon: Icons.badge_outlined,
-                      onChanged: (val) => setState(() => _idType = val),
-                    ),
+                    child: Obx(() {
+                      // Ensure _idType exists in the list, otherwise set to null
+                      final currentValue =
+                          _editGuestDetailsVm.idTypes.contains(_idType)
+                          ? _idType
+                          : null;
+
+                      return _buildDropdown(
+                        value: currentValue,
+                        items: _editGuestDetailsVm.idTypes
+                            .toList(), // convert RxList to normal List
+                        label: 'ID Type',
+                        icon: Icons.badge_outlined,
+                        onChanged: (val) => setState(() => _idType = val),
+                      );
+                    }),
                   ),
+
                   SizedBox(width: spacing),
                   Expanded(
                     child: _buildTextField(
@@ -358,14 +505,17 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               Row(
                 children: [
                   Expanded(
-                    child: _buildDropdown(
-                      value: _issuingCountry,
-                      items: _countries,
-                      label: 'Issuing Country',
-                      icon: Icons.flag_outlined,
-                      onChanged: (val) => setState(() => _issuingCountry = val),
+                    child: Obx(
+                      () => _buildDropdown(
+                        value: _issuingCountry,
+                        items: _editGuestDetailsVm.countries,
+                        label: 'Issuing Country',
+                        icon: Icons.flag_outlined,
+                        onChanged: (val) => _issuingCountry = val,
+                      ),
                     ),
                   ),
+
                   SizedBox(width: spacing),
                   Expanded(
                     child: _buildTextField(
@@ -390,7 +540,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildOtherTab(EdgeInsets padding, double spacing, TextTheme textTheme) {
+  Widget _buildOtherTab(
+    EdgeInsets padding,
+    double spacing,
+    TextTheme textTheme,
+  ) {
     return SingleChildScrollView(
       padding: padding.copyWith(top: spacing * 1.5, bottom: spacing * 2),
       child: Column(
@@ -400,23 +554,28 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               Row(
                 children: [
                   Expanded(
-                    child: _buildDropdown(
-                      value: _nationality,
-                      items: _countries,
-                      label: 'Nationality',
-                      icon: Icons.language,
-                      onChanged: (val) => setState(() => _nationality = val),
-                    ),
+                    child: Obx(() {
+                      return _buildDropdown(
+                        value: _nationality,
+                        items: _editGuestDetailsVm.nationalityNames.toList(),
+                        label: 'Nationality',
+                        icon: Icons.language,
+                        onChanged: (val) => setState(() => _nationality = val),
+                      );
+                    }),
                   ),
+
                   SizedBox(width: spacing),
                   Expanded(
-                    child: _buildDropdown(
-                      value: _vipStatus,
-                      items: _vipStatuses,
-                      label: 'VIP Status',
-                      icon: Icons.star_outline,
-                      onChanged: (val) => setState(() => _vipStatus = val),
-                    ),
+                    child: Obx(() {
+                      return _buildDropdown(
+                        value: _vipStatus,
+                        items: _editGuestDetailsVm.vipStatuses.toList(),
+                        label: 'VIP Status',
+                        icon: Icons.star_outline,
+                        onChanged: (val) => setState(() => _vipStatus = val),
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -431,14 +590,17 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               Row(
                 children: [
                   Expanded(
-                    child: _buildDropdown(
-                      value: _birthCountry,
-                      items: _countries,
-                      label: 'Birth Country',
-                      icon: Icons.place_outlined,
-                      onChanged: (val) => setState(() => _birthCountry = val),
+                    child: Obx(
+                      () => _buildDropdown(
+                        value: _birthCountry,
+                        items: _editGuestDetailsVm.countries,
+                        label: 'Birth Country',
+                        icon: Icons.place_outlined,
+                        onChanged: (val) => _birthCountry = val,
+                      ),
                     ),
                   ),
+
                   SizedBox(width: spacing),
                   Expanded(
                     child: _buildTextField(
@@ -454,14 +616,16 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                 label: 'Spouse Birth Date',
                 date: _spouseBirthDate,
                 icon: Icons.favorite_outline,
-                onDateSelected: (date) => setState(() => _spouseBirthDate = date),
+                onDateSelected: (date) =>
+                    setState(() => _spouseBirthDate = date),
               ),
               SizedBox(height: spacing * 1.5),
               _buildDateField(
                 label: 'Wedding Anniversary',
                 date: _weddingAnniversary,
                 icon: Icons.favorite,
-                onDateSelected: (date) => setState(() => _weddingAnniversary = date),
+                onDateSelected: (date) =>
+                    setState(() => _weddingAnniversary = date),
               ),
               SizedBox(height: spacing * 1.5),
               _buildTextField(
@@ -469,14 +633,14 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                 label: 'Company',
                 icon: Icons.business_outlined,
               ),
-              SizedBox(height: spacing * 1.5),
-              _buildDropdown(
-                value: _purposeOfVisit,
-                items: _purposes,
-                label: 'Purpose of Visit',
-                icon: Icons.flight_takeoff,
-                onChanged: (val) => setState(() => _purposeOfVisit = val),
-              ),
+              // SizedBox(height: spacing * 1.5),
+              // _buildDropdown(
+              //   value: _purposeOfVisit,
+              //   items: _purposes,
+              //   label: 'Purpose of Visit',
+              //   icon: Icons.flight_takeoff,
+              //   onChanged: (val) => setState(() => _purposeOfVisit = val),
+              // ),
             ],
           ),
         ],
@@ -489,7 +653,9 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
       padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 20)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+        borderRadius: BorderRadius.circular(
+          ResponsiveConfig.cardRadius(context),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -536,9 +702,14 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
         ),
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
-      validator: (value) => isRequired && (value == null || value.isEmpty) ? 'This field is required' : null,
+      validator: (value) => isRequired && (value == null || value.isEmpty)
+          ? 'This field is required'
+          : null,
     );
   }
 
@@ -551,7 +722,9 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
   }) {
     return DropdownButtonFormField<String>(
       value: value,
-      items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+      items: items
+          .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+          .toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
@@ -570,7 +743,10 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
         ),
         filled: true,
         fillColor: AppColors.surface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
     );
   }
@@ -603,7 +779,10 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
           ),
           filled: true,
           fillColor: AppColors.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
         child: Text(
           date != null ? _dateFormat.format(date) : 'Select date',
@@ -643,12 +822,19 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               onTap: () => onChanged(item.$1),
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface,
+                  color: isSelected
+                      ? AppColors.primary.withOpacity(0.1)
+                      : AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.lightgrey.withOpacity(0.3),
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.lightgrey.withOpacity(0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -658,14 +844,20 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                     Icon(
                       item.$3,
                       size: 18,
-                      color: isSelected ? AppColors.primary : AppColors.darkgrey,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.darkgrey,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       item.$2,
                       style: TextStyle(
-                        color: isSelected ? AppColors.primary : AppColors.darkgrey,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.darkgrey,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                     ),
                   ],
@@ -678,7 +870,11 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
     );
   }
 
-  Widget _buildBottomBar(EdgeInsets padding, double spacing, TextTheme textTheme) {
+  Widget _buildBottomBar(
+    EdgeInsets padding,
+    double spacing,
+    TextTheme textTheme,
+  ) {
     return Container(
       padding: padding.copyWith(top: spacing, bottom: spacing * 1.5),
       decoration: BoxDecoration(
@@ -699,21 +895,30 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.primary,
                 side: const BorderSide(color: AppColors.primary, width: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              child: Text('Cancel', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Cancel',
+                style: textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
           SizedBox(width: spacing),
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _isSaving ? null : _handleSave,
+              onPressed:  _handleSave,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.onPrimary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 2,
               ),
@@ -723,7 +928,9 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.onPrimary),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.onPrimary,
+                        ),
                       ),
                     )
                   : Row(
@@ -731,7 +938,12 @@ class _EditGuestDetailsState extends State<EditGuestDetails> with SingleTickerPr
                       children: [
                         const Icon(Icons.check, size: 20),
                         const SizedBox(width: 8),
-                        Text('Save Changes', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                        Text(
+                          'Save Changes',
+                          style: textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
             ),

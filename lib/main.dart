@@ -17,6 +17,7 @@ import 'package:inta_mobile_pms/features/reservations/viewmodels/audit_trail_vm.
 import 'package:inta_mobile_pms/features/reservations/viewmodels/cancel_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/change_reservation_type_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/departure_list_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/edit_guest_details_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/inhouse_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/no_show_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_list_vm.dart';
@@ -94,6 +95,9 @@ void main() async {
   );
   Get.put<NetLockVm>(NetLockVm(Get.find<DashboardService>()));
   Get.put<AuditTrailVm>(AuditTrailVm(Get.find<ReservationListService>()));
+  Get.put<EditGuestDetailsVm>(
+    EditGuestDetailsVm(Get.find<ReservationListService>()),
+  );
 
   runApp(PMSApp());
 }

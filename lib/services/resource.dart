@@ -24,6 +24,12 @@ class AppResources {
   static const String houseKeepingStatus = 'houseKeepingStatus';
   static const String maintenanceblock = 'maintenanceblock';
   static const String auditTrial = 'auditTrial';
+  static const String guests = 'guests';
+  static const String vipStatus = 'vipStatus';
+  static const String nationality = 'nationality';
+  static const String identityType = 'identityType';
+  static const String country = 'country';
+  static const String title = 'title';
 
   //authentication
   static const String authentication = 'authentication';
@@ -66,6 +72,15 @@ class AppResources {
   static const String getFolioPayments = '$payment';
   static const String saveOtherInformation = '$booking/otherInformation';
   static const String getAuditTrial = '$auditTrial/getAuditTrial/';
+  static const String updateGuests = '$guests';
+  static const String getAllVipStatus =
+      '$vipStatus/GetAll?startIndex=0&PageSize=0&withInactive=false';
+  static const String getAllNationality =
+      '$nationality/GetAll?startIndex=0&PageSize=0';
+  static const String getAllIdentityTypes =
+      '$identityType/GetAll?startIndex=0&PageSize=0&withInactive=false';
+      static const String getAllCountries = '$country/GetAll';
+      static const String getAllTitle = '$title/GetAll?startIndex=0&PageSize=0';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';

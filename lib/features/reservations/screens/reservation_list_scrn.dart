@@ -332,7 +332,7 @@ class _ReservationListState extends State<ReservationList> {
             label: 'Edit Guest Details',
             onTap: () {
               context.pop();
-              context.push(AppRoutes.editGuestDetails);
+              context.push(AppRoutes.editGuestDetails , extra: guestData);
             },
           ),
             ActionItem(icon: Icons.receipt, label: 'Print Invoice'),

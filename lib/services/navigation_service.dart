@@ -12,9 +12,9 @@ class NavigationService {
     navigatorKey.currentContext?.go(route);
   }
 
-   void back() {
+  void back() {
     final context = navigatorKey.currentContext;
-    if (context != null && Navigator.canPop(context)) {
+    if (context != null && context.mounted && Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }
   }

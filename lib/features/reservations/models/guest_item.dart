@@ -1,353 +1,28 @@
-// class GuestItem {
-//   final String bookingRoomId;
-//   final String guestName;
-//   final String resId;
-//   final String folioId;
-//   final String startDate;
-//   final String endDate;
-//   final int nights;
-//   final String? roomType;
-//   final int adults;
-//   final double totalAmount;
-//   final double balanceAmount;
-//   final int? remainingNights;
-//   final String? roomNumber;
-//   final String? reservedDate;
-//   final String? reservationType;
-//   final String? status;
-//   final String? businessSource;
-//   final String? cancellationNumber;
-//   final String? voucherNumber;
-//   final String? room;
-//   final int? roomId;
-//   final String? country;
-//   final String? rateType;
-//   final double? avgDailyRate;
-//   final double? totalCredits;
-//   final double? roomCharges;
-//   final double? discount;
-//   final double? tax;
-//   final double? extraCharge;
-//   final double? unpostedInclusionRate;
-//   final double? balanceTransfer;
-//   final double? amountPaid;
-//   final double? roundOff;
-//   final String? childAge;
-//   final double? adjustment;
-//   final double? netAmount;
-//   final String? phone;
-//   final String? mobile;
-//   final String? email;
-//   final String? fax;
-//   final String? idNumber;
-//   final String? idType;
-//   final String? expiryDate;
-//   final String? dob;
-//   final String? nationality;
-//   final String? arrivalBy;
-//   final String? arrivalVehicle;
-//   final String? arrivalDate;
-//   final String? arrivalTime;
-//   final String? departureBy;
-//   final String? departureVehicle;
-//   final String? departureDate;
-//   final String? departureTime;
-//   final String? arrival;
-//   final String? departure;
-//   final String? cancellationDate;
-//   final int? children;
-//   final String? marketCode;
-//   final String? company;
-//   final String? travelAgent;
-//   final String? remarks;
-//   final int? billingRateTypeId;
-//   final List<FolioCharge>? folioCharges;
-//     int? billingInstructionId;
-//   bool? isTaxInclusiveRate;
-//   String? taxRegistrationDate;
-//   String? billNumber;
-//   int? isCash;
-//   bool? isComplementory;
-//   double? manualRate;
-//   int? paymentMode;
-//   int? paymentModeCategory;
-//   int? rateSourceId;
-//   double? releaseChargeAmountPercentage;
-//   String? releaseDate;
-//   int? businessCategoryId;
-//   int? businessSourceId;
-//   int? marketId;
-//   bool? isToBeReleased;
-//   String? maxDep;
-//   int? maxNights;
-//   String? minArr;
-//   int? pax;
-//   String? vehiclePlate;
-//   String? voucherNo;
-//   String? resDate;
-
-//   GuestItem({
-//     required this.bookingRoomId,
-//     required this.guestName,
-//     required this.resId,
-//     required this.folioId,
-//     required this.startDate,
-//     required this.endDate,
-//     required this.nights,
-//     this.roomType,
-//     required this.adults,
-//     required this.totalAmount,
-//     required this.balanceAmount,
-//     this.remainingNights,
-//     this.roomNumber,
-//     this.reservedDate,
-//     this.reservationType,
-//     this.status,
-//     this.businessSource,
-//     this.cancellationNumber,
-//     this.voucherNumber,
-//     this.room,
-//     this.roomId,
-//     this.country,
-//     this.rateType,
-//     this.avgDailyRate,
-//     this.totalCredits,
-//     this.roomCharges,
-//     this.discount,
-//     this.tax,
-//     this.extraCharge,
-//     this.unpostedInclusionRate,
-//     this.balanceTransfer,
-//     this.amountPaid,
-//     this.roundOff,
-//     this.childAge,
-//     this.adjustment,
-//     this.netAmount,
-//     this.phone,
-//     this.mobile,
-//     this.email,
-//     this.fax,
-//     this.idNumber,
-//     this.idType,
-//     this.expiryDate,
-//     this.dob,
-//     this.nationality,
-//     this.arrivalBy,
-//     this.arrivalVehicle,
-//     this.arrivalDate,
-//     this.arrivalTime,
-//     this.departureBy,
-//     this.departureVehicle,
-//     this.departureDate,
-//     this.departureTime,
-//     this.arrival,
-//     this.departure,
-//     this.cancellationDate,
-//     this.children,
-//     this.marketCode,
-//     this.company,
-//     this.travelAgent,
-//     this.remarks,
-//     this.folioCharges,
-//     this.billingRateTypeId,
-//         this.billingInstructionId,
-//     this.isTaxInclusiveRate,
-//     this.taxRegistrationDate,
-//     this.billNumber,
-//     this.isCash,
-//     this.isComplementory,
-//     this.manualRate,
-//     this.paymentMode,
-//     this.paymentModeCategory,
-//     this.rateSourceId,
-//     this.releaseChargeAmountPercentage,
-//     this.releaseDate,
-//     this.businessCategoryId,
-//     this.businessSourceId,
-//     this.marketId,
-//     this.isToBeReleased,
-//     this.maxDep,
-//     this.maxNights,
-//     this.minArr,
-//     this.pax,
-//     this.vehiclePlate,
-//     this.voucherNo,
-//     this.resDate,
-
-//   });
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'bookingRoomId': bookingRoomId,
-//       'guestName': guestName,
-//       'resId': resId,
-//       'folioId': folioId,
-//       'startDate': startDate,
-//       'endDate': endDate,
-//       'nights': nights,
-//       'roomType': roomType,
-//       'adults': adults,
-//       'totalAmount': totalAmount,
-//       'balanceAmount': balanceAmount,
-//       'remainingNights': remainingNights,
-//       'roomNumber': roomNumber,
-//       'reservedDate': reservedDate,
-//       'reservationType': reservationType,
-//       'status': status,
-//       'businessSource': businessSource,
-//       'cancellationNumber': cancellationNumber,
-//       'voucherNumber': voucherNumber,
-//       'room': room,
-//       'roomId': roomId,
-//       'country': country,
-//       'rateType': rateType,
-//       'avgDailyRate': avgDailyRate,
-//       'totalCredits': totalCredits,
-//       'roomCharges': roomCharges,
-//       'discount': discount,
-//       'tax': tax,
-//       'extraCharge': extraCharge,
-//       'unpostedInclusionRate': unpostedInclusionRate,
-//       'balanceTransfer': balanceTransfer,
-//       'amountPaid': amountPaid,
-//       'roundOff': roundOff,
-//       'childAge': childAge,
-//       'adjustment': adjustment,
-//       'netAmount': netAmount,
-//       'phone': phone,
-//       'mobile': mobile,
-//       'email': email,
-//       'fax': fax,
-//       'idNumber': idNumber,
-//       'idType': idType,
-//       'expiryDate': expiryDate,
-//       'dob': dob,
-//       'nationality': nationality,
-//       'arrivalBy': arrivalBy,
-//       'arrivalVehicle': arrivalVehicle,
-//       'arrivalDate': arrivalDate,
-//       'arrivalTime': arrivalTime,
-//       'departureBy': departureBy,
-//       'departureVehicle': departureVehicle,
-//       'departureDate': departureDate,
-//       'departureTime': departureTime,
-//       'arrival': arrival,
-//       'departure': departure,
-//       'cancellationDate': cancellationDate,
-//       'children': children,
-//       'marketCode': marketCode,
-//       'company': company,
-//       'travelAgent': travelAgent,
-//       'remarks': remarks,
-//       'billingRateTypeId': billingRateTypeId,
-//       'folioCharges': folioCharges?.map((f) => f.toJson()).toList(),
-
-//     };
-//   }
-
-//   @override
-//   String toString() {
-//     return 'GuestItem('
-//         'bookingRoomId: $bookingRoomId, '
-//         'guestName: $guestName, '
-//         'resId: $resId, '
-//         'folioId: $folioId, '
-//         'startDate: $startDate, '
-//         'endDate: $endDate, '
-//         'nights: $nights, '
-//         'roomType: $roomType, '
-//         'adults: $adults, '
-//         'totalAmount: $totalAmount, '
-//         'balanceAmount: $balanceAmount, '
-//         'remainingNights: $remainingNights, '
-//         'roomNumber: $roomNumber, '
-//         'reservedDate: $reservedDate, '
-//         'reservationType: $reservationType, '
-//         'status: $status, '
-//         'businessSource: $businessSource, '
-//         'cancellationNumber: $cancellationNumber, '
-//         'voucherNumber: $voucherNumber, '
-//         'room: $room, '
-//         'roomId: $roomId, '
-//         'country: $country, '
-//         'rateType: $rateType, '
-//         'avgDailyRate: $avgDailyRate, '
-//         'totalCredits: $totalCredits, '
-//         'roomCharges: $roomCharges, '
-//         'discount: $discount, '
-//         'tax: $tax, '
-//         'extraCharge: $extraCharge, '
-//         'unpostedInclusionRate: $unpostedInclusionRate, '
-//         'balanceTransfer: $balanceTransfer, '
-//         'amountPaid: $amountPaid, '
-//         'roundOff: $roundOff, '
-//         'childAge: $childAge, '
-//         'adjustment: $adjustment, '
-//         'netAmount: $netAmount, '
-//         'phone: $phone, '
-//         'mobile: $mobile, '
-//         'email: $email, '
-//         'fax: $fax, '
-//         'idNumber: $idNumber, '
-//         'idType: $idType, '
-//         'expiryDate: $expiryDate, '
-//         'dob: $dob, '
-//         'nationality: $nationality, '
-//         'arrivalBy: $arrivalBy, '
-//         'arrivalVehicle: $arrivalVehicle, '
-//         'arrivalDate: $arrivalDate, '
-//         'arrivalTime: $arrivalTime, '
-//         'departureBy: $departureBy, '
-//         'departureVehicle: $departureVehicle, '
-//         'departureDate: $departureDate, '
-//         'departureTime: $departureTime, '
-//         'arrival: $arrival, '
-//         'departure: $departure, '
-//         'cancellationDate: $cancellationDate, '
-//         'children: $children, '
-//         'marketCode: $marketCode, '
-//         'company: $company, '
-//         'travelAgent: $travelAgent, '
-//         'remarks: $remarks, '
-//         'billingRateTypeId:$billingRateTypeId'
-//         'folioCharges: $folioCharges'
-//         ')';
-//   }
-// }
-
-// class FolioCharge {
-//   final String title;
-//   final String date;
-//   final String room;
-//   final double amount;
-//   final bool isPosted;
-//   FolioCharge({
-//     required this.title,
-//     required this.date,
-//     required this.room,
-//     required this.amount,
-//     required this.isPosted,
-//   });
-
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'title': title,
-//       'date': date,
-//       'room': room,
-//       'amount': amount,
-//       'isPosted': isPosted,
-//     };
-//   }
-
-//   @override
-//   String toString() {
-//     return 'FolioCharge(title: $title, date: $date, room: $room, amount: $amount, isPosted: $isPosted)';
-//   }
-// }
 class GuestItem {
   final int? bookingId;
   final String bookingRoomId;
   final String guestName;
+  final int? guestId;
+  final int? titleId;
+  final String? fullAddress;
+  final String? cityName;
+  final String? imagePath;
+  final String? zipCode;
+  final String? state;
+  final int? identityType;
+  final bool? isAdult;
+  final bool? isMainGuest;
+  final bool? isBlackListed;
+  final String? gender;
+  final int? nationalityId;
+  final int? vipStatusId;
+  final int? identityIssuingCountryId;
+  final int? identityIssuingCityId;
+  final String? dateofBirth;
+  final String? spouseDateofBirth;
+  final String? anniversaryDate;
+  final int? birthCityId;
+  final int? swipeCardId;
   final String resId;
   final String folioId;
   final String startDate;
@@ -362,6 +37,8 @@ class GuestItem {
   final String? reservedDate;
   final String? reservationType;
   final String? status;
+  final String? workPlace;
+  final String? civilStatus;
   final String? businessSource;
   final String? cancellationNumber;
   final String? voucherNumber;
@@ -399,8 +76,8 @@ class GuestItem {
   final String? departureVehicle;
   final String? departureDate;
   final String? departureTime;
-  final String? arrival; // Full arrival datetime
-  final String? departure; // Full departure datetime
+  final String? arrival;
+  final String? departure;
   final String? cancellationDate;
   final int? children;
   final String? marketCode;
@@ -414,7 +91,6 @@ class GuestItem {
   final int? masterFolioBookingTransId;
   final List<FolioCharge>? folioCharges;
 
-  // Billing fields
   int? billingInstructionId;
   bool? isTaxInclusiveRate;
   String? taxRegistrationDate;
@@ -443,6 +119,28 @@ class GuestItem {
     this.bookingId,
     required this.bookingRoomId,
     required this.guestName,
+    this.guestId,
+    this.titleId,
+    this.zipCode,
+    this.state,
+    this.fullAddress,
+    this.cityName,
+    this.workPlace,
+    this.imagePath,
+    this.identityType,
+    this.nationalityId,
+    this.vipStatusId,
+    this.swipeCardId,
+    this.identityIssuingCountryId,
+    this.identityIssuingCityId,
+    this.dateofBirth,
+    this.anniversaryDate,
+    this.spouseDateofBirth,
+    this.birthCityId,
+    this.gender,
+    this.isAdult,
+    this.isMainGuest,
+    this.isBlackListed,
     required this.resId,
     required this.folioId,
     required this.startDate,
@@ -457,6 +155,7 @@ class GuestItem {
     this.reservedDate,
     this.reservationType,
     this.status,
+    this.civilStatus,
     this.businessSource,
     this.cancellationNumber,
     this.voucherNumber,
@@ -538,6 +237,28 @@ class GuestItem {
       bookingId: json['bookingId'] ?? 0,
       bookingRoomId: json['bookingRoomId'] ?? '',
       guestName: json['guestName'] ?? '',
+      guestId: json['guestId'] ?? 0,
+      titleId: json['titleId'] ?? 0,
+      fullAddress: json['fullAddress'] ?? '',
+      zipCode: json['zipCode'] ?? '',
+      state: json['state'] ?? '',
+      gender: json['gender'] ?? '',
+      isAdult: json['isAdult'] ?? true,
+      isMainGuest: json['isMainGuest'] ?? true,
+      isBlackListed: json['isBlackListed'] ?? false,
+      identityType: json['identityType'] ?? 0,
+      nationalityId: json['nationalityId'] ?? 0,
+      vipStatusId: json['vipStatusId'] ?? 0,
+      swipeCardId: json['swipeCardId'] ?? 0,
+      cityName: json['cityName'] ?? '',
+      workPlace: json['workPlace'] ?? '',
+      imagePath: json['imagePath'] ?? '',
+      identityIssuingCityId: json['identityIssuingCityId'] ?? 0,
+      identityIssuingCountryId: json['identityIssuingCountryId'] ?? 0,
+      dateofBirth: json['dateofBirth'] ?? '',
+      anniversaryDate: json['anniversaryDate'] ?? '',
+      spouseDateofBirth: json['spouseDateofBirth'] ?? '',
+      birthCityId: json['birthCityId'] ?? 0,
       resId: json['resId'] ?? '',
       folioId: json['folioId'] ?? '',
       startDate: json['startDate'] ?? '',
@@ -639,6 +360,28 @@ class GuestItem {
       'bookingId': bookingId,
       'bookingRoomId': bookingRoomId,
       'guestName': guestName,
+      'guestId': guestId,
+      'titleId': titleId,
+      'zipCode': zipCode,
+      'state': state,
+      'identityType': identityType,
+      'nationalityId': nationalityId,
+      'vipStatusId': vipStatusId,
+      'swipeCardId': swipeCardId,
+      'fullAddress': fullAddress,
+      'cityName': cityName,
+      'workPlace': workPlace,
+      'imagePath': imagePath,
+      'isAdult': isAdult,
+      'isMainGuest': isMainGuest,
+      'isBlackListed': isBlackListed,
+      'gender': gender,
+      'identityIssuingCountryId': identityIssuingCountryId,
+      'identityIssuingCityId': identityIssuingCityId,
+      'birthCityId': birthCityId,
+      'spouseDateofBirth': spouseDateofBirth,
+      'dateofBirth': dateofBirth,
+      'anniversaryDate': anniversaryDate,
       'resId': resId,
       'folioId': folioId,
       'startDate': startDate,
@@ -726,7 +469,7 @@ class GuestItem {
       'voucherNo': voucherNo,
       'resDate': resDate,
       'grCardNumber': grCardNumber,
-      'masterFolioBookingTransId':masterFolioBookingTransId,
+      'masterFolioBookingTransId': masterFolioBookingTransId,
     };
   }
 
@@ -736,6 +479,26 @@ class GuestItem {
         'bookingId: $bookingId, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '
+        'workPlace: $workPlace, '
+        'guestId: $guestId, '
+        'titleId: $titleId,'
+        'fullAddress: $fullAddress, '
+        'cityName: $cityName, '
+        'imagePath: $imagePath, '
+        'zipCode: $zipCode, '
+        'state: $state, '
+        'gender: $gender'
+        'isAdult: $isAdult, '
+        'isMainGuest: $isMainGuest, '
+        'identityType: $identityType, '
+        'nationalityId: $nationalityId, '
+        'vipStatusId: $vipStatusId, '
+        'swipeCardId: $swipeCardId, '
+        'identityIssuingCityId: $identityIssuingCityId, '
+        'identityIssuingCountryId: $identityIssuingCountryId, '
+        'birthCityId: $birthCityId, '
+        'spouseDateofBirth: $spouseDateofBirth, '
+        'dateofBirth: $dateofBirth, '
         'resId: $resId, '
         'folioId: $folioId, '
         'startDate: $startDate, '

@@ -434,7 +434,7 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Edit Guest Details',
             onTap: () {
               context.pop();
-              context.push(AppRoutes.editGuestDetails);
+              context.push(AppRoutes.editGuestDetails, extra: guestData);
             },
           ),
           ActionItem(

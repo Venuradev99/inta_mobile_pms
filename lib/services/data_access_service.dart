@@ -104,6 +104,36 @@ class DataAccessService {
     }
   }
 
+  Future<Map<String, dynamic>> put(
+    Map<String, dynamic> body,
+    String url,
+  ) async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+
+      if (token.isEmpty) {
+        throw Exception('Session key not available');
+      }
+
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        'Hotelid': hotelId,
+      };
+
+      final response = await http.put(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('POST error: $e');
+    }
+  }
+
   //   Future<Map<String, dynamic>> Post(
   //     String url,
   //     Map<String, dynamic> body,

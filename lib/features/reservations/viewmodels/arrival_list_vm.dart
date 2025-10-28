@@ -26,8 +26,6 @@ class ArrivalListVm extends GetxController {
   var statuses = <FilterDropdownData>[].obs;
   var businessSources = <FilterDropdownData>[].obs;
 
- 
-
   ArrivalListVm(this._reservationListService);
 
   String getToDateForWeek(String fromDate) {
@@ -77,7 +75,7 @@ class ArrivalListVm extends GetxController {
         _reservationListService.getAllreservationTypes(),
         _reservationListService.getAllbusinessSources(),
       ]);
-      
+
       final arrivalListResponse = response[0];
       final statusResponse = response[1];
       final roomTypeResponse = response[2];
@@ -374,7 +372,31 @@ class ArrivalListVm extends GetxController {
         final guestItem = GuestItem(
           bookingId: result["bookingId"] ?? 0,
           bookingRoomId: result["bookingRoom"]["bookingRoomId"].toString(),
+          guestId: result["guest"]["guestId"] ?? 0,
           guestName: result["guest"]["firstName"] ?? '',
+          fullAddress: result["guest"]["fullAddress"] ?? '',
+          cityName: result["guest"]["cityName"] ?? '',
+          zipCode: result["guest"]["zipCode"] ?? '',
+          state: result["guest"]["state"] ?? '',
+          civilStatus:  result["guest"]["civilStatus"] ?? '',
+          workPlace:  result["guest"]["workPlace"] ?? '',
+          swipeCardId:  result["guest"]["swipeCardId"] ?? 0,
+          imagePath: result["guest"]["imagePath"] ?? '',
+          gender: result["guest"]["gender"] ?? 'Other',
+          identityType: result["guest"]["identityType"] ?? 0,
+          dateofBirth: result["guest"]["dateofBirth"] ?? '',
+          nationalityId: result["guest"]["nationalityId"] ?? 0,
+          anniversaryDate: result["guest"]["anniversaryDate"] ?? '',
+          spouseDateofBirth: result["guest"]["spouseDateofBirth"] ?? '',
+          birthCityId: result["guest"]["birthCityId"] ?? 0,
+          vipStatusId: result["guest"]["vipStatusId"] ?? 0,
+          isAdult: result["guest"]["isAdult"] ?? true,
+          isMainGuest: result["guest"]["isMainGuest"] ?? true,
+          isBlackListed: result["guest"]["isBlackListed"] ?? false,
+          identityIssuingCityId: result["guest"]["identityIssuingCityId"] ?? 0,
+          identityIssuingCountryId:
+              result["guest"]["identityIssuingCountryId"] ?? 0,
+          titleId: result["guest"]["titleId"] ?? 0,
           resId: result["bookingRoom"]["reservatioNumber"].toString(),
           folioId: result["bookingRoom"]["folioId"].toString(),
           startDate: getFirstTenCharacters(
@@ -625,6 +647,4 @@ class ArrivalListVm extends GetxController {
       throw Exception('Error unassign request: $e');
     }
   }
-
- 
 }
