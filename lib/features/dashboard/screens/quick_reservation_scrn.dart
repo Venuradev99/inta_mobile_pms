@@ -13,7 +13,6 @@ class QuickReservation extends StatefulWidget {
 class _QuickReservationState extends State<QuickReservation> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   bool _isLoading = true;
-  int selectedIndex = 0;
   DateTime checkInDate = DateTime.now();
   DateTime checkOutDate = DateTime.now().add(const Duration(days: 1));
   TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // ~1 PM as per screenshot
@@ -22,32 +21,37 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
   String? selectedBusinessSource;
   String? selectedOta;
   String? selectedTravelAgent;
+  String? selectedCompany;
   String reservationType = 'Confirm';
   int roomCount = 1;
   String? selectedRoomType;
   String? selectedRateType;
-  String? selectedRoom;
-  int adultCount = 1;
-  int childCount = 0;
-  double rate = 0.00;
+  bool differentRoomTypes = false;
+  List<String?> selectedRoomTypes = [];
+  List<String?> selectedRateTypes = [];
+  List<String?> selectedRooms = [];
+  List<int> adultCounts = [];
+  List<int> childCounts = [];
+  List<double> rates = [];
   bool rateOverride = false;
   bool returningGuest = false;
   String? selectedSalutation;
   TextEditingController guestNameController = TextEditingController();
   TextEditingController mobileNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController voucherController = TextEditingController();
 
   // Dynamic totals
   double roomCharges = 0.0;
   double tax = 0.0;
   double total = 0.0;
 
-  final List<String> options = [
-    'Walk In',
-    'Booking Engine',
-    'OTA',
-    'Travel Agent',
-  ];
+  final Map<String, double> defaultRates = {
+    'Standard Room': 100.00,
+    'Deluxe Room': 150.00,
+    'Suite': 200.00,
+    'Executive Room': 250.00,
+  };
 
   final List<String> otas = [
     'Booking.com',
@@ -63,11 +67,18 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     'Global Agents',
   ];
 
+  final List<String> companies = [
+    'Company A',
+    'Company B',
+    'Company C',
+    'Enterprise Solutions',
+  ];
+
   final List<String> businessSources = [
-    'Direct Booking',
-    'Online Travel Agency',
-    'Corporate Contract',
-    'Group Booking',
+    'Web',
+    'Online Travel Agent',
+    'Travel Agent',
+    'Corporate',
   ];
 
   final List<String> reservationTypes = [
@@ -105,6 +116,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
       duration: const Duration(milliseconds: 1500),
     )..repeat();
 
+    // Initialize per-room lists
+    _initializeRoomLists();
+
     // Simulate loading (replace with real async data fetch, e.g., API call)
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -116,12 +130,22 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     _updateTotals();
   }
 
+  void _initializeRoomLists() {
+    selectedRoomTypes = List.filled(roomCount, null, growable: true);
+    selectedRateTypes = List.filled(roomCount, null, growable: true);
+    selectedRooms = List.filled(roomCount, null, growable: true);
+    adultCounts = List.filled(roomCount, 1, growable: true);
+    childCounts = List.filled(roomCount, 0, growable: true);
+    rates = List.filled(roomCount, 0.00, growable: true);
+  }
+
   @override
   void dispose() {
     _shimmerController.dispose();
     guestNameController.dispose();
     mobileNumberController.dispose();
     emailController.dispose();
+    voucherController.dispose();
     super.dispose();
   }
 
@@ -133,9 +157,24 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
   }
 
   void _updateTotals() {
-    roomCharges = rate * nights * roomCount;
-    tax = roomCharges * 0.1; // 10% tax; adjust as needed
+    roomCharges = 0.0;
+    tax = 0.0;
+    for (int i = 0; i < roomCount; i++) {
+      final double roomCharge = rates[i] * nights;
+      roomCharges += roomCharge;
+      tax += roomCharge * 0.1; // 10% tax; adjust as needed
+    }
     total = roomCharges + tax;
+  }
+
+  void _setDefaultRates() {
+    for (int i = 0; i < roomCount; i++) {
+      String? rt = differentRoomTypes ? selectedRoomTypes[i] : selectedRoomType;
+      if (rt != null) {
+        rates[i] = defaultRates[rt] ?? 0.0;
+      }
+    }
+    _updateTotals();
   }
 
   Future<void> _selectDate(BuildContext context, bool isCheckIn) async {
@@ -187,13 +226,34 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     return '$hour:$minute $period';
   }
 
+  void _removeRoom(int index) {
+    setState(() {
+      selectedRoomTypes.removeAt(index);
+      selectedRateTypes.removeAt(index);
+      selectedRooms.removeAt(index);
+      adultCounts.removeAt(index);
+      childCounts.removeAt(index);
+      rates.removeAt(index);
+      roomCount = adultCounts.length;
+      _updateTotals();
+    });
+  }
+
   bool _validateForm() {
     // Basic validation for required fields
-    if (selectedRoomType == null || selectedRateType == null || adultCount < 1) {
+    if (reservationType.isEmpty || roomCount < 1) {
       return false;
     }
-    if (selectedIndex == 2 && selectedOta == null) return false;
-    if (selectedIndex == 3 && selectedTravelAgent == null) return false;
+    if (selectedBusinessSource == 'Online Travel Agent' && selectedOta == null) return false;
+    if (selectedBusinessSource == 'Travel Agent' && (selectedTravelAgent == null || voucherController.text.isEmpty)) return false;
+    if (selectedBusinessSource == 'Corporate' && selectedCompany == null) return false;
+    for (int i = 0; i < roomCount; i++) {
+      if (adultCounts[i] < 1) return false;
+      if (differentRoomTypes) {
+        if (selectedRoomTypes[i] == null || selectedRateTypes[i] == null) return false;
+      }
+    }
+    if (!differentRoomTypes && (selectedRoomType == null || selectedRateType == null)) return false;
     return true;
   }
 
@@ -234,63 +294,6 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: defaultPadding),
-                      // Toggle Bar (Segmented Buttons)
-                      Container(
-                        padding: EdgeInsets.all(defaultPadding / 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(cardRadius),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 6,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: List.generate(options.length, (index) {
-                            final bool isSelected = selectedIndex == index;
-                            return Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedIndex = index;
-                                    // Reset conditional fields on tab change
-                                    selectedOta = null;
-                                    selectedTravelAgent = null;
-                                    selectedBusinessSource = null;
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: defaultPadding),
-                                  margin: EdgeInsets.symmetric(horizontal: defaultPadding / 4),
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.primary : AppColors.surface,
-                                    borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                                    border: Border.all(
-                                      color: isSelected ? AppColors.primary : Colors.transparent,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      options[index],
-                                      textAlign: TextAlign.center,
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: 14 * fontScale,
-                                        fontWeight: FontWeight.w600,
-                                        color: isSelected ? AppColors.onPrimary : AppColors.darkgrey,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      SizedBox(height: listItemSpacing * 1.25),
 
                       // Check-in/Check-out Section
                       _buildCheckInOutSection(
@@ -303,49 +306,75 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       ),
                       SizedBox(height: listItemSpacing * 1.25),
 
-                      // Conditional Extra Dropdowns based on selected tab
-                      AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: (selectedIndex == 2)
-                            ? _buildDropdownField(
-                                key: const ValueKey('ota'),
-                                label: 'OTA *',
-                                value: selectedOta,
-                                hint: 'Select OTA',
-                                items: otas,
-                                onChanged: (value) => setState(() => selectedOta = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
-                              )
-                            : (selectedIndex == 3)
-                                ? _buildDropdownField(
-                                    key: const ValueKey('travel_agent'),
-                                    label: 'Travel Agent *',
-                                    value: selectedTravelAgent,
-                                    hint: 'Select Travel Agent',
-                                    items: travelAgents,
-                                    onChanged: (value) => setState(() => selectedTravelAgent = value),
-                                    theme: theme,
-                                    fontScale: fontScale,
-                                    cardRadius: cardRadius,
-                                  )
-                                : const SizedBox.shrink(key: ValueKey('none')),
-                      ),
-                      if (selectedIndex == 2 || selectedIndex == 3) SizedBox(height: listItemSpacing),
-
                       // Business Source (always shown)
                       _buildDropdownField(
                         label: 'Business Source',
                         value: selectedBusinessSource,
                         hint: 'Select Business Source',
                         items: businessSources,
-                        onChanged: (value) => setState(() => selectedBusinessSource = value),
+                        onChanged: (value) => setState(() {
+                          selectedBusinessSource = value;
+                          selectedOta = null;
+                          selectedTravelAgent = null;
+                          selectedCompany = null;
+                          voucherController.clear();
+                        }),
                         theme: theme,
                         fontScale: fontScale,
                         cardRadius: cardRadius,
                       ),
                       SizedBox(height: listItemSpacing),
+
+                      // Conditional Extra Fields based on selected category
+                      if (selectedBusinessSource == 'Online Travel Agent')
+                        _buildDropdownField(
+                          key: const ValueKey('ota'),
+                          label: 'OTA *',
+                          value: selectedOta,
+                          hint: 'Select OTA',
+                          items: otas,
+                          onChanged: (value) => setState(() => selectedOta = value),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        )
+                      else if (selectedBusinessSource == 'Travel Agent')
+                        Column(
+                          key: const ValueKey('travel_agent'),
+                          children: [
+                            _buildDropdownField(
+                              label: 'Agent *',
+                              value: selectedTravelAgent,
+                              hint: 'Select Travel Agent',
+                              items: travelAgents,
+                              onChanged: (value) => setState(() => selectedTravelAgent = value),
+                              theme: theme,
+                              fontScale: fontScale,
+                              cardRadius: cardRadius,
+                            ),
+                            SizedBox(height: listItemSpacing),
+                            _buildTextField(
+                              label: 'Voucher No *',
+                              controller: voucherController,
+                              hint: 'Enter Voucher No',
+                              theme: theme,
+                              fontScale: fontScale,
+                            ),
+                          ],
+                        )
+                      else if (selectedBusinessSource == 'Corporate')
+                        _buildDropdownField(
+                          key: const ValueKey('corporate'),
+                          label: 'Company *',
+                          value: selectedCompany,
+                          hint: 'Select Company',
+                          items: companies,
+                          onChanged: (value) => setState(() => selectedCompany = value),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        ),
+                      if (selectedBusinessSource != null && selectedBusinessSource != 'Web') SizedBox(height: listItemSpacing),
 
                       // Reservation Type and Rooms
                       if (isMobile)
@@ -367,7 +396,31 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                               value: roomCount,
                               onChanged: (value) {
                                 setState(() {
+                                  if (value > roomCount) {
+                                    final int toAdd = value - roomCount;
+                                    for (int j = 0; j < toAdd; j++) {
+                                      selectedRoomTypes.add(null);
+                                      selectedRateTypes.add(null);
+                                      selectedRooms.add(null);
+                                      adultCounts.add(1);
+                                      childCounts.add(0);
+                                      rates.add(0.00);
+                                    }
+                                  } else if (value < roomCount) {
+                                    final int toRemove = roomCount - value;
+                                    for (int j = 0; j < toRemove; j++) {
+                                      selectedRoomTypes.removeLast();
+                                      selectedRateTypes.removeLast();
+                                      selectedRooms.removeLast();
+                                      adultCounts.removeLast();
+                                      childCounts.removeLast();
+                                      rates.removeLast();
+                                    }
+                                  }
                                   roomCount = value;
+                                  if (!rateOverride) {
+                                    _setDefaultRates();
+                                  }
                                   _updateTotals();
                                 });
                               },
@@ -400,7 +453,31 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                 value: roomCount,
                                 onChanged: (value) {
                                   setState(() {
+                                    if (value > roomCount) {
+                                      final int toAdd = value - roomCount;
+                                      for (int j = 0; j < toAdd; j++) {
+                                        selectedRoomTypes.add(null);
+                                        selectedRateTypes.add(null);
+                                        selectedRooms.add(null);
+                                        adultCounts.add(1);
+                                        childCounts.add(0);
+                                        rates.add(0.00);
+                                      }
+                                    } else if (value < roomCount) {
+                                      final int toRemove = roomCount - value;
+                                      for (int j = 0; j < toRemove; j++) {
+                                        selectedRoomTypes.removeLast();
+                                        selectedRateTypes.removeLast();
+                                        selectedRooms.removeLast();
+                                        adultCounts.removeLast();
+                                        childCounts.removeLast();
+                                        rates.removeLast();
+                                      }
+                                    }
                                     roomCount = value;
+                                    if (!rateOverride) {
+                                      _setDefaultRates();
+                                    }
                                     _updateTotals();
                                   });
                                 },
@@ -412,7 +489,36 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                             ),
                           ],
                         ),
-                      SizedBox(height: listItemSpacing * 1.5),
+                      SizedBox(height: listItemSpacing),
+
+                      // Different Room Types switch
+                      Tooltip(
+                        message: 'Allow different room types for each room',
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Different Room Types',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 14 * fontScale,
+                                color: AppColors.lightgrey,
+                              ),
+                            ),
+                            Switch(
+                              value: differentRoomTypes,
+                              onChanged: (value) => setState(() {
+                                differentRoomTypes = value;
+                                if (!rateOverride) {
+                                  _setDefaultRates();
+                                }
+                              }),
+                              activeColor: AppColors.primary,
+                              inactiveThumbColor: AppColors.lightgrey,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: listItemSpacing * 0.5),
 
                       // Room Details Card
                       Card(
@@ -424,85 +530,27 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Room Details',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontSize: 18 * fontScale,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.darkgrey,
-                                    ),
-                                  ),
-                                  Tooltip(
-                                    message: 'Override the default rate',
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'Rate Override',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            fontSize: 14 * fontScale,
-                                            color: AppColors.lightgrey,
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Switch(
-                                          value: rateOverride,
-                                          onChanged: (value) => setState(() => rateOverride = value),
-                                          activeColor: AppColors.primary,
-                                          inactiveThumbColor: AppColors.lightgrey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: listItemSpacing),
-                              if (isMobile)
-                                Column(
-                                  children: [
-                                    _buildDropdownField(
-                                      label: 'Room Type *',
-                                      value: selectedRoomType,
-                                      hint: 'Select Room Type',
-                                      items: roomTypes,
-                                      onChanged: (value) => setState(() => selectedRoomType = value),
-                                      theme: theme,
-                                      fontScale: fontScale,
-                                      cardRadius: cardRadius,
-                                    ),
-                                    SizedBox(height: listItemSpacing),
-                                    _buildDropdownField(
-                                      label: 'Rate Type *',
-                                      value: selectedRateType,
-                                      hint: 'Select Rate Type',
-                                      items: rateTypes,
-                                      onChanged: (value) => setState(() => selectedRateType = value),
-                                      theme: theme,
-                                      fontScale: fontScale,
-                                      cardRadius: cardRadius,
-                                    ),
-                                  ],
-                                )
-                              else
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildDropdownField(
+                              if (!differentRoomTypes)
+                                if (isMobile)
+                                  Column(
+                                    children: [
+                                      _buildDropdownField(
                                         label: 'Room Type *',
                                         value: selectedRoomType,
                                         hint: 'Select Room Type',
                                         items: roomTypes,
-                                        onChanged: (value) => setState(() => selectedRoomType = value),
+                                        onChanged: (value) => setState(() {
+                                          selectedRoomType = value;
+                                          if (!rateOverride) {
+                                            _setDefaultRates();
+                                          }
+                                        }),
                                         theme: theme,
                                         fontScale: fontScale,
                                         cardRadius: cardRadius,
                                       ),
-                                    ),
-                                    SizedBox(width: defaultPadding),
-                                    Expanded(
-                                      child: _buildDropdownField(
+                                      SizedBox(height: listItemSpacing),
+                                      _buildDropdownField(
                                         label: 'Rate Type *',
                                         value: selectedRateType,
                                         hint: 'Select Rate Type',
@@ -512,99 +560,81 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                         fontScale: fontScale,
                                         cardRadius: cardRadius,
                                       ),
+                                    ],
+                                  )
+                                else
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildDropdownField(
+                                          label: 'Room Type *',
+                                          value: selectedRoomType,
+                                          hint: 'Select Room Type',
+                                          items: roomTypes,
+                                          onChanged: (value) => setState(() {
+                                            selectedRoomType = value;
+                                            if (!rateOverride) {
+                                              _setDefaultRates();
+                                            }
+                                          }),
+                                          theme: theme,
+                                          fontScale: fontScale,
+                                          cardRadius: cardRadius,
+                                        ),
+                                      ),
+                                      SizedBox(width: defaultPadding),
+                                      Expanded(
+                                        child: _buildDropdownField(
+                                          label: 'Rate Type *',
+                                          value: selectedRateType,
+                                          hint: 'Select Rate Type',
+                                          items: rateTypes,
+                                          onChanged: (value) => setState(() => selectedRateType = value),
+                                          theme: theme,
+                                          fontScale: fontScale,
+                                          cardRadius: cardRadius,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              if (!differentRoomTypes) SizedBox(height: listItemSpacing),
+                              Tooltip(
+                                message: 'Override the default rate',
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Rate Override',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontSize: 14 * fontScale,
+                                        color: AppColors.lightgrey,
+                                      ),
+                                    ),
+                                    Switch(
+                                      value: rateOverride,
+                                      onChanged: (value) => setState(() {
+                                        rateOverride = value;
+                                        if (!value) {
+                                          _setDefaultRates();
+                                        }
+                                      }),
+                                      activeColor: AppColors.primary,
+                                      inactiveThumbColor: AppColors.lightgrey,
                                     ),
                                   ],
                                 ),
-                              SizedBox(height: listItemSpacing),
-                              _buildDropdownField(
-                                label: 'Room',
-                                value: selectedRoom,
-                                hint: 'Select Room',
-                                items: rooms,
-                                onChanged: (value) => setState(() => selectedRoom = value),
-                                theme: theme,
-                                fontScale: fontScale,
-                                cardRadius: cardRadius,
                               ),
                               SizedBox(height: listItemSpacing),
-                              if (isMobile)
-                                Column(
-                                  children: [
-                                    _buildStepperField(
-                                      label: 'Adult *',
-                                      value: adultCount,
-                                      onChanged: (value) => setState(() => adultCount = value),
-                                      theme: theme,
-                                      fontScale: fontScale,
-                                      cardRadius: cardRadius,
-                                      minValue: 1,
-                                    ),
-                                    SizedBox(height: listItemSpacing),
-                                    _buildStepperField(
-                                      label: 'Child *',
-                                      value: childCount,
-                                      onChanged: (value) => setState(() => childCount = value),
-                                      theme: theme,
-                                      fontScale: fontScale,
-                                      cardRadius: cardRadius,
-                                    ),
-                                    SizedBox(height: listItemSpacing),
-                                    _buildRateField(
-                                      theme: theme,
-                                      fontScale: fontScale,
-                                      cardRadius: cardRadius,
-                                    ),
-                                  ],
-                                )
-                              else
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: _buildStepperField(
-                                        label: 'Adult *',
-                                        value: adultCount,
-                                        onChanged: (value) => setState(() => adultCount = value),
-                                        theme: theme,
-                                        fontScale: fontScale,
-                                        cardRadius: cardRadius,
-                                        minValue: 1,
-                                      ),
-                                    ),
-                                    SizedBox(width: defaultPadding),
-                                    Expanded(
-                                      child: _buildStepperField(
-                                        label: 'Child *',
-                                        value: childCount,
-                                        onChanged: (value) => setState(() => childCount = value),
-                                        theme: theme,
-                                        fontScale: fontScale,
-                                        cardRadius: cardRadius,
-                                      ),
-                                    ),
-                                    SizedBox(width: defaultPadding),
-                                    Expanded(
-                                      child: _buildRateField(
-                                        theme: theme,
-                                        fontScale: fontScale,
-                                        cardRadius: cardRadius,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              SizedBox(height: listItemSpacing * 1.5),
-                              Container(
-                                padding: EdgeInsets.all(defaultPadding),
-                                decoration: BoxDecoration(
-                                  color: AppColors.background,
-                                  borderRadius: BorderRadius.circular(cardRadius / 1.5),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildRateSummaryItem('Room Charges', '\$${roomCharges.toStringAsFixed(2)}', theme, fontScale),
-                                    _buildRateSummaryItem('Tax', '\$${tax.toStringAsFixed(2)}', theme, fontScale),
-                                    _buildRateSummaryItem('Total Rate', '\$${total.toStringAsFixed(2)}', theme, fontScale),
-                                  ],
+                              ...List.generate(
+                                roomCount,
+                                (index) => _buildRoomSection(
+                                  index,
+                                  theme: theme,
+                                  isMobile: isMobile,
+                                  defaultPadding: defaultPadding,
+                                  listItemSpacing: listItemSpacing,
+                                  fontScale: fontScale,
+                                  cardRadius: cardRadius,
                                 ),
                               ),
                             ],
@@ -613,7 +643,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       ),
                       SizedBox(height: listItemSpacing * 1.5),
 
-                      // Guest Information Card (removed total/confirm; moved to bottom bar)
+                      // Guest Information Card
                       Card(
                         color: AppColors.surface,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
@@ -659,7 +689,6 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                               ),
                               SizedBox(height: listItemSpacing * 1.5),
                               if (isMobile) ...[
-                                // Mobile: Salutation and Guest Name in Row
                                 Row(
                                   children: [
                                     Expanded(
@@ -752,7 +781,6 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                   ),
                                 ),
                               ] else ...[
-                                // Desktop layout
                                 Row(
                                   children: [
                                     Expanded(
@@ -1213,6 +1241,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
   }
 
   Widget _buildRateField({
+    required int index,
     required ThemeData theme,
     required double fontScale,
     required double cardRadius,
@@ -1230,11 +1259,11 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
         ),
         SizedBox(height: 4),
         TextFormField(
-          initialValue: rate.toStringAsFixed(2),
+          initialValue: rates[index].toStringAsFixed(2),
           enabled: rateOverride,
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
-            rate = double.tryParse(value) ?? 0.0;
+            rates[index] = double.tryParse(value) ?? 0.0;
             _updateTotals();
             setState(() {});
           },
@@ -1288,6 +1317,280 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     );
   }
 
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required ThemeData theme,
+    required double fontScale,
+    String? hint,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontSize: 14 * fontScale,
+            color: AppColors.lightgrey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        SizedBox(height: 4),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint ?? 'Enter $label',
+            hintStyle: TextStyle(
+              fontSize: 14 * fontScale,
+              color: AppColors.lightgrey.withOpacity(0.6),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: AppColors.lightgrey),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            filled: true,
+            fillColor: AppColors.surface,
+          ),
+          style: TextStyle(
+            fontSize: 14 * fontScale,
+            color: AppColors.darkgrey,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRoomSection(
+    int index, {
+    required ThemeData theme,
+    required bool isMobile,
+    required double defaultPadding,
+    required double listItemSpacing,
+    required double fontScale,
+    required double cardRadius,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: listItemSpacing),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(cardRadius),
+        color: AppColors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: defaultPadding, vertical: defaultPadding / 2),
+            decoration: BoxDecoration(
+              color: Colors.blueGrey[700],
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(cardRadius),
+                topRight: Radius.circular(cardRadius),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Room ${index + 1}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14 * fontScale,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: roomCount > 1 ? () => _removeRoom(index) : null,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(defaultPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (differentRoomTypes)
+                  if (isMobile)
+                    Column(
+                      children: [
+                        _buildDropdownField(
+                          label: 'Room Type *',
+                          value: selectedRoomTypes[index],
+                          hint: 'Select Room Type',
+                          items: roomTypes,
+                          onChanged: (value) => setState(() {
+                            selectedRoomTypes[index] = value;
+                            if (!rateOverride) {
+                              rates[index] = defaultRates[value!] ?? 0.0;
+                              _updateTotals();
+                            }
+                          }),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        ),
+                        SizedBox(height: listItemSpacing),
+                        _buildDropdownField(
+                          label: 'Rate Type *',
+                          value: selectedRateTypes[index],
+                          hint: 'Select Rate Type',
+                          items: rateTypes,
+                          onChanged: (value) => setState(() => selectedRateTypes[index] = value),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        ),
+                        SizedBox(height: listItemSpacing),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDropdownField(
+                            label: 'Room Type *',
+                            value: selectedRoomTypes[index],
+                            hint: 'Select Room Type',
+                            items: roomTypes,
+                            onChanged: (value) => setState(() {
+                              selectedRoomTypes[index] = value;
+                              if (!rateOverride) {
+                                rates[index] = defaultRates[value!] ?? 0.0;
+                                _updateTotals();
+                              }
+                            }),
+                            theme: theme,
+                            fontScale: fontScale,
+                            cardRadius: cardRadius,
+                          ),
+                        ),
+                        SizedBox(width: defaultPadding),
+                        Expanded(
+                          child: _buildDropdownField(
+                            label: 'Rate Type *',
+                            value: selectedRateTypes[index],
+                            hint: 'Select Rate Type',
+                            items: rateTypes,
+                            onChanged: (value) => setState(() => selectedRateTypes[index] = value),
+                            theme: theme,
+                            fontScale: fontScale,
+                            cardRadius: cardRadius,
+                          ),
+                        ),
+                      ],
+                    ),
+                _buildDropdownField(
+                  label: 'Room',
+                  value: selectedRooms[index],
+                  hint: 'Select Room',
+                  items: rooms,
+                  onChanged: (value) => setState(() => selectedRooms[index] = value),
+                  theme: theme,
+                  fontScale: fontScale,
+                  cardRadius: cardRadius,
+                ),
+                SizedBox(height: listItemSpacing),
+                if (isMobile)
+                  Column(
+                    children: [
+                      _buildStepperField(
+                        label: 'Adult *',
+                        value: adultCounts[index],
+                        onChanged: (value) => setState(() => adultCounts[index] = value),
+                        theme: theme,
+                        fontScale: fontScale,
+                        cardRadius: cardRadius,
+                        minValue: 1,
+                      ),
+                      SizedBox(height: listItemSpacing),
+                      _buildStepperField(
+                        label: 'Child *',
+                        value: childCounts[index],
+                        onChanged: (value) => setState(() => childCounts[index] = value),
+                        theme: theme,
+                        fontScale: fontScale,
+                        cardRadius: cardRadius,
+                      ),
+                      SizedBox(height: listItemSpacing),
+                      _buildRateField(
+                        index: index,
+                        theme: theme,
+                        fontScale: fontScale,
+                        cardRadius: cardRadius,
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStepperField(
+                          label: 'Adult *',
+                          value: adultCounts[index],
+                          onChanged: (value) => setState(() => adultCounts[index] = value),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                          minValue: 1,
+                        ),
+                      ),
+                      SizedBox(width: defaultPadding),
+                      Expanded(
+                        child: _buildStepperField(
+                          label: 'Child *',
+                          value: childCounts[index],
+                          onChanged: (value) => setState(() => childCounts[index] = value),
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        ),
+                      ),
+                      SizedBox(width: defaultPadding),
+                      Expanded(
+                        child: _buildRateField(
+                          index: index,
+                          theme: theme,
+                          fontScale: fontScale,
+                          cardRadius: cardRadius,
+                        ),
+                      ),
+                    ],
+                  ),
+                SizedBox(height: listItemSpacing),
+                Container(
+                  padding: EdgeInsets.all(defaultPadding),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(cardRadius / 1.5),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildRateSummaryItem('Room Charges', '\$${(rates[index] * nights).toStringAsFixed(2)}', theme, fontScale),
+                      _buildRateSummaryItem('Tax', '\$${(rates[index] * nights * 0.1).toStringAsFixed(2)}', theme, fontScale),
+                      _buildRateSummaryItem('Total Rate', '\$${(rates[index] * nights * 1.1).toStringAsFixed(2)}', theme, fontScale),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildShimmerLayout({
     required ThemeData theme,
     required bool isMobile,
@@ -1300,9 +1603,6 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: defaultPadding),
-        // Shimmer for Toggle Bar
-        _buildShimmerContainer(height: 50, width: double.infinity, radius: cardRadius),
-        SizedBox(height: listItemSpacing * 1.25),
         // Shimmer for Check-in/Check-out
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1315,7 +1615,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
           ],
         ),
         SizedBox(height: listItemSpacing * 1.25),
-        // Shimmer for Dropdowns (Business Source, etc.)
+        // Shimmer for Dropdowns (Business Category, etc.)
         _buildShimmerContainer(height: 60, width: double.infinity),
         SizedBox(height: listItemSpacing),
         if (isMobile)
