@@ -19,6 +19,7 @@ class EditGuestDetailsVm extends GetxController {
   var countryWithCityList = <CountryResponse>[].obs;
   var vipStatusList = <VipStatusResponse>[].obs;
   var titleList = <TitleResponse>[].obs;
+  
 
   var purposes = <String>[].obs;
   var vipStatuses = <String>[].obs;
@@ -26,6 +27,7 @@ class EditGuestDetailsVm extends GetxController {
   var countries = <String>[].obs;
   var titles = <String>[].obs;
   var allCities = <CityResponse>[];
+  var cityNames = <String>[].obs;
 
   var nationalityNames = <String>[].obs;
 
@@ -103,6 +105,7 @@ class EditGuestDetailsVm extends GetxController {
         allCities = countryWithCityList
             .expand((country) => country.cities)
             .toList();
+        cityNames.value = allCities.map((city) => city.cityName).toList();
 
         countries.value = countryWithCityList
             .map((item) => item.countryName)

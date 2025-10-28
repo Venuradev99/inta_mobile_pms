@@ -40,7 +40,6 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
   final TextEditingController _registrationNoController =
       TextEditingController();
   final TextEditingController _idNumberController = TextEditingController();
-  final TextEditingController _issuingCityController = TextEditingController();
   final TextEditingController _birthCityController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
 
@@ -50,6 +49,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
   String? _country = 'Sri Lanka';
   String? _idType;
   String? _issuingCountry;
+  String? _issuingCity;
   String? _nationality = 'Sri Lanka';
   String? _vipStatus;
   String? _birthCountry;
@@ -82,9 +82,6 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
         _faxController.text = guestDetails.fax ?? '';
         _registrationNoController.text = guestDetails.resId;
         _idNumberController.text = guestDetails.idNumber ?? '';
-        _issuingCityController.text = _editGuestDetailsVm.getCity(
-          guestDetails.identityIssuingCityId,
-        );
         _companyController.text = guestDetails.company ?? '';
         _birthCityController.text = _editGuestDetailsVm.getCity(
           guestDetails.birthCityId,
@@ -107,6 +104,9 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
           _issuingCountry = _editGuestDetailsVm.getCountry(
             guestDetails.identityIssuingCountryId,
           );
+          _issuingCity = _editGuestDetailsVm.getCity(
+            guestDetails.identityIssuingCityId,
+          );
           if (guestDetails.vipStatusId != null) {
         
             _vipStatus = _editGuestDetailsVm.getVipStatus(guestDetails.vipStatusId);
@@ -122,12 +122,12 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
           }
 
           if (guestDetails.anniversaryDate!.isNotEmpty) {
-            _birthDate = _editGuestDetailsVm.getDateTime(
+            _weddingAnniversary = _editGuestDetailsVm.getDateTime(
               guestDetails.anniversaryDate!,
             );
           }
           if (guestDetails.spouseDateofBirth!.isNotEmpty) {
-            _birthDate = _editGuestDetailsVm.getDateTime(
+            _spouseBirthDate = _editGuestDetailsVm.getDateTime(
               guestDetails.spouseDateofBirth!,
             );
           }
@@ -149,7 +149,6 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
     _faxController.dispose();
     _registrationNoController.dispose();
     _idNumberController.dispose();
-    _issuingCityController.dispose();
     _birthCityController.dispose();
     _companyController.dispose();
     super.dispose();
@@ -222,7 +221,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
             isMainGuest: guestDetails.isMainGuest,
             identityNumber: _idNumberController.text,
             identityType: _editGuestDetailsVm.getIdentidyTypeId(_idType),
-            identityIssuingCityId: _editGuestDetailsVm.getCityId(_issuingCityController.text),
+            identityIssuingCityId: _editGuestDetailsVm.getCityId(_issuingCity ?? ''),
             identityIssuingCountryId: _editGuestDetailsVm.getCountryId(_issuingCountry),
             imagePath: guestDetails.imagePath,
             titleId: _editGuestDetailsVm.getTitleId(_title),
@@ -232,7 +231,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
             salutation: 0,
             blackListedReason: '',
             designation:'',
-            remark:guestDetails.remarks,
+            remark:guestDetails.remarks ?? '',
             fax: _faxController.text,
             specialReq:'',
             registrationId: "0",
@@ -339,7 +338,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
                 label: 'Full Name',
                 icon: Icons.person_outline,
                 isRequired: true,
-                prefixText: '${_title} ',
+                prefixText: '$_title ',
               ),
               SizedBox(height: spacing * 1.5),
               _buildModernRadioGroup<GuestType>(
@@ -511,17 +510,26 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
                         items: _editGuestDetailsVm.countries,
                         label: 'Issuing Country',
                         icon: Icons.flag_outlined,
-                        onChanged: (val) => _issuingCountry = val,
+                        onChanged: (val) => setState(() => _issuingCountry = val),
                       ),
                     ),
                   ),
 
                   SizedBox(width: spacing),
                   Expanded(
-                    child: _buildTextField(
-                      controller: _issuingCityController,
-                      label: 'Issuing City',
-                      icon: Icons.location_on_outlined,
+                    child: Obx(
+                      () {
+                        final currentValue = _editGuestDetailsVm.cityNames.contains(_issuingCity)
+                            ? _issuingCity
+                            : null;
+                        return _buildDropdown(
+                          value: currentValue,
+                          items: _editGuestDetailsVm.cityNames.toList(),
+                          label: 'Issuing City',
+                          icon: Icons.location_on_outlined,
+                          onChanged: (val) => setState(() => _issuingCity = val),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -596,7 +604,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
                         items: _editGuestDetailsVm.countries,
                         label: 'Birth Country',
                         icon: Icons.place_outlined,
-                        onChanged: (val) => _birthCountry = val,
+                        onChanged: (val) => setState(() => _birthCountry = val),
                       ),
                     ),
                   ),
