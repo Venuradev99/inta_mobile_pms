@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class EmptyState extends StatelessWidget {
+class EmptyStateWgt extends StatelessWidget {
   final String title;
   final String subMessage;
   final IconData icon;
 
-  const EmptyState({
+  const EmptyStateWgt({
     super.key,
     required this.title,
     required this.subMessage,

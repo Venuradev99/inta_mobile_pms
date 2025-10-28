@@ -12,7 +12,7 @@ import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_shee
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
-import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class InHouseList extends StatefulWidget {
@@ -52,7 +52,7 @@ class _InHouseListState extends State<InHouseList> {
     return Obx(() {
       final items = _inhouseListVm.inhouseFilteredList.value ?? [];
       if (items.isEmpty) {
-        return const EmptyState(
+        return const EmptyStateWgt(
           title: 'No In-House Guests',
           subMessage: 'No in-house guests at the moment',
         );
