@@ -4,11 +4,11 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:shimmer/shimmer.dart';
 
-class MaintenanceBlockCard extends StatelessWidget {
+class MaintenanceBlockCardWgt extends StatelessWidget {
   final MaintenanceBlockItem block;
   final VoidCallback onTap;
 
-  const MaintenanceBlockCard({
+  const MaintenanceBlockCardWgt({
     required this.block,
     required this.onTap,
     Key? key,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
 
 
 class TabbedListView<T> extends StatefulWidget {
@@ -72,7 +72,7 @@ class _TabbedListViewState<T> extends State<TabbedListView<T>> with TickerProvid
     final content = items.isEmpty
         ? (widget.emptyBuilder != null
             ? widget.emptyBuilder!(periodKey)
-            : EmptyState(
+            : EmptyStateWgt(
                 title: 'No data found',
                 subMessage: widget.emptySubMessage?.call(periodKey) ?? 'No items for this period',
               ))

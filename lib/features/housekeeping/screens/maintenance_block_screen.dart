@@ -5,8 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
-import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state.dart';
-import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class MaintenanceBlock extends StatefulWidget {
@@ -26,93 +27,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
-  // final List<MaintenanceBlockItem> _allMaintenanceBlocks = [
-  //   MaintenanceBlockItem(
-  //     id: 'MB001',
-  //     title: 'HVAC System Maintenance',
-  //     description:
-  //         'Regular maintenance and inspection of HVAC system in Building A',
-  //     status: 'In Progress',
-  //     priority: 'High',
-  //     createdDate: DateTime.now().subtract(const Duration(days: 2)),
-  //     scheduledDate: DateTime.now().add(const Duration(days: 1)),
-  //     assignedTo: 'John Smith',
-  //     category: 'HVAC',
-  //     estimatedCost: 1200.0,
-  //     tags: ['Preventive', 'Scheduled'],
-  //   ),
-  //   MaintenanceBlockItem(
-  //     id: 'MB002',
-  //     title: 'Elevator Inspection',
-  //     description:
-  //         'Monthly safety inspection and maintenance of elevator systems',
-  //     status: 'Pending',
-  //     priority: 'Medium',
-  //     createdDate: DateTime.now().subtract(const Duration(days: 5)),
-  //     scheduledDate: DateTime.now().add(const Duration(days: 3)),
-  //     assignedTo: 'Mike Johnson',
-  //     category: 'Elevator',
-  //     estimatedCost: 800.0,
-  //     tags: ['Safety', 'Inspection'],
-  //   ),
-  //   MaintenanceBlockItem(
-  //     id: 'MB003',
-  //     title: 'Plumbing Repair - Unit 205',
-  //     description:
-  //         'Fix leaking pipes and replace faulty fixtures in apartment 205',
-  //     status: 'Completed',
-  //     priority: 'High',
-  //     createdDate: DateTime.now().subtract(const Duration(days: 10)),
-  //     assignedTo: 'Sarah Wilson',
-  //     category: 'Plumbing',
-  //     estimatedCost: 450.0,
-  //     tags: ['Emergency', 'Tenant Request'],
-  //   ),
-  //   MaintenanceBlockItem(
-  //     id: 'MB004',
-  //     title: 'Landscaping Service',
-  //     description:
-  //         'Monthly landscaping and garden maintenance for common areas',
-  //     status: 'Scheduled',
-  //     priority: 'Low',
-  //     createdDate: DateTime.now().subtract(const Duration(days: 1)),
-  //     scheduledDate: DateTime.now().add(const Duration(days: 7)),
-  //     assignedTo: 'Green Care Services',
-  //     category: 'Landscaping',
-  //     estimatedCost: 600.0,
-  //     tags: ['Recurring', 'Aesthetic'],
-  //   ),
-  //   MaintenanceBlockItem(
-  //     id: 'MB005',
-  //     title: 'Fire Safety System Check',
-  //     description: 'Annual fire safety system inspection and testing',
-  //     status: 'In Progress',
-  //     priority: 'High',
-  //     createdDate: DateTime.now().subtract(const Duration(days: 3)),
-  //     scheduledDate: DateTime.now(),
-  //     assignedTo: 'Safety First Inc.',
-  //     category: 'Safety',
-  //     estimatedCost: 2000.0,
-  //     tags: ['Annual', 'Compliance'],
-  //   ),
-  // ];
-
-  // Map<String, int> get statusCounts {
-  //   final counts = <String, int>{
-  //     'All': _allMaintenanceBlocks.length,
-  //     'Pending': 0,
-  //     'In Progress': 0,
-  //     'Completed': 0,
-  //     'Scheduled': 0,
-  //   };
-
-  //   for (final block in _allMaintenanceBlocks) {
-  //     counts[block.status] = (counts[block.status] ?? 0) + 1;
-  //   }
-
-  //   return counts;
-  // }
-
+ 
   @override
   void initState() {
     super.initState();
@@ -138,71 +53,58 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     super.dispose();
   }
 
-  // void _showFilterBottomSheet() {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(
-  //         top: Radius.circular(ResponsiveConfig.cardRadius(context)),
-  //       ),
-  //     ),
-  //     builder: (context) => Container(
-  //       color: AppColors.surface,
-  //       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
-  //       child: Column(
-  //         mainAxisSize: MainAxisSize.min,
-  //         children: [
-  //           Container(
-  //             width: 40,
-  //             height: 4,
-  //             decoration: BoxDecoration(
-  //               color: AppColors.lightgrey,
-  //               borderRadius: BorderRadius.circular(2),
-  //             ),
-  //           ),
-  //           const SizedBox(height: 16),
-  //           Text(
-  //             'Filter by Status',
-  //             style: Theme.of(context).textTheme.titleMedium,
-  //           ),
-  //           const SizedBox(height: 16),
-  //           ...statusCounts.entries.map(
-  //             (entry) => ListTile(
-  //               title: Text(entry.key),
-  //               trailing: Container(
-  //                 padding: const EdgeInsets.symmetric(
-  //                   horizontal: 8,
-  //                   vertical: 4,
-  //                 ),
-  //                 decoration: BoxDecoration(
-  //                   color: _getStatusColor(entry.key).withOpacity(0.1),
-  //                   borderRadius: BorderRadius.circular(12),
-  //                 ),
-  //                 child: Text(
-  //                   '${entry.value}',
-  //                   style: TextStyle(
-  //                     color: _getStatusColor(entry.key),
-  //                     fontWeight: FontWeight.w500,
-  //                   ),
-  //                 ),
-  //               ),
-  //               onTap: () {
-  //                 setState(() {
-  //                   _selectedFilter = entry.key;
-  //                   _tabController.animateTo(
-  //                     statusCounts.keys.toList().indexOf(entry.key),
-  //                   );
-  //                 });
-  //                context.go();
-  //               },
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+ // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
 
+void _showActionsBottomSheet(dynamic block) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, // Important for DraggableScrollableSheet
+    backgroundColor: Colors.transparent, // Let ActionBottomSheet handle the background
+    builder: (context) => ActionBottomSheet(
+      guestName: block.roomNumber ?? 'Room ${block.id}', // Adjust based on your block model
+      actions: [
+        ActionItem(
+          icon: Icons.edit,
+          label: 'Edit Blocked Room',
+          onTap: () {
+            Navigator.pop(context);
+            // Navigate to edit screen
+            // context.push(AppRoutes.editBlockRoom, extra: block);
+          },
+        ),
+        // ActionItem(
+        //   icon: Icons.lock_open,
+        //   label: 'Unblock Room',
+        //   onTap: () {
+        //     Navigator.pop(context);
+        //     // Call unblock functionality
+        //     _maintenanceBlockVm.unblockRoom(block.id).then((_) {
+        //       _maintenanceBlockVm.loadAllMaintenanceBlocks();
+        //     }).catchError((error) {
+        //       // Show error snackbar
+        //       Get.snackbar(
+        //         'Error',
+        //         'Failed to unblock room: $error',
+        //         snackPosition: SnackPosition.BOTTOM,
+        //         backgroundColor: AppColors.red,
+        //         colorText: AppColors.onPrimary,
+        //       );
+        //     });
+        //   },
+        // ),
+        ActionItem(
+          icon: Icons.info_outline,
+          label: 'View Details',
+          onTap: () {
+            Navigator.pop(context);
+            // Navigate to details screen
+            // context.push(AppRoutes.blockRoomDetails, extra: block);
+          },
+        ),
+      ],
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -396,7 +298,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
               }
 
               if (_maintenanceBlockVm.maintenanceBlockListFiltered.isEmpty) {
-                return const EmptyState(
+                return const EmptyStateWgt(
                   title: 'No Maintenance Blocks',
                   subMessage: 'No in-house guests at the moment',
                 );
@@ -415,10 +317,10 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                   itemBuilder: (context, index) {
                     final block =
                         _maintenanceBlockVm.maintenanceBlockListFiltered[index];
-                    return MaintenanceBlockCard(
+                    return MaintenanceBlockCardWgt(
                       block: block,
                       onTap: () {
-                        // Navigate to detailed view
+                        _showActionsBottomSheet(block);
                       },
                     );
                   },

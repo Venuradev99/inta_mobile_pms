@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 
-class StatCard extends StatelessWidget {
+class StatCardWgt extends StatelessWidget {
   final String title;
   final String value;
   final Color color;
   final IconData icon;
 
-  const StatCard({
+  const StatCardWgt({
     required this.title,
     required this.value,
     required this.color,
