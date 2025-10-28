@@ -94,9 +94,10 @@ class HouseKeepingService {
     }
   }
 
-   Future<Map<String, dynamic>> getAllBlockRoomReasons() async {
+  Future<Map<String, dynamic>> getAllBlockRoomReasons() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllBlockRoomReasons}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllBlockRoomReasons}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -104,10 +105,13 @@ class HouseKeepingService {
     }
   }
 
-    Future<Map<String, dynamic>> saveMaintenanceblock( Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> saveMaintenanceblock(
+    Map<String, dynamic> body,
+  ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.saveMaintenanceblock}';
-      final response = await _dataAccess.post(body,url);
+      final url =
+          '${_appResources.baseUrl}${AppResources.saveMaintenanceblock}';
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
@@ -151,6 +155,19 @@ class HouseKeepingService {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllRooms}';
       final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> unblockRoom(
+    Map<String, dynamic> body,
+    int maintenanceblockRoomId,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.unblockMaintenanceblock}/$maintenanceblockRoomId';
+      final response = await _dataAccess.put(body,url);
       return response;
     } catch (error) {
       return {"error": error.toString()};

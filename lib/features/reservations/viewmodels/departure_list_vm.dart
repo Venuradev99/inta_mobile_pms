@@ -545,6 +545,31 @@ class DepartureListVm extends GetxController {
     return str.length > 10 ? str.substring(0, 10) : str;
   }
 
+   Future<Map<String, dynamic>> getVoidReservationData(GuestItem item) async {
+    try {
+      Map<String, dynamic> guestData = {};
+      final response = await _reservationListService.getVoidReasons();
+
+      if (response["isSuccessful"] == true) {
+        final reasonList = [];
+        final result = response["result"];
+        for (final item in result) {
+          reasonList.add({"id": item["reasonId"], "name": item["name"]});
+        }
+        guestData["reasons"] = reasonList;
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error loading void data!',
+        );
+      }
+
+      return guestData;
+    } catch (e) {
+      MessageService().error('Error getting all Guest data: $e');
+      throw Exception('Error getting all Guest data: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> getCancelReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> guestData = {};
