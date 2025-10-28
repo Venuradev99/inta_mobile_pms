@@ -107,7 +107,11 @@ class EditGuestDetailsVm extends GetxController {
         countries.value = countryWithCityList
             .map((item) => item.countryName)
             .toList();
-      } else {}
+      } else {
+          MessageService().error(
+          countryResponse["errors"][0] ?? 'Error getting countries and cities!',
+        );
+      }
 
       if (titleResponse["isSuccessful"] == true) {
         final result = titleResponse["result"]["recordSet"] as List;
@@ -132,7 +136,11 @@ class EditGuestDetailsVm extends GetxController {
             .toList();
 
         titles.value = titleList.map((item) => item.name).toList();
-      } else {}
+      } else {
+          MessageService().error(
+          titleResponse["errors"][0] ?? 'Error getting titles!',
+        );
+      }
       if (identityTypeResponse["isSuccessful"] == true) {
         final result = identityTypeResponse["result"]["recordSet"] as List;
         identityTypeList.value = result
@@ -156,7 +164,11 @@ class EditGuestDetailsVm extends GetxController {
             .toList();
 
         idTypes.value = identityTypeList.map((item) => item.name).toList();
-      } else {}
+      } else {
+          MessageService().error(
+          identityTypeResponse["errors"][0] ?? 'Error getting identity types!',
+        );
+      }
 
       if (vipStatusResponse["isSuccessful"] == true) {
         final result = vipStatusResponse["result"]["recordSet"] as List;
@@ -178,7 +190,11 @@ class EditGuestDetailsVm extends GetxController {
             .toList();
 
         vipStatuses.value = vipStatusList.map((item) => item.name).toList();
-      } else {}
+      } else {
+          MessageService().error(
+          vipStatusResponse["errors"][0] ?? 'Error getting vip status!',
+        );
+      }
     } catch (e) {
       throw Exception('Error loading initial data : $e');
     }

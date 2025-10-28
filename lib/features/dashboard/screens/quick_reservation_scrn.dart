@@ -162,7 +162,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     for (int i = 0; i < roomCount; i++) {
       final double roomCharge = rates[i] * nights;
       roomCharges += roomCharge;
-      tax += roomCharge * 0.1; // 10% tax; adjust as needed
+      tax += roomCharge * 0.1;
     }
     total = roomCharges + tax;
   }
