@@ -2,9 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/update_house_status_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
@@ -31,13 +30,8 @@ class HouseStatusVm extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await Future.wait([
-        _houseKeepingServices.getAllHouseKeepingStatus(),
-        _houseKeepingServices.getHouseKeepers(),
-      ]);
-
-      final houseKeepingStatus = response[0];
-      final houseKeepers = response[1];
+      final houseKeepingStatus = await _houseKeepingServices
+          .getAllHouseKeepingStatus();
 
       if (houseKeepingStatus["isSuccessful"] == true) {
         final result = houseKeepingStatus["result"]["recordSet"];
@@ -56,36 +50,31 @@ class HouseStatusVm extends GetxController {
         );
       }
 
-      if (houseKeepers["isSuccessful"] == true) {
-        final result = houseKeepers["result"];
-        for (final item in result) {
-          houseKeepersList.add({
-            "id": item["userId"],
-            "name": "${item["firstName"]} ${item["lastName"]}",
-          });
-        }
-      } else {
-        MessageService().error(
-          houseKeepers["errors"][0] ?? 'Error getting House Keepers!',
-        );
-      }
-
       final roomResult = await _houseKeepingServices
           .getAllRoomsForHouseStatus();
       if (roomResult["isSuccessful"] == true) {
         final result = roomResult["result"]["recordSet"];
         for (final item in result) {
           final data = RoomItem(
-            section: getHouseKeeperName(item["houseKeeper"]),
+            id: item["id"] ?? 0,
+            houseKeeper: item["houseKeeper"] ?? 0,
+            houseKeeperName: item["houseKeeperName"] ?? '',
+            section: item["houseKeeperName"] ?? '',
             roomName: item["name"] ?? '',
             availability: item["availability"] ?? '',
             housekeepingStatus: item["houseKeepingStatusName"] ?? '',
+            houseKeepingStatusId: item["houseKeepingStatus"] ?? 0,
             roomType: item["roomTypeName"] ?? '',
+            hasIssue: item["isDirty"] ?? false,
+            remark: item["houseKeepingRemark"] ?? '',
+            isRoom: item["isRoom"] ?? true,
           );
           roomList.add(data);
         }
       } else {
-        MessageService().error(roomResult["errors"][0] ?? 'Error getting rooms!');
+        MessageService().error(
+          roomResult["errors"][0] ?? 'Error getting rooms!',
+        );
       }
       groupRoomsBySection(roomList);
     } catch (e) {
@@ -93,6 +82,33 @@ class HouseStatusVm extends GetxController {
       throw Exception('Error loading rooms: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> clearRemark(RoomItem room) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: room.id!,
+        houseKeeper: room.houseKeeper!,
+        houseKeepingRemark: room.remark ?? '',
+        houseKeepingStatus: room.houseKeepingStatusId!,
+        isRoom: room.isRoom ?? true,
+        operationType: 6,
+      ).toJson();
+
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+      if (response["isSuccessful"] == true) {
+        MessageService().success('Remark cleared successfully.');
+        await loadRooms();
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error clearing remark!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error clearing remark: $e');
+      throw Exception('Error clearing remark: $e');
     }
   }
 
@@ -110,20 +126,6 @@ class HouseStatusVm extends GetxController {
       return Color(int.parse(hex, radix: 16));
     } catch (e) {
       return Colors.grey;
-    }
-  }
-
-  String getHouseKeeperName(int id) {
-    try {
-      if (id == 0) {
-        return '';
-      }
-      final selectedHouseKeeper = houseKeepersList.firstWhere(
-        (item) => item["id"] == id,
-      );
-      return selectedHouseKeeper["name"];
-    } catch (e) {
-      throw Exception('Error while getting House keeper name: $e');
     }
   }
 

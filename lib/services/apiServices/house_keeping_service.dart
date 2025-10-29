@@ -73,6 +73,18 @@ class HouseKeepingService {
     }
   }
 
+  Future<Map<String, dynamic>> updateHouseStatus(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.updateHouseStatus}';
+      final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getAllRoomsForHouseStatus() async {
     try {
       final url =
@@ -166,8 +178,9 @@ class HouseKeepingService {
     int maintenanceblockRoomId,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.unblockMaintenanceblock}/$maintenanceblockRoomId';
-      final response = await _dataAccess.put(body,url);
+      final url =
+          '${_appResources.baseUrl}${AppResources.unblockMaintenanceblock}/$maintenanceblockRoomId';
+      final response = await _dataAccess.put(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};

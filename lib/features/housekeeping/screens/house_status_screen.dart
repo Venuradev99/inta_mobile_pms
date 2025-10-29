@@ -546,11 +546,8 @@ class _HouseStatusState extends State<HouseStatus> {
     ).showSnackBar(SnackBar(content: Text('View remark for ${room.roomName}')));
   }
 
-  void _clearRemark(RoomItem room) {
-    // Implement clear remark logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Remark cleared for ${room.roomName}')),
-    );
+  void _clearRemark(RoomItem room) async {
+    await _houseStatusVm.clearRemark(room);
   }
 
   Color _getHousekeepingColor(String status) {
@@ -841,8 +838,7 @@ class _RoomActionsSheet extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: Obx(() {
-                final _houseStatusVm = Get.find<HouseStatusVm>();
-
+                final houseStatusVm = Get.find<HouseStatusVm>();
                 return Row(
                   children: [
                     Container(
@@ -850,7 +846,7 @@ class _RoomActionsSheet extends StatelessWidget {
                       height: 12,
                       decoration: BoxDecoration(
                         // color: _getStatusColor(room.housekeepingStatus),
-                        color: _houseStatusVm.getStatusColor(
+                        color: houseStatusVm.getStatusColor(
                           room.housekeepingStatus,
                         ),
                         shape: BoxShape.circle,
