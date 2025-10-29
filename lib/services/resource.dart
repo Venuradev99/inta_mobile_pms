@@ -107,5 +107,9 @@ class AppResources {
   static const String unblockMaintenanceblock = '$maintenanceblock/UnblockDateRange';
   static const String updateHouseStatus = '$rooms/UpdateHouseStatus'; 
 
+////Stay View
+ static const String getBookingDetailsByDate = '$calenderBooking/GetBookingDetailsByDate';
+ static const String getStatusColorForStayview = '$roomstatus/GetStatusColorForStayview';
+
 
 }
