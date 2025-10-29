@@ -29,6 +29,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scr
 import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/edit_reservation_screen.dart';
 import 'package:inta_mobile_pms/features/stay_view/stay_view.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
@@ -168,6 +169,10 @@ final appRouter = GoRouter(
       path: AppRoutes.editBlockRoomPage,
       builder: (context, state) =>
           EditBlockRoomPage(block: state.extra as MaintenanceBlockItem)
+    ),
+    GoRoute(
+      path: AppRoutes.editReservationScreen,
+       builder: (context, state) => const EditReservationScreen(),
     ),
   ],
 );
