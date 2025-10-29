@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/void_reservation_vm.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class VoidReservation extends StatefulWidget {
   final Map<String, dynamic> reservationData;
@@ -20,16 +19,6 @@ class VoidReservation extends StatefulWidget {
 class _VoidReservationState extends State<VoidReservation> {
   final _voidReservationVm = Get.find<VoidReservationVm>();
   String? selectedReason;
-  // final List<String> reasons = [
-  //   'aaaa',
-  //   'add remark',
-  //   'Mistake',
-  //   'Mistakenly Entered',
-  //   'new void',
-  //   'Not interested',
-  //   'Test',
-  //   'the staff make a mistake',
-  // ];
 
   @override
   Widget build(BuildContext context) {

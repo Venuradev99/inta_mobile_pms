@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 
 class EditReservationScreen extends StatefulWidget {
-  const EditReservationScreen({super.key});
+  final GuestItem? guestItem;
+  const EditReservationScreen({super.key, required this.guestItem});
 
   @override
   State<EditReservationScreen> createState() => _EditReservationScreenState();

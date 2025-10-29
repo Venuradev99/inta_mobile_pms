@@ -111,8 +111,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: categoryList.map((category) {
                             return DropdownMenuItem(
-                              value: category["id"].toString(),
-                              child: Text(category["description"]),
+                              value: category.id.toString(),
+                              child: Text(category.description),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -141,8 +141,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: reasonList.map((reason) {
                             return DropdownMenuItem(
-                              value: reason["id"].toString(),
-                              child: Text(reason["description"]),
+                              value: reason.id.toString(),
+                              child: Text(reason.description),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -172,8 +172,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: unitRoomList.map((unitRoom) {
                             return DropdownMenuItem(
-                              value: unitRoom["id"].toString(),
-                              child: Text(unitRoom["description"]),
+                              value: unitRoom.id.toString(),
+                              child: Text(unitRoom.description),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -221,8 +221,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: priorityList.map((priority) {
                             return DropdownMenuItem(
-                              value: priority["id"].toString(),
-                              child: Text(priority["description"]),
+                              value: priority.id.toString(),
+                              child: Text(priority.description),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -252,8 +252,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: houseKeeperList.map((houseKeeper) {
                             return DropdownMenuItem(
-                              value: houseKeeper["id"].toString(),
-                              child: Text(houseKeeper["description"]),
+                              value: houseKeeper.id.toString(),
+                              child: Text(houseKeeper.description),
                             );
                           }).toList(),
                           onChanged: (value) {
@@ -283,8 +283,8 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                           ),
                           items: statusList.map((status) {
                             return DropdownMenuItem(
-                              value: status["id"].toString(),
-                              child: Text(status["description"]),
+                              value: status.id.toString(),
+                              child: Text(status.description),
                             );
                           }).toList(),
                           onChanged: (value) {

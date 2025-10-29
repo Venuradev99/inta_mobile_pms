@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class ConfirmationDialog extends StatelessWidget {
@@ -84,7 +82,7 @@ class ConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                     Get.back(result: false);
+                     Navigator.of(context).pop(false);
                       onCancel?.call();
                     },
                     style: OutlinedButton.styleFrom(
@@ -108,7 +106,7 @@ class ConfirmationDialog extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                     Get.back(result: true);
+                    Navigator.of(context).pop(true);
                       onConfirm?.call();
                     },
                     style: ElevatedButton.styleFrom(

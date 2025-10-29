@@ -67,7 +67,7 @@ class _NetLockState extends State<NetLock> {
 
   void _unlockSelected() async {
     if (_selectedRows.isNotEmpty) {
-      final selectedCount = _selectedRows.length;
+      // final selectedCount = _selectedRows.length;
 
       await _netLockVm.unlockBooking(_selectedRows);
       _selectedRows.clear();

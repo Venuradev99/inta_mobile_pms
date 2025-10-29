@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/edit_guest_details_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
@@ -11,6 +12,7 @@ import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/edit_reservation_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
@@ -202,7 +204,35 @@ class _ReservationListState extends State<ReservationList> {
                 );
               },
             ),
-            ActionItem(icon: Icons.edit, label: 'Edit Reservation'),
+            ActionItem(
+              icon: Icons.edit,
+              label: 'Edit Reservation',
+              onTap: () async {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        EditReservationScreen(guestItem: guestData),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          const begin = Offset(0.0, 1.0); // start from bottom
+                          const end = Offset.zero;
+                          final tween = Tween(
+                            begin: begin,
+                            end: end,
+                          ).chain(CurveTween(curve: Curves.ease));
+                          final offsetAnimation = animation.drive(tween);
+
+                          return SlideTransition(
+                            position: offsetAnimation,
+                            child: child,
+                          );
+                        },
+                    transitionDuration: const Duration(milliseconds: 300),
+                  ),
+                );
+              },
+            ),
             if (isNoshow == true)
               ActionItem(
                 icon: Icons.not_interested,
@@ -309,7 +339,7 @@ class _ReservationListState extends State<ReservationList> {
                     icon: Icons.meeting_room,
                   );
                   if (confirmed == true) {
-                    await _reservationListVm.unassignRoom(guestData!);
+                    await _reservationListVm.unassignRoom(guestData);
                     if (!mounted) return;
                   }
                 },
@@ -327,14 +357,14 @@ class _ReservationListState extends State<ReservationList> {
                 });
               },
             ),
-           ActionItem(
-            icon: Icons.person,
-            label: 'Edit Guest Details',
-            onTap: () {
-              context.pop();
-              context.push(AppRoutes.editGuestDetails , extra: guestData);
-            },
-          ),
+            ActionItem(
+              icon: Icons.person,
+              label: 'Edit Guest Details',
+              onTap: () {
+                context.pop();
+                context.push(AppRoutes.editGuestDetails, extra: guestData);
+              },
+            ),
             ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
             ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
             ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),

@@ -31,6 +31,7 @@ class DataAccessService {
       String errorMsg =
           responseBody["errors"][0] ?? 'Unauthorized, try login again!';
       MessageService().error(errorMsg);
+
       return ApiResponse(
         errors: [errorMsg],
         isSuccessful: responseBody['isSuccessful'] ?? false,

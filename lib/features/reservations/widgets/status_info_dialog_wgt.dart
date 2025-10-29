@@ -1,7 +1,5 @@
 // lib/widgets/common/status_info_dialog.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 
 class StatusInfoDialog extends StatelessWidget {

@@ -172,7 +172,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.editReservationScreen,
-       builder: (context, state) => const EditReservationScreen(),
+       builder: (context, state) =>  EditReservationScreen(guestItem: state.extra as GuestItem?),
     ),
   ],
 );

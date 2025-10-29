@@ -554,12 +554,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       children: [
                         Expanded(
                           child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () {
+                              setState((){
+                                _startDate = null;
+                                _endDate = null;
+                                _selectedRoomType = null;
+                                _selectedRoom = null;
+                                _unblockRoom = false;
+                              });
+                              _maintenanceBlockVm.filterByFilterBottomSheet(isReset: true);
+                              Navigator.pop(context);
+                            },
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: AppColors.primary),
                               foregroundColor: AppColors.primary,
                             ),
-                            child: const Text('Cancel'),
+                            child: const Text('Reset'),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -572,11 +582,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               _maintenanceBlockVm.filterRoomTypeId.value = _selectedRoomType?.roomTypeId;
                               _maintenanceBlockVm.filterRoomId.value = _selectedRoom?.roomId;
                               _maintenanceBlockVm.filterIsUnblock.value = _unblockRoom;
-                              _maintenanceBlockVm.loadAllMaintenanceBlocks();
+                              _maintenanceBlockVm.filterByFilterBottomSheet(isReset: false);
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.onPrimary
                             ),
                             child: const Text('Submit'),
                           ),
