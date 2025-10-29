@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/dropdown_data.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
+import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/add_work_order_dialog.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
@@ -18,6 +21,12 @@ class WorkOrderList extends StatefulWidget {
 
 class _WorkOrderListState extends State<WorkOrderList> {
   final _workOrderListVm = Get.find<WorkOrderListVm>();
+
+  String _selectedFilter = 'All';
+  String _searchQuery = '';
+  bool _isSearchVisible = false;
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -29,42 +38,126 @@ class _WorkOrderListState extends State<WorkOrderList> {
     });
   }
 
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const FilterBottomSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Work Orders',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            color: AppColors.black,
-          ),
-        ),
+        title: _isSearchVisible
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search maintenance blocks...',
+                  border: InputBorder.none,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    // _searchQuery = value;
+                    _workOrderListVm.searchWorkOrders(value);
+                  });
+                },
+              )
+            : Text(
+                'Work Orders',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppColors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () =>context.go(AppRoutes.dashboard),
+          icon: Icon(
+            _isSearchVisible ? Icons.arrow_back : Icons.arrow_back,
+            color: AppColors.black,
+          ),
+          onPressed: () {
+            if (_isSearchVisible) {
+              setState(() {
+                _isSearchVisible = false;
+                _searchQuery = '';
+                _searchController.clear();
+              });
+            } else {
+              context.go(AppRoutes.dashboard);
+            }
+          },
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.black),
-            onPressed: () {
-              // Implement search functionality
-            },
-          ),
+          if (!_isSearchVisible)
+            IconButton(
+              icon: const Icon(Icons.search, color: AppColors.black),
+              onPressed: () {
+                setState(() {
+                  _isSearchVisible = true;
+                });
+              },
+            ),
+          if (_isSearchVisible)
+            IconButton(
+              icon: const Icon(Icons.clear, color: AppColors.black),
+              onPressed: () {
+                setState(() {
+                  _searchQuery = '';
+                  _searchController.clear();
+                  _isSearchVisible = false;
+                });
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
+            onPressed: _showFilterBottomSheet,
+          ),
+          IconButton(
+            icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-              // Implement filter functionality
+              context.push(AppRoutes.blockRoomSelection);
             },
           ),
         ],
       ),
+      // appBar: AppBar(
+      //   title: const Text(
+      //     'Work Orders',
+      //     style: TextStyle(
+      //       fontSize: 22,
+      //       fontWeight: FontWeight.w600,
+      //       color: AppColors.black,
+      //     ),
+      //   ),
+      //   backgroundColor: AppColors.surface,
+      //   elevation: 0,
+      //   leading: IconButton(
+      //     icon: const Icon(Icons.arrow_back, color: AppColors.black),
+      //     onPressed: () =>context.go(AppRoutes.dashboard),
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.search, color: AppColors.black),
+      //       onPressed: () {
+
+      //       },
+      //     ),
+      //     IconButton(
+      //       icon: const Icon(Icons.filter_list, color: AppColors.black),
+      //       onPressed: () {
+      //         // Implement filter functionality
+      //       },
+      //     ),
+      //   ],
+      // ),
       body: Obx(() {
-        final workOrders = _workOrderListVm.workOrders.value;
+        final workOrders = _workOrderListVm.workOrdersFiltered.toList();
         final isLoading = _workOrderListVm.isLoading;
         return Column(
           children: [
@@ -458,26 +551,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
     }
   }
 
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _showAddWorkOrderDialog(BuildContext context) {
     try {
       showDialog(
@@ -494,5 +567,371 @@ class _WorkOrderListState extends State<WorkOrderList> {
     } catch (e) {
       throw Exception('_showAddWorkOrderDialog error: $e');
     }
+  }
+}
+
+class FilterBottomSheet extends StatefulWidget {
+  const FilterBottomSheet({super.key});
+
+  @override
+  State<FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  final _workOrderListVm = Get.find<WorkOrderListVm>();
+
+  DateTime? _startDate;
+  DateTime? _endDate;
+  String? _orderNo;
+  DropdownData? _selectedRoom;
+  DropdownData? _selectedCategory;
+  DropdownData? _selectedPriority;
+  DropdownData? _selectedStatus;
+  DropdownData? _selectedAssignTo;
+  bool? _isCompleted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startDate = _workOrderListVm.filterStartDate.value;
+    _endDate = _workOrderListVm.filterEndDate.value;
+    _orderNo = _workOrderListVm.filterOrderNo.value;
+    _selectedCategory = _workOrderListVm.categoryList.firstWhereOrNull(
+      (category) => category.id == _workOrderListVm.filterCategoryId.value,
+    );
+    _selectedRoom = _workOrderListVm.unitRoomList.firstWhereOrNull(
+      (room) => room.id == _workOrderListVm.filterRoomId.value,
+    );
+    _selectedPriority = _workOrderListVm.priorityList.firstWhereOrNull(
+      (priority) => priority.id == _workOrderListVm.filterPriorityId.value,
+    );
+    _selectedStatus = _workOrderListVm.statusList.firstWhereOrNull(
+      (status) => status.id == _workOrderListVm.filterStatusId.value,
+    );
+    _selectedAssignTo = _workOrderListVm.houseKeeperList.firstWhereOrNull(
+      (houseKeeper) =>
+          houseKeeper.id == _workOrderListVm.filterAssignToId.value,
+    );
+    _isCompleted = _workOrderListVm.filterIsCompleted.value;
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isStart
+          ? (_startDate ?? DateTime.now())
+          : (_endDate ?? DateTime.now()),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = _startDate;
+          }
+        } else {
+          _endDate = picked;
+          if (_startDate != null && _endDate!.isBefore(_startDate!)) {
+            _startDate = _endDate;
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            children: [
+              // Header with title and close button
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Filter',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Start and End Date
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, true),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'Start Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _startDate != null
+                                    ? '${_startDate!.day.toString().padLeft(2, '0')}-${(_startDate!.month).toString().padLeft(2, '0')}-${_startDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _startDate != null
+                                      ? AppColors.black
+                                      : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, false),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'End Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _endDate != null
+                                    ? '${_endDate!.day.toString().padLeft(2, '0')}-${(_endDate!.month).toString().padLeft(2, '0')}-${_endDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _endDate != null
+                                      ? AppColors.black
+                                      : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Type Dropdown
+                    Obx(
+                      () => DropdownButtonFormField<DropdownData>(
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedCategory,
+                        hint: const Text('Select Category'),
+                        items: _workOrderListVm.unitRoomList.map((item) {
+                          return DropdownMenuItem<DropdownData>(
+                            value: item,
+                            child: Text(item.description),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(
+                      () => DropdownButtonFormField<DropdownData>(
+                        decoration: const InputDecoration(
+                          labelText: 'Room',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedRoom,
+                        hint: const Text('Select Room'),
+                        items: _workOrderListVm.unitRoomList.map((item) {
+                          return DropdownMenuItem<DropdownData>(
+                            value: item,
+                            child: Text(item.description),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRoom = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(
+                      () => DropdownButtonFormField<DropdownData>(
+                        decoration: const InputDecoration(
+                          labelText: 'Status',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedStatus,
+                        hint: const Text('Select Room'),
+                        items: _workOrderListVm.statusList.map((item) {
+                          return DropdownMenuItem<DropdownData>(
+                            value: item,
+                            child: Text(item.description),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedStatus = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(
+                      () => DropdownButtonFormField<DropdownData>(
+                        decoration: const InputDecoration(
+                          labelText: 'Priority',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedPriority,
+                        hint: const Text('Select Room'),
+                        items: _workOrderListVm.priorityList.map((item) {
+                          return DropdownMenuItem<DropdownData>(
+                            value: item,
+                            child: Text(item.description),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedPriority = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(
+                      () => DropdownButtonFormField<DropdownData>(
+                        decoration: const InputDecoration(
+                          labelText: 'Assign To',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedAssignTo,
+                        hint: const Text('Select Room'),
+                        items: _workOrderListVm.houseKeeperList.map((item) {
+                          return DropdownMenuItem<DropdownData>(
+                            value: item,
+                            child: Text(item.description),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedAssignTo = value;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Unblock Room Switch
+                    SwitchListTile(
+                      title: const Text('Is Completed Work Order'),
+                      value: _isCompleted ?? false,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _isCompleted = value;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    const SizedBox(height: 24),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _startDate = null;
+                                _endDate = null;
+                                _selectedRoom = null;
+                                _isCompleted = false;
+                                _orderNo = '';
+                                _selectedAssignTo = null;
+                                _selectedCategory = null;
+                                _selectedPriority = null;
+                                _selectedStatus = null;
+
+                              });
+                              _workOrderListVm.filterByFilterBottomSheet(
+                                isReset: true,
+                              );
+                              Navigator.pop(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              foregroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Reset'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Apply filters
+                              _workOrderListVm.filterStartDate.value =
+                                  _startDate;
+                              _workOrderListVm.filterEndDate.value = _endDate;
+                              _workOrderListVm.filterOrderNo.value = _orderNo;
+                              _workOrderListVm.filterRoomId.value =
+                                  _selectedRoom?.id;
+                                   _workOrderListVm.filterAssignToId.value =
+                                  _selectedAssignTo?.id;
+                                   _workOrderListVm.filterStatusId.value =
+                                  _selectedStatus?.id;
+                                   _workOrderListVm.filterPriorityId.value =
+                                  _selectedPriority?.id;
+                                   _workOrderListVm.filterCategoryId.value =
+                                  _selectedCategory?.id;
+                              _workOrderListVm.filterIsCompleted.value =
+                                  _isCompleted;
+                              _workOrderListVm.filterByFilterBottomSheet(
+                                isReset: false,
+                              );
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: AppColors.onPrimary,
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

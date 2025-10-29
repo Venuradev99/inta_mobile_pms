@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_details_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/room_move_save_data.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
@@ -128,8 +127,8 @@ class RoomMoveVm extends GetxController {
         saveRoomMoveRequest,
       );
       if (response["isSuccessful"] == true) {
-        final selectedRoomType = getType(saveData.roomTypeId!);
-        final selectedRoom = getRoom(saveData.roomId!);
+        final selectedRoomType = getType(saveData.roomTypeId);
+        final selectedRoom = getRoom(saveData.roomId);
         String msg =
             'Room moved successfully to $selectedRoomType - $selectedRoom';
         MessageService().success(msg);

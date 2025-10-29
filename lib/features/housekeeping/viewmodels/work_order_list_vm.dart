@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/dropdown_data.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/save_work_order_request.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_orders_search_request.dart';
@@ -10,13 +10,24 @@ import 'package:intl/intl.dart';
 class WorkOrderListVm extends GetxController {
   final HouseKeepingService _houseKeepingServices;
   final workOrders = <WorkOrder>[].obs;
-  final statusList = <Map<String, dynamic>>[].obs;
-  final priorityList = <Map<String, dynamic>>[].obs;
-  final categoryList = <Map<String, dynamic>>[].obs;
-  final houseKeeperList = <Map<String, dynamic>>[].obs;
-  final unitRoomList = <Map<String, dynamic>>[].obs;
-  final reasonList = <Map<String, dynamic>>[].obs;
+  final workOrdersFiltered = <WorkOrder>[].obs;
+  final statusList = <DropdownData>[].obs;
+  final priorityList = <DropdownData>[].obs;
+  final categoryList = <DropdownData>[].obs;
+  final houseKeeperList = <DropdownData>[].obs;
+  final unitRoomList = <DropdownData>[].obs;
+  final reasonList = <DropdownData>[].obs;
   final isLoading = true.obs;
+
+  final filterStartDate = Rxn<DateTime>();
+  final filterEndDate = Rxn<DateTime>();
+  final filterOrderNo = Rxn<String>();
+  final filterCategoryId = Rxn<int>();
+  final filterPriorityId = Rxn<int>();
+  final filterRoomId = Rxn<int>();
+  final filterStatusId = Rxn<int>();
+  final filterAssignToId = Rxn<int>();
+  final filterIsCompleted = Rxn<bool>();
 
   WorkOrderListVm(this._houseKeepingServices);
 
@@ -43,10 +54,12 @@ class WorkOrderListVm extends GetxController {
 
       if (workOrderStatusResponse["isSuccessful"] == true) {
         for (final item in workOrderStatusResponse["result"]) {
-          statusList.add({
-            "id": item["workOrderStatusModelId"],
-            "description": item["description"],
-          });
+          statusList.add(
+            DropdownData(
+              id: item["workOrderStatusModelId"],
+              description: item["description"],
+            ),
+          );
         }
       } else {
         MessageService().error(
@@ -72,6 +85,7 @@ class WorkOrderListVm extends GetxController {
             reason: '',
           );
           workOrders.add(data);
+          workOrdersFiltered.add(data);
         }
       } else {
         MessageService().error(
@@ -104,10 +118,12 @@ class WorkOrderListVm extends GetxController {
 
       if (priorityResponse["isSuccessful"] == true) {
         for (final item in priorityResponse["result"]) {
-          priorityList.add({
-            "id": item["wellKnownPriorityId"],
-            "description": item["name"],
-          });
+          priorityList.add(
+            DropdownData(
+              id: item["wellKnownPriorityId"],
+              description: item["name"],
+            ),
+          );
         }
       } else {
         MessageService().error(
@@ -117,10 +133,12 @@ class WorkOrderListVm extends GetxController {
 
       if (workOrderCategories["isSuccessful"] == true) {
         for (final item in workOrderCategories["result"]) {
-          categoryList.add({
-            "id": item["workOrderCategoryId"],
-            "description": item["name"],
-          });
+          categoryList.add(
+            DropdownData(
+              id: item["workOrderCategoryId"],
+              description: item["name"],
+            ),
+          );
         }
       } else {
         MessageService().error(
@@ -130,10 +148,12 @@ class WorkOrderListVm extends GetxController {
 
       if (houseKeepers["isSuccessful"] == true) {
         for (final item in houseKeepers["result"]) {
-          houseKeeperList.add({
-            "id": item["userId"],
-            "description": "${item["firstName"]} ${item["lastName"]}",
-          });
+          houseKeeperList.add(
+            DropdownData(
+              id:  item["userId"],
+               description: "${item["firstName"]} ${item["lastName"]}",
+               )
+          );
         }
       } else {
         MessageService().error(
@@ -142,7 +162,12 @@ class WorkOrderListVm extends GetxController {
       }
       if (unitRooms["isSuccessful"] == true) {
         for (final item in unitRooms["result"]["recordSet"]) {
-          unitRoomList.add({"id": item["id"], "description": item["name"]});
+          unitRoomList.add(
+              DropdownData(
+                id: item["id"],
+                description: item["name"],
+              ),
+            );
         }
       } else {
         MessageService().error(
@@ -151,10 +176,18 @@ class WorkOrderListVm extends GetxController {
       }
       if (reasons["isSuccessful"] == true) {
         for (final item in reasons["result"]) {
-          reasonList.add({"id": item["reasonId"], "description": item["name"]});
+          reasonList.add(
+              DropdownData(
+                id: item["reasonId"],
+                description: item["name"],
+              ),
+            
+            );
         }
       } else {
-        MessageService().error(reasons["errors"][0] ?? 'Error getting reasons!');
+        MessageService().error(
+          reasons["errors"][0] ?? 'Error getting reasons!',
+        );
       }
     } catch (e) {
       MessageService().error('Work order loading error: $e');
@@ -163,8 +196,8 @@ class WorkOrderListVm extends GetxController {
   }
 
   String getStatus(int status) {
-    final item = statusList.firstWhere((item) => item["id"] == status);
-    return item["description"];
+    final item = statusList.firstWhere((item) => item.id == status);
+    return item.description;
   }
 
   DateTime getDate(String date) {
@@ -242,6 +275,145 @@ class WorkOrderListVm extends GetxController {
     } catch (e) {
       MessageService().error('Error Saving new work order: $e');
       throw Exception('Error Saving new work order: $e');
+    }
+  }
+
+  searchWorkOrders(searchQuery) {
+    try {
+      if (searchQuery.isNotEmpty) {
+        workOrdersFiltered.value = workOrdersFiltered
+            .where(
+              (workOrder) =>
+                  workOrder.orderNo.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ) ||
+                  workOrder.unitRoom.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ) ||
+                  workOrder.status.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  ),
+            )
+            .toList();
+      } else {
+        workOrdersFiltered.value = workOrders.toList();
+      }
+    } catch (e) {
+      throw Exception('Error filter searching : $e');
+    }
+  }
+
+  void filterByFilterBottomSheet({bool? isReset}) {
+    try {
+      List<WorkOrder> listToFilter = workOrders.toList();
+      if (isReset == true) {
+        workOrdersFiltered.value = workOrders.toList();
+        filterOrderNo.value = null;
+        filterStartDate.value = null;
+        filterEndDate.value = null;
+        filterCategoryId.value = null;
+        filterPriorityId.value = null;
+        filterStatusId.value = null;
+        filterAssignToId.value = null;
+        filterRoomId.value = null;
+        filterIsCompleted.value = false;
+        return;
+      }
+      if (filterStartDate.value != null) {
+        listToFilter = listToFilter.where((workOrder) {
+          DateTime blockFromDate = DateTime.parse(
+            workOrder.blockFrom.toString(),
+          );
+          return blockFromDate.isAfter(filterStartDate.value!) ||
+              blockFromDate.isAtSameMomentAs(filterStartDate.value!);
+        }).toList();
+      }
+      if (filterEndDate.value != null) {
+        listToFilter = listToFilter.where((workOrder) {
+          DateTime blockToDate = DateTime.parse(workOrder.blockTo.toString());
+          return blockToDate.isBefore(filterEndDate.value!) ||
+              blockToDate.isAtSameMomentAs(filterEndDate.value!);
+        }).toList();
+      }
+      if (filterOrderNo.value != null && filterOrderNo.value!.isNotEmpty) {
+        listToFilter = listToFilter
+            .where(
+              (item) => item.orderNo.toLowerCase().contains(
+                filterOrderNo.value!.toLowerCase(),
+              ),
+            )
+            .toList();
+      }
+      if (filterCategoryId.value != null) {
+        listToFilter = listToFilter
+            .where(
+              (item) =>
+                  item.category ==
+                  categoryList.firstWhere(
+                    (element) => element.id == filterCategoryId.value,
+                  ).description,
+            )
+            .toList();
+      }
+      if (filterPriorityId.value != null) {
+        listToFilter = listToFilter
+            .where(
+              (item) =>
+                  item.priority ==
+                  priorityList.firstWhere(
+                    (element) => element.id == filterPriorityId.value,
+                  ).description,
+            )
+            .toList();
+      }
+      if (filterRoomId.value != null) {
+        listToFilter = listToFilter
+            .where(
+              (item) =>
+                  item.unitRoom ==
+                  unitRoomList.firstWhere(
+                    (element) => element.id == filterRoomId.value,
+                  ).description,
+            )
+            .toList();
+      }
+      if (filterStatusId.value != null) {
+        listToFilter = listToFilter
+            .where(
+              (item) =>
+                  item.status ==
+                  statusList.firstWhere(
+                    (element) => element.id == filterStatusId.value,
+                  ).description,
+            )
+            .toList();
+      }
+      if (filterAssignToId.value != null) {
+        listToFilter = listToFilter
+            .where(
+              (item) =>
+                  item.assignedTo ==
+                  houseKeeperList.firstWhere(
+                    (element) => element.id == filterAssignToId.value,
+                  ).description,
+            )
+            .toList();
+      }
+      if (filterIsCompleted.value == true) {
+        listToFilter = listToFilter
+            .where(
+              (item) => item.status.toLowerCase() == statusList
+                  .firstWhere((element) =>
+                      element.id == 2)
+                  .description
+                  .toLowerCase(),
+            )
+            .toList();
+      }
+
+      workOrdersFiltered.value = listToFilter;
+    } catch (e) {
+      throw Exception('Error filter maintenance blocks : $e');
     }
   }
 }

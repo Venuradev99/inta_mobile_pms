@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/core/widgets/message_helper.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/block_room_reason_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_payload.dart';
@@ -15,10 +14,7 @@ class RoomTypeResponse {
   final int roomTypeId;
   final String name;
 
-  RoomTypeResponse({
-    required this.roomTypeId,
-    required this.name,
-  });
+  RoomTypeResponse({required this.roomTypeId, required this.name});
 }
 
 class MaintenanceBlockVm extends GetxController {
@@ -53,8 +49,12 @@ class MaintenanceBlockVm extends GetxController {
       String nextMonthSysDate = nextMonthDate.toString().substring(0, 10);
 
       final payload = MaintenanceBlockPayload(
-        from: filterStartDate.value?.toString().substring(0, 10) ?? systemWorkingDate,
-        to: filterEndDate.value?.toString().substring(0, 10) ?? nextMonthSysDate,
+        from:
+            filterStartDate.value?.toString().substring(0, 10) ??
+            systemWorkingDate,
+        to:
+            filterEndDate.value?.toString().substring(0, 10) ??
+            nextMonthSysDate,
         isBlock: !filterIsUnblock.value,
         pageSize: 50,
         roomId: filterRoomId.value ?? 0,
@@ -65,7 +65,8 @@ class MaintenanceBlockVm extends GetxController {
         _houseKeepingService.getAllMaintenanceblock(payload),
         _houseKeepingService.getAllRooms(),
         _houseKeepingService.getAllBlockRoomReasons(),
-        _houseKeepingService.getAllRoomTypes(), // Assuming this method exists in your service; implement it similarly to getAllRooms
+        _houseKeepingService
+            .getAllRoomTypes(), // Assuming this method exists in your service; implement it similarly to getAllRooms
       ]);
       final maintenanceblockResponse = response[0];
       final roomResponse = response[1];
@@ -132,7 +133,9 @@ class MaintenanceBlockVm extends GetxController {
       }
 
       if (roomTypeResponse["isSuccessful"] == true) {
-        final result = roomTypeResponse["result"]["recordSet"] as List; // Adjust based on your API response structure
+        final result =
+            roomTypeResponse["result"]["recordSet"]
+                as List; // Adjust based on your API response structure
         roomTypesList.value = result
             .map(
               (item) => RoomTypeResponse(
@@ -227,6 +230,51 @@ class MaintenanceBlockVm extends GetxController {
     }
   }
 
+  void filterByFilterBottomSheet({bool? isReset}) {
+    try {
+      List<MaintenanceBlockItem> listToFilter = maintenanceBlockList;
+      if (isReset == true) {
+        maintenanceBlockListFiltered.value = maintenanceBlockList;
+        filterStartDate.value = null;
+        filterEndDate.value = null;
+        filterRoomTypeId.value = null;
+        filterRoomId.value = null;
+        filterIsUnblock.value = false;
+        return;
+      }
+      if (filterStartDate.value != null) {
+        listToFilter = listToFilter.where((block) {
+          DateTime blockFromDate = DateTime.parse(block.fromDate);
+          return blockFromDate.isAfter(filterStartDate.value!) ||
+              blockFromDate.isAtSameMomentAs(filterStartDate.value!);
+        }).toList();
+      }
+      if (filterEndDate.value != null) {
+        listToFilter = listToFilter.where((block) {
+          DateTime blockToDate = DateTime.parse(block.toDate);
+          return blockToDate.isBefore(filterEndDate.value!) ||
+              blockToDate.isAtSameMomentAs(filterEndDate.value!);
+        }).toList();
+      }
+      if (filterRoomTypeId.value != null) {
+        listToFilter = listToFilter
+            .where((block) => block.roomTypeId == filterRoomTypeId.value)
+            .toList();
+      }
+      if (filterRoomId.value != null) {
+        listToFilter = listToFilter
+            .where((block) => block.roomId == filterRoomId.value)
+            .toList();
+      }
+      if (filterIsUnblock.value) {
+        listToFilter = listToFilter.where((block) => block.status == 0).toList();
+      }
+      maintenanceBlockListFiltered.value = listToFilter;
+    } catch (e) {
+      throw Exception('Error filter maintenance blocks : $e');
+    }
+  }
+
   filteredMaintenanceBlocks(searchQuery) {
     try {
       // if (_selectedFilter != 'All') {
@@ -250,7 +298,7 @@ class MaintenanceBlockVm extends GetxController {
                   ),
             )
             .toList();
-      }else{
+      } else {
         maintenanceBlockListFiltered.value = maintenanceBlockList;
       }
     } catch (e) {
