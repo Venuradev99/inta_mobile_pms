@@ -4,13 +4,12 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
-import 'package:intl/intl.dart';
 
 class MaintenanceBlock extends StatefulWidget {
   const MaintenanceBlock({super.key});
@@ -29,6 +28,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
+ 
   @override
   void initState() {
     super.initState();
@@ -54,193 +54,67 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     super.dispose();
   }
 
-  // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
+ // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
 
-  void _showActionsBottomSheet(MaintenanceBlockItem block) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Important for DraggableScrollableSheet
-      backgroundColor:
-          Colors.transparent, // Let ActionBottomSheet handle the background
-      builder: (context) => ActionBottomSheet(
-        guestName:
-            'Room ${block.maintenanceBlockId}', // Adjust based on your block model
-        actions: [
-          ActionItem(
-            icon: Icons.edit,
-            label: 'Edit Blocked Room',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to edit screen
-              context.push(AppRoutes.editBlockRoomPage, extra: block);
-            },
-          ),
-          // ActionItem(
-          //   icon: Icons.lock_open,
-          //   label: 'Unblock Room',
-          //   onTap: () {
-          //     Navigator.pop(context);
-          //     // Call unblock functionality
-          //     _maintenanceBlockVm.unblockRoom(block.maintenanceBlockId).then((_) {
-          //       _maintenanceBlockVm.loadAllMaintenanceBlocks();
-          //     }).catchError((error) {
-          //       // Show error snackbar
-          //       Get.snackbar(
-          //         'Error',
-          //         'Failed to unblock room: $error',
-          //         snackPosition: SnackPosition.BOTTOM,
-          //         backgroundColor: AppColors.red,
-          //         colorText: AppColors.onPrimary,
-          //       );
-          //     });
-          //   },
-          // ),
-          ActionItem(
-            icon: Icons.lock_open,
-            label: 'Unblock Room',
-            onTap: () async {
-              Navigator.pop(context);
+void _showActionsBottomSheet(dynamic block) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, // Important for DraggableScrollableSheet
+    backgroundColor: Colors.transparent, // Let ActionBottomSheet handle the background
+    builder: (context) => ActionBottomSheet(
+      guestName: block.roomName ?? 'Room ${block.maintenanceBlockId}',
+      actions: [
+        ActionItem(
+          icon: Icons.edit,
+          label: 'Edit Blocked Room',
+          onTap: () {
+            Navigator.pop(context);
+            // Navigate to edit screen
+            // context.push(AppRoutes.editBlockRoom, extra: block);
+          },
+        ),
+        // ActionItem(
+        //   icon: Icons.lock_open,
+        //   label: 'Unblock Room',
+        //   onTap: () {
+        //     Navigator.pop(context);
+        //     // Call unblock functionality
+        //     _maintenanceBlockVm.unblockRoom(block.maintenanceBlockId).then((_) {
+        //       _maintenanceBlockVm.loadAllMaintenanceBlocks();
+        //     }).catchError((error) {
+        //       // Show error snackbar
+        //       Get.snackbar(
+        //         'Error',
+        //         'Failed to unblock room: $error',
+        //         snackPosition: SnackPosition.BOTTOM,
+        //         backgroundColor: AppColors.red,
+        //         colorText: AppColors.onPrimary,
+        //       );
+        //     });
+        //   },
+        // ),
+        ActionItem(
+          icon: Icons.info_outline,
+          label: 'View Details',
+          onTap: () {
+            Navigator.pop(context);
+            // Navigate to details screen
+            // context.push(AppRoutes.blockRoomDetails, extra: block);
+          },
+        ),
+      ],
+    ),
+  );
+}
 
-              final fromDate = DateTime.parse(block.fromDate);
-              final toDate = DateTime.parse(block.toDate);
-
-              DateTime? selectedStart = fromDate;
-              DateTime? selectedEnd = toDate;
-
-              if (fromDate.year == toDate.year &&
-                  fromDate.month == toDate.month &&
-                  fromDate.day == toDate.day) {
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Confirm Unblock'),
-                    content: Text(
-                      'Do you want to unblock the room for ${DateFormat('yyyy-MM-dd').format(fromDate)}?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Unblock'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.onPrimary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirm == true) {
-                  await _maintenanceBlockVm.unblockRoom(
-                    block,
-                    fromDate,
-                    toDate,
-                  );
-                }
-              } else {
-                // Otherwise, show dialog with two date pickers
-                await showDialog(
-                  context: context,
-                  builder: (context) {
-                    return StatefulBuilder(
-                      builder: (context, setState) => AlertDialog(
-                        title: const Text('Unblock Date Range'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              title: Text(
-                                'Start Date: ${DateFormat('yyyy-MM-dd').format(selectedStart!)}',
-                              ),
-                              trailing: const Icon(Icons.calendar_today),
-                              onTap: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedStart!,
-                                  firstDate: fromDate,
-                                  lastDate: toDate,
-                                );
-                                if (picked != null) {
-                                  setState(() => selectedStart = picked);
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 10),
-                            ListTile(
-                              title: Text(
-                                'End Date: ${DateFormat('yyyy-MM-dd').format(selectedEnd!)}',
-                              ),
-                              trailing: const Icon(Icons.calendar_today),
-                              onTap: () async {
-                                final picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: selectedEnd!,
-                                  firstDate: fromDate,
-                                  lastDate: toDate,
-                                );
-                                if (picked != null) {
-                                  setState(() => selectedEnd = picked);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              await _maintenanceBlockVm.unblockRoom(
-                                block,
-                                selectedStart!,
-                                selectedEnd!,
-                              );
-                            },
-                            child: const Text('Unblock'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: AppColors.onPrimary,
-                              padding: const EdgeInsets.symmetric(vertical: 14,horizontal: 24),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }
-            },
-          ),
-
-          ActionItem(
-            icon: Icons.info_outline,
-            label: 'View Details',
-            onTap: () {
-              Navigator.pop(context);
-              // Navigate to details screen
-              // context.push(AppRoutes.blockRoomDetails, extra: block);
-            },
-          ),
-        ],
-      ),
-    );
-  }
+void _showFilterBottomSheet() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => const FilterBottomSheet(),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +158,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 _searchController.clear();
               });
             } else {
-              context.go(AppRoutes.dashboard);
+             context.go(AppRoutes.dashboard);
             }
           },
         ),
@@ -306,19 +180,17 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                   _searchQuery = '';
                   _searchController.clear();
                   _isSearchVisible = false;
-                    _maintenanceBlockVm.filteredMaintenanceBlocks('');
                 });
               },
             ),
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
-            // onPressed: _showFilterBottomSheet,
-            onPressed: () => {},
+            onPressed: _showFilterBottomSheet,
           ),
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-              context.push(AppRoutes.blockRoomSelection);
+             context.push(AppRoutes.blockRoomSelection);
             },
           ),
         ],
@@ -429,7 +301,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                   padding: ResponsiveConfig.horizontalPadding(
                     context,
                   ).add(const EdgeInsets.symmetric(vertical: 8)),
-                  itemCount: 8,
+                  itemCount: 8, 
                   itemBuilder: (context, index) =>
                       const MaintenanceBlockCardShimmer(),
                 );
@@ -470,7 +342,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          context.go(AppRoutes.blockRoomSelection);
+         context.go(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),
@@ -479,6 +351,245 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
           style: TextStyle(color: AppColors.onPrimary),
         ),
       ),
+    );
+  }
+}
+
+class FilterBottomSheet extends StatefulWidget {
+  const FilterBottomSheet({super.key});
+
+  @override
+  State<FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  final _maintenanceBlockVm = Get.find<MaintenanceBlockVm>();
+
+  DateTime? _startDate;
+  DateTime? _endDate;
+  RoomTypeResponse? _selectedRoomType;
+  RoomResponse? _selectedRoom;
+  bool _unblockRoom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Prefill with current filter values from VM
+    _startDate = _maintenanceBlockVm.filterStartDate.value;
+    _endDate = _maintenanceBlockVm.filterEndDate.value;
+    _selectedRoomType = _maintenanceBlockVm.roomTypesList.firstWhereOrNull(
+      (type) => type.roomTypeId == _maintenanceBlockVm.filterRoomTypeId.value,
+    );
+    _selectedRoom = _maintenanceBlockVm.roomsList.firstWhereOrNull(
+      (room) => room.roomId == _maintenanceBlockVm.filterRoomId.value,
+    );
+    _unblockRoom = _maintenanceBlockVm.filterIsUnblock.value;
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now()),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = _startDate;
+          }
+        } else {
+          _endDate = picked;
+          if (_startDate != null && _endDate!.isBefore(_startDate!)) {
+            _startDate = _endDate;
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            children: [
+              // Header with title and close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Filter',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Start and End Date
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, true),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'Start Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _startDate != null
+                                    ? '${_startDate!.day.toString().padLeft(2, '0')}-${(_startDate!.month).toString().padLeft(2, '0')}-${_startDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _startDate != null ? AppColors.black : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, false),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'End Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _endDate != null
+                                    ? '${_endDate!.day.toString().padLeft(2, '0')}-${(_endDate!.month).toString().padLeft(2, '0')}-${_endDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _endDate != null ? AppColors.black : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Type Dropdown
+                    Obx(() => DropdownButtonFormField<RoomTypeResponse>(
+                          decoration: const InputDecoration(
+                            labelText: 'Room Type',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: _selectedRoomType,
+                          hint: const Text('Select Room Type'),
+                          items: _maintenanceBlockVm.roomTypesList.map((type) {
+                            return DropdownMenuItem<RoomTypeResponse>(
+                              value: type,
+                              child: Text(type.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRoomType = value;
+                            });
+                          },
+                        )),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(() => DropdownButtonFormField<RoomResponse>(
+                          decoration: const InputDecoration(
+                            labelText: 'Room',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: _selectedRoom,
+                          hint: const Text('Select Room'),
+                          items: _maintenanceBlockVm.roomsList.map((room) {
+                            return DropdownMenuItem<RoomResponse>(
+                              value: room,
+                              child: Text(room.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRoom = value;
+                            });
+                          },
+                        )),
+                    const SizedBox(height: 16),
+                    // Unblock Room Switch
+                    SwitchListTile(
+                      title: const Text('Unblock Room'),
+                      value: _unblockRoom,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _unblockRoom = value;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    const SizedBox(height: 24),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              foregroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Apply filters
+                              _maintenanceBlockVm.filterStartDate.value = _startDate;
+                              _maintenanceBlockVm.filterEndDate.value = _endDate;
+                              _maintenanceBlockVm.filterRoomTypeId.value = _selectedRoomType?.roomTypeId;
+                              _maintenanceBlockVm.filterRoomId.value = _selectedRoom?.roomId;
+                              _maintenanceBlockVm.filterIsUnblock.value = _unblockRoom;
+                              _maintenanceBlockVm.loadAllMaintenanceBlocks();
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
