@@ -4,6 +4,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card_wgt.dart';
@@ -105,6 +106,16 @@ void _showActionsBottomSheet(dynamic block) {
     ),
   );
 }
+
+void _showFilterBottomSheet() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => const FilterBottomSheet(),
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,8 +185,7 @@ void _showActionsBottomSheet(dynamic block) {
             ),
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
-            // onPressed: _showFilterBottomSheet,
-            onPressed: () => {},
+            onPressed: _showFilterBottomSheet,
           ),
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
@@ -341,6 +351,245 @@ void _showActionsBottomSheet(dynamic block) {
           style: TextStyle(color: AppColors.onPrimary),
         ),
       ),
+    );
+  }
+}
+
+class FilterBottomSheet extends StatefulWidget {
+  const FilterBottomSheet({super.key});
+
+  @override
+  State<FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<FilterBottomSheet> {
+  final _maintenanceBlockVm = Get.find<MaintenanceBlockVm>();
+
+  DateTime? _startDate;
+  DateTime? _endDate;
+  RoomTypeResponse? _selectedRoomType;
+  RoomResponse? _selectedRoom;
+  bool _unblockRoom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Prefill with current filter values from VM
+    _startDate = _maintenanceBlockVm.filterStartDate.value;
+    _endDate = _maintenanceBlockVm.filterEndDate.value;
+    _selectedRoomType = _maintenanceBlockVm.roomTypesList.firstWhereOrNull(
+      (type) => type.roomTypeId == _maintenanceBlockVm.filterRoomTypeId.value,
+    );
+    _selectedRoom = _maintenanceBlockVm.roomsList.firstWhereOrNull(
+      (room) => room.roomId == _maintenanceBlockVm.filterRoomId.value,
+    );
+    _unblockRoom = _maintenanceBlockVm.filterIsUnblock.value;
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now()),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+          if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+            _endDate = _startDate;
+          }
+        } else {
+          _endDate = picked;
+          if (_startDate != null && _endDate!.isBefore(_startDate!)) {
+            _startDate = _endDate;
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            children: [
+              // Header with title and close button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Filter',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    // Start and End Date
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, true),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'Start Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _startDate != null
+                                    ? '${_startDate!.day.toString().padLeft(2, '0')}-${(_startDate!.month).toString().padLeft(2, '0')}-${_startDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _startDate != null ? AppColors.black : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () => _selectDate(context, false),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'End Date',
+                                border: OutlineInputBorder(),
+                              ),
+                              child: Text(
+                                _endDate != null
+                                    ? '${_endDate!.day.toString().padLeft(2, '0')}-${(_endDate!.month).toString().padLeft(2, '0')}-${_endDate!.year}'
+                                    : 'Select Date',
+                                style: TextStyle(
+                                  color: _endDate != null ? AppColors.black : AppColors.lightgrey,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Room Type Dropdown
+                    Obx(() => DropdownButtonFormField<RoomTypeResponse>(
+                          decoration: const InputDecoration(
+                            labelText: 'Room Type',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: _selectedRoomType,
+                          hint: const Text('Select Room Type'),
+                          items: _maintenanceBlockVm.roomTypesList.map((type) {
+                            return DropdownMenuItem<RoomTypeResponse>(
+                              value: type,
+                              child: Text(type.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRoomType = value;
+                            });
+                          },
+                        )),
+                    const SizedBox(height: 16),
+                    // Room Dropdown
+                    Obx(() => DropdownButtonFormField<RoomResponse>(
+                          decoration: const InputDecoration(
+                            labelText: 'Room',
+                            border: OutlineInputBorder(),
+                          ),
+                          value: _selectedRoom,
+                          hint: const Text('Select Room'),
+                          items: _maintenanceBlockVm.roomsList.map((room) {
+                            return DropdownMenuItem<RoomResponse>(
+                              value: room,
+                              child: Text(room.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedRoom = value;
+                            });
+                          },
+                        )),
+                    const SizedBox(height: 16),
+                    // Unblock Room Switch
+                    SwitchListTile(
+                      title: const Text('Unblock Room'),
+                      value: _unblockRoom,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _unblockRoom = value;
+                        });
+                      },
+                      activeColor: AppColors.primary,
+                    ),
+                    const SizedBox(height: 24),
+                    // Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.primary),
+                              foregroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Apply filters
+                              _maintenanceBlockVm.filterStartDate.value = _startDate;
+                              _maintenanceBlockVm.filterEndDate.value = _endDate;
+                              _maintenanceBlockVm.filterRoomTypeId.value = _selectedRoomType?.roomTypeId;
+                              _maintenanceBlockVm.filterRoomId.value = _selectedRoom?.roomId;
+                              _maintenanceBlockVm.filterIsUnblock.value = _unblockRoom;
+                              _maintenanceBlockVm.loadAllMaintenanceBlocks();
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

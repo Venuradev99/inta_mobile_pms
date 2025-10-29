@@ -9,6 +9,16 @@ import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart'
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
+class RoomTypeResponse {
+  final int roomTypeId;
+  final String name;
+
+  RoomTypeResponse({
+    required this.roomTypeId,
+    required this.name,
+  });
+}
+
 class MaintenanceBlockVm extends GetxController {
   final HouseKeepingService _houseKeepingService;
 
@@ -18,7 +28,14 @@ class MaintenanceBlockVm extends GetxController {
   RxList<MaintenanceBlockItem> maintenanceBlockListFiltered =
       <MaintenanceBlockItem>[].obs;
   final roomsList = <RoomResponse>[].obs;
+  final roomTypesList = <RoomTypeResponse>[].obs;
   final blockRoomReasonList = <BlockRoomReasonResponse>[].obs;
+
+  final filterStartDate = Rxn<DateTime>();
+  final filterEndDate = Rxn<DateTime>();
+  final filterRoomTypeId = Rxn<int>();
+  final filterRoomId = Rxn<int>();
+  final filterIsUnblock = false.obs;
 
   MaintenanceBlockVm(this._houseKeepingService);
 
@@ -31,24 +48,27 @@ class MaintenanceBlockVm extends GetxController {
         sysDate.month + 1,
         sysDate.day,
       );
-      String nextMonthSysDate = nextMonthDate.toString();
+      String nextMonthSysDate = nextMonthDate.toString().substring(0, 10);
+
       final payload = MaintenanceBlockPayload(
-        from: systemWorkingDate,
-        to: nextMonthSysDate,
-        isBlock: true,
+        from: filterStartDate.value?.toString().substring(0, 10) ?? systemWorkingDate,
+        to: filterEndDate.value?.toString().substring(0, 10) ?? nextMonthSysDate,
+        isBlock: !filterIsUnblock.value,
         pageSize: 50,
-        roomId: 0,
-        roomTypeId: 0,
+        roomId: filterRoomId.value ?? 0,
+        roomTypeId: filterRoomTypeId.value ?? 0,
         startIndex: 0,
       ).toJson();
       final response = await Future.wait([
         _houseKeepingService.getAllMaintenanceblock(payload),
         _houseKeepingService.getAllRooms(),
         _houseKeepingService.getAllBlockRoomReasons(),
+        _houseKeepingService.getAllRoomTypes(), // Assuming this method exists in your service; implement it similarly to getAllRooms
       ]);
       final maintenanceblockResponse = response[0];
       final roomResponse = response[1];
       final reasonResponse = response[2];
+      final roomTypeResponse = response[3];
 
       if (maintenanceblockResponse["isSuccessful"] == true) {
         final result =
@@ -106,6 +126,22 @@ class MaintenanceBlockVm extends GetxController {
       } else {
         MessageService().error(
           reasonResponse["errors"][0] ?? 'Error getting reasons!',
+        );
+      }
+
+      if (roomTypeResponse["isSuccessful"] == true) {
+        final result = roomTypeResponse["result"]["recordSet"] as List; // Adjust based on your API response structure
+        roomTypesList.value = result
+            .map(
+              (item) => RoomTypeResponse(
+                roomTypeId: item["roomTypeId"],
+                name: item["name"],
+              ),
+            )
+            .toList();
+      } else {
+        MessageService().error(
+          roomTypeResponse["errors"][0] ?? 'Error getting room types!',
         );
       }
     } catch (e) {
