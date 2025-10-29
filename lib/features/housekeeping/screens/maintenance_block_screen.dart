@@ -10,6 +10,7 @@ import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.da
 import 'package:inta_mobile_pms/features/housekeeping/widgets/maintenance_block_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:intl/intl.dart';
 
 class MaintenanceBlock extends StatefulWidget {
   const MaintenanceBlock({super.key});
@@ -28,7 +29,6 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
- 
   @override
   void initState() {
     super.initState();
@@ -54,7 +54,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     super.dispose();
   }
 
- // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
+  // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
 
 void _showActionsBottomSheet(dynamic block) {
   showModalBottomSheet(
@@ -158,7 +158,7 @@ void _showFilterBottomSheet() {
                 _searchController.clear();
               });
             } else {
-             context.go(AppRoutes.dashboard);
+              context.go(AppRoutes.dashboard);
             }
           },
         ),
@@ -180,6 +180,7 @@ void _showFilterBottomSheet() {
                   _searchQuery = '';
                   _searchController.clear();
                   _isSearchVisible = false;
+                    _maintenanceBlockVm.filteredMaintenanceBlocks('');
                 });
               },
             ),
@@ -190,7 +191,7 @@ void _showFilterBottomSheet() {
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-             context.push(AppRoutes.blockRoomSelection);
+              context.push(AppRoutes.blockRoomSelection);
             },
           ),
         ],
@@ -301,7 +302,7 @@ void _showFilterBottomSheet() {
                   padding: ResponsiveConfig.horizontalPadding(
                     context,
                   ).add(const EdgeInsets.symmetric(vertical: 8)),
-                  itemCount: 8, 
+                  itemCount: 8,
                   itemBuilder: (context, index) =>
                       const MaintenanceBlockCardShimmer(),
                 );
@@ -342,7 +343,7 @@ void _showFilterBottomSheet() {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-         context.go(AppRoutes.blockRoomSelection);
+          context.go(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),

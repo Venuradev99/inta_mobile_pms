@@ -5,9 +5,11 @@ import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_i
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenanceblock_save_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/unblock_maintenance_block_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class RoomTypeResponse {
   final int roomTypeId;
@@ -86,7 +88,7 @@ class MaintenanceBlockVm extends GetxController {
                 reasonId: item["reasonId"] ?? 0,
                 reasonName: item["reasonName"] ?? '',
                 blockedBy: item["blockedBy"] ?? '',
-                blockedOn: item["blockedOn"].substring(0, 10) ?? '',
+                blockedOn: item["blockedOn"] ?? '',
                 status: item["status"] ?? 0,
                 hotelId: item["hotelId"] ?? 0,
               ),
@@ -152,6 +154,57 @@ class MaintenanceBlockVm extends GetxController {
     }
   }
 
+  Future<void> unblockRoom(
+    MaintenanceBlockItem block,
+    DateTime fromDate,
+    DateTime toDate,
+  ) async {
+    try {
+      final payload = UnblockMaintenanceBlockPayload(
+        maintenanceBlockId: block.maintenanceBlockId,
+        hotelId: block.hotelId,
+        roomId: block.roomId,
+        roomTypeId: block.roomTypeId,
+        reasonId: block.reasonId,
+        blockedBy: block.blockedBy,
+        blockedOn: block.blockedOn,
+        fromDate: fromDate.toString().substring(0, 10),
+        toDate: toDate.toString().substring(0, 10),
+        reasonName: block.reasonName,
+        roomName: block.roomName,
+        roomTypeName: block.roomTypeName,
+        name: [block.roomName],
+        status: 0,
+        unblockDateRanges: [
+          UnblockDateRange(
+            fromDate: fromDate.toString().substring(0, 10),
+            toDate: toDate.toString().substring(0, 10),
+            index: 1,
+            isMain: true,
+            isOverlap: false,
+            minDate: '${fromDate.toString().substring(0, 10)}T00:00:00',
+            maxDate: '${toDate.toString().substring(0, 10)}T00:00:00',
+          ),
+        ],
+      ).toJson();
+      final response = await _houseKeepingService.unblockRoom(
+        payload,
+        block.maintenanceBlockId,
+      );
+      if (response["isSuccessful"] == true) {
+        NavigationService().back();
+        await loadAllMaintenanceBlocks();
+        MessageService().success('Room unblocked successfully.');
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error in unblocking room!',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error in unblocking room: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> saveMaintenanceblock(
     DateTime? fromDate,
     DateTime? toDate,
@@ -197,6 +250,8 @@ class MaintenanceBlockVm extends GetxController {
                   ),
             )
             .toList();
+      }else{
+        maintenanceBlockListFiltered.value = maintenanceBlockList;
       }
     } catch (e) {
       throw Exception('Error filter searching : $e');

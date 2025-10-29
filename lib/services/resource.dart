@@ -1,6 +1,6 @@
 class AppResources {
-  static final String logoutUrl =
-      'http://pms_service.intapos.com:3334/api/userAccount/Logout';
+  // static final String logoutUrl =
+  //     'http://pms_service.intapos.com:3334/api/userAccount/Logout';
 
   String baseUrl;
 
@@ -104,4 +104,7 @@ class AppResources {
   static const String getAllBlockRoomReasons =
       '$reason/GetByCategory?ResonCategoryId=1&withInactive=false';
   static const String saveMaintenanceblock = '$maintenanceblock/save';
+  static const String unblockMaintenanceblock = '$maintenanceblock/UnblockDateRange';
+
+
 }

@@ -412,7 +412,7 @@ class ArrivalListVm extends GetxController {
           balanceAmount: result["bookingRoom"]["balanceAmount"] ?? 0,
           remainingNights:
               result["bookingRoom"]["noOfNights"] ??
-              0, ////change remaining nights logic
+              0, 
           roomNumber: result["bookingRoom"]["roomName"] ?? '',
           reservedDate: getFirstTenCharacters(
             result["bookingRoom"]["bookingDate"],

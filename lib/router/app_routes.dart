@@ -29,6 +29,7 @@ class AppRoutes {
   static const String blockRoomDetails = '/block-room-details';
   static const String assignRooms = '/assign-rooms';
   static const String editGuestDetails = '/edit-guest-details';
+    static const String editBlockRoomPage = '/edit-block-room';
   
   
 }

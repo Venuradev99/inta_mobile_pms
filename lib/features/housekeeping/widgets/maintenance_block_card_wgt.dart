@@ -100,7 +100,7 @@ class MaintenanceBlockCardWgt extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${block.blockedBy} on ${block.blockedOn}',
+                      '${block.blockedBy} on ${block.blockedOn.substring(0,10)}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.lightgrey,
                       ),

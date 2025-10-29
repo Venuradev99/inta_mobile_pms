@@ -74,6 +74,29 @@ class DataAccessService {
     }
   }
 
+  //  Future<Map<String, dynamic>> delete(String url) async {
+  //   try {
+  //     final token = await LocalStorageManager.getAccessToken();
+  //     final hotelId = await LocalStorageManager.getHotelId();
+
+  //     if (token.isEmpty) {
+  //       throw Exception('Session key not available');
+  //     }
+
+  //     final headers = {
+  //       'Authorization': token,
+  //       'Content-Type': 'application/json',
+  //       'Hotelid': hotelId,
+  //     };
+
+  //     final response = await http.delete(Uri.parse(url), headers: headers);
+
+  //     return _handleResponse(response);
+  //   } catch (e) {
+  //     throw Exception('GET error: $e');
+  //   }
+  // }
+
   Future<Map<String, dynamic>> post(
     Map<String, dynamic> body,
     String url,
@@ -134,161 +157,5 @@ class DataAccessService {
     }
   }
 
-  //   Future<Map<String, dynamic>> Post(
-  //     String url,
-  //     Map<String, dynamic> body,
-  //   ) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
 
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.post(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //       body: jsonEncode(body),
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
-
-  //   Future<Map<String, dynamic>> PostList(String url, List<dynamic> body) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
-
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.post(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //       body: jsonEncode(body),
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
-
-  //   Future<Map<String, dynamic>> Put(
-  //     String url,
-  //     Map<String, dynamic> body,
-  //   ) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
-
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.put(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //       body: jsonEncode(body),
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
-
-  //   Future<Map<String, dynamic>> PUT(String url, List<dynamic> body) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
-
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.put(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //       body: jsonEncode(body),
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
-
-  //   Future<Map<dynamic, dynamic>> Put_(
-  //     String url,
-  //     Map<dynamic, dynamic> body,
-  //   ) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
-
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.put(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //       body: jsonEncode(body),
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
-
-  //   Future<Map<String, dynamic>> Delete(String url) async {
-  //     final sessionKey = await SessionManager.getSessionKey();
-  //     if (sessionKey == null) {
-  //       throw Exception('Session key not available');
-  //     }
-
-  //     final serviceUrl = appData;
-  //     if (serviceUrl == null) {
-  //       throw Exception('Service URL not available');
-  //     }
-
-  //     final headers = {
-  //       'Authorization': sessionKey,
-  //       'Content-Type': 'application/json',
-  //     };
-
-  //     final response = await http.delete(
-  //       Uri.parse('$serviceUrl/api$url'),
-  //       headers: headers,
-  //     );
-
-  //     return _handleResponse(response);
-  //   }
 }

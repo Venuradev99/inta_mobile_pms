@@ -8,6 +8,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.da
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/departure_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
@@ -231,6 +232,54 @@ class _DepartureListState extends State<DepartureList> {
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
                       RoomMovePage(guestItem: data),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
+              );
+            },
+          ),
+          ActionItem(
+            icon: Icons.block,
+            label: 'Void Reservation',
+            onTap: () async {
+              final voidReservationData = await _departureListVm
+                  .getVoidReservationData(item);
+              if (!mounted) return;
+              context.pop();
+              final data = {
+                'reasons': voidReservationData["reasons"],
+                'bookingRoomId': guestData?.bookingRoomId,
+                'guestName': guestData?.guestName,
+                'resNumber': guestData?.resId,
+                'folio': guestData?.folioId,
+                'arrivalDate': guestData?.startDate,
+                'departureDate': guestData?.endDate,
+                'roomType': guestData?.roomType,
+                'room': guestData?.room,
+                'total': guestData?.totalAmount,
+                'deposit':
+                    (guestData?.totalAmount ?? 0.0) -
+                    (guestData?.balanceAmount ?? 0.0),
+              };
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      VoidReservation(reservationData: data),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
                         // Slide from bottom to top
