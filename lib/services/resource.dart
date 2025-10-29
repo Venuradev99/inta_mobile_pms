@@ -105,6 +105,7 @@ class AppResources {
       '$reason/GetByCategory?ResonCategoryId=1&withInactive=false';
   static const String saveMaintenanceblock = '$maintenanceblock/save';
   static const String unblockMaintenanceblock = '$maintenanceblock/UnblockDateRange';
+  static const String updateHouseStatus = '$rooms/UpdateHouseStatus'; 
 
 
 }
