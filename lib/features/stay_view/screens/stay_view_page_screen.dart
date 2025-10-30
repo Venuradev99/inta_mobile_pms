@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 
-
 class StayViewPageScreen extends StatefulWidget {
   const StayViewPageScreen({super.key});
 
@@ -18,7 +17,7 @@ class StayViewPageScreen extends StatefulWidget {
 class _StayViewPageScreenState extends State<StayViewPageScreen> {
   DateTime _centerDate = DateTime(2025, 10, 29);
 
- void _showInfoDialog() {
+  void _showInfoDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -116,9 +115,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         Colors.grey[700]!,
                       ),
                       const SizedBox(height: 12),
-                      _buildLegendItem('Inventory', Colors.pink[100]!),
+                      _buildLegendItem('Inventory', Colors.blue[100]!),
                       const SizedBox(height: 12),
-                      _buildLegendItem('Unassigned Room', Colors.blue[100]!),
+                      _buildLegendItem('Unassigned Room', Colors.red[100]!),
                     ],
                   ),
                 ),
@@ -216,6 +215,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       ],
     );
   }
+
   Widget _buildInfoItem(String title, String description, IconData icon) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,7 +516,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Bunk Bed',
         'items': [
-          {'type': 'room', 'name': '4', 'statuses': [5, 5, 5], 'color': const Color(0xFFFFC0CB)},
+          {'type': 'room', 'name': '4', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
           {'type': 'room', 'name': '501-1', 'statuses': [null, null, null], 'color': null},
           {'type': 'room', 'name': '501-2', 'statuses': [null, null, null], 'color': null},
           {'type': 'maintenance', 'name': '501-3'},
@@ -528,7 +528,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Double Room new',
         'items': [
-          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': const Color(0xFFBBDEFB)},
+          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': Colors.red[100]},
           {'type': 'room', 'name': 'Test', 'statuses': [null, null, null], 'color': null},
           {'type': 'room', 'name': 'TT V', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, false, true], 'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple}},
           {'type': 'room', 'name': '142', 'statuses': [null, null, null], 'color': null},
@@ -542,7 +542,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Gami Gedara',
         'items': [
-          {'type': 'room', 'name': '01', 'statuses': [5, 5, 5], 'color': const Color(0xFFFFC0CB)},
+          {'type': 'room', 'name': '01', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
           {'type': 'room', 'name': '02', 'statuses': [null, null, null], 'color': null},
           {'type': 'room', 'name': '03', 'statuses': [null, null, null], 'color': null},
         ],
@@ -550,14 +550,14 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Super Deluxe Single Room',
         'items': [
-          {'type': 'room', 'name': '301', 'statuses': [2, 2, 3], 'color': const Color(0xFFE0F7FA)},
+          {'type': 'room', 'name': '301', 'statuses': [2, 2, 3], 'color': Colors.blue[100]},
           {'type': 'room', 'name': '302', 'statuses': [null, null, null], 'color': null},
         ],
       },
       {
         'name': 'Family Suite',
         'items': [
-          {'type': 'room', 'name': 'Child Room2', 'statuses': [4, 4, 4], 'color': const Color(0xFFFFF9C4)},
+          {'type': 'room', 'name': 'Child Room2', 'statuses': [4, 4, 4], 'color': Colors.red[100]},
           {'type': 'room', 'name': 'Family Villa', 'statuses': [null, null, null], 'color': null},
           {'type': 'room', 'name': 'Temp room', 'statuses': [null, null, null], 'color': null},
         ],
@@ -630,7 +630,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     }).toList();
   }
 
-  Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidth, TextTheme textTheme, List<DateTime> days) {
+Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidth, TextTheme textTheme, List<DateTime> days) {
     final String name = item['name'];
     final String type = item['type'];
     final bool isMaintenance = type == 'maintenance';
@@ -638,6 +638,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final List<dynamic>? statuses = item['statuses'];
     final List<bool>? occupancy = item['occupancy'] as List<bool>?;
     final Map<String, dynamic>? guest = item['guest'] as Map<String, dynamic>?;
+    final String? guestName = guest?['name'] as String?;
     final Color? guestColor = guest?['color'] as Color?;
     final bool hasOccupancy = occupancy != null && occupancy.any((b) => b);
 
@@ -696,10 +697,22 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         if (occupancy != null && occupancy[i]) {
           cellBgColor = guestColor?.withOpacity(0.15);
           child = Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: guestColor,
               borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              guestName ?? '',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.1,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           );
         } else if (statuses?[i] != null) {
