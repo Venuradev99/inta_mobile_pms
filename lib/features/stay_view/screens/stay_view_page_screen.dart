@@ -21,32 +21,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
   DateTime _centerDate = DateTime(2025, 10, 29);
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
-        await _stayViewVm.loadInitialData();
-      }
-    });
-  }
-
   void _showInfoDialog() {
-    List<Map<String, dynamic>> statuses = _stayViewVm.statusList
-        .map((status) => {'label': status.label, 'color': status.color})
-        .toList();
-
-    // [
-    //   {'label': 'Arrival', 'color': const Color(0xFF00838F)},
-    //   {'label': 'Checked Out', 'color': const Color(0xFFD32F2F)},
-    //   {'label': 'Due Out', 'color': const Color(0xFF00BCD4)},
-    //   {'label': 'Confirm Reservation', 'color': const Color(0xFF4CAF50)},
-    //   {'label': 'Maintenance Block', 'color': const Color(0xFF616161)},
-    //   {'label': 'Stayover', 'color': const Color(0xFF9C27B0)},
-    //   {'label': 'Dayuse Reservation', 'color': const Color(0xFFFF8F00)},
-    //   {'label': 'Day Used', 'color': const Color(0xFFFFD600)},
-    // ];
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -132,9 +107,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         Colors.grey[700]!,
                       ),
                       const SizedBox(height: 12),
-                      _buildLegendItem('Inventory', Colors.pink[100]!),
+                      _buildLegendItem('Inventory', Colors.blue[100]!),
                       const SizedBox(height: 12),
-                      _buildLegendItem('Unassigned Room', Colors.blue[100]!),
+                      _buildLegendItem('Unassigned Room', Colors.red[100]!),
                     ],
                   ),
                 ),
@@ -550,24 +525,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Bunk Bed',
         'items': [
-          {
-            'type': 'room',
-            'name': '4',
-            'statuses': [5, 5, 5],
-            'color': const Color(0xFFFFC0CB),
-          },
-          {
-            'type': 'room',
-            'name': '501-1',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '501-2',
-            'statuses': [null, null, null],
-            'color': null,
-          },
+          {'type': 'room', 'name': '4', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
+          {'type': 'room', 'name': '501-1', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '501-2', 'statuses': [null, null, null], 'color': null},
           {'type': 'maintenance', 'name': '501-3'},
           {
             'type': 'room',
@@ -592,129 +552,38 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Double Room new',
         'items': [
-          {
-            'type': 'room',
-            'name': 'KC5',
-            'statuses': [7, 7, 1],
-            'color': const Color(0xFFBBDEFB),
-          },
-          {
-            'type': 'room',
-            'name': 'Test',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': 'TT V',
-            'statuses': [null, null, null],
-            'color': null,
-            'occupancy': [false, false, true],
-            'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple},
-          },
-          {
-            'type': 'room',
-            'name': '142',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '141',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '140',
-            'statuses': [null, null, null],
-            'color': null,
-            'occupancy': [false, true, true],
-            'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green},
-          },
-          {
-            'type': 'room',
-            'name': '139',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '138',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '137',
-            'statuses': [null, null, null],
-            'color': null,
-            'occupancy': [true, false, false],
-            'guest': {'name': 'Ms. K.', 'color': AppColors.green},
-          },
+          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': Colors.red[100]},
+          {'type': 'room', 'name': 'Test', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': 'TT V', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, false, true], 'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple}},
+          {'type': 'room', 'name': '142', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '141', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '140', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, true, true], 'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green}},
+          {'type': 'room', 'name': '139', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '138', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '137', 'statuses': [null, null, null], 'color': null, 'occupancy': [true, false, false], 'guest': {'name': 'Ms. K.', 'color': AppColors.green}},
         ],
       },
       {
         'name': 'Gami Gedara',
         'items': [
-          {
-            'type': 'room',
-            'name': '01',
-            'statuses': [5, 5, 5],
-            'color': const Color(0xFFFFC0CB),
-          },
-          {
-            'type': 'room',
-            'name': '02',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '03',
-            'statuses': [null, null, null],
-            'color': null,
-          },
+          {'type': 'room', 'name': '01', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
+          {'type': 'room', 'name': '02', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '03', 'statuses': [null, null, null], 'color': null},
         ],
       },
       {
         'name': 'Super Deluxe Single Room',
         'items': [
-          {
-            'type': 'room',
-            'name': '301',
-            'statuses': [2, 2, 3],
-            'color': const Color(0xFFE0F7FA),
-          },
-          {
-            'type': 'room',
-            'name': '302',
-            'statuses': [null, null, null],
-            'color': null,
-          },
+          {'type': 'room', 'name': '301', 'statuses': [2, 2, 3], 'color': Colors.blue[100]},
+          {'type': 'room', 'name': '302', 'statuses': [null, null, null], 'color': null},
         ],
       },
       {
         'name': 'Family Suite',
         'items': [
-          {
-            'type': 'room',
-            'name': 'Child Room2',
-            'statuses': [4, 4, 4],
-            'color': const Color(0xFFFFF9C4),
-          },
-          {
-            'type': 'room',
-            'name': 'Family Villa',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': 'Temp room',
-            'statuses': [null, null, null],
-            'color': null,
-          },
+          {'type': 'room', 'name': 'Child Room2', 'statuses': [4, 4, 4], 'color': Colors.red[100]},
+          {'type': 'room', 'name': 'Family Villa', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': 'Temp room', 'statuses': [null, null, null], 'color': null},
         ],
       },
       {
@@ -794,13 +663,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     }).toList();
   }
 
-  Widget _buildItemRow(
-    Map<String, dynamic> item,
-    double roomWidth,
-    double dayWidth,
-    TextTheme textTheme,
-    List<DateTime> days,
-  ) {
+Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidth, TextTheme textTheme, List<DateTime> days) {
     final String name = item['name'];
     final String type = item['type'];
     final bool isMaintenance = type == 'maintenance';
@@ -808,6 +671,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final List<dynamic>? statuses = item['statuses'];
     final List<bool>? occupancy = item['occupancy'] as List<bool>?;
     final Map<String, dynamic>? guest = item['guest'] as Map<String, dynamic>?;
+    final String? guestName = guest?['name'] as String?;
     final Color? guestColor = guest?['color'] as Color?;
     final bool hasOccupancy = occupancy != null && occupancy.any((b) => b);
 
@@ -866,10 +730,22 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         if (occupancy != null && occupancy[i]) {
           cellBgColor = guestColor?.withOpacity(0.15);
           child = Container(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: guestColor,
               borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              guestName ?? '',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.w500,
+                letterSpacing: -0.1,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           );
         } else if (statuses?[i] != null) {
