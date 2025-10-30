@@ -33,12 +33,23 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-  void openBrowser(String url) async {
+//   void openBrowser(String url) async {
+//   final uri = Uri.parse(url);
+//   if (await canLaunchUrl(uri)) {
+//     await launchUrl(uri, mode: LaunchMode.externalApplication);
+//   } else {
+//     throw 'Could not launch $url';
+//   }
+// }
+
+void openBrowser(String url) async {
   final uri = Uri.parse(url);
-  if (await canLaunchUrl(uri)) {
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  } else {
-    throw 'Could not launch $url';
+  try {
+    if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
+      print('Could not launch $url');
+    }
+  } catch (e) {
+    print('Error launching URL: $e');
   }
 }
 
@@ -83,13 +94,23 @@ class _DashboardState extends State<Dashboard> {
           ),
           IconButton(
             icon: Icon(
+              Icons.print,
+              color: AppColors.black,
+              size: iconSize,
+            ),
+            onPressed: () {
+               openBrowser('http://192.168.1.176:2234');
+              // context.go(AppRoutes.notifications);
+            },
+          ),
+          IconButton(
+            icon: Icon(
               Icons.notifications,
               color: AppColors.black,
               size: iconSize,
             ),
             onPressed: () {
-               openBrowser('https://www.google.com');
-              // context.go(AppRoutes.notifications);
+              context.go(AppRoutes.notifications);
             },
           ),
         ],
