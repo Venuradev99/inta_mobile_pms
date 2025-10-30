@@ -10,7 +10,6 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/reservations/models/amend_stay_save_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/amend_stay_vm.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 
 class AmendStay extends StatefulWidget {
@@ -41,12 +40,12 @@ class _AmendStayState extends State<AmendStay> {
   TimeOfDay? _selectedArrivalTime;
   TimeOfDay? _selectedDepartureTime;
 
-  bool _overrideRoomRate = false;
+  // bool _overrideRoomRate = false;
   DateTime? _selectedArrival;
   DateTime? _selectedDeparture;
 
-  String? _selectedRoomType;
-  String? _selectedRoom;
+  // String? _selectedRoomType;
+  // String? _selectedRoom;
 
   @override
   void initState() {

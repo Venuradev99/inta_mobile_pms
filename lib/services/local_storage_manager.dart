@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:inta_mobile_pms/data/models/Base_currency_model.dart';
-import 'package:inta_mobile_pms/data/models/MasterData.model.dart';
+import 'package:inta_mobile_pms/data/models/master_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageManager {

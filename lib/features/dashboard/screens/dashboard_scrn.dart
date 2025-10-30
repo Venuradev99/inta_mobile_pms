@@ -9,8 +9,8 @@ import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
-import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -32,6 +32,16 @@ class _DashboardState extends State<Dashboard> {
       }
     });
   }
+
+  void openBrowser(String url) async {
+  final uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
+
 
 
 
@@ -78,7 +88,8 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.notifications);
+               openBrowser('https://www.google.com');
+              // context.go(AppRoutes.notifications);
             },
           ),
         ],

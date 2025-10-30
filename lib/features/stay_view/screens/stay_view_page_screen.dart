@@ -47,7 +47,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     //   {'label': 'Day Used', 'color': const Color(0xFFFFD600)},
     // ];
 
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -324,7 +323,13 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildHeaderRow(roomWidth, dayWidth, dayLabels, textTheme, days),
+                          _buildHeaderRow(
+                            roomWidth,
+                            dayWidth,
+                            dayLabels,
+                            textTheme,
+                            days,
+                          ),
                           const SizedBox(height: 12),
                           ..._buildRoomSections(
                             roomWidth,
@@ -463,7 +468,13 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     );
   }
 
-  Widget _buildHeaderRow(double roomWidth, double dayWidth, List<String> dayLabels, TextTheme textTheme, List<DateTime> days) {
+  Widget _buildHeaderRow(
+    double roomWidth,
+    double dayWidth,
+    List<String> dayLabels,
+    TextTheme textTheme,
+    List<DateTime> days,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -489,17 +500,19 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             ),
             ...List.generate(dayLabels.length, (index) {
               final bool isToday = index == 1;
-              final bool isWeekend = days[index].weekday == DateTime.saturday || days[index].weekday == DateTime.sunday;
-              final Color? bgColor = isToday 
-                  ? AppColors.primary.withOpacity(0.08) 
-                  : isWeekend 
-                      ? Colors.red.withOpacity(0.05) 
-                      : null;
-              final Color textColor = isToday 
-                  ? AppColors.primary 
-                  : isWeekend 
-                      ? Colors.red[700]! 
-                      : Colors.grey[700]!;
+              final bool isWeekend =
+                  days[index].weekday == DateTime.saturday ||
+                  days[index].weekday == DateTime.sunday;
+              final Color? bgColor = isToday
+                  ? AppColors.primary.withOpacity(0.08)
+                  : isWeekend
+                  ? Colors.red.withOpacity(0.05)
+                  : null;
+              final Color textColor = isToday
+                  ? AppColors.primary
+                  : isWeekend
+                  ? Colors.red[700]!
+                  : Colors.grey[700]!;
               return Expanded(
                 child: Container(
                   width: dayWidth,
@@ -507,9 +520,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: bgColor,
-                    border: Border(
-                      left: BorderSide(color: Colors.grey[200]!),
-                    ),
+                    border: Border(left: BorderSide(color: Colors.grey[200]!)),
                   ),
                   child: Text(
                     dayLabels[index],
@@ -581,15 +592,66 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Double Room new',
         'items': [
-          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': const Color(0xFFBBDEFB)},
-          {'type': 'room', 'name': 'Test', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': 'TT V', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, false, true], 'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple}},
-          {'type': 'room', 'name': '142', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '141', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '140', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, true, true], 'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green}},
-          {'type': 'room', 'name': '139', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '138', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '137', 'statuses': [null, null, null], 'color': null, 'occupancy': [true, false, false], 'guest': {'name': 'Ms. K.', 'color': AppColors.green}},
+          {
+            'type': 'room',
+            'name': 'KC5',
+            'statuses': [7, 7, 1],
+            'color': const Color(0xFFBBDEFB),
+          },
+          {
+            'type': 'room',
+            'name': 'Test',
+            'statuses': [null, null, null],
+            'color': null,
+          },
+          {
+            'type': 'room',
+            'name': 'TT V',
+            'statuses': [null, null, null],
+            'color': null,
+            'occupancy': [false, false, true],
+            'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple},
+          },
+          {
+            'type': 'room',
+            'name': '142',
+            'statuses': [null, null, null],
+            'color': null,
+          },
+          {
+            'type': 'room',
+            'name': '141',
+            'statuses': [null, null, null],
+            'color': null,
+          },
+          {
+            'type': 'room',
+            'name': '140',
+            'statuses': [null, null, null],
+            'color': null,
+            'occupancy': [false, true, true],
+            'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green},
+          },
+          {
+            'type': 'room',
+            'name': '139',
+            'statuses': [null, null, null],
+            'color': null,
+          },
+          {
+            'type': 'room',
+            'name': '138',
+            'statuses': [null, null, null],
+            'color': null,
+          },
+          {
+            'type': 'room',
+            'name': '137',
+            'statuses': [null, null, null],
+            'color': null,
+            'occupancy': [true, false, false],
+            'guest': {'name': 'Ms. K.', 'color': AppColors.green},
+          },
         ],
       },
       {

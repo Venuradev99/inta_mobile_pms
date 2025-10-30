@@ -20,7 +20,7 @@ class StayViewVm extends GetxController {
     try {
       final todaySystemDate = await LocalStorageManager.getSystemDate();
       today.value = DateTime.parse(todaySystemDate);
-      
+
       final payload = {
         "numberOfDates": 3,
         "roomTypeId": 0,
@@ -33,6 +33,15 @@ class StayViewVm extends GetxController {
 
       final bookingStatsResponse = response[0];
       final statusColorResponse = response[1];
+
+      if (bookingStatsResponse["isSuccessful"] == true) {
+        
+      } else {
+        final msg =
+            bookingStatsResponse["errors"][0] ??
+            'Error Loading Booking Statistics!';
+        MessageService().error(msg);
+      }
 
       if (statusColorResponse["isSuccessful"] == true) {
         final result = statusColorResponse["result"] as List;
