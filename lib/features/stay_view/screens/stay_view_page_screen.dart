@@ -324,12 +324,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildHeaderRow(
-                            roomWidth,
-                            dayWidth,
-                            dayLabels,
-                            textTheme,
-                          ),
+                          _buildHeaderRow(roomWidth, dayWidth, dayLabels, textTheme, days),
                           const SizedBox(height: 12),
                           ..._buildRoomSections(
                             roomWidth,
@@ -468,12 +463,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     );
   }
 
-  Widget _buildHeaderRow(
-    double roomWidth,
-    double dayWidth,
-    List<String> dayLabels,
-    TextTheme textTheme,
-  ) {
+  Widget _buildHeaderRow(double roomWidth, double dayWidth, List<String> dayLabels, TextTheme textTheme, List<DateTime> days) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -499,20 +489,33 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             ),
             ...List.generate(dayLabels.length, (index) {
               final bool isToday = index == 1;
+              final bool isWeekend = days[index].weekday == DateTime.saturday || days[index].weekday == DateTime.sunday;
+              final Color? bgColor = isToday 
+                  ? AppColors.primary.withOpacity(0.08) 
+                  : isWeekend 
+                      ? Colors.red.withOpacity(0.05) 
+                      : null;
+              final Color textColor = isToday 
+                  ? AppColors.primary 
+                  : isWeekend 
+                      ? Colors.red[700]! 
+                      : Colors.grey[700]!;
               return Expanded(
                 child: Container(
                   width: dayWidth,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isToday ? AppColors.primary.withOpacity(0.08) : null,
-                    border: Border(left: BorderSide(color: Colors.grey[200]!)),
+                    color: bgColor,
+                    border: Border(
+                      left: BorderSide(color: Colors.grey[200]!),
+                    ),
                   ),
                   child: Text(
                     dayLabels[index],
                     style: textTheme.bodySmall!.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: isToday ? AppColors.primary : Colors.grey[700],
+                      color: textColor,
                       height: 1.4,
                     ),
                     textAlign: TextAlign.center,
@@ -578,78 +581,15 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       {
         'name': 'Double Room new',
         'items': [
-          {
-            'type': 'room',
-            'name': 'KC5',
-            'statuses': [7, 7, 1],
-            'color': const Color(0xFFBBDEFB),
-          },
-          {
-            'type': 'room',
-            'name': 'Test',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': 'TT V',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'guest',
-            'name': 'Ms. Palasar..',
-            'color': AppColors.purple,
-            'statuses': [false, false, true],
-          },
-          {
-            'type': 'room',
-            'name': '142',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '141',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '140',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'guest',
-            'name': 'Ms. Vindhya Keert.',
-            'color': AppColors.green,
-            'statuses': [false, true, true],
-          },
-          {
-            'type': 'room',
-            'name': '139',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '138',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'room',
-            'name': '137',
-            'statuses': [null, null, null],
-            'color': null,
-          },
-          {
-            'type': 'guest',
-            'name': 'Ms. K.',
-            'color': AppColors.green,
-            'statuses': [true, false, false],
-          },
+          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': const Color(0xFFBBDEFB)},
+          {'type': 'room', 'name': 'Test', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': 'TT V', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, false, true], 'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple}},
+          {'type': 'room', 'name': '142', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '141', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '140', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, true, true], 'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green}},
+          {'type': 'room', 'name': '139', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '138', 'statuses': [null, null, null], 'color': null},
+          {'type': 'room', 'name': '137', 'statuses': [null, null, null], 'color': null, 'occupancy': [true, false, false], 'guest': {'name': 'Ms. K.', 'color': AppColors.green}},
         ],
       },
       {
@@ -801,23 +741,21 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
   ) {
     final String name = item['name'];
     final String type = item['type'];
-    final bool isGuest = type == 'guest';
     final bool isMaintenance = type == 'maintenance';
     final Color? color = item['color'];
     final List<dynamic>? statuses = item['statuses'];
+    final List<bool>? occupancy = item['occupancy'] as List<bool>?;
+    final Map<String, dynamic>? guest = item['guest'] as Map<String, dynamic>?;
+    final Color? guestColor = guest?['color'] as Color?;
+    final bool hasOccupancy = occupancy != null && occupancy.any((b) => b);
 
-    final double namePaddingLeft = isGuest ? 32.0 : 16.0;
+    final double namePaddingLeft = 16.0;
 
     TextStyle nameStyle = textTheme.bodyMedium!.copyWith(
-      fontWeight: isGuest ? FontWeight.w500 : FontWeight.w400,
+      fontWeight: FontWeight.w400,
       letterSpacing: -0.1,
+      color: Colors.grey[800],
     );
-
-    if (isGuest) {
-      nameStyle = nameStyle.copyWith(color: color);
-    } else {
-      nameStyle = nameStyle.copyWith(color: Colors.grey[800]);
-    }
 
     final List<Widget> dayCells = [];
     if (isMaintenance) {
@@ -859,71 +797,55 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           ),
         ),
       );
-    } else if (isGuest) {
-      for (int i = 0; i < (statuses! as List<bool>).length; i++) {
-        final occupied = statuses[i];
-        dayCells.add(
-          Expanded(
-            child: Container(
-              height: 48,
-              decoration: BoxDecoration(
-                color: occupied ? color?.withOpacity(0.15) : null,
-                border: Border(left: BorderSide(color: Colors.grey[200]!)),
-              ),
-              child: occupied
-                  ? Container(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    )
-                  : null,
-            ),
-          ),
-        );
-      }
     } else {
-      for (int i = 0; i < statuses!.length; i++) {
-        final status = statuses[i];
+      for (int i = 0; i < (statuses ?? []).length; i++) {
+        Widget? child;
+        Color? cellBgColor;
+        if (occupancy != null && occupancy[i]) {
+          cellBgColor = guestColor?.withOpacity(0.15);
+          child = Container(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: BoxDecoration(
+              color: guestColor,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          );
+        } else if (statuses?[i] != null) {
+          child = Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Text(
+              statuses![i].toString(),
+              style: TextStyle(
+                color: Colors.grey[900],
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        } else {
+          child = const SizedBox.shrink();
+        }
         dayCells.add(
           Expanded(
             child: Container(
               height: 48,
               alignment: Alignment.center,
               decoration: BoxDecoration(
+                color: cellBgColor,
                 border: Border(left: BorderSide(color: Colors.grey[200]!)),
               ),
-              child: status == null
-                  ? const SizedBox.shrink()
-                  : Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        status.toString(),
-                        style: TextStyle(
-                          color: Colors.grey[900],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+              child: child,
             ),
           ),
         );
@@ -946,21 +868,11 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                 padding: EdgeInsets.only(left: namePaddingLeft),
                 child: Row(
                   children: [
-                    if (isGuest)
-                      Container(
-                        width: 6,
-                        height: 6,
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
                     Expanded(
                       child: Tooltip(
-                        message: isGuest ? 'Guest: $name' : 'Room: $name',
+                        message: 'Room: $name',
                         child: Text(
-                          isGuest ? name : '$name ₩',
+                          '$name ₩',
                           style: nameStyle,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -976,7 +888,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       ],
     );
 
-    return isGuest
+    return hasOccupancy
         ? InkWell(
             onTap: () => _handleGuestTap(item, days),
             splashColor: AppColors.primary.withOpacity(0.1),
@@ -987,8 +899,8 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
   }
 
   void _handleGuestTap(Map<String, dynamic> item, List<DateTime> days) {
-    final String name = item['name'];
-    final List<bool> occupied = item['statuses'] as List<bool>;
+    final String guestName = item['guest']['name'];
+    final List<bool> occupied = item['occupancy'] as List<bool>;
 
     int? startIndex, endIndex;
     for (int i = 0; i < occupied.length; i++) {
@@ -1004,23 +916,10 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final DateTime endDate = days[endIndex!].add(const Duration(days: 1));
     final int nights = endIndex - startIndex + 1;
 
-    String roomNumber;
-    switch (name) {
-      case 'Ms. Palasar..':
-        roomNumber = 'TT V';
-        break;
-      case 'Ms. Vindhya Keert.':
-        roomNumber = '140';
-        break;
-      case 'Ms. K.':
-        roomNumber = '137';
-        break;
-      default:
-        roomNumber = 'Unknown';
-    }
+    final String roomNumber = item['name'];
 
     final guestItem = GuestItem(
-      guestName: name,
+      guestName: guestName,
       startDate: DateFormat('MMM d, yyyy').format(startDate),
       endDate: DateFormat('MMM d, yyyy').format(endDate),
       nights: nights,
