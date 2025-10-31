@@ -504,11 +504,9 @@ class _HouseStatusState extends State<HouseStatus> {
     ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
   }
 
-  void _clearStatus(RoomItem room) {
-    // Implement clear status logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Status cleared for ${room.roomName}')),
-    );
+  void _clearStatus(RoomItem room) async {
+     await _houseStatusVm.clearStatus(room);
+  
   }
 
   void _showEditHousekeeperDialog(RoomItem room) {

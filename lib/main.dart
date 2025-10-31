@@ -26,7 +26,6 @@ import 'package:inta_mobile_pms/features/reservations/viewmodels/stop_room_move_
 import 'package:inta_mobile_pms/features/reservations/viewmodels/void_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:inta_mobile_pms/router/app_router.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
@@ -103,7 +102,7 @@ void main() async {
     EditGuestDetailsVm(Get.find<ReservationListService>()),
   );
   Get.put<StayViewVm>(
-    StayViewVm(Get.find<StayViewService>()),
+    StayViewVm(Get.find<StayViewService>(),Get.find<ReservationListService>()),
   );
 
   runApp(PMSApp());
