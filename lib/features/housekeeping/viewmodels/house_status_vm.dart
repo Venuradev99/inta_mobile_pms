@@ -85,12 +85,39 @@ class HouseStatusVm extends GetxController {
     }
   }
 
+  Future<void> updateRemark(RoomItem room, String remark) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: room.id!,
+        houseKeeper: room.houseKeeper!,
+        houseKeepingRemark: remark,
+        houseKeepingStatus: room.houseKeepingStatusId!,
+        isRoom: room.isRoom ?? true,
+        operationType: 3, // Assuming 3 for update/add/edit remark; adjust if different operationType is needed
+      ).toJson();
+
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+      if (response["isSuccessful"] == true) {
+        MessageService().success('Remark updated successfully.');
+        await loadRooms();
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error updating remark!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error updating remark: $e');
+      throw Exception('Error updating remark: $e');
+    }
+  }
+
   Future<void> clearRemark(RoomItem room) async {
     try {
       final payload = UpdateHouseStatusPayload(
         id: room.id!,
         houseKeeper: room.houseKeeper!,
-        houseKeepingRemark: room.remark ?? '',
+        houseKeepingRemark: '', // Updated to explicitly set to empty for clearing
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,
         operationType: 6,

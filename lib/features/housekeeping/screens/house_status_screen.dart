@@ -5,19 +5,18 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HouseStatus extends StatefulWidget {
   const HouseStatus({super.key});
-
   @override
   State<HouseStatus> createState() => _HouseStatusState();
 }
 
 class _HouseStatusState extends State<HouseStatus> {
   final _houseStatusVm = Get.find<HouseStatusVm>();
-
   List<RoomItem> rooms = [];
   bool isEditMode = false;
   Set<RoomItem> selectedRooms = {};
@@ -31,7 +30,6 @@ class _HouseStatusState extends State<HouseStatus> {
       }
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,7 +77,6 @@ class _HouseStatusState extends State<HouseStatus> {
       body: Obx(() {
         final groupedRooms = _houseStatusVm.groupedRooms;
         final isLoading = _houseStatusVm.isLoading;
-
         return Column(
           children: [
             if (isEditMode) _buildActionButtons(),
@@ -87,7 +84,7 @@ class _HouseStatusState extends State<HouseStatus> {
               child: isLoading.value
                   ? ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: 10, 
+                      itemCount: 10,
                       itemBuilder: (context, index) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +117,6 @@ class _HouseStatusState extends State<HouseStatus> {
                       itemBuilder: (context, index) {
                         final section = groupedRooms.keys.elementAt(index);
                         final sectionRooms = groupedRooms[section]!;
-
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -143,7 +139,6 @@ class _HouseStatusState extends State<HouseStatus> {
       }),
     );
   }
-
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -229,7 +224,6 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
-
   Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
     if (!isEditMode) {
       return Text(
@@ -241,11 +235,9 @@ class _HouseStatusState extends State<HouseStatus> {
         ),
       );
     }
-
     final allSelected = sectionRooms.every(
       (room) => selectedRooms.contains(room),
     );
-
     return Row(
       children: [
         Text(
@@ -281,16 +273,13 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
-
   Widget _buildRoomCard(RoomItem room) {
     // final statusColor = _getHousekeepingColor(room.housekeepingStatus);
     // final bgColor = _getBackgroundColor(room.housekeepingStatus);
-
     final statusColor = _houseStatusVm.getHousekeepingColor(
       room.housekeepingStatus,
     );
     final bgColor = _houseStatusVm.getBackgroundColor(room.housekeepingStatus);
-
     return InkWell(
       onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
       borderRadius: BorderRadius.circular(8),
@@ -375,7 +364,6 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
-
   Widget _buildRoomCardShimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
@@ -413,7 +401,6 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
-
   void _bulkSetStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk set status logic, e.g., show dialog for status selection
@@ -423,7 +410,6 @@ class _HouseStatusState extends State<HouseStatus> {
     // After action, optionally clear selections
     setState(() => selectedRooms.clear());
   }
-
   void _bulkEditHousekeeper() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk edit housekeeper logic
@@ -434,7 +420,6 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
-
   void _bulkClearStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk clear status logic
@@ -443,7 +428,6 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
-
   void _bulkClearRemark() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk clear remark logic
@@ -452,7 +436,6 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
-
   void _showRoomActionsSheet(RoomItem room) {
     showModalBottomSheet(
       context: context,
@@ -464,10 +447,8 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
-
   void _handleRoomAction(String action, RoomItem room) {
   context.pop();
-
     // Handle different actions
     switch (action) {
       case 'set_status':
@@ -496,60 +477,105 @@ class _HouseStatusState extends State<HouseStatus> {
         break;
     }
   }
-
   void _showSetStatusDialog(RoomItem room) {
     // Implement set status dialog
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
   }
-
   void _clearStatus(RoomItem room) {
     // Implement clear status logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Status cleared for ${room.roomName}')),
     );
   }
-
   void _showEditHousekeeperDialog(RoomItem room) {
     // Implement edit housekeeper dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
     );
   }
-
   void _unassignHousekeeper(RoomItem room) {
     // Implement unassign housekeeper logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Housekeeper unassigned from ${room.roomName}')),
     );
   }
-
   void _showAddRemarkDialog(RoomItem room) {
-    // Implement add remark dialog
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Add remark for ${room.roomName}')));
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Align(
+          alignment: Alignment.center,
+          child: RemarkDialog(room: room, startInEdit: true),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(anim1),
+            child: child,
+          ),
+        );
+      },
+    );
   }
-
   void _showEditRemarkDialog(RoomItem room) {
-    // Implement edit remark dialog
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Edit remark for ${room.roomName}')));
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Align(
+          alignment: Alignment.center,
+          child: RemarkDialog(room: room, startInEdit: true),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(anim1),
+            child: child,
+          ),
+        );
+      },
+    );
   }
-
   void _showViewRemarkDialog(RoomItem room) {
-    // Implement view remark dialog
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('View remark for ${room.roomName}')));
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, anim1, anim2) {
+        return Align(
+          alignment: Alignment.center,
+          child: RemarkDialog(room: room, startInEdit: false),
+        );
+      },
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1.0).animate(anim1),
+            child: child,
+          ),
+        );
+      },
+    );
   }
-
   void _clearRemark(RoomItem room) async {
     await _houseStatusVm.clearRemark(room);
   }
-
   Color _getHousekeepingColor(String status) {
     switch (status.toLowerCase()) {
       case 'clean':
@@ -562,7 +588,6 @@ class _HouseStatusState extends State<HouseStatus> {
         return AppColors.darkgrey;
     }
   }
-
   Color _getBackgroundColor(String status) {
     switch (status.toLowerCase()) {
       case 'clean':
@@ -575,7 +600,6 @@ class _HouseStatusState extends State<HouseStatus> {
         return const Color(0xFFF5F5F5);
     }
   }
-
   Color _getTextColor(String status) {
     switch (status) {
       case 'clean':
@@ -588,7 +612,6 @@ class _HouseStatusState extends State<HouseStatus> {
         return Colors.grey[800]!;
     }
   }
-
   void _showStatusInfoDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -717,7 +740,6 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
-
   Widget _buildStatusInfoItem(
     BuildContext context,
     String status,
@@ -757,7 +779,6 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
-
   Widget _buildIndicatorInfoItem(
     BuildContext context,
     String indicator,
@@ -807,13 +828,10 @@ class _HouseStatusState extends State<HouseStatus> {
 class _RoomActionsSheet extends StatelessWidget {
   final RoomItem room;
   final Function(String) onActionSelected;
-
   const _RoomActionsSheet({required this.room, required this.onActionSelected});
-
   @override
   Widget build(BuildContext context) {
     final hasRemark = room.remark != null && room.remark!.isNotEmpty;
-
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -833,7 +851,6 @@ class _RoomActionsSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-
             // Room info header
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
@@ -883,9 +900,7 @@ class _RoomActionsSheet extends StatelessWidget {
                 );
               }),
             ),
-
             const Divider(height: 1),
-
             // Actions list
             ListView(
               shrinkWrap: true,
@@ -948,14 +963,12 @@ class _RoomActionsSheet extends StatelessWidget {
                 ],
               ],
             ),
-
             const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
-
   Widget _buildActionTile(
     BuildContext context, {
     required IconData icon,
@@ -964,7 +977,6 @@ class _RoomActionsSheet extends StatelessWidget {
     bool isDestructive = false,
   }) {
     final color = isDestructive ? Colors.red[700] : AppColors.black;
-
     return ListTile(
       leading: Icon(icon, color: color, size: 24),
       title: Text(
@@ -979,7 +991,6 @@ class _RoomActionsSheet extends StatelessWidget {
       visualDensity: VisualDensity.compact,
     );
   }
-
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'clean':
