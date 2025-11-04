@@ -1,4 +1,3 @@
-// lib/features/reservations/widgets/assign_rooms_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -89,7 +88,7 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
       child: Container(
         color: Colors.transparent,
         child: GestureDetector(
-          onTap: () {}, // Prevent dismissal when tapping content
+          onTap: () {}, 
           child: DraggableScrollableSheet(
             initialChildSize: 0.65,
             minChildSize: 0.4,

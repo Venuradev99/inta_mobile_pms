@@ -75,28 +75,28 @@ class DataAccessService {
     }
   }
 
-  //  Future<Map<String, dynamic>> delete(String url) async {
-  //   try {
-  //     final token = await LocalStorageManager.getAccessToken();
-  //     final hotelId = await LocalStorageManager.getHotelId();
+   Future<Map<String, dynamic>> delete(String url) async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
 
-  //     if (token.isEmpty) {
-  //       throw Exception('Session key not available');
-  //     }
+      if (token.isEmpty) {
+        throw Exception('Session key not available');
+      }
 
-  //     final headers = {
-  //       'Authorization': token,
-  //       'Content-Type': 'application/json',
-  //       'Hotelid': hotelId,
-  //     };
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        'Hotelid': hotelId,
+      };
 
-  //     final response = await http.delete(Uri.parse(url), headers: headers);
+      final response = await http.delete(Uri.parse(url), headers: headers);
 
-  //     return _handleResponse(response);
-  //   } catch (e) {
-  //     throw Exception('GET error: $e');
-  //   }
-  // }
+      return _handleResponse(response);
+    } catch (e) {
+      throw Exception('GET error: $e');
+    }
+  }
 
   Future<Map<String, dynamic>> post(
     Map<String, dynamic> body,

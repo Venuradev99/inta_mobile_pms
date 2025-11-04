@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_scrn.dart';
+import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:shimmer/shimmer.dart';
 
 class StayViewPageScreen extends StatefulWidget {
   const StayViewPageScreen({super.key});
@@ -15,9 +20,22 @@ class StayViewPageScreen extends StatefulWidget {
 }
 
 class _StayViewPageScreenState extends State<StayViewPageScreen> {
+  final _stayViewVm = Get.find<StayViewVm>();
   DateTime _centerDate = DateTime(2025, 10, 29);
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _stayViewVm.loadToday();
+      _stayViewVm.loadInitialData(_centerDate);
+    });
+  }
+
   void _showInfoDialog() {
+    final List<Map<String, dynamic>> statuses = _stayViewVm.statusList
+        .map((item) => {"color": item.color, "label": item.label})
+        .toList();
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -28,10 +46,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           contentPadding: const EdgeInsets.all(0),
           title: const Text(
             'Status & Indicators Information',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -52,16 +67,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _buildLegendGrid([
-                        {'label': 'Arrival', 'color': const Color(0xFF00838F)},
-                        {'label': 'Checked Out', 'color': const Color(0xFFD32F2F)},
-                        {'label': 'Due Out', 'color': const Color(0xFF00BCD4)},
-                        {'label': 'Confirm Reservation', 'color': const Color(0xFF4CAF50)},
-                        {'label': 'Maintenance Block', 'color': const Color(0xFF616161)},
-                        {'label': 'Stayover', 'color': const Color(0xFF9C27B0)},
-                        {'label': 'Dayuse Reservation', 'color': const Color(0xFFFF8F00)},
-                        {'label': 'Day Used', 'color': const Color(0xFFFFD600)},
-                      ]),
+                      _buildLegendGrid(statuses),
                       const SizedBox(height: 24),
                       const Text(
                         'Booking Indicators',
@@ -128,14 +134,14 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'Cancel',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -153,10 +159,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildLegendItem(
-                    items[i]['label'],
-                    items[i]['color'],
-                  ),
+                  child: _buildLegendItem(items[i]['label'], items[i]['color']),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -189,10 +192,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -207,10 +207,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         const SizedBox(width: 12),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -261,18 +258,18 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final textTheme = AppTextTheme.lightTextTheme;
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = ResponsiveConfig.horizontalPadding(context);
-    final availableWidth = screenWidth - (horizontalPadding.left + horizontalPadding.right);
-    
-    // Dynamic width calculation: 35% for room names, 65% distributed among 3 days
-    final double roomWidth = availableWidth * 0.35;
-    final double dayWidth = (availableWidth * 0.65) / 3;
-    final double totalWidth = availableWidth;
+    final availableWidth =
+        screenWidth - (horizontalPadding.left + horizontalPadding.right);
 
+    // Dynamic width calculation: 35% for room names, 65% distributed among days
     final List<DateTime> days = [
       _centerDate.subtract(const Duration(days: 1)),
       _centerDate,
       _centerDate.add(const Duration(days: 1)),
     ];
+    final int numDays = days.length;
+    final double roomWidth = availableWidth * 0.35;
+    final double dayWidth = (availableWidth * 0.65) / numDays;
 
     final List<String> dayLabels = days.map((d) {
       final String weekday = DateFormat('E').format(d);
@@ -282,10 +279,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: CustomAppBar(
-        title: 'Stay View',
-        onInfoTap: _showInfoDialog,
-      ),
+      appBar: CustomAppBar(title: 'Stay View', onInfoTap: _showInfoDialog),
       body: RefreshIndicator(
         onRefresh: () async {
           await Future.delayed(const Duration(seconds: 1));
@@ -295,15 +289,16 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             children: [
               _buildDateNavigator(textTheme),
               Padding(
-                padding: ResponsiveConfig.horizontalPadding(context).copyWith(
-                  top: 20, 
-                  bottom: 24
-                ),
+                padding: ResponsiveConfig.horizontalPadding(
+                  context,
+                ).copyWith(top: 20, bottom: 24),
                 child: GestureDetector(
                   onHorizontalDragEnd: (details) {
                     if (details.primaryVelocity! > 300) {
                       setState(() {
-                        _centerDate = _centerDate.subtract(const Duration(days: 1));
+                        _centerDate = _centerDate.subtract(
+                          const Duration(days: 1),
+                        );
                       });
                     } else if (details.primaryVelocity! < -300) {
                       setState(() {
@@ -316,11 +311,38 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildHeaderRow(roomWidth, dayWidth, dayLabels, textTheme, days),
+                          _buildHeaderRow(
+                            roomWidth,
+                            dayWidth,
+                            dayLabels,
+                            textTheme,
+                            days,
+                          ),
                           const SizedBox(height: 12),
-                          ..._buildRoomSections(roomWidth, dayWidth, textTheme, days),
-                          const SizedBox(height: 20),
-                          _buildOccupancyCard(roomWidth, dayWidth, [50, 60, 70], textTheme),
+                          Obx(() {
+                            return _stayViewVm.isLoading.value == true
+                                ? Column(
+                                    children: _buildRoomSectionsShimmer(
+                                      roomWidth,
+                                      dayWidth,
+                                    ),
+                                  )
+                                : Column(
+                                    children: _buildRoomSections(
+                                      roomWidth,
+                                      dayWidth,
+                                      textTheme,
+                                      days,
+                                    ),
+                                  );
+                          }),
+                          // const SizedBox(height: 20),
+                          // _buildOccupancyCard(
+                          //   roomWidth,
+                          //   dayWidth,
+                          //   days,
+                          //   textTheme,
+                          // ),
                         ],
                       );
                     },
@@ -334,14 +356,214 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     );
   }
 
+  // List<Widget> _buildRoomSectionsShimmer(double roomWidth, double dayWidth) {
+  //   return List.generate(3, (index) {
+  //     return Container(
+  //       margin: const EdgeInsets.only(bottom: 12),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(12),
+  //         border: Border.all(color: Colors.grey[200]!),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.02),
+  //             blurRadius: 8,
+  //             offset: const Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Padding(
+  //         padding: const EdgeInsets.all(16),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             // Header shimmer
+  //             Row(
+  //               children: [
+  //                 Shimmer.fromColors(
+  //                   baseColor: Colors.grey[300]!,
+  //                   highlightColor: Colors.grey[100]!,
+  //                   child: Container(
+  //                     width: 30,
+  //                     height: 24,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       borderRadius: BorderRadius.circular(6),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 12),
+  //                 Shimmer.fromColors(
+  //                   baseColor: Colors.grey[300]!,
+  //                   highlightColor: Colors.grey[100]!,
+  //                   child: Container(
+  //                     width: 120,
+  //                     height: 16,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       borderRadius: BorderRadius.circular(4),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             const SizedBox(height: 16),
+  //             // Availability row shimmer
+  //             Row(
+  //               children: [
+  //                 Shimmer.fromColors(
+  //                   baseColor: Colors.grey[300]!,
+  //                   highlightColor: Colors.grey[100]!,
+  //                   child: Container(
+  //                     width: roomWidth,
+  //                     height: 40,
+  //                     decoration: BoxDecoration(
+  //                       color: Colors.white,
+  //                       borderRadius: BorderRadius.circular(4),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 Expanded(
+  //                   child: Row(
+  //                     children: List.generate(7, (dayIndex) {
+  //                       return Expanded(
+  //                         child: Padding(
+  //                           padding: const EdgeInsets.symmetric(horizontal: 2),
+  //                           child: Shimmer.fromColors(
+  //                             baseColor: Colors.grey[300]!,
+  //                             highlightColor: Colors.grey[100]!,
+  //                             child: Container(
+  //                               height: 40,
+  //                               decoration: BoxDecoration(
+  //                                 color: Colors.white,
+  //                                 borderRadius: BorderRadius.circular(4),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       );
+  //                     }),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             const SizedBox(height: 8),
+  //             // Room rows shimmer
+  //             ...List.generate(2, (rowIndex) {
+  //               return Padding(
+  //                 padding: const EdgeInsets.only(bottom: 8),
+  //                 child: Row(
+  //                   children: [
+  //                     Shimmer.fromColors(
+  //                       baseColor: Colors.grey[300]!,
+  //                       highlightColor: Colors.grey[100]!,
+  //                       child: Container(
+  //                         width: roomWidth,
+  //                         height: 50,
+  //                         decoration: BoxDecoration(
+  //                           color: Colors.white,
+  //                           borderRadius: BorderRadius.circular(4),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                     const SizedBox(width: 8),
+  //                     Expanded(
+  //                       child: Row(
+  //                         children: List.generate(7, (dayIndex) {
+  //                           return Expanded(
+  //                             child: Padding(
+  //                               padding: const EdgeInsets.symmetric(
+  //                                 horizontal: 2,
+  //                               ),
+  //                               child: Shimmer.fromColors(
+  //                                 baseColor: Colors.grey[300]!,
+  //                                 highlightColor: Colors.grey[100]!,
+  //                                 child: Container(
+  //                                   height: 50,
+  //                                   decoration: BoxDecoration(
+  //                                     color: Colors.white,
+  //                                     borderRadius: BorderRadius.circular(4),
+  //                                   ),
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                           );
+  //                         }),
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             }),
+  //           ],
+  //         ),
+  //       ),
+  //     );
+  //   });
+  // }
+
+  List<Widget> _buildRoomSectionsShimmer(double roomWidth, double dayWidth) {
+    return List.generate(10, (index) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Left side shimmer (room type name)
+              Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  width: 140,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+
+              // Right side shimmer (like expand icon)
+              Shimmer.fromColors(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
   Widget _buildDateNavigator(TextTheme textTheme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          bottom: BorderSide(color: Colors.grey[200]!, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -352,6 +574,8 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               setState(() {
                 _centerDate = _centerDate.subtract(const Duration(days: 1));
               });
+
+              _stayViewVm.loadInitialData(_centerDate);
             },
             tooltip: 'Previous Day',
             style: IconButton.styleFrom(
@@ -414,6 +638,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               setState(() {
                 _centerDate = _centerDate.add(const Duration(days: 1));
               });
+              _stayViewVm.loadInitialData(_centerDate);
             },
             tooltip: 'Next Day',
             style: IconButton.styleFrom(
@@ -425,7 +650,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           ElevatedButton.icon(
             onPressed: () {
               setState(() {
-                _centerDate = DateTime.now();
+                _centerDate = _stayViewVm.today.value ?? DateTime.now();
               });
             },
             style: ElevatedButton.styleFrom(
@@ -438,14 +663,23 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               ),
             ),
             icon: const Icon(Icons.today, size: 18),
-            label: const Text('Today', style: TextStyle(fontWeight: FontWeight.w500)),
+            label: const Text(
+              'Today',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderRow(double roomWidth, double dayWidth, List<String> dayLabels, TextTheme textTheme, List<DateTime> days) {
+  Widget _buildHeaderRow(
+    double roomWidth,
+    double dayWidth,
+    List<String> dayLabels,
+    TextTheme textTheme,
+    List<DateTime> days,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -471,17 +705,19 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             ),
             ...List.generate(dayLabels.length, (index) {
               final bool isToday = index == 1;
-              final bool isWeekend = days[index].weekday == DateTime.saturday || days[index].weekday == DateTime.sunday;
-              final Color? bgColor = isToday 
-                  ? AppColors.primary.withOpacity(0.08) 
-                  : isWeekend 
-                      ? Colors.red.withOpacity(0.05) 
-                      : null;
-              final Color textColor = isToday 
-                  ? AppColors.primary 
-                  : isWeekend 
-                      ? Colors.red[700]! 
-                      : Colors.grey[700]!;
+              final bool isWeekend =
+                  days[index].weekday == DateTime.saturday ||
+                  days[index].weekday == DateTime.sunday;
+              final Color? bgColor = isToday
+                  ? AppColors.primary.withOpacity(0.08)
+                  : isWeekend
+                  ? Colors.red.withOpacity(0.05)
+                  : null;
+              final Color textColor = isToday
+                  ? AppColors.primary
+                  : isWeekend
+                  ? Colors.red[700]!
+                  : Colors.grey[700]!;
               return Expanded(
                 child: Container(
                   width: dayWidth,
@@ -489,9 +725,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: bgColor,
-                    border: Border(
-                      left: BorderSide(color: Colors.grey[200]!),
-                    ),
+                    border: Border(left: BorderSide(color: Colors.grey[200]!)),
                   ),
                   child: Text(
                     dayLabels[index],
@@ -511,66 +745,14 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     );
   }
 
-  List<Widget> _buildRoomSections(double roomWidth, double dayWidth, TextTheme textTheme, List<DateTime> days) {
-    final List<Map<String, dynamic>> roomTypes = [
-      {
-        'name': 'Bunk Bed',
-        'items': [
-          {'type': 'room', 'name': '4', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
-          {'type': 'room', 'name': '501-1', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '501-2', 'statuses': [null, null, null], 'color': null},
-          {'type': 'maintenance', 'name': '501-3'},
-          {'type': 'room', 'name': '501-4', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '501-5', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '501-6', 'statuses': [null, null, null], 'color': null},
-        ],
-      },
-      {
-        'name': 'Double Room new',
-        'items': [
-          {'type': 'room', 'name': 'KC5', 'statuses': [7, 7, 1], 'color': Colors.red[100]},
-          {'type': 'room', 'name': 'Test', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': 'TT V', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, false, true], 'guest': {'name': 'Ms. Palasar..', 'color': AppColors.purple}},
-          {'type': 'room', 'name': '142', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '141', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '140', 'statuses': [null, null, null], 'color': null, 'occupancy': [false, true, true], 'guest': {'name': 'Ms. Vindhya Keert.', 'color': AppColors.green}},
-          {'type': 'room', 'name': '139', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '138', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '137', 'statuses': [null, null, null], 'color': null, 'occupancy': [true, false, false], 'guest': {'name': 'Ms. K.', 'color': AppColors.green}},
-        ],
-      },
-      {
-        'name': 'Gami Gedara',
-        'items': [
-          {'type': 'room', 'name': '01', 'statuses': [5, 5, 5], 'color': Colors.blue[100]},
-          {'type': 'room', 'name': '02', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': '03', 'statuses': [null, null, null], 'color': null},
-        ],
-      },
-      {
-        'name': 'Super Deluxe Single Room',
-        'items': [
-          {'type': 'room', 'name': '301', 'statuses': [2, 2, 3], 'color': Colors.blue[100]},
-          {'type': 'room', 'name': '302', 'statuses': [null, null, null], 'color': null},
-        ],
-      },
-      {
-        'name': 'Family Suite',
-        'items': [
-          {'type': 'room', 'name': 'Child Room2', 'statuses': [4, 4, 4], 'color': Colors.red[100]},
-          {'type': 'room', 'name': 'Family Villa', 'statuses': [null, null, null], 'color': null},
-          {'type': 'room', 'name': 'Temp room', 'statuses': [null, null, null], 'color': null},
-        ],
-      },
-      {
-        'name': 'Utility',
-        'items': [
-          {'type': 'room', 'name': '105', 'statuses': [null, null, null], 'color': null},
-        ],
-      },
-    ];
-
-    return roomTypes.map((section) {
+  List<Widget> _buildRoomSections(
+    double roomWidth,
+    double dayWidth,
+    TextTheme textTheme,
+    List<DateTime> days,
+  ) {
+    return _stayViewVm.roomTypes.map((section) {
+      final items = section['rooms'] as List<Map<String, dynamic>>;
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -586,20 +768,21 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           ],
         ),
         child: Theme(
-          data: Theme.of(context).copyWith(
-            dividerColor: Colors.transparent,
-          ),
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             title: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    '${section['items'].length}',
+                    '${items.length}',
                     style: textTheme.labelSmall?.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
@@ -608,7 +791,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  section['name'],
+                  section['roomTypeName'],
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     letterSpacing: -0.2,
@@ -616,31 +799,177 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                 ),
               ],
             ),
-            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            tilePadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             childrenPadding: const EdgeInsets.all(0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            children: section['items'].map<Widget>((item) {
-              return _buildItemRow(item, roomWidth, dayWidth, textTheme, days);
-            }).toList(),
+            children: [
+              _buildAvailabilityRow(
+                section,
+                roomWidth,
+                dayWidth,
+                textTheme,
+                days,
+              ),
+              ...items.map<Widget>((item) {
+                return _buildItemRow(
+                  item,
+                  roomWidth,
+                  dayWidth,
+                  textTheme,
+                  days,
+                  section,
+                );
+              }).toList(),
+            ],
           ),
         ),
       );
     }).toList();
   }
 
-Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidth, TextTheme textTheme, List<DateTime> days) {
-    final String name = item['name'];
-    final String type = item['type'];
-    final bool isMaintenance = type == 'maintenance';
-    final Color? color = item['color'];
-    final List<dynamic>? statuses = item['statuses'];
-    final List<bool>? occupancy = item['occupancy'] as List<bool>?;
-    final Map<String, dynamic>? guest = item['guest'] as Map<String, dynamic>?;
-    final String? guestName = guest?['name'] as String?;
-    final Color? guestColor = guest?['color'] as Color?;
-    final bool hasOccupancy = occupancy != null && occupancy.any((b) => b);
+  Widget _buildAvailabilityRow(
+    Map<String, dynamic> section,
+    double roomWidth,
+    double dayWidth,
+    TextTheme textTheme,
+    List<DateTime> days,
+  ) {
+    final List<dynamic> datas = section['datas'] as List<dynamic>;
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: roomWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Availability',
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ),
+            ...List.generate(datas.length, (index) {
+              final assignCount = datas[index]['availability'].toInt();
+              final total = datas[index]['totalNoOfRooms'];
+              final unassignCount = datas[index]['bookingRooms'].length;
+              return Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    border: Border(left: BorderSide(color: Colors.grey[200]!)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          // Handle avail button tap
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            '$assignCount',
+                            style: textTheme.bodySmall!.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          ' ',
+                          style: textTheme.bodySmall!.copyWith(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                      ),
+                      if (unassignCount > 0)
+                        InkWell(
+                          onTap: () {
+                            // Handle total button tap
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '$unassignCount',
+                              style: textTheme.bodySmall!.copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.red[700],
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemRow(
+    Map<String, dynamic> item,
+    double roomWidth,
+    double dayWidth,
+    TextTheme textTheme,
+    List<DateTime> days,
+    Map<String, dynamic> section,
+  ) {
+    final String name = item['roomNo'];
+    final bool isMaintenance = (item['maintenanceBlockId'] ?? 0) > 0;
+    final bool hasOccupancy = item['roomData'].any(
+      (dayData) => dayData['checkInExist'] != null,
+    );
+
+    // Process guest per day, spanning noOfNights
+    final int numDays = days.length;
+    List<Map<String, dynamic>?> guestPerDay = List.filled(numDays, null);
+    for (int i = 0; i < numDays; i++) {
+      final dayData = item['roomData'][i];
+      if (dayData['checkInExist'] != null &&
+          dayData['checkInExist'].isNotEmpty) {
+        final checkIn = dayData['checkInExist'][0];
+        final double nights = checkIn['noOfNights'] ?? 1.0;
+        for (int j = 0; j < nights; j++) {
+          if (i + j < numDays) {
+            guestPerDay[i + j] = checkIn;
+          }
+        }
+      }
+    }
 
     final double namePaddingLeft = 16.0;
 
@@ -691,11 +1020,18 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
         ),
       );
     } else {
-      for (int i = 0; i < (statuses ?? []).length; i++) {
+      for (int i = 0; i < numDays; i++) {
+        final dayData = item['roomData'][i];
         Widget? child;
         Color? cellBgColor;
-        if (occupancy != null && occupancy[i]) {
-          cellBgColor = guestColor?.withOpacity(0.15);
+        if (guestPerDay[i] != null) {
+          final checkIn = guestPerDay[i]!;
+          final String guestName = checkIn['guestName'] ?? '';
+          final String colorCode = checkIn['colorCode'] ?? '#000000';
+          final Color guestColor = Color(
+            int.parse(colorCode.replaceFirst('#', '0xFF')),
+          );
+          cellBgColor = guestColor.withOpacity(0.15);
           child = Container(
             margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -704,7 +1040,7 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              guestName ?? '',
+              guestName,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 10,
@@ -715,29 +1051,9 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
               maxLines: 1,
             ),
           );
-        } else if (statuses?[i] != null) {
-          child = Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 4,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Text(
-              statuses![i].toString(),
-              style: TextStyle(
-                color: Colors.grey[900],
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          );
+        } else if (!(dayData['available'] ?? true)) {
+          cellBgColor = AppColors.onPrimary;
+          child = const SizedBox.shrink(); // Or add text/icon if needed
         } else {
           child = const SizedBox.shrink();
         }
@@ -757,14 +1073,29 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
       }
     }
 
+    // Add room indicators
+    List<Widget> indicators = [];
+    if (item['isSmokingRoom'] ?? false) {
+      indicators.add(
+        Icon(Icons.smoking_rooms, size: 14, color: Colors.grey[700]),
+      );
+    } else {
+      indicators.add(Icon(Icons.smoke_free, size: 14, color: Colors.grey[700]));
+    }
+
+    if (item['isDirty'] ?? false) {
+      indicators.add(
+        Icon(Icons.cleaning_services, size: 14, color: Colors.grey[700]),
+      );
+    }
+    // Add more indicators as needed based on data
+
     final content = Column(
       children: [
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(
-              top: BorderSide(color: Colors.grey[100]!, width: 1),
-            ),
+            border: Border(top: BorderSide(color: Colors.grey[100]!, width: 1)),
           ),
           child: Row(
             children: [
@@ -779,12 +1110,13 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
                       child: Tooltip(
                         message: 'Room: $name',
                         child: Text(
-                          '$name ₩',
+                          name,
                           style: nameStyle,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
+                    ...indicators,
                   ],
                 ),
               ),
@@ -797,7 +1129,7 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
 
     return hasOccupancy
         ? InkWell(
-            onTap: () => _handleGuestTap(item, days),
+            onTap: () => _handleGuestTap(item, days, section, guestPerDay),
             splashColor: AppColors.primary.withOpacity(0.1),
             highlightColor: AppColors.primary.withOpacity(0.05),
             child: content,
@@ -805,74 +1137,87 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
         : content;
   }
 
-  void _handleGuestTap(Map<String, dynamic> item, List<DateTime> days) {
-    final String guestName = item['guest']['name'];
-    final List<bool> occupied = item['occupancy'] as List<bool>;
-
+  void _handleGuestTap(
+    Map<String, dynamic> item,
+    List<DateTime> days,
+    Map<String, dynamic> section,
+    List<Map<String, dynamic>?> guestPerDay,
+  ) async {
     int? startIndex, endIndex;
-    for (int i = 0; i < occupied.length; i++) {
-      if (occupied[i]) {
+    for (int i = 0; i < guestPerDay.length; i++) {
+      if (guestPerDay[i] != null) {
         startIndex ??= i;
         endIndex = i;
       }
     }
 
-    if (startIndex == null) return; // No occupancy, do nothing
+    if (startIndex == null) return;
 
+    final checkIn = guestPerDay[startIndex]!;
+    final String guestName = checkIn['guestName'];
+    final int bookingRoomId = checkIn['bookingRoomId'];
     final DateTime startDate = days[startIndex];
-    final DateTime endDate = days[endIndex!].add(const Duration(days: 1));
-    final int nights = endIndex - startIndex + 1;
+    final double nights = checkIn['noOfNights'] ?? 1.0;
+    final DateTime endDate = startDate.add(Duration(days: nights.toInt()));
+    final String roomNumber = item['roomNo'];
 
-    final String roomNumber = item['name'];
+    await _stayViewVm.getAllGuestData(bookingRoomId);
+    final guestItem = _stayViewVm.allGuestDetails.value;
 
-    final guestItem = GuestItem(
-      guestName: guestName,
-      startDate: DateFormat('MMM d, yyyy').format(startDate),
-      endDate: DateFormat('MMM d, yyyy').format(endDate),
-      nights: nights,
-      roomNumber: roomNumber,
-      roomType: 'Double Room new',
-      reservationType: 'Dinner Only',
-      avgDailyRate: 3125.0 / nights,
-      totalAmount: 3660.0,
-      totalCredits: 3660.0,
-      balanceAmount: 0.0,
-      adults: 1,
-      children: 0,
-      phone: '+94 123 456789',
-      mobile: '+94 987 654321',
-      email: 'guest@example.com',
-      idType: 'Passport',
-      idNumber: 'N1234567',
-      expiryDate: '2028-12-31',
-      dob: '1990-01-01',
-      nationality: 'Sri Lanka',
-      arrivalBy: 'Flight',
-      departureBy: 'Flight',
-      businessSource: 'Direct',
-      company: 'N/A',
-      travelAgent: 'N/A',
-      childAge: null,
-      roomCharges: 3125.0,
-      discount: 0.0,
-      tax: 531.25,
-      adjustment: 3.75,
-      netAmount: 3660.0,
-      folioId: '12345',
-      remarks: 'No special requests.',
-      folioCharges: [],
-      bookingRoomId: '', resId: '', // Use empty list for demo; populate with FolioCharge instances if class is defined
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ViewReservation(item: guestItem),
-      ),
-    );
+     context.push(AppRoutes.viewReservation, extra: guestItem);
   }
 
-  Widget _buildOccupancyCard(double roomWidth, double dayWidth, List<int> occupancies, TextTheme textTheme) {
+  Widget _buildOccupancyCard(
+    double roomWidth,
+    double dayWidth,
+    List<DateTime> days,
+    TextTheme textTheme,
+  ) {
+    final List<Map<String, dynamic>> roomTypes = [
+      {
+        "roomTypeName": "Deluxe Queen",
+        "roomTypeId": 1,
+        "datas": [
+          {
+            "calenderDate": "2025-10-28T00:00:00",
+            "availability": 3.00,
+            "totalNoOfRooms": 4,
+            "bookingRooms": [],
+          },
+          {
+            "calenderDate": "2025-10-29T00:00:00",
+            "availability": 2.00,
+            "totalNoOfRooms": 4,
+            "bookingRooms": [],
+          },
+          {
+            "calenderDate": "2025-10-30T00:00:00",
+            "availability": 2.00,
+            "totalNoOfRooms": 4,
+            "bookingRooms": [],
+          },
+        ],
+        // ... rooms omitted for brevity
+      },
+      // Add more if needed
+    ];
+
+    final int numDays = days.length;
+    List<int> occupancies = [];
+    for (int i = 0; i < numDays; i++) {
+      double totalRooms = 0.0;
+      double totalAvailable = 0.0;
+      for (var section in roomTypes) {
+        final dayData = section['datas'][i];
+        totalRooms += dayData['totalNoOfRooms'] ?? 0.0;
+        totalAvailable += dayData['availability'] ?? 0.0;
+      }
+      final double occupancyPercent = totalRooms > 0
+          ? ((totalRooms - totalAvailable) / totalRooms * 100).roundToDouble()
+          : 0.0;
+      occupancies.add(occupancyPercent.toInt());
+    }
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -923,7 +1268,9 @@ Widget _buildItemRow(Map<String, dynamic> item, double roomWidth, double dayWidt
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     border: Border(
-                      left: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                      left: BorderSide(
+                        color: AppColors.primary.withOpacity(0.2),
+                      ),
                     ),
                   ),
                   child: Column(

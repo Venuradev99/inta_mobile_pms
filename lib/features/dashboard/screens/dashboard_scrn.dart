@@ -9,8 +9,8 @@ import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
-import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -32,6 +32,27 @@ class _DashboardState extends State<Dashboard> {
       }
     });
   }
+
+//   void openBrowser(String url) async {
+//   final uri = Uri.parse(url);
+//   if (await canLaunchUrl(uri)) {
+//     await launchUrl(uri, mode: LaunchMode.externalApplication);
+//   } else {
+//     throw 'Could not launch $url';
+//   }
+// }
+
+void openBrowser(String url) async {
+  final uri = Uri.parse(url);
+  try {
+    if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
+      print('Could not launch $url');
+    }
+  } catch (e) {
+    print('Error launching URL: $e');
+  }
+}
+
 
 
 
@@ -69,6 +90,17 @@ class _DashboardState extends State<Dashboard> {
             ),
             onPressed: () {
               context.go(AppRoutes.stayView);
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.print,
+              color: AppColors.black,
+              size: iconSize,
+            ),
+            onPressed: () {
+               openBrowser('http://192.168.1.176:2234');
+              // context.go(AppRoutes.notifications);
             },
           ),
           IconButton(

@@ -139,6 +139,35 @@ class HouseStatusVm extends GetxController {
     }
   }
 
+   Future<void> clearStatus(RoomItem room) async {
+    // try {
+    //   final payload = UpdateHouseStatusPayload(
+    //     id: room.id!,
+    //     houseKeeper: room.houseKeeper!,
+    //     houseKeepingRemark: room.remark ?? '',
+    //     houseKeepingStatus: room.houseKeepingStatusId!,
+    //     isRoom: room.isRoom ?? true,
+    //     operationType: 6,
+    //   ).toJson();
+
+    //   final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+    //   if (response["isSuccessful"] == true) {
+    //     MessageService().success('Remark cleared successfully.');
+    //     await loadRooms();
+    //   } else {
+    //     MessageService().error(
+    //       response["errors"][0] ?? 'Error clearing remark!',
+    //     );
+    //   }
+    // } catch (e) {
+    //   MessageService().error('Error clearing remark: $e');
+    //   throw Exception('Error clearing remark: $e');
+    // }
+  }
+
+
+
   Color hexToColor(String hexCode) {
     if (hexCode == '' || hexCode.isEmpty) {
       return Colors.grey;

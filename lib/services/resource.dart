@@ -1,13 +1,11 @@
 class AppResources {
-  // static final String logoutUrl =
-  //     'http://pms_service.intapos.com:3334/api/userAccount/Logout';
-
   String baseUrl;
 
   AppResources({required this.baseUrl});
 
   static const String dashboard = 'dashboard';
   static const String currency = 'currency';
+  static const String system = 'system';
   static const String calenderBooking = 'calenderBooking';
   static const String booking = 'booking';
   static const String roomTypes = 'roomTypes';
@@ -31,9 +29,11 @@ class AppResources {
   static const String country = 'country';
   static const String title = 'title';
 
+  
+
   //authentication
   static const String authentication = 'authentication';
-  static const String getSystemWorkingDate = 'system/GetSystemWorkingDate';
+  static const String getSystemWorkingDate = '$system/GetSystemWorkingDate';
   static const String getBaseCurrency = '$currency/Base';
 
   //dashboard
@@ -67,12 +67,12 @@ class AppResources {
   static const String getAvailableRooms = '$rooms/Available';
   static const String getStopRoomMoveReasons =
       '$reason/GetByCategory?ResonCategoryId=18&withInactive=false';
-  static const String saveReason = '$reason';
-  static const String getAmendStayData = '$amendStay';
-  static const String getFolioPayments = '$payment';
+  static const String saveReason = reason;
+  static const String getAmendStayData = amendStay;
+  static const String getFolioPayments = payment;
   static const String saveOtherInformation = '$booking/otherInformation';
   static const String getAuditTrial = '$auditTrial/getAuditTrial/';
-  static const String updateGuests = '$guests';
+  static const String updateGuests = guests;
   static const String getAllVipStatus =
       '$vipStatus/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllNationality =
@@ -106,6 +106,10 @@ class AppResources {
   static const String saveMaintenanceblock = '$maintenanceblock/save';
   static const String unblockMaintenanceblock = '$maintenanceblock/UnblockDateRange';
   static const String updateHouseStatus = '$rooms/UpdateHouseStatus'; 
+
+////Stay View
+ static const String getBookingDetailsByDate = '$calenderBooking/GetBookingDetailsByDate';
+ static const String getStatusColorForStayview = '$roomstatus/GetStatusColorForStayview';
 
 
 }
