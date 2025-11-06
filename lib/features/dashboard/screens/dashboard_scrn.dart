@@ -35,10 +35,10 @@ class _DashboardState extends State<Dashboard> {
     final uri = Uri.parse(url);
     try {
       if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
-        print('Could not launch $url');
+        throw Exception('Count not launch!');
       }
     } catch (e) {
-      print('Error launching URL: $e');
+      throw Exception('Error launching URL: $e');
     }
   }
 
@@ -57,6 +57,9 @@ class _DashboardState extends State<Dashboard> {
       appBar: PmsAppBar(
         title: '',
         alwaysVisibleSearch: true,
+        onSearchChanged: (query) {
+          _dashboardVm.filterSearchGuestItem(query);
+        },
         actions: [
           IconButton(
             icon: Icon(

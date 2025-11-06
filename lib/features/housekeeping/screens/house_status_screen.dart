@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -78,6 +79,7 @@ class _HouseStatusState extends State<HouseStatus> {
       body: Obx(() {
         final groupedRooms = _houseStatusVm.groupedRooms;
         final isLoading = _houseStatusVm.isLoading;
+
         return Column(
           children: [
             if (isEditMode) _buildActionButtons(),
@@ -230,7 +232,7 @@ class _HouseStatusState extends State<HouseStatus> {
   Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
     if (!isEditMode) {
       return Text(
-        section,
+        section == ''? 'No Housekeeper Assigned' : section,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
           color: AppColors.darkgrey,
@@ -244,10 +246,10 @@ class _HouseStatusState extends State<HouseStatus> {
     return Row(
       children: [
         Text(
-          section,
+         section == ''? 'No Housekeeper Assigned' : section,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.black,
+            color: AppColors.darkgrey,
             fontSize: 20,
           ),
         ),
@@ -289,8 +291,7 @@ class _HouseStatusState extends State<HouseStatus> {
       onTap: isEditMode
           ? null
           : () {
-              final freshRoom = _houseStatusVm.getRoomById(room.id!) ?? room;
-              _showRoomActionsSheet(freshRoom);
+              _showRoomActionsSheet(room);
             },
       borderRadius: BorderRadius.circular(8),
       child: Container(
@@ -415,6 +416,7 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _bulkSetStatus() {
     if (selectedRooms.isEmpty) return;
+
     // Implement bulk set status logic, e.g., show dialog for status selection
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Set status for ${selectedRooms.length} rooms')),
@@ -443,13 +445,21 @@ class _HouseStatusState extends State<HouseStatus> {
     setState(() => selectedRooms.clear());
   }
 
-  void _bulkClearRemark() {
+  void _bulkClearRemark() async {
     if (selectedRooms.isEmpty) return;
-    // Implement bulk clear remark logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Clear remark for ${selectedRooms.length} rooms')),
+     final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Clear Remarks',
+      message: 'Are you sure you want to clear remarks?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.meeting_room,
     );
-    setState(() => selectedRooms.clear());
+    if (confirmed == true) {
+       await _houseStatusVm.bulkClearStatus(selectedRooms);
+      if (!mounted) return;
+    }
   }
 
   void _showRoomActionsSheet(RoomItem room) {
@@ -495,32 +505,49 @@ class _HouseStatusState extends State<HouseStatus> {
     }
   }
 
-  void _showSetStatusDialog(RoomItem room) {
-    // Implement set status dialog
+  void _showSetStatusDialog(RoomItem room) async {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
+
   }
 
-  void _clearStatus(RoomItem room) {
-    // Implement clear status logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Status cleared for ${room.roomName}')),
+  void _clearStatus(RoomItem room) async {
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Clear Status',
+      message: 'Are you sure you want to clear status?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.meeting_room,
     );
+    if (confirmed == true) {
+       await _houseStatusVm.clearStatus(room);
+      if (!mounted) return;
+    }
   }
 
   void _showEditHousekeeperDialog(RoomItem room) {
-    // Implement edit housekeeper dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
     );
   }
 
-  void _unassignHousekeeper(RoomItem room) {
-    // Implement unassign housekeeper logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Housekeeper unassigned from ${room.roomName}')),
+  void _unassignHousekeeper(RoomItem room) async{
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Unassign Housekeeper',
+      message: 'Are you sure you want to unassign housekeeper?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.visibility,
     );
+    if (confirmed == true) {
+      await _houseStatusVm.unassignHouseKeeper(room);
+      if (!mounted) return;
+    }
   }
 
   void _showAddRemarkDialog(RoomItem room) {
@@ -599,7 +626,19 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 
   void _clearRemark(RoomItem room) async {
-    await _houseStatusVm.clearRemark(room);
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Clear Remarks',
+      message: 'Are you sure you want to clear remarks?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.visibility,
+    );
+    if (confirmed == true) {
+      await _houseStatusVm.clearRemark(room);
+      if (!mounted) return;
+    }
   }
 
   void _showStatusInfoDialog(BuildContext context) {
@@ -985,16 +1024,4 @@ class _RoomActionsSheet extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return AppColors.green;
-      case 'dirty':
-        return AppColors.red;
-      case 'inspected':
-        return AppColors.blue;
-      default:
-        return AppColors.darkgrey;
-    }
-  }
 }
