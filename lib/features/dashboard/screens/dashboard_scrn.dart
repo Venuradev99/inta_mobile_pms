@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -20,7 +19,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
- 
   final _dashboardVm = Get.find<DashboardVm>();
 
   @override
@@ -33,28 +31,16 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
-//   void openBrowser(String url) async {
-//   final uri = Uri.parse(url);
-//   if (await canLaunchUrl(uri)) {
-//     await launchUrl(uri, mode: LaunchMode.externalApplication);
-//   } else {
-//     throw 'Could not launch $url';
-//   }
-// }
-
-void openBrowser(String url) async {
-  final uri = Uri.parse(url);
-  try {
-    if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
-      print('Could not launch $url');
+  void openBrowser(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
+        print('Could not launch $url');
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
     }
-  } catch (e) {
-    print('Error launching URL: $e');
   }
-}
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +65,7 @@ void openBrowser(String url) async {
               size: iconSize,
             ),
             onPressed: () {
-             context.go(AppRoutes.quickReservation);
+              context.go(AppRoutes.quickReservation);
             },
           ),
           IconButton(
@@ -99,8 +85,7 @@ void openBrowser(String url) async {
               size: iconSize,
             ),
             onPressed: () {
-               openBrowser('http://192.168.1.176:2234');
-              // context.go(AppRoutes.notifications);
+              openBrowser('http://192.168.1.176:2234');
             },
           ),
           IconButton(
@@ -580,7 +565,7 @@ void openBrowser(String url) async {
                   AppColors.primary.withOpacity(0.85),
                 ],
               ),
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
               ),
@@ -603,21 +588,17 @@ void openBrowser(String url) async {
                   children: [
                     Row(
                       children: [
-                        // Avatar with subtle border
+                        // Avatar
                         CircleAvatar(
                           radius: avatarRadius,
-                          backgroundColor: AppColors.onPrimary.withOpacity(
-                            0.15,
-                          ),
+                          backgroundColor: AppColors.onPrimary.withOpacity(0.15),
                           child: Icon(
                             Icons.person,
                             color: AppColors.onPrimary,
                             size: iconSize,
                           ),
                         ),
-                        SizedBox(
-                          width: ResponsiveConfig.scaleWidth(context, 14),
-                        ),
+                        SizedBox(width: ResponsiveConfig.scaleWidth(context, 14)),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,26 +608,17 @@ void openBrowser(String url) async {
                                 style: textTheme.bodySmall?.copyWith(
                                   color: AppColors.onPrimary.withOpacity(0.85),
                                   fontWeight: FontWeight.w500,
-                                  fontSize:
-                                      (textTheme.bodySmall?.fontSize ?? 12) *
-                                      fontScale,
+                                  fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
                                 ),
                               ),
-                              SizedBox(
-                                height: ResponsiveConfig.scaleHeight(
-                                  context,
-                                  6,
-                                ),
-                              ),
+                              SizedBox(height: ResponsiveConfig.scaleHeight(context, 6)),
                               Text(
                                 'Admin User',
                                 style: textTheme.titleLarge?.copyWith(
                                   color: AppColors.onPrimary,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 0.5,
-                                  fontSize:
-                                      (textTheme.titleLarge?.fontSize ?? 22) *
-                                      fontScale,
+                                  fontSize: (textTheme.titleLarge?.fontSize ?? 22) * fontScale,
                                 ),
                               ),
                             ],
@@ -658,9 +630,7 @@ void openBrowser(String url) async {
                             color: AppColors.onPrimary.withOpacity(0.9),
                             size: iconSize,
                           ),
-                          onPressed: () {
-                            () => context.go(AppRoutes.settings);
-                          },
+                          onPressed: () => context.go(AppRoutes.settings),
                         ),
                       ],
                     ),
@@ -671,8 +641,7 @@ void openBrowser(String url) async {
                         color: AppColors.onPrimary.withOpacity(0.95),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.3,
-                        fontSize:
-                            (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                        fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                       ),
                     ),
                   ],
@@ -680,17 +649,13 @@ void openBrowser(String url) async {
               ),
             ),
           ),
+          // Scrollable Menu
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
                 // Main Navigation Section
-                _buildSectionHeader(
-                  context,
-                  textTheme,
-                  config,
-                  'Main Navigation',
-                ),
+                _buildSectionHeader(context, textTheme, config, 'Main Navigation'),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -698,7 +663,7 @@ void openBrowser(String url) async {
                   'Dashboard',
                   () => context.go(AppRoutes.dashboard),
                   config,
-                  isActive: true, // Assuming dashboard is active
+                  isActive: true,
                 ),
                 _buildMenuTile(
                   context,
@@ -756,13 +721,60 @@ void openBrowser(String url) async {
                   () => context.go(AppRoutes.ratesInventory),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.bar_chart,
-                  'Manager Report',
-                  () => context.go(AppRoutes.managerReport),
-                  config,
+                // === REPORTS EXPANSION TILE ===
+                ExpansionTile(
+                  leading: Container(
+                    padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context) * 0.5),
+                    ),
+                    child: Icon(
+                      Icons.assessment,
+                      size: iconSize * 0.8,
+                      color: AppColors.primary.withOpacity(0.6),
+                    ),
+                  ),
+                  title: Text(
+                    'Reports',
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      color: AppColors.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                  tilePadding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveConfig.defaultPadding(context),
+                    vertical: ResponsiveConfig.scaleHeight(context, 2),
+                  ),
+                  childrenPadding: EdgeInsets.zero,
+                  backgroundColor: AppColors.primary.withOpacity(0.05),
+                  collapsedBackgroundColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+                    side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                  ),
+                  initiallyExpanded: false,
+                  children: [
+                    _buildSubMenuTile(
+                      context,
+                      textTheme,
+                      Icons.nights_stay,
+                      'Night Audit Report',
+                      () => context.go(AppRoutes.nightAuditReport),
+                      config,
+                      // isActive: GoRouterState.of(context).location.contains(AppRoutes.nightAuditReport),
+                    ),
+                    _buildSubMenuTile(
+                      context,
+                      textTheme,
+                      Icons.bar_chart,
+                      'Manager Report',
+                      () => context.go(AppRoutes.managerReport),
+                      config,
+                      // isActive: GoRouterState.of(context).location.contains(AppRoutes.managerReport),
+                    ),
+                  ],
                 ),
                 Divider(
                   height: 1,
@@ -770,7 +782,6 @@ void openBrowser(String url) async {
                   indent: ResponsiveConfig.defaultPadding(context),
                   endIndent: ResponsiveConfig.defaultPadding(context),
                 ),
-
                 // Maintenance Section
                 _buildSectionHeader(context, textTheme, config, 'Maintenance'),
                 _buildMenuTile(
@@ -803,7 +814,6 @@ void openBrowser(String url) async {
                   indent: ResponsiveConfig.defaultPadding(context),
                   endIndent: ResponsiveConfig.defaultPadding(context),
                 ),
-
                 // Settings Section
                 _buildSectionHeader(context, textTheme, config, 'Settings'),
                 _buildMenuTile(
@@ -833,22 +843,16 @@ void openBrowser(String url) async {
               ],
             ),
           ),
-          // Bottom Actions (e.g., Logout)
+          // Bottom Logout
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
             decoration: BoxDecoration(
               color: AppColors.surface.withOpacity(0.5),
-              border: Border(
-                top: BorderSide(color: AppColors.onSurface.withOpacity(0.1)),
-              ),
+              border: Border(top: BorderSide(color: AppColors.onSurface.withOpacity(0.1))),
             ),
             child: ListTile(
-              leading: Icon(
-                Icons.logout,
-                color: AppColors.error,
-                size: iconSize,
-              ),
+              leading: Icon(Icons.logout, color: AppColors.error, size: iconSize),
               title: Text(
                 'Logout',
                 style: textTheme.bodyMedium?.copyWith(
@@ -857,15 +861,9 @@ void openBrowser(String url) async {
                   fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                 ),
               ),
-              trailing: Icon(
-                Icons.arrow_forward_ios,
-                size: iconSize * 0.8,
-                color: AppColors.error,
-              ),
+              trailing: Icon(Icons.arrow_forward_ios, size: iconSize * 0.8, color: AppColors.error),
               onTap: () => _dashboardVm.handleLogout(),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               tileColor: Colors.transparent,
             ),
           ),
@@ -912,7 +910,6 @@ void openBrowser(String url) async {
     final iconSize = ResponsiveConfig.iconSize(context);
     final fontScale = ResponsiveConfig.fontScale(context);
     final cardRadius = ResponsiveConfig.cardRadius(context);
-
     return ListTile(
       contentPadding: EdgeInsets.symmetric(
         horizontal: ResponsiveConfig.defaultPadding(context),
@@ -970,6 +967,90 @@ void openBrowser(String url) async {
     );
   }
 
+  Widget _buildSubMenuTile(
+    BuildContext context,
+    TextTheme textTheme,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+    ResponsiveConfig config, {
+    bool isActive = false,
+    int? badgeCount,
+  }) {
+    final iconSize = ResponsiveConfig.iconSize(context);
+    final fontScale = ResponsiveConfig.fontScale(context);
+    final cardRadius = ResponsiveConfig.cardRadius(context);
+    final defaultPadding = ResponsiveConfig.defaultPadding(context);
+
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: defaultPadding + 32, // indented like submenu
+        vertical: ResponsiveConfig.scaleHeight(context, 2),
+      ),
+      leading: Container(
+        padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(cardRadius * 0.5),
+        ),
+        child: Icon(
+          icon,
+          color: isActive
+              ? AppColors.primary
+              : AppColors.primary.withOpacity(0.6),
+          size: iconSize * 0.8,
+        ),
+      ),
+      title: Text(
+        title,
+        style: textTheme.bodyMedium?.copyWith(
+          color: isActive ? AppColors.black : AppColors.onSurface.withOpacity(0.7),
+          fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+          fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+        ),
+      ),
+      trailing: badgeCount != null
+          ? _buildBadge(badgeCount, isActive)
+          : (isActive
+              ? Container(
+                  width: ResponsiveConfig.scaleWidth(context, 4),
+                  height: ResponsiveConfig.scaleHeight(context, 20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 2)),
+                  ),
+                )
+              : null),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(cardRadius),
+        side: isActive ? BorderSide(color: AppColors.primary.withOpacity(0.2)) : BorderSide.none,
+      ),
+      tileColor: isActive ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
+      onTap: onTap,
+      hoverColor: AppColors.primary.withOpacity(0.05),
+    );
+  }
+
+  Widget _buildBadge(int count, bool isActive) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: isActive ? AppColors.onPrimary : AppColors.error,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildOccupancyCards(
     BuildContext context,
     TextTheme textTheme,
@@ -982,7 +1063,6 @@ void openBrowser(String url) async {
     return Obx(() {
       final departureData = _dashboardVm.departureData.value;
       final arrivalData = _dashboardVm.arrivalData.value;
-
       return Column(
         children: [
           if (isMobile)
@@ -1153,24 +1233,17 @@ void openBrowser(String url) async {
                     color: AppColors.black.withOpacity(0.8),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(
-                    ResponsiveConfig.scaleWidth(context, 6),
-                  ),
+                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
                   decoration: BoxDecoration(
                     color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveConfig.scaleWidth(context, 10),
-                    ),
+                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
                   ),
                   child: Icon(
-                    title == 'Arrival'
-                        ? Icons.flight_land
-                        : Icons.flight_takeoff,
+                    title == 'Arrival' ? Icons.flight_land : Icons.flight_takeoff,
                     color: accentColor,
                     size: iconSize * 0.9,
                   ),
@@ -1184,8 +1257,7 @@ void openBrowser(String url) async {
                 color: accentColor,
                 fontWeight: FontWeight.bold,
                 height: 0.9,
-                fontSize:
-                    (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8,
+                fontSize: (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8,
               ),
             ),
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 10)),
@@ -1196,9 +1268,7 @@ void openBrowser(String url) async {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(
-                  ResponsiveConfig.scaleWidth(context, 8),
-                ),
+                borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 8)),
                 border: Border.all(color: accentColor.withOpacity(0.1)),
               ),
               child: Text(
@@ -1232,14 +1302,11 @@ void openBrowser(String url) async {
       final averageLengthOfStayData = _dashboardVm.averageLengthOfStayData.value;
       final totalPaymentData = _dashboardVm.totalPaymentData.value;
       final revParData = _dashboardVm.revParData.value;
-
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(
-              context,
-            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Property Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -1316,7 +1383,7 @@ void openBrowser(String url) async {
                 iconSize,
                 fontScale,
                 'Avg. Length of Stay',
-                 '\$${averageLengthOfStayData?.today}Nights',
+                '\$${averageLengthOfStayData?.today}Nights',
                 'Y\'day: \$${averageLengthOfStayData?.yesterday}',
                 '+${averageLengthOfStayData?.percentage}%',
                 false,
@@ -1409,20 +1476,15 @@ void openBrowser(String url) async {
                     color: AppColors.black.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                     height: 1.2,
-                    fontSize:
-                        (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                    fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                   ),
                 ),
               ),
               Container(
-                padding: EdgeInsets.all(
-                  ResponsiveConfig.scaleWidth(context, 6),
-                ),
+                padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
                 decoration: BoxDecoration(
                   color: accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.scaleWidth(context, 8),
-                  ),
+                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 8)),
                 ),
                 child: Icon(icon, color: accentColor, size: iconSize * 0.8),
               ),
@@ -1454,9 +1516,7 @@ void openBrowser(String url) async {
             ),
             decoration: BoxDecoration(
               color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(
-                ResponsiveConfig.scaleWidth(context, 12),
-              ),
+              borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1464,17 +1524,13 @@ void openBrowser(String url) async {
                 Icon(
                   isPositive ? Icons.trending_up : Icons.trending_down,
                   size: iconSize * 0.7,
-                  color: isPositive
-                      ? Colors.green.shade600
-                      : Colors.red.shade600,
+                  color: isPositive ? Colors.green.shade600 : Colors.red.shade600,
                 ),
                 SizedBox(width: ResponsiveConfig.scaleWidth(context, 4)),
                 Text(
                   percentage,
                   style: textTheme.bodySmall?.copyWith(
-                    color: isPositive
-                        ? Colors.green.shade600
-                        : Colors.red.shade600,
+                    color: isPositive ? Colors.green.shade600 : Colors.red.shade600,
                     fontWeight: FontWeight.w600,
                     fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
                   ),
@@ -1497,7 +1553,6 @@ void openBrowser(String url) async {
   ) {
     return Obx(() {
       final inHouseData = _dashboardVm.inHouseData.value;
-
       return Container(
         padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
         decoration: BoxDecoration(
@@ -1533,19 +1588,14 @@ void openBrowser(String url) async {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(
-                    ResponsiveConfig.scaleWidth(context, 6),
-                  ),
+                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveConfig.scaleWidth(context, 10),
-                    ),
+                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
                   ),
                   child: Icon(
                     Icons.home,
@@ -1591,9 +1641,7 @@ void openBrowser(String url) async {
     double fontScale,
   ) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: ResponsiveConfig.scaleHeight(context, 6),
-      ),
+      padding: EdgeInsets.symmetric(vertical: ResponsiveConfig.scaleHeight(context, 6)),
       child: Row(
         children: [
           Text(
@@ -1615,9 +1663,7 @@ void openBrowser(String url) async {
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.scaleWidth(context, 10),
-                  ),
+                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
                 ),
                 child: Text(
                   value,
@@ -1653,7 +1699,6 @@ void openBrowser(String url) async {
   ) {
     return Obx(() {
       final bookingData = _dashboardVm.bookingData.value;
-
       return Container(
         padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
         decoration: BoxDecoration(
@@ -1689,19 +1734,14 @@ void openBrowser(String url) async {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(
-                    ResponsiveConfig.scaleWidth(context, 6),
-                  ),
+                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveConfig.scaleWidth(context, 10),
-                    ),
+                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
                   ),
                   child: Icon(
                     Icons.book,
@@ -1753,9 +1793,7 @@ void openBrowser(String url) async {
     double fontScale,
   ) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: ResponsiveConfig.scaleHeight(context, 6),
-      ),
+      padding: EdgeInsets.symmetric(vertical: ResponsiveConfig.scaleHeight(context, 6)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1774,9 +1812,7 @@ void openBrowser(String url) async {
             ),
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(
-                ResponsiveConfig.scaleWidth(context, 10),
-              ),
+              borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
             ),
             child: Text(
               value,
@@ -1806,17 +1842,14 @@ void openBrowser(String url) async {
       final complementaryRooms = _dashboardVm.complementaryRooms.value;
       final outOfOrderRooms = _dashboardVm.outOfOrderRooms.value;
       final totalRoomSoldRate = _dashboardVm.totalRoomSoldRate.value;
-      final totalAvailableRoomsRate =
-          _dashboardVm.totalAvailableRoomsRate.value;
+      final totalAvailableRoomsRate = _dashboardVm.totalAvailableRoomsRate.value;
       final outOfOrderRoomsRate = _dashboardVm.outOfOrderRoomsRate.value;
       final complementaryRoomsRate = _dashboardVm.complementaryRoomsRate.value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(
-              context,
-            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Inventory Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -1931,9 +1964,7 @@ void openBrowser(String url) async {
           padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
           decoration: BoxDecoration(
             color: progressColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(
-              ResponsiveConfig.scaleWidth(context, 12),
-            ),
+            borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
           ),
           child: Icon(icon, color: progressColor, size: iconSize),
         ),
@@ -1950,8 +1981,7 @@ void openBrowser(String url) async {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize:
-                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                     ),
                   ),
                   Container(
@@ -1961,17 +1991,14 @@ void openBrowser(String url) async {
                     ),
                     decoration: BoxDecoration(
                       color: progressColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.scaleWidth(context, 12),
-                      ),
+                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
                     ),
                     child: Text(
                       value,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize:
-                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                       ),
                     ),
                   ),
@@ -1983,9 +2010,7 @@ void openBrowser(String url) async {
                 height: ResponsiveConfig.scaleHeight(context, 8),
                 decoration: BoxDecoration(
                   color: AppColors.black.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.scaleWidth(context, 4),
-                  ),
+                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,
@@ -1995,9 +2020,7 @@ void openBrowser(String url) async {
                       gradient: LinearGradient(
                         colors: [progressColor, progressColor.withOpacity(0.7)],
                       ),
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.scaleWidth(context, 4),
-                      ),
+                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
                       boxShadow: [
                         BoxShadow(
                           color: progressColor.withOpacity(0.3),
@@ -2026,14 +2049,11 @@ void openBrowser(String url) async {
   ) {
     return Obx(() {
       final occupancyData = _dashboardVm.occupancyData.value;
-
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(
-              context,
-            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Occupancy Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -2122,9 +2142,7 @@ void openBrowser(String url) async {
           padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
           decoration: BoxDecoration(
             color: progressColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(
-              ResponsiveConfig.scaleWidth(context, 12),
-            ),
+            borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
           ),
           child: Icon(icon, color: progressColor, size: iconSize),
         ),
@@ -2141,8 +2159,7 @@ void openBrowser(String url) async {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize:
-                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                     ),
                   ),
                   Container(
@@ -2152,17 +2169,14 @@ void openBrowser(String url) async {
                     ),
                     decoration: BoxDecoration(
                       color: progressColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.scaleWidth(context, 12),
-                      ),
+                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
                     ),
                     child: Text(
                       value,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize:
-                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                       ),
                     ),
                   ),
@@ -2174,9 +2188,7 @@ void openBrowser(String url) async {
                 height: ResponsiveConfig.scaleHeight(context, 8),
                 decoration: BoxDecoration(
                   color: AppColors.black.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.scaleWidth(context, 4),
-                  ),
+                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,
@@ -2186,9 +2198,7 @@ void openBrowser(String url) async {
                       gradient: LinearGradient(
                         colors: [progressColor, progressColor.withOpacity(0.7)],
                       ),
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.scaleWidth(context, 4),
-                      ),
+                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
                       boxShadow: [
                         BoxShadow(
                           color: progressColor.withOpacity(0.3),
