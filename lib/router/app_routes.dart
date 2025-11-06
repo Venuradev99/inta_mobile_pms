@@ -31,6 +31,7 @@ class AppRoutes {
   static const String editGuestDetails = '/edit-guest-details';
     static const String editBlockRoomPage = '/edit-block-room';
     static const String editReservationScreen = '/edit-reservation-screen';
+    static const String nightAuditReport = '/night-audit-report';
   
   
 }

@@ -4,6 +4,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart'
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
+import 'package:inta_mobile_pms/features/reports/night_audit_report.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/arrival_list_scrn.dart';
@@ -173,6 +174,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.editReservationScreen,
        builder: (context, state) =>  EditReservationScreen(guestItem: state.extra as GuestItem?),
+    ),
+    GoRoute(
+      path: AppRoutes.nightAuditReport,
+      builder: (context, state) => const NightAuditReport(),
     ),
   ],
 );
