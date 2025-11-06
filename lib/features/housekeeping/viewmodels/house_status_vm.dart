@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dar
 import 'package:inta_mobile_pms/features/housekeeping/models/update_house_status_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class HouseStatusVm extends GetxController {
   final HouseKeepingService _houseKeepingServices;
@@ -29,7 +30,6 @@ class HouseStatusVm extends GetxController {
   Future<void> loadRooms() async {
     try {
       isLoading.value = true;
-
       final houseKeepingStatus = await _houseKeepingServices
           .getAllHouseKeepingStatus();
 
@@ -77,6 +77,7 @@ class HouseStatusVm extends GetxController {
         );
       }
       groupRoomsBySection(roomList);
+
     } catch (e) {
       MessageService().error('Error loading rooms: $e');
       throw Exception('Error loading rooms: $e');
@@ -93,15 +94,18 @@ class HouseStatusVm extends GetxController {
         houseKeepingRemark: remark,
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,
-        operationType: 3, // Assuming 3 for update/add/edit remark; adjust if different operationType is needed
+        operationType:
+            6,
       ).toJson();
 
       final response = await _houseKeepingServices.updateHouseStatus(payload);
 
       if (response["isSuccessful"] == true) {
+        NavigationService().back();
         MessageService().success('Remark updated successfully.');
         await loadRooms();
       } else {
+          NavigationService().back();
         MessageService().error(
           response["errors"][0] ?? 'Error updating remark!',
         );
@@ -117,7 +121,8 @@ class HouseStatusVm extends GetxController {
       final payload = UpdateHouseStatusPayload(
         id: room.id!,
         houseKeeper: room.houseKeeper!,
-        houseKeepingRemark: '', // Updated to explicitly set to empty for clearing
+        houseKeepingRemark:
+            '',
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,
         operationType: 6,
@@ -139,7 +144,7 @@ class HouseStatusVm extends GetxController {
     }
   }
 
-   Future<void> clearStatus(RoomItem room) async {
+  Future<void> clearStatus(RoomItem room) async {
     // try {
     //   final payload = UpdateHouseStatusPayload(
     //     id: room.id!,
@@ -166,6 +171,9 @@ class HouseStatusVm extends GetxController {
     // }
   }
 
+  RoomItem? getRoomById(int id) {
+  return roomList.firstWhereOrNull((r) => r.id == id);
+}
 
 
   Color hexToColor(String hexCode) {

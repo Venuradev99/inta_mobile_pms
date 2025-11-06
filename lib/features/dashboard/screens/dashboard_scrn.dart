@@ -732,14 +732,14 @@ void openBrowser(String url) async {
                   () => context.go(AppRoutes.arrivalList),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.hotel,
-                  'In-house List',
-                  () => context.go(AppRoutes.inhouseList),
-                  config,
-                ),
+                // _buildMenuTile(
+                //   context,
+                //   textTheme,
+                //   Icons.hotel,
+                //   'In-house List',
+                //   () => context.go(AppRoutes.inhouseList),
+                //   config,
+                // ),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -1068,7 +1068,7 @@ void openBrowser(String url) async {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.inhouseList),
+                  // onTap: () => context.go(AppRoutes.inhouseList),
                   child: _buildInHouseCard(
                     context,
                     textTheme,

@@ -30,6 +30,7 @@ class _HouseStatusState extends State<HouseStatus> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +40,7 @@ class _HouseStatusState extends State<HouseStatus> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () =>context.go(AppRoutes.dashboard),
+          onPressed: () => context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'House Status',
@@ -139,6 +140,7 @@ class _HouseStatusState extends State<HouseStatus> {
       }),
     );
   }
+
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -224,6 +226,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
     if (!isEditMode) {
       return Text(
@@ -273,6 +276,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
+
   Widget _buildRoomCard(RoomItem room) {
     // final statusColor = _getHousekeepingColor(room.housekeepingStatus);
     // final bgColor = _getBackgroundColor(room.housekeepingStatus);
@@ -281,7 +285,13 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     final bgColor = _houseStatusVm.getBackgroundColor(room.housekeepingStatus);
     return InkWell(
-      onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
+      // onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
+      onTap: isEditMode
+          ? null
+          : () {
+              final freshRoom = _houseStatusVm.getRoomById(room.id!) ?? room;
+              _showRoomActionsSheet(freshRoom);
+            },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -364,6 +374,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   Widget _buildRoomCardShimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
@@ -401,6 +412,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   void _bulkSetStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk set status logic, e.g., show dialog for status selection
@@ -410,6 +422,7 @@ class _HouseStatusState extends State<HouseStatus> {
     // After action, optionally clear selections
     setState(() => selectedRooms.clear());
   }
+
   void _bulkEditHousekeeper() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk edit housekeeper logic
@@ -420,6 +433,7 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
+
   void _bulkClearStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk clear status logic
@@ -428,6 +442,7 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
+
   void _bulkClearRemark() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk clear remark logic
@@ -436,6 +451,7 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
+
   void _showRoomActionsSheet(RoomItem room) {
     showModalBottomSheet(
       context: context,
@@ -447,8 +463,9 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   void _handleRoomAction(String action, RoomItem room) {
-  context.pop();
+    context.pop();
     // Handle different actions
     switch (action) {
       case 'set_status':
@@ -477,30 +494,35 @@ class _HouseStatusState extends State<HouseStatus> {
         break;
     }
   }
+
   void _showSetStatusDialog(RoomItem room) {
     // Implement set status dialog
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
   }
+
   void _clearStatus(RoomItem room) {
     // Implement clear status logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Status cleared for ${room.roomName}')),
     );
   }
+
   void _showEditHousekeeperDialog(RoomItem room) {
     // Implement edit housekeeper dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
     );
   }
+
   void _unassignHousekeeper(RoomItem room) {
     // Implement unassign housekeeper logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Housekeeper unassigned from ${room.roomName}')),
     );
   }
+
   void _showAddRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -525,6 +547,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _showEditRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -549,6 +572,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _showViewRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -573,45 +597,11 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _clearRemark(RoomItem room) async {
     await _houseStatusVm.clearRemark(room);
   }
-  Color _getHousekeepingColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return AppColors.green;
-      case 'dirty':
-        return AppColors.red;
-      case 'inspected':
-        return AppColors.blue;
-      default:
-        return AppColors.darkgrey;
-    }
-  }
-  Color _getBackgroundColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return const Color(0xFFF0F8E8);
-      case 'dirty':
-        return const Color(0xFFFFF0F0);
-      case 'inspected':
-        return const Color(0xFFE8F4FD);
-      default:
-        return const Color(0xFFF5F5F5);
-    }
-  }
-  Color _getTextColor(String status) {
-    switch (status) {
-      case 'clean':
-        return Colors.green[800]!;
-      case 'dirty':
-        return Colors.red[800]!;
-      case 'inspected':
-        return Colors.blue[800]!;
-      default:
-        return Colors.grey[800]!;
-    }
-  }
+
   void _showStatusInfoDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -652,7 +642,7 @@ class _HouseStatusState extends State<HouseStatus> {
                         ),
                         const Spacer(),
                         IconButton(
-                          onPressed: () =>context.pop(),
+                          onPressed: () => context.pop(),
                           icon: Icon(
                             Icons.close,
                             color: Colors.grey[600],
@@ -740,6 +730,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   Widget _buildStatusInfoItem(
     BuildContext context,
     String status,
@@ -779,6 +770,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
+
   Widget _buildIndicatorInfoItem(
     BuildContext context,
     String indicator,
@@ -969,6 +961,7 @@ class _RoomActionsSheet extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildActionTile(
     BuildContext context, {
     required IconData icon,
@@ -991,6 +984,7 @@ class _RoomActionsSheet extends StatelessWidget {
       visualDensity: VisualDensity.compact,
     );
   }
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'clean':

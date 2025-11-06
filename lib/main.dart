@@ -7,6 +7,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_theme.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/net_lock_vm.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/quick_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
@@ -28,6 +29,7 @@ import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart'
 import 'package:inta_mobile_pms/router/app_router.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/quick_reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
@@ -57,6 +59,8 @@ void main() async {
     dataAccessService,
     appResources,
   );
+  final quickReservationService = QuickReservationService(dataAccessService,appResources);
+
 
   //register Services
   Get.put<StayViewService>(stayViewService);
@@ -64,6 +68,7 @@ void main() async {
   Get.put<ReservationListService>(reservationListService);
   Get.put<HouseKeepingService>(houseKeepingService);
   Get.put<UserApiService>(userApiService);
+  Get.put<QuickReservationService>(quickReservationService);
 
   //Inject services
   Get.put<DashboardVm>(
@@ -104,6 +109,7 @@ void main() async {
   Get.put<StayViewVm>(
     StayViewVm(Get.find<StayViewService>(),Get.find<ReservationListService>()),
   );
+  Get.put<QuickReservationVm>(QuickReservationVm(Get.find<QuickReservationService>()));
 
   runApp(PMSApp());
 }
