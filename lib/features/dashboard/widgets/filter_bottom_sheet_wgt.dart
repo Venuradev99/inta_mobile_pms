@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
@@ -342,26 +340,26 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     } else if (widget.type == 'reservation') {
       fields.addAll([
         const SizedBox(height: 16),
-        Text(
-          'Date Filter Type',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
-        RadioListTile<String>(
-          title: const Text('Reserved Date'),
-          value: 'reserved',
-          groupValue: dateFilterType,
-          onChanged: (value) => setState(() => dateFilterType = value!),
-          contentPadding: EdgeInsets.zero,
-        ),
-        RadioListTile<String>(
-          title: const Text('Arrival Date'),
-          value: 'arrival',
-          groupValue: dateFilterType,
-          onChanged: (value) => setState(() => dateFilterType = value!),
-          contentPadding: EdgeInsets.zero,
-        ),
+        // Text(
+        //   'Date Filter Type',
+        //   style: Theme.of(
+        //     context,
+        //   ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+        // ),
+        // RadioListTile<String>(
+        //   title: const Text('Reserved Date'),
+        //   value: 'reserved',
+        //   groupValue: dateFilterType,
+        //   onChanged: (value) => setState(() => dateFilterType = value!),
+        //   contentPadding: EdgeInsets.zero,
+        // ),
+        // RadioListTile<String>(
+        //   title: const Text('Arrival Date'),
+        //   value: 'arrival',
+        //   groupValue: dateFilterType,
+        //   onChanged: (value) => setState(() => dateFilterType = value!),
+        //   contentPadding: EdgeInsets.zero,
+        // ),
         const SizedBox(height: 16),
        
         
@@ -398,10 +396,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         _buildTextField('Guest Name', guestNameController),
         const SizedBox(height: 16),
         _buildTextField('Reservation Number', reservationNumberController),
-        const SizedBox(height: 16),
-        _buildTextField('Cancellation Number', cancellationNumberController),
-        const SizedBox(height: 16),
-        _buildTextField('Voucher Number', voucherNumberController),
+        // const SizedBox(height: 16),
+        // _buildTextField('Cancellation Number', cancellationNumberController),
+        // const SizedBox(height: 16),
+        // _buildTextField('Voucher Number', voucherNumberController),
       ]);
     }
 
