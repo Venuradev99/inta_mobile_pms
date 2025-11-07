@@ -1,13 +1,11 @@
-// house_status_vm.dart (Updated ViewModel)
-
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/update_house_status_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
+import 'dart:ui';
 
 class HouseStatusVm extends GetxController {
   final HouseKeepingService _houseKeepingServices;
@@ -31,7 +29,7 @@ class HouseStatusVm extends GetxController {
   Future<void> loadRooms() async {
     try {
       isLoading.value = true;
-
+      houseKeepingStatusList.clear();
       final houseKeepingStatus = await _houseKeepingServices
           .getAllHouseKeepingStatus();
 
@@ -51,7 +49,7 @@ class HouseStatusVm extends GetxController {
               'Error getting House Keeping Status!',
         );
       }
-
+      roomList.clear();
       final roomResult = await _houseKeepingServices
           .getAllRoomsForHouseStatus();
       if (roomResult["isSuccessful"] == true) {
@@ -95,15 +93,19 @@ class HouseStatusVm extends GetxController {
         houseKeepingRemark: remark,
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,
-        operationType: 3, // Assuming 3 for update/add/edit remark; adjust if different operationType is needed
+        operationType: 6,
       ).toJson();
 
       final response = await _houseKeepingServices.updateHouseStatus(payload);
 
       if (response["isSuccessful"] == true) {
-        MessageService().success('Remark updated successfully.');
+        NavigationService().back();
+        MessageService().success(
+          response["message"] ?? 'Remark updated successfully.',
+        );
         await loadRooms();
       } else {
+        NavigationService().back();
         MessageService().error(
           response["errors"][0] ?? 'Error updating remark!',
         );
@@ -119,7 +121,7 @@ class HouseStatusVm extends GetxController {
       final payload = UpdateHouseStatusPayload(
         id: room.id!,
         houseKeeper: room.houseKeeper!,
-        houseKeepingRemark: '', // Updated to explicitly set to empty for clearing
+        houseKeepingRemark: '',
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,
         operationType: 6,
@@ -141,31 +143,62 @@ class HouseStatusVm extends GetxController {
     }
   }
 
-   Future<void> clearStatus(RoomItem room) async {
-    // try {
-    //   final payload = UpdateHouseStatusPayload(
-    //     id: room.id!,
-    //     houseKeeper: room.houseKeeper!,
-    //     houseKeepingRemark: room.remark ?? '',
-    //     houseKeepingStatus: room.houseKeepingStatusId!,
-    //     isRoom: room.isRoom ?? true,
-    //     operationType: 6,
-    //   ).toJson();
+  Future<void> unassignHouseKeeper(RoomItem room) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: room.id!,
+        houseKeeper: 0,
+        houseKeepingRemark: '',
+        houseKeepingStatus: room.houseKeepingStatusId ?? 0,
+        isRoom: room.isRoom ?? true,
+        operationType: 6,
+      ).toJson();
 
-    //   final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
 
-    //   if (response["isSuccessful"] == true) {
-    //     MessageService().success('Remark cleared successfully.');
-    //     await loadRooms();
-    //   } else {
-    //     MessageService().error(
-    //       response["errors"][0] ?? 'Error clearing remark!',
-    //     );
-    //   }
-    // } catch (e) {
-    //   MessageService().error('Error clearing remark: $e');
-    //   throw Exception('Error clearing remark: $e');
-    // }
+      if (response["isSuccessful"] == true) {
+        MessageService().success(
+          response["message"] ?? 'Housekeeper unassigned successfully.',
+        );
+        await loadRooms();
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error clearing remark!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error clearing remark: $e');
+      throw Exception('Error clearing remark: $e');
+    }
+  }
+
+  Future<void> clearStatus(RoomItem room) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: room.id!,
+        houseKeeper: room.houseKeeper!,
+        houseKeepingRemark: room.remark ?? '',
+        houseKeepingStatus: 0,
+        isRoom: room.isRoom ?? true,
+        operationType: 6,
+      ).toJson();
+
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+      if (response["isSuccessful"] == true) {
+        MessageService().success(
+          response["message"] ?? 'Status cleared successfully.',
+        );
+        await loadRooms();
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error clearing status!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error clearing status: $e');
+      throw Exception('Error clearing status: $e');
+    }
   }
 
   Future<void> updateStatus(RoomItem room, int newStatusId) async {
@@ -201,6 +234,36 @@ class HouseStatusVm extends GetxController {
     for (final r in rooms) {
       await updateStatus(r, newStatusId);
     }
+  }
+
+  Future<void> bulkClearStatus(Set<RoomItem> rooms) async {
+    // try {
+    //   for (final room in rooms) {
+    //     final payload = UpdateHouseStatusPayload(
+    //       id: room.id!,
+    //       houseKeeper: room.houseKeeper!,
+    //       houseKeepingRemark: room.remark ?? '',
+    //       houseKeepingStatus: 0,
+    //       isRoom: room.isRoom ?? true,
+    //       operationType: 6,
+    //     ).toJson();
+    //     final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+    //     if (response["isSuccessful"] == true) {
+    //       MessageService().success(
+    //         response["message"] ?? 'Status cleared successfully.',
+    //       );
+    //       await loadRooms();
+    //     } else {
+    //       MessageService().error(
+    //         response["errors"][0] ?? 'Error clearing status!',
+    //       );
+    //     }
+    //   }
+    // } catch (e) {
+    //   MessageService().error('Error clearing status: $e');
+    //   throw Exception('Error clearing status: $e');
+    // }
   }
 
   Color hexToColor(String hexCode) {

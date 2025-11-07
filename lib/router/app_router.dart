@@ -4,7 +4,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart'
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
-import 'package:inta_mobile_pms/features/reports/night_audit_report.dart';
+import 'package:inta_mobile_pms/features/reports/screens/night_audit_report.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/arrival_list_scrn.dart';
@@ -24,7 +24,7 @@ import 'package:inta_mobile_pms/features/dashboard/screens/rates_inventory_scrn.
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/reservation_list_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_list_screen.dart';
-import 'package:inta_mobile_pms/features/reports/manager_report.dart';
+import 'package:inta_mobile_pms/features/reports/screens/manager_report.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_scrn.dart';

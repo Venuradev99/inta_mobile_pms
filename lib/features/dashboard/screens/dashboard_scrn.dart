@@ -35,10 +35,10 @@ class _DashboardState extends State<Dashboard> {
     final uri = Uri.parse(url);
     try {
       if (!await launchUrl(uri, mode: LaunchMode.platformDefault)) {
-        print('Could not launch $url');
+        throw Exception('Count not launch!');
       }
     } catch (e) {
-      print('Error launching URL: $e');
+      throw Exception('Error launching URL: $e');
     }
   }
 
@@ -57,6 +57,9 @@ class _DashboardState extends State<Dashboard> {
       appBar: PmsAppBar(
         title: '',
         alwaysVisibleSearch: true,
+        onSearchChanged: (query) {
+          _dashboardVm.filterSearchGuestItem(query);
+        },
         actions: [
           IconButton(
             icon: Icon(
@@ -697,14 +700,14 @@ class _DashboardState extends State<Dashboard> {
                   () => context.go(AppRoutes.arrivalList),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.hotel,
-                  'In-house List',
-                  () => context.go(AppRoutes.inhouseList),
-                  config,
-                ),
+                // _buildMenuTile(
+                //   context,
+                //   textTheme,
+                //   Icons.hotel,
+                //   'In-house List',
+                //   () => context.go(AppRoutes.inhouseList),
+                //   config,
+                // ),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -1148,7 +1151,7 @@ class _DashboardState extends State<Dashboard> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.inhouseList),
+                  // onTap: () => context.go(AppRoutes.inhouseList),
                   child: _buildInHouseCard(
                     context,
                     textTheme,

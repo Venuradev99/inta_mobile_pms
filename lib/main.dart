@@ -7,9 +7,12 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_theme.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/net_lock_vm.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/quick_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
+import 'package:inta_mobile_pms/features/reports/viewmodels/manager_report_vm.dart';
+import 'package:inta_mobile_pms/features/reports/viewmodels/night_audit_report_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/amend_stay_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/arrival_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/assign_rooms_vm.dart';
@@ -28,6 +31,8 @@ import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart'
 import 'package:inta_mobile_pms/router/app_router.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/quick_reservation_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reports_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
@@ -57,6 +62,11 @@ void main() async {
     dataAccessService,
     appResources,
   );
+  final quickReservationService = QuickReservationService(
+    dataAccessService,
+    appResources,
+  );
+  final reportsService = ReportsService(dataAccessService, appResources);
 
   //register Services
   Get.put<StayViewService>(stayViewService);
@@ -64,10 +74,16 @@ void main() async {
   Get.put<ReservationListService>(reservationListService);
   Get.put<HouseKeepingService>(houseKeepingService);
   Get.put<UserApiService>(userApiService);
+  Get.put<QuickReservationService>(quickReservationService);
+  Get.put<ReportsService>(reportsService);
 
   //Inject services
   Get.put<DashboardVm>(
-    DashboardVm(Get.find<DashboardService>(), Get.find<UserApiService>()),
+    DashboardVm(
+      Get.find<DashboardService>(),
+      Get.find<UserApiService>(),
+      Get.find<ReservationListService>(),
+    ),
   );
   Get.put<ArrivalListVm>(ArrivalListVm(Get.find<ReservationListService>()));
   Get.put<VoidReservationVm>(
@@ -102,8 +118,13 @@ void main() async {
     EditGuestDetailsVm(Get.find<ReservationListService>()),
   );
   Get.put<StayViewVm>(
-    StayViewVm(Get.find<StayViewService>(),Get.find<ReservationListService>()),
+    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationListService>()),
   );
+  Get.put<QuickReservationVm>(
+    QuickReservationVm(Get.find<QuickReservationService>()),
+  );
+  Get.put<NightAuditReportVm>(NightAuditReportVm(Get.find<ReportsService>()));
+  Get.put<ManagerReportVm>(ManagerReportVm(Get.find<ReportsService>()));
 
   runApp(PMSApp());
 }

@@ -30,6 +30,7 @@ class _RemarkDialogState extends State<RemarkDialog> {
   @override
   void initState() {
     super.initState();
+    
     _initialRemark = widget.room.remark;
     _isEditMode = widget.startInEdit || (_initialRemark == null || _initialRemark!.isEmpty);
     _remarkController = TextEditingController(text: _initialRemark);
@@ -50,17 +51,12 @@ class _RemarkDialogState extends State<RemarkDialog> {
   void _saveRemark() async {
     final newRemark = _remarkController.text.trim();
     if (newRemark != _initialRemark) {
-      // Assuming VM has a method to update remark, e.g., updateRemark
-      await _houseStatusVm.updateRemark(widget.room, newRemark); // Update this line with actual VM method if different
-      setState(() {
-        _initialRemark = newRemark;
-        _isEditMode = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Remark updated for ${widget.room.roomName}')),
-      );
+      await _houseStatusVm.updateRemark(widget.room, newRemark);
+      // setState(() {
+      //   _initialRemark = newRemark;
+      //   _isEditMode = false;
+      // });
     }
-    Navigator.of(context).pop();
   }
 
   @override
@@ -88,7 +84,6 @@ class _RemarkDialogState extends State<RemarkDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header with drag handle effect
             Container(
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
               decoration: BoxDecoration(

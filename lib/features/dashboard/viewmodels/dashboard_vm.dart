@@ -4,18 +4,25 @@ import 'package:inta_mobile_pms/features/dashboard/models/hotel_inventory_data.d
 import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
+import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
+import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
 class DashboardVm extends GetxController {
   final DashboardService _dashboardService;
-   final UserApiService _userApiService;
+  final UserApiService _userApiService;
+  final ReservationListService _reservationListService;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
   final inHouseData = Rx<BookingStaticData?>(null);
   final bookingData = Rx<BookingStaticData?>(null);
+  final allReservationList = <GuestItem>[].obs;
+  final allReservationListFiltered = <GuestItem>[].obs;
 
   double totalRoomsToSell = 0;
 
@@ -44,23 +51,50 @@ class DashboardVm extends GetxController {
 
   final isLoading = true.obs;
 
-  DashboardVm(this._dashboardService,this._userApiService);
+  DashboardVm(this._dashboardService, this._userApiService, this._reservationListService);
+
+   String getToDateForWeek(String fromDate) {
+    try {
+      DateTime startDate = DateTime.parse(fromDate);
+      DateTime endDate = startDate.add(Duration(days: 6));
+      return endDate.toIso8601String().substring(0, 10);
+    } catch (e) {
+      throw Exception('Error in GetToDateForWeek');
+    }
+  }
 
   Future<void> loadBookingStaticData() async {
-    isLoading.value = true;
     try {
+      isLoading.value = true;
+      final today = await LocalStorageManager.getSystemDate();
+      final body = ReservationSearchRequest(
+        businessSourceId: 0,
+        exceptCancelled: false,
+        fromDate: today.toString(),
+        isArrivalDate: true,
+        reservationTypeId: 0,
+        roomId: 0,
+        roomTypeId: 0,
+        searchByName: "",
+        searchType: 1,
+        status: 0,
+        toDate: getToDateForWeek(today.toString()),
+        businessCategoryId: 0,
+      ).toJson();
 
       final responses = await Future.wait([
         _dashboardService.getBookingStatics(),
         _dashboardService.getInventoryStatics(),
         _dashboardService.getPropertyStatics(),
         _dashboardService.getOccupancyStatics(),
+        _reservationListService.getAllReservationList(body),
       ]);
 
       final bookingResponse = responses[0];
       final inventoryResponse = responses[1];
       final propertyStatisticsResponse = responses[2];
       final occupancyStaticsResponse = responses[3];
+      final arrivalListResponse = responses[4];
 
       if (bookingResponse["isSuccessful"] == true) {
         List<dynamic> result = bookingResponse["result"];
@@ -84,7 +118,9 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-        MessageService().error(bookingResponse["errors"][0] ?? 'Error getting booking details!');
+        MessageService().error(
+          bookingResponse["errors"][0] ?? 'Error getting booking details!',
+        );
       }
 
       if (inventoryResponse["isSuccessful"] == true) {
@@ -107,17 +143,17 @@ class DashboardVm extends GetxController {
 
           // if (data.name == "Projected RevPAR") {
           //   projectedRevPar.value = data.value;
-          //  
+          //
           // }
 
           // if (data.name == "Projected ADR") {
           //   projectedAdr.value = data.value;
-          //  
+          //
           // }
 
           // if (data.name == "Projected Occupancy") {
           //   projectedOccupancy.value = data.value;
-          //   
+          //
           // }
         }
 
@@ -127,7 +163,7 @@ class DashboardVm extends GetxController {
           final data = HotelInventoryData.fromJson(item);
           // if (data.name == "Total Rooms Available") {
           //   totalAvailableRooms.value = data.value;
-          //   
+          //
           // }
 
           if (data.name == "Out of Order") {
@@ -143,13 +179,22 @@ class DashboardVm extends GetxController {
             ? futureInventoryModel[0]
             : 0;
         totalAvailableRooms.value = totalRoomsToSell - todayInventory;
-        totalRoomSoldRate.value =  totalRoomsToSell == 0 ? 0 : (totalRoomSold / totalRoomsToSell);
-        totalAvailableRoomsRate.value = totalRoomsToSell == 0 ? 0 :
-            (totalAvailableRooms / totalRoomsToSell) ;
-        complementaryRoomsRate.value = totalRoomsToSell == 0 ? 0 :  (complementaryRooms / totalRoomsToSell);
-        outOfOrderRoomsRate.value = totalRoomsToSell == 0 ? 0 : (outOfOrderRooms / totalRoomsToSell);
+        totalRoomSoldRate.value = totalRoomsToSell == 0
+            ? 0
+            : (totalRoomSold / totalRoomsToSell);
+        totalAvailableRoomsRate.value = totalRoomsToSell == 0
+            ? 0
+            : (totalAvailableRooms / totalRoomsToSell);
+        complementaryRoomsRate.value = totalRoomsToSell == 0
+            ? 0
+            : (complementaryRooms / totalRoomsToSell);
+        outOfOrderRoomsRate.value = totalRoomsToSell == 0
+            ? 0
+            : (outOfOrderRooms / totalRoomsToSell);
       } else {
-       MessageService().error(inventoryResponse["errors"][0] ?? 'Error getting inventory details!');
+        MessageService().error(
+          inventoryResponse["errors"][0] ?? 'Error getting inventory details!',
+        );
       }
 
       if (propertyStatisticsResponse["isSuccessful"] == true) {
@@ -179,7 +224,10 @@ class DashboardVm extends GetxController {
           }
         }
       } else {
-       MessageService().error(propertyStatisticsResponse["errors"][0] ?? 'Error getting property statistics details!');
+        MessageService().error(
+          propertyStatisticsResponse["errors"][0] ??
+              'Error getting property statistics details!',
+        );
       }
 
       if (occupancyStaticsResponse["isSuccessful"] == true) {
@@ -187,17 +235,64 @@ class DashboardVm extends GetxController {
         final data = OccupancyData.fromJson(result);
         occupancyData.value = data;
       } else {
-       MessageService().error(occupancyStaticsResponse["errors"][0] ?? 'Error getting booking details!');
+        MessageService().error(
+          occupancyStaticsResponse["errors"][0] ??
+              'Error getting booking details!',
+        );
+      }
+
+      if (arrivalListResponse["isSuccessful"] == true) {
+        final List<dynamic> result = arrivalListResponse["result"];
+
+        for (final item in result) {
+          final data = GuestItem(
+            bookingRoomId: item['bookingRoomId'].toString(),
+            guestName: item['bookingGuestWithTitle'] ?? '',
+            resId: item['reservationNo'] ?? '',
+            folioId: item['bookingId'].toString(),
+            startDate: item['arrivalDate'] ?? '',
+            endDate: item['departureDate'] ?? '',
+            nights: item['nights'] ?? 0,
+            roomType: item['roomName'] ?? '',
+            reservationType: item['reservationType'] ?? '',
+            adults: item['noOfAdults'] ?? 0,
+            totalAmount: (item['totalAmount'] ?? 0).toDouble(),
+            balanceAmount: (item['balanceAmount'] ?? 0).toDouble(),
+            room: item['roomName'] ?? '',
+          );
+            allReservationList.add(data);
+             allReservationListFiltered.add(data);
+        }
+       
+      } else {
+        MessageService().error(
+          arrivalListResponse["errors"][0] ?? 'Error loading arrival list!',
+        );
       }
     } catch (e) {
       MessageService().error('Error loading dashboard data: $e');
     } finally {
       isLoading.value = false;
-      
     }
   }
 
-    Future<void> handleLogout() async {
-   await _userApiService.logout();
+
+ void filterSearchGuestItem(String query) {
+  try {
+    allReservationListFiltered.value = allReservationList.toList();
+
+    if (query.isNotEmpty) {
+      allReservationListFiltered.value = allReservationListFiltered.where(
+        (item) => item.resId.toLowerCase().contains(query.toLowerCase())
+      ).toList();
+    }
+
+    print(allReservationListFiltered);
+  } catch (e) {
+    throw Exception('Error in Search Filtering: $e');
+  }
+}
+  Future<void> handleLogout() async {
+    await _userApiService.logout();
   }
 }

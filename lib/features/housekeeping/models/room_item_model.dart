@@ -26,4 +26,22 @@ class RoomItem {
     this.remark,
     this.isRoom,
   });
+
+   @override
+  String toString() {
+    return 'RoomItem('
+        'id: $id, '
+        'houseKeeper: $houseKeeper, '
+        'houseKeepingStatusId: $houseKeepingStatusId, '
+        'houseKeeperName: $houseKeeperName, '
+        'section: $section, '
+        'roomName: $roomName, '
+        'availability: $availability, '
+        'housekeepingStatus: $housekeepingStatus, '
+        'roomType: $roomType, '
+        'hasIssue: $hasIssue, '
+        'isRoom: $isRoom, '
+        'remark: $remark'
+        ')';
+  }
 }

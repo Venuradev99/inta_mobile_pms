@@ -28,6 +28,7 @@ class AppResources {
   static const String identityType = 'identityType';
   static const String country = 'country';
   static const String title = 'title';
+  static const String hotel = 'hotel';
 
   
 
@@ -111,5 +112,10 @@ class AppResources {
  static const String getBookingDetailsByDate = '$calenderBooking/GetBookingDetailsByDate';
  static const String getStatusColorForStayview = '$roomstatus/GetStatusColorForStayview';
 
+
+////reports
+static const String getNightAudits = '$auditTrial/nightAudit';
+static const String getCurrencies = '$currency/GetAll?startIndex=0&PageSize=0&withInactive=false';
+static const String getAllHotel = '$hotel/GetAllByUserAndMenu/374';
 
 }

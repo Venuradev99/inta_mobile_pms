@@ -9,6 +9,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dar
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/set_status_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -33,6 +34,7 @@ class _HouseStatusState extends State<HouseStatus> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +44,7 @@ class _HouseStatusState extends State<HouseStatus> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () =>context.go(AppRoutes.dashboard),
+          onPressed: () => context.go(AppRoutes.dashboard),
         ),
         title: Text(
           'House Status',
@@ -80,6 +82,7 @@ class _HouseStatusState extends State<HouseStatus> {
       body: Obx(() {
         final groupedRooms = _houseStatusVm.groupedRooms;
         final isLoading = _houseStatusVm.isLoading;
+
         return Column(
           children: [
             if (isEditMode) _buildActionButtons(),
@@ -142,6 +145,7 @@ class _HouseStatusState extends State<HouseStatus> {
       }),
     );
   }
+
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -227,10 +231,11 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
     if (!isEditMode) {
       return Text(
-        section,
+        section == ''? 'No Housekeeper Assigned' : section,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
           color: AppColors.darkgrey,
@@ -244,10 +249,10 @@ class _HouseStatusState extends State<HouseStatus> {
     return Row(
       children: [
         Text(
-          section,
+         section == ''? 'No Housekeeper Assigned' : section,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.black,
+            color: AppColors.darkgrey,
             fontSize: 20,
           ),
         ),
@@ -276,13 +281,19 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
+
   Widget _buildRoomCard(RoomItem room) {
     final statusColor = _houseStatusVm.getHousekeepingColor(
       room.housekeepingStatus,
     );
     final bgColor = _houseStatusVm.getBackgroundColor(room.housekeepingStatus);
     return InkWell(
-      onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
+      // onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
+      onTap: isEditMode
+          ? null
+          : () {
+              _showRoomActionsSheet(room);
+            },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -365,6 +376,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   Widget _buildRoomCardShimmer() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
@@ -423,6 +435,7 @@ class _HouseStatusState extends State<HouseStatus> {
       isEditMode = false;
     });
   }
+
   void _bulkEditHousekeeper() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk edit housekeeper logic
@@ -433,6 +446,7 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
+
   void _bulkClearStatus() {
     if (selectedRooms.isEmpty) return;
     // Implement bulk clear status logic
@@ -441,14 +455,24 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     setState(() => selectedRooms.clear());
   }
-  void _bulkClearRemark() {
+
+  void _bulkClearRemark() async {
     if (selectedRooms.isEmpty) return;
-    // Implement bulk clear remark logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Clear remark for ${selectedRooms.length} rooms')),
+     final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Clear Remarks',
+      message: 'Are you sure you want to clear remarks?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.meeting_room,
     );
-    setState(() => selectedRooms.clear());
+    if (confirmed == true) {
+       await _houseStatusVm.bulkClearStatus(selectedRooms);
+      if (!mounted) return;
+    }
   }
+
   void _showRoomActionsSheet(RoomItem room) {
     showModalBottomSheet(
       context: context,
@@ -460,8 +484,9 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   void _handleRoomAction(String action, RoomItem room) {
-  context.pop();
+    context.pop();
     // Handle different actions
     switch (action) {
       case 'set_status':
@@ -501,24 +526,45 @@ class _HouseStatusState extends State<HouseStatus> {
 
     await _houseStatusVm.updateStatus(room, selectedId);
   }
-  void _clearStatus(RoomItem room) {
-    // Implement clear status logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Status cleared for ${room.roomName}')),
+
+  void _clearStatus(RoomItem room) async {
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Clear Status',
+      message: 'Are you sure you want to clear status?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.meeting_room,
     );
+    if (confirmed == true) {
+       await _houseStatusVm.clearStatus(room);
+      if (!mounted) return;
+    }
   }
+
   void _showEditHousekeeperDialog(RoomItem room) {
-    // Implement edit housekeeper dialog
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
     );
   }
-  void _unassignHousekeeper(RoomItem room) {
-    // Implement unassign housekeeper logic
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Housekeeper unassigned from ${room.roomName}')),
+
+  void _unassignHousekeeper(RoomItem room) async{
+    final confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Unassign Housekeeper',
+      message: 'Are you sure you want to unassign housekeeper?',
+      confirmText: 'Yes',
+      cancelText: 'No',
+      confirmColor: AppColors.red,
+      // icon: Icons.visibility,
     );
+    if (confirmed == true) {
+      await _houseStatusVm.unassignHouseKeeper(room);
+      if (!mounted) return;
+    }
   }
+
   void _showAddRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -543,6 +589,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _showEditRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -567,6 +614,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _showViewRemarkDialog(RoomItem room) {
     showGeneralDialog(
       context: context,
@@ -591,6 +639,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   void _clearRemark(RoomItem room) async {
     await _houseStatusVm.clearRemark(room);
   }
@@ -634,7 +683,7 @@ class _HouseStatusState extends State<HouseStatus> {
                         ),
                         const Spacer(),
                         IconButton(
-                          onPressed: () =>context.pop(),
+                          onPressed: () => context.pop(),
                           icon: Icon(
                             Icons.close,
                             color: Colors.grey[600],
@@ -722,6 +771,7 @@ class _HouseStatusState extends State<HouseStatus> {
       },
     );
   }
+
   Widget _buildStatusInfoItem(
     BuildContext context,
     String status,
@@ -761,6 +811,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ],
     );
   }
+
   Widget _buildIndicatorInfoItem(
     BuildContext context,
     String indicator,
@@ -950,6 +1001,7 @@ class _RoomActionsSheet extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildActionTile(
     BuildContext context, {
     required IconData icon,
