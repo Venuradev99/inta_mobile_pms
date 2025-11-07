@@ -1,3 +1,5 @@
+// house_status_vm.dart (Updated ViewModel)
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -166,7 +168,40 @@ class HouseStatusVm extends GetxController {
     // }
   }
 
+  Future<void> updateStatus(RoomItem room, int newStatusId) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: room.id!,
+        houseKeeper: room.houseKeeper!,
+        houseKeepingRemark: room.remark ?? '',
+        houseKeepingStatus: newStatusId,
+        isRoom: room.isRoom ?? true,
+        operationType: 1,               // 1 = update housekeeping status
+      ).toJson();
 
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+      if (response["isSuccessful"] == true) {
+        MessageService().success('Status updated successfully.');
+        await loadRooms();               // refresh UI
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error updating status!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error updating status: $e');
+    }
+  }
+
+  Future<void> bulkUpdateStatus(List<RoomItem> rooms, int newStatusId) async {
+    // You can either call the single-room endpoint in a loop
+    // or – if the backend supports it – send a bulk payload.
+    // Here we keep it simple and loop.
+    for (final r in rooms) {
+      await updateStatus(r, newStatusId);
+    }
+  }
 
   Color hexToColor(String hexCode) {
     if (hexCode == '' || hexCode.isEmpty) {

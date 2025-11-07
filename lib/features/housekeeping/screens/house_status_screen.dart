@@ -1,3 +1,5 @@
+// house_status.dart (Updated Screen)
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -6,6 +8,7 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/housekeeping/widgets/set_status_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -274,8 +277,6 @@ class _HouseStatusState extends State<HouseStatus> {
     );
   }
   Widget _buildRoomCard(RoomItem room) {
-    // final statusColor = _getHousekeepingColor(room.housekeepingStatus);
-    // final bgColor = _getBackgroundColor(room.housekeepingStatus);
     final statusColor = _houseStatusVm.getHousekeepingColor(
       room.housekeepingStatus,
     );
@@ -401,14 +402,26 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
-  void _bulkSetStatus() {
+  void _bulkSetStatus() async {
     if (selectedRooms.isEmpty) return;
-    // Implement bulk set status logic, e.g., show dialog for status selection
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Set status for ${selectedRooms.length} rooms')),
+
+    final selectedId = await showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => SetStatusDialog(
+        room: selectedRooms.first,
+        isBulk: true,
+        bulkRooms: selectedRooms.toList(),
+      ),
     );
-    // After action, optionally clear selections
-    setState(() => selectedRooms.clear());
+
+    if (selectedId == null) return;
+
+    await _houseStatusVm.bulkUpdateStatus(selectedRooms.toList(), selectedId);
+    setState(() {
+      selectedRooms.clear();
+      isEditMode = false;
+    });
   }
   void _bulkEditHousekeeper() {
     if (selectedRooms.isEmpty) return;
@@ -477,11 +490,16 @@ class _HouseStatusState extends State<HouseStatus> {
         break;
     }
   }
-  void _showSetStatusDialog(RoomItem room) {
-    // Implement set status dialog
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Set status for ${room.roomName}')));
+  void _showSetStatusDialog(RoomItem room) async {
+    final selectedId = await showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => SetStatusDialog(room: room),
+    );
+
+    if (selectedId == null) return; // cancelled
+
+    await _houseStatusVm.updateStatus(room, selectedId);
   }
   void _clearStatus(RoomItem room) {
     // Implement clear status logic
@@ -575,42 +593,6 @@ class _HouseStatusState extends State<HouseStatus> {
   }
   void _clearRemark(RoomItem room) async {
     await _houseStatusVm.clearRemark(room);
-  }
-  Color _getHousekeepingColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return AppColors.green;
-      case 'dirty':
-        return AppColors.red;
-      case 'inspected':
-        return AppColors.blue;
-      default:
-        return AppColors.darkgrey;
-    }
-  }
-  Color _getBackgroundColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return const Color(0xFFF0F8E8);
-      case 'dirty':
-        return const Color(0xFFFFF0F0);
-      case 'inspected':
-        return const Color(0xFFE8F4FD);
-      default:
-        return const Color(0xFFF5F5F5);
-    }
-  }
-  Color _getTextColor(String status) {
-    switch (status) {
-      case 'clean':
-        return Colors.green[800]!;
-      case 'dirty':
-        return Colors.red[800]!;
-      case 'inspected':
-        return Colors.blue[800]!;
-      default:
-        return Colors.grey[800]!;
-    }
   }
   void _showStatusInfoDialog(BuildContext context) {
     showDialog(
@@ -862,7 +844,6 @@ class _RoomActionsSheet extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        // color: _getStatusColor(room.housekeepingStatus),
                         color: houseStatusVm.getStatusColor(
                           room.housekeepingStatus,
                         ),
@@ -990,17 +971,5 @@ class _RoomActionsSheet extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       visualDensity: VisualDensity.compact,
     );
-  }
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return AppColors.green;
-      case 'dirty':
-        return AppColors.red;
-      case 'inspected':
-        return AppColors.blue;
-      default:
-        return AppColors.darkgrey;
-    }
   }
 }
