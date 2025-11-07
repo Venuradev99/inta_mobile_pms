@@ -288,6 +288,7 @@ class DashboardVm extends GetxController {
     }
 
     print(allReservationListFiltered);
+    
   } catch (e) {
     throw Exception('Error in Search Filtering: $e');
   }

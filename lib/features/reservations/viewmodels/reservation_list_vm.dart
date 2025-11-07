@@ -137,14 +137,15 @@ class ReservationListVm extends GetxController {
       if (roomTypeResponse["isSuccessful"]) {
         final result = roomTypeResponse["result"]["recordSet"];
         roomTypes.value = [];
+        roomTypes.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomTypeId"],
             "name": item["name"],
           });
           roomTypes.add(data);
-          roomTypes.refresh();
         }
+         roomTypes.refresh();
       } else {
         MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room details!',
@@ -154,14 +155,15 @@ class ReservationListVm extends GetxController {
       if (reservationTypeResponse["isSuccessful"]) {
         final result = reservationTypeResponse["result"]["recordSet"];
         reservationTypes.value = [];
+        reservationTypes.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["reservationTypeId"],
             "name": item["name"],
           });
           reservationTypes.add(data);
-          roomTypes.refresh();
         }
+         reservationTypes.refresh();
       } else {
         MessageService().error(
           reservationTypeResponse["errors"][0] ??
@@ -172,14 +174,16 @@ class ReservationListVm extends GetxController {
       if (roomStatusResponse["isSuccessful"]) {
         statuses.value = [];
         final result = roomStatusResponse["result"]["recordSet"];
+         statuses.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomStatusId"],
             "name": item["name"],
           });
           statuses.add(data);
-          roomTypes.refresh();
         }
+       
+         statuses.refresh();
       } else {
         MessageService().error(
           roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
@@ -189,14 +193,15 @@ class ReservationListVm extends GetxController {
       if (businessSourcesResponse["isSuccessful"]) {
         final result = businessSourcesResponse["result"]["recordSet"];
         businessSources.value = [];
+          businessSources.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["businessSourceId"],
             "name": item["name"],
           });
           businessSources.add(data);
-          roomTypes.refresh();
         }
+         businessSources.refresh();
       } else {
         MessageService().error(
           businessSourcesResponse["errors"][0] ??

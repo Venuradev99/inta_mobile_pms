@@ -213,7 +213,6 @@ class HouseStatusVm extends GetxController {
     //       isRoom: room.isRoom ?? true,
     //       operationType: 6,
     //     ).toJson();
-
     //     final response = await _houseKeepingServices.updateHouseStatus(payload);
 
     //     if (response["isSuccessful"] == true) {
