@@ -37,4 +37,14 @@ class ReportsService {
     }
   }
 
+   Future<Map<String, dynamic>> getManagerReport(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getManagerReport}';
+      final response = await _dataAccess.post(body,url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
 }

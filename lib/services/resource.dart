@@ -29,6 +29,7 @@ class AppResources {
   static const String country = 'country';
   static const String title = 'title';
   static const String hotel = 'hotel';
+  static const String report = 'report';
 
   
 
@@ -117,5 +118,6 @@ class AppResources {
 static const String getNightAudits = '$auditTrial/nightAudit';
 static const String getCurrencies = '$currency/GetAll?startIndex=0&PageSize=0&withInactive=false';
 static const String getAllHotel = '$hotel/GetAllByUserAndMenu/374';
+static const String getManagerReport = '$report/ManagerReport';
 
 }
