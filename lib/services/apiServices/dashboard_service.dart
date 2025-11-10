@@ -20,16 +20,6 @@ class DashboardService {
     }
   }
 
-  Future<Map<String, dynamic>> getInventoryStatics() async {
-    try {
-      final url = '${_appResources.baseUrl}${AppResources.getInventoryStats}';
-      final response = await _dataAccess.get(url);
-      return response;
-    } catch (error) {
-      return {"error": error.toString()};
-    }
-  }
-
   Future<Map<String, dynamic>> getAllLockReservations() async {
     try {
       final url =
@@ -51,27 +41,60 @@ class DashboardService {
     }
   }
 
-  Future<Map<String, dynamic>> getPropertyStatics() async {
+  Future<Map<String, dynamic>> getInventoryPropertyOccupancyData() async {
     try {
-      // final url = AppResources.getInventoryStats;
-      // final response = await _dataAccess.get(url);
-
-      final config = await rootBundle.loadString('assets/config.json');
-      final response = json.decode(config);
-      return response["propertyStatistics"];
-    } catch (error) {
-      return {"error": error.toString()};
-    }
-  }
-
-  Future<Map<String, dynamic>> getOccupancyStatics() async {
-    try {
-      // final url = AppResources.getInventoryStats;
-      // final response = await _dataAccess.get(url);
-
-      final config = await rootBundle.loadString('assets/config.json');
-      final response = json.decode(config);
-      return response["occupancyStatics"];
+      return {
+        "errors": [],
+        "isSuccessful": true,
+        "isDBAccessible": true,
+        "result": {
+          "propertyStatistics": {
+            "totalRevenue": {
+              "name": "Total Revenue",
+              "today": 91423.00,
+              "yesterday": 17205.50,
+              "percentage": 0.0,
+            },
+            "averageDailyRate": {
+              "name": "Total Payment",
+              "today": 0.0,
+              "yesterday": 0.0,
+              "percentage": 0.0,
+            },
+            "averageLengthOfStay": {
+              "name": "",
+              "today": 0.0,
+              "yesterday": 0.0,
+              "percentage": 0.0,
+            },
+            "revPar": {
+              "name": "RevPar",
+              "today": 1523.7166666666666666666666667,
+              "yesterday": 286.75833333333333333333333333,
+              "percentage": 0.0,
+            },
+            "totalPayment": {
+              "name": "",
+              "today": 0.0,
+              "yesterday": 0.0,
+              "percentage": 0.0,
+            },
+          },
+          "occupancyStatics": {"today": 81.67, "yesterday": 23.33},
+          "inventoryStatics": {
+            "totalAvailableRooms": 60.0,
+            "totalAvailableRoomsRate": 0.0,
+            "totalRoomsSold": 49.0,
+            "totalRoomsSoldRate": 0.0,
+            "blockedRooms": 0.0,
+            "blockedRoomsRate": 0.0,
+            "complementaryRooms": 0.0,
+            "complementaryRoomsRate": 0.0,
+          },
+        },
+        "message": "",
+      };
+      
     } catch (error) {
       return {"error": error.toString()};
     }

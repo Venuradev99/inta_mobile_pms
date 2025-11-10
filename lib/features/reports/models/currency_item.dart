@@ -1,10 +1,12 @@
 class CurrencyItem {
   final int currencyId;
   final String code;
+   final String symbol;
 
   CurrencyItem({
     required this.currencyId,
     required this.code,
+    required this.symbol,
   });
 
   // Factory method to create an instance from JSON
@@ -12,6 +14,7 @@ class CurrencyItem {
     return CurrencyItem(
       currencyId: json['currencyId'] ?? 0,
       code: json['code'] ?? '',
+       symbol: json['symbol'] ?? '',
     );
   }
 
@@ -20,12 +23,13 @@ class CurrencyItem {
     return {
       'currencyId': currencyId,
       'code': code,
+        'symbol': symbol,
     };
   }
 
   // Override toString for easy printing
   @override
   String toString() {
-    return 'CurrencyItem(currencyId: $currencyId, code: $code)';
+    return 'CurrencyItem(currencyId: $currencyId, code: $code, symbol: $symbol)';
   }
 }
