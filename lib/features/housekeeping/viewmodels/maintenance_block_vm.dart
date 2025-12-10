@@ -157,6 +157,14 @@ class MaintenanceBlockVm extends GetxController {
     }
   }
 
+  resetSearch() {
+    try {
+      maintenanceBlockListFiltered.value = maintenanceBlockList;
+    } catch (e) {
+      throw Exception('Error in resetting search : $e');
+    }
+  }
+
   Future<void> unblockRoom(
     MaintenanceBlockItem block,
     DateTime fromDate,

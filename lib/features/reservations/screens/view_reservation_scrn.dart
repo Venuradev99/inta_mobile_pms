@@ -129,7 +129,7 @@ class _ViewReservation extends State<ViewReservation>{
                   Tab(text: 'Guest Details'),
                   Tab(text: 'Charges'),
                   Tab(text: 'Folio'),
-                  Tab(text: 'Notes'),
+                  Tab(text: 'Remarks'),
                 ],
               ),
             ),
@@ -568,7 +568,7 @@ class _ViewReservation extends State<ViewReservation>{
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCardHeader('Notes & Remarks', Icons.note_alt),
+            _buildCardHeader('Remarks', Icons.note_alt),
             const SizedBox(height: 16),
             Container(
               width: double.infinity,

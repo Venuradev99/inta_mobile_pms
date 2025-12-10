@@ -27,6 +27,7 @@ class _DashboardState extends State<Dashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await _dashboardVm.loadBookingStaticData();
+        await _dashboardVm.getUserName();
       }
     });
   }
@@ -82,11 +83,7 @@ class _DashboardState extends State<Dashboard> {
             },
           ),
           IconButton(
-            icon: Icon(
-              Icons.print,
-              color: AppColors.black,
-              size: iconSize,
-            ),
+            icon: Icon(Icons.print, color: AppColors.black, size: iconSize),
             onPressed: () {
               openBrowser('http://192.168.1.176:2234');
             },
@@ -282,8 +279,9 @@ class _DashboardState extends State<Dashboard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: ResponsiveConfig.horizontalPadding(context)
-              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          padding: ResponsiveConfig.horizontalPadding(
+            context,
+          ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
           child: Shimmer.fromColors(
             baseColor: Colors.grey[300]!,
             highlightColor: Colors.grey[100]!,
@@ -331,8 +329,9 @@ class _DashboardState extends State<Dashboard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: ResponsiveConfig.horizontalPadding(context)
-              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          padding: ResponsiveConfig.horizontalPadding(
+            context,
+          ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
           child: Shimmer.fromColors(
             baseColor: Colors.grey[300]!,
             highlightColor: Colors.grey[100]!,
@@ -381,7 +380,10 @@ class _DashboardState extends State<Dashboard> {
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
                                 child: Container(
-                                  width: ResponsiveConfig.scaleWidth(context, 100),
+                                  width: ResponsiveConfig.scaleWidth(
+                                    context,
+                                    100,
+                                  ),
                                   height: 16,
                                   color: Colors.white,
                                 ),
@@ -390,14 +392,19 @@ class _DashboardState extends State<Dashboard> {
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
                                 child: Container(
-                                  width: ResponsiveConfig.scaleWidth(context, 50),
+                                  width: ResponsiveConfig.scaleWidth(
+                                    context,
+                                    50,
+                                  ),
                                   height: 16,
                                   color: Colors.white,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+                          SizedBox(
+                            height: ResponsiveConfig.scaleHeight(context, 12),
+                          ),
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
                             highlightColor: Colors.grey[100]!,
@@ -432,8 +439,9 @@ class _DashboardState extends State<Dashboard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: ResponsiveConfig.horizontalPadding(context)
-              .copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+          padding: ResponsiveConfig.horizontalPadding(
+            context,
+          ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
           child: Shimmer.fromColors(
             baseColor: Colors.grey[300]!,
             highlightColor: Colors.grey[100]!,
@@ -482,7 +490,10 @@ class _DashboardState extends State<Dashboard> {
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
                                 child: Container(
-                                  width: ResponsiveConfig.scaleWidth(context, 100),
+                                  width: ResponsiveConfig.scaleWidth(
+                                    context,
+                                    100,
+                                  ),
                                   height: 16,
                                   color: Colors.white,
                                 ),
@@ -491,14 +502,19 @@ class _DashboardState extends State<Dashboard> {
                                 baseColor: Colors.grey[300]!,
                                 highlightColor: Colors.grey[100]!,
                                 child: Container(
-                                  width: ResponsiveConfig.scaleWidth(context, 50),
+                                  width: ResponsiveConfig.scaleWidth(
+                                    context,
+                                    50,
+                                  ),
                                   height: 16,
                                   color: Colors.white,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
+                          SizedBox(
+                            height: ResponsiveConfig.scaleHeight(context, 12),
+                          ),
                           Shimmer.fromColors(
                             baseColor: Colors.grey[300]!,
                             highlightColor: Colors.grey[100]!,
@@ -594,14 +610,18 @@ class _DashboardState extends State<Dashboard> {
                         // Avatar
                         CircleAvatar(
                           radius: avatarRadius,
-                          backgroundColor: AppColors.onPrimary.withOpacity(0.15),
+                          backgroundColor: AppColors.onPrimary.withOpacity(
+                            0.15,
+                          ),
                           child: Icon(
                             Icons.person,
                             color: AppColors.onPrimary,
                             size: iconSize,
                           ),
                         ),
-                        SizedBox(width: ResponsiveConfig.scaleWidth(context, 14)),
+                        SizedBox(
+                          width: ResponsiveConfig.scaleWidth(context, 14),
+                        ),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -611,29 +631,32 @@ class _DashboardState extends State<Dashboard> {
                                 style: textTheme.bodySmall?.copyWith(
                                   color: AppColors.onPrimary.withOpacity(0.85),
                                   fontWeight: FontWeight.w500,
-                                  fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                                  fontSize:
+                                      (textTheme.bodySmall?.fontSize ?? 12) *
+                                      fontScale,
                                 ),
                               ),
-                              SizedBox(height: ResponsiveConfig.scaleHeight(context, 6)),
-                              Text(
-                                'Admin User',
-                                style: textTheme.titleLarge?.copyWith(
-                                  color: AppColors.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                  fontSize: (textTheme.titleLarge?.fontSize ?? 22) * fontScale,
+                              SizedBox(
+                                height: ResponsiveConfig.scaleHeight(
+                                  context,
+                                  6,
                                 ),
                               ),
+                              Obx(() {
+                                return Text(
+                                  _dashboardVm.userName.value,
+                                  style: textTheme.titleLarge?.copyWith(
+                                    color: AppColors.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.5,
+                                    fontSize:
+                                        (textTheme.titleLarge?.fontSize ?? 22) *
+                                        fontScale,
+                                  ),
+                                );
+                              }),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.settings_outlined,
-                            color: AppColors.onPrimary.withOpacity(0.9),
-                            size: iconSize,
-                          ),
-                          onPressed: () => context.go(AppRoutes.settings),
                         ),
                       ],
                     ),
@@ -644,7 +667,8 @@ class _DashboardState extends State<Dashboard> {
                         color: AppColors.onPrimary.withOpacity(0.95),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 0.3,
-                        fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                        fontSize:
+                            (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                       ),
                     ),
                   ],
@@ -658,7 +682,12 @@ class _DashboardState extends State<Dashboard> {
               padding: EdgeInsets.zero,
               children: [
                 // Main Navigation Section
-                _buildSectionHeader(context, textTheme, config, 'Main Navigation'),
+                _buildSectionHeader(
+                  context,
+                  textTheme,
+                  config,
+                  'Main Navigation',
+                ),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -727,10 +756,14 @@ class _DashboardState extends State<Dashboard> {
                 // === REPORTS EXPANSION TILE ===
                 ExpansionTile(
                   leading: Container(
-                    padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
+                    padding: EdgeInsets.all(
+                      ResponsiveConfig.scaleWidth(context, 8),
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context) * 0.5),
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.cardRadius(context) * 0.5,
+                      ),
                     ),
                     child: Icon(
                       Icons.assessment,
@@ -742,7 +775,8 @@ class _DashboardState extends State<Dashboard> {
                     'Reports',
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize:
+                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                       color: AppColors.onSurface.withOpacity(0.7),
                     ),
                   ),
@@ -754,7 +788,9 @@ class _DashboardState extends State<Dashboard> {
                   backgroundColor: AppColors.primary.withOpacity(0.05),
                   collapsedBackgroundColor: Colors.transparent,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.cardRadius(context),
+                    ),
                     side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
                   ),
                   initiallyExpanded: false,
@@ -852,10 +888,16 @@ class _DashboardState extends State<Dashboard> {
             padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
             decoration: BoxDecoration(
               color: AppColors.surface.withOpacity(0.5),
-              border: Border(top: BorderSide(color: AppColors.onSurface.withOpacity(0.1))),
+              border: Border(
+                top: BorderSide(color: AppColors.onSurface.withOpacity(0.1)),
+              ),
             ),
             child: ListTile(
-              leading: Icon(Icons.logout, color: AppColors.error, size: iconSize),
+              leading: Icon(
+                Icons.logout,
+                color: AppColors.error,
+                size: iconSize,
+              ),
               title: Text(
                 'Logout',
                 style: textTheme.bodyMedium?.copyWith(
@@ -864,9 +906,15 @@ class _DashboardState extends State<Dashboard> {
                   fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                 ),
               ),
-              trailing: Icon(Icons.arrow_forward_ios, size: iconSize * 0.8, color: AppColors.error),
+              trailing: Icon(
+                Icons.arrow_forward_ios,
+                size: iconSize * 0.8,
+                color: AppColors.error,
+              ),
               onTap: () => _dashboardVm.handleLogout(),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               tileColor: Colors.transparent,
             ),
           ),
@@ -993,7 +1041,9 @@ class _DashboardState extends State<Dashboard> {
       leading: Container(
         padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(cardRadius * 0.5),
         ),
         child: Icon(
@@ -1007,7 +1057,9 @@ class _DashboardState extends State<Dashboard> {
       title: Text(
         title,
         style: textTheme.bodyMedium?.copyWith(
-          color: isActive ? AppColors.black : AppColors.onSurface.withOpacity(0.7),
+          color: isActive
+              ? AppColors.black
+              : AppColors.onSurface.withOpacity(0.7),
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
           fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
         ),
@@ -1015,20 +1067,26 @@ class _DashboardState extends State<Dashboard> {
       trailing: badgeCount != null
           ? _buildBadge(badgeCount, isActive)
           : (isActive
-              ? Container(
-                  width: ResponsiveConfig.scaleWidth(context, 4),
-                  height: ResponsiveConfig.scaleHeight(context, 20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 2)),
-                  ),
-                )
-              : null),
+                ? Container(
+                    width: ResponsiveConfig.scaleWidth(context, 4),
+                    height: ResponsiveConfig.scaleHeight(context, 20),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.scaleWidth(context, 2),
+                      ),
+                    ),
+                  )
+                : null),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(cardRadius),
-        side: isActive ? BorderSide(color: AppColors.primary.withOpacity(0.2)) : BorderSide.none,
+        side: isActive
+            ? BorderSide(color: AppColors.primary.withOpacity(0.2))
+            : BorderSide.none,
       ),
-      tileColor: isActive ? AppColors.primary.withOpacity(0.05) : Colors.transparent,
+      tileColor: isActive
+          ? AppColors.primary.withOpacity(0.05)
+          : Colors.transparent,
       onTap: onTap,
       hoverColor: AppColors.primary.withOpacity(0.05),
     );
@@ -1236,17 +1294,24 @@ class _DashboardState extends State<Dashboard> {
                     color: AppColors.black.withOpacity(0.8),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
-                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize:
+                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
+                  padding: EdgeInsets.all(
+                    ResponsiveConfig.scaleWidth(context, 6),
+                  ),
                   decoration: BoxDecoration(
                     color: accentColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.scaleWidth(context, 10),
+                    ),
                   ),
                   child: Icon(
-                    title == 'Arrival' ? Icons.flight_land : Icons.flight_takeoff,
+                    title == 'Arrival'
+                        ? Icons.flight_land
+                        : Icons.flight_takeoff,
                     color: accentColor,
                     size: iconSize * 0.9,
                   ),
@@ -1260,7 +1325,8 @@ class _DashboardState extends State<Dashboard> {
                 color: accentColor,
                 fontWeight: FontWeight.bold,
                 height: 0.9,
-                fontSize: (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8,
+                fontSize:
+                    (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8,
               ),
             ),
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 10)),
@@ -1271,7 +1337,9 @@ class _DashboardState extends State<Dashboard> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surface.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 8)),
+                borderRadius: BorderRadius.circular(
+                  ResponsiveConfig.scaleWidth(context, 8),
+                ),
                 border: Border.all(color: accentColor.withOpacity(0.1)),
               ),
               child: Text(
@@ -1302,14 +1370,17 @@ class _DashboardState extends State<Dashboard> {
       final totalRevenueData = _dashboardVm.totalRevenueData.value;
       final averageDailyRateData = _dashboardVm.averageDailyRateData.value;
       final bookingLeadTimeData = _dashboardVm.bookingLeadTimeData.value;
-      final averageLengthOfStayData = _dashboardVm.averageLengthOfStayData.value;
+      final averageLengthOfStayData =
+          _dashboardVm.averageLengthOfStayData.value;
       final totalPaymentData = _dashboardVm.totalPaymentData.value;
       final revParData = _dashboardVm.revParData.value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Property Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -1479,15 +1550,20 @@ class _DashboardState extends State<Dashboard> {
                     color: AppColors.black.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                     height: 1.2,
-                    fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                    fontSize:
+                        (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                   ),
                 ),
               ),
               Container(
-                padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
+                padding: EdgeInsets.all(
+                  ResponsiveConfig.scaleWidth(context, 6),
+                ),
                 decoration: BoxDecoration(
                   color: accentColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 8)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.scaleWidth(context, 8),
+                  ),
                 ),
                 child: Icon(icon, color: accentColor, size: iconSize * 0.8),
               ),
@@ -1519,7 +1595,9 @@ class _DashboardState extends State<Dashboard> {
             ),
             decoration: BoxDecoration(
               color: (isPositive ? Colors.green : Colors.red).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.scaleWidth(context, 12),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1527,13 +1605,17 @@ class _DashboardState extends State<Dashboard> {
                 Icon(
                   isPositive ? Icons.trending_up : Icons.trending_down,
                   size: iconSize * 0.7,
-                  color: isPositive ? Colors.green.shade600 : Colors.red.shade600,
+                  color: isPositive
+                      ? Colors.green.shade600
+                      : Colors.red.shade600,
                 ),
                 SizedBox(width: ResponsiveConfig.scaleWidth(context, 4)),
                 Text(
                   percentage,
                   style: textTheme.bodySmall?.copyWith(
-                    color: isPositive ? Colors.green.shade600 : Colors.red.shade600,
+                    color: isPositive
+                        ? Colors.green.shade600
+                        : Colors.red.shade600,
                     fontWeight: FontWeight.w600,
                     fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
                   ),
@@ -1591,14 +1673,19 @@ class _DashboardState extends State<Dashboard> {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize:
+                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
+                  padding: EdgeInsets.all(
+                    ResponsiveConfig.scaleWidth(context, 6),
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.scaleWidth(context, 10),
+                    ),
                   ),
                   child: Icon(
                     Icons.home,
@@ -1644,7 +1731,9 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: ResponsiveConfig.scaleHeight(context, 6)),
+      padding: EdgeInsets.symmetric(
+        vertical: ResponsiveConfig.scaleHeight(context, 6),
+      ),
       child: Row(
         children: [
           Text(
@@ -1666,7 +1755,9 @@ class _DashboardState extends State<Dashboard> {
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.scaleWidth(context, 10),
+                  ),
                 ),
                 child: Text(
                   value,
@@ -1737,14 +1828,19 @@ class _DashboardState extends State<Dashboard> {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize:
+                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 6)),
+                  padding: EdgeInsets.all(
+                    ResponsiveConfig.scaleWidth(context, 6),
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.scaleWidth(context, 10),
+                    ),
                   ),
                   child: Icon(
                     Icons.book,
@@ -1796,7 +1892,9 @@ class _DashboardState extends State<Dashboard> {
     double fontScale,
   ) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: ResponsiveConfig.scaleHeight(context, 6)),
+      padding: EdgeInsets.symmetric(
+        vertical: ResponsiveConfig.scaleHeight(context, 6),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -1815,7 +1913,9 @@ class _DashboardState extends State<Dashboard> {
             ),
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 10)),
+              borderRadius: BorderRadius.circular(
+                ResponsiveConfig.scaleWidth(context, 10),
+              ),
             ),
             child: Text(
               value,
@@ -1845,14 +1945,17 @@ class _DashboardState extends State<Dashboard> {
       final complementaryRooms = _dashboardVm.complementaryRooms.value;
       final outOfOrderRooms = _dashboardVm.outOfOrderRooms.value;
       final totalRoomSoldRate = _dashboardVm.totalRoomSoldRate.value;
-      final totalAvailableRoomsRate = _dashboardVm.totalAvailableRoomsRate.value;
+      final totalAvailableRoomsRate =
+          _dashboardVm.totalAvailableRoomsRate.value;
       final outOfOrderRoomsRate = _dashboardVm.outOfOrderRoomsRate.value;
       final complementaryRoomsRate = _dashboardVm.complementaryRoomsRate.value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Inventory Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -1967,7 +2070,9 @@ class _DashboardState extends State<Dashboard> {
           padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
           decoration: BoxDecoration(
             color: progressColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.scaleWidth(context, 12),
+            ),
           ),
           child: Icon(icon, color: progressColor, size: iconSize),
         ),
@@ -1984,7 +2089,8 @@ class _DashboardState extends State<Dashboard> {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize:
+                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                     ),
                   ),
                   Container(
@@ -1994,14 +2100,17 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     decoration: BoxDecoration(
                       color: progressColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.scaleWidth(context, 12),
+                      ),
                     ),
                     child: Text(
                       value,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize:
+                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                       ),
                     ),
                   ),
@@ -2013,7 +2122,9 @@ class _DashboardState extends State<Dashboard> {
                 height: ResponsiveConfig.scaleHeight(context, 8),
                 decoration: BoxDecoration(
                   color: AppColors.black.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.scaleWidth(context, 4),
+                  ),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,
@@ -2023,7 +2134,9 @@ class _DashboardState extends State<Dashboard> {
                       gradient: LinearGradient(
                         colors: [progressColor, progressColor.withOpacity(0.7)],
                       ),
-                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.scaleWidth(context, 4),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: progressColor.withOpacity(0.3),
@@ -2056,7 +2169,9 @@ class _DashboardState extends State<Dashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: ResponsiveConfig.horizontalPadding(context).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
+            padding: ResponsiveConfig.horizontalPadding(
+              context,
+            ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Occupancy Statistics',
               style: textTheme.headlineSmall?.copyWith(
@@ -2145,7 +2260,9 @@ class _DashboardState extends State<Dashboard> {
           padding: EdgeInsets.all(ResponsiveConfig.scaleWidth(context, 8)),
           decoration: BoxDecoration(
             color: progressColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
+            borderRadius: BorderRadius.circular(
+              ResponsiveConfig.scaleWidth(context, 12),
+            ),
           ),
           child: Icon(icon, color: progressColor, size: iconSize),
         ),
@@ -2162,7 +2279,8 @@ class _DashboardState extends State<Dashboard> {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize:
+                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
                     ),
                   ),
                   Container(
@@ -2172,14 +2290,17 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     decoration: BoxDecoration(
                       color: progressColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 12)),
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.scaleWidth(context, 12),
+                      ),
                     ),
                     child: Text(
                       value,
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize:
+                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
                       ),
                     ),
                   ),
@@ -2191,7 +2312,9 @@ class _DashboardState extends State<Dashboard> {
                 height: ResponsiveConfig.scaleHeight(context, 8),
                 decoration: BoxDecoration(
                   color: AppColors.black.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
+                  borderRadius: BorderRadius.circular(
+                    ResponsiveConfig.scaleWidth(context, 4),
+                  ),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,
@@ -2201,7 +2324,9 @@ class _DashboardState extends State<Dashboard> {
                       gradient: LinearGradient(
                         colors: [progressColor, progressColor.withOpacity(0.7)],
                       ),
-                      borderRadius: BorderRadius.circular(ResponsiveConfig.scaleWidth(context, 4)),
+                      borderRadius: BorderRadius.circular(
+                        ResponsiveConfig.scaleWidth(context, 4),
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: progressColor.withOpacity(0.3),

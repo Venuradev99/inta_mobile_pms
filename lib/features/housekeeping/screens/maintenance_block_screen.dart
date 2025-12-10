@@ -181,6 +181,7 @@ void _showFilterBottomSheet() {
                   _searchController.clear();
                   _isSearchVisible = false;
                 });
+                _maintenanceBlockVm.resetSearch();
               },
             ),
           IconButton(
@@ -342,7 +343,7 @@ void _showFilterBottomSheet() {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-         context.go(AppRoutes.blockRoomSelection);
+         context.push(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),

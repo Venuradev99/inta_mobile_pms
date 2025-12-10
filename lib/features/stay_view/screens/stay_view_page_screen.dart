@@ -770,6 +770,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         child: Theme(
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
+            initiallyExpanded: true,
             title: Row(
               children: [
                 Container(
@@ -1160,6 +1161,11 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final double nights = checkIn['noOfNights'] ?? 1.0;
     final DateTime endDate = startDate.add(Duration(days: nights.toInt()));
     final String roomNumber = item['roomNo'];
+    final int status = checkIn['status'] ?? 0;
+
+    // if(status == 0){
+    //   return;
+    // }
 
     await _stayViewVm.getAllGuestData(bookingRoomId);
     final guestItem = _stayViewVm.allGuestDetails.value;

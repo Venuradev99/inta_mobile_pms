@@ -22,29 +22,6 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
   final List<RoomResponse> _selectedRooms = [];
   bool _selectAll = false;
 
-  // final List<String> _rooms = [
-  //   '501-1',
-  //   '501-2',
-  //   '501-3',
-  //   '501-4',
-  //   '501-5',
-  //   '501-6',
-  //   '501-7',
-  //   '501-8',
-  //   '501-9',
-  //   '501-10',
-  //   '501-11',
-  //   '501-12',
-  //   '501-13',
-  //   '501-14',
-  //   '501-15',
-  //   '501-16',
-  //   '501-17',
-  //   '501-18',
-  //   '501-19',
-  //   '501-20',
-  // ];
-
   void _toggleRoom(RoomResponse room) {
     setState(() {
       if (_selectedRooms.contains(room)) {
@@ -82,7 +59,7 @@ class _BlockRoomSelectionScreenState extends State<BlockRoomSelectionScreen> {
     }
 
     // Navigate to the next screen with selected rooms
-  context.go(AppRoutes.blockRoomDetails, extra: _selectedRooms.toList());
+  context.push(AppRoutes.blockRoomDetails, extra: _selectedRooms.toList());
   }
 
   @override

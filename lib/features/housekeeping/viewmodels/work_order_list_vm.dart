@@ -34,6 +34,8 @@ class WorkOrderListVm extends GetxController {
   Future<void> loadWorkOrders() async {
     try {
       isLoading.value = true;
+      workOrdersFiltered.clear();
+      workOrders.clear();
       final request = WorkOrdersSearchRequest(
         assignerId: 0,
         categoryId: 0,

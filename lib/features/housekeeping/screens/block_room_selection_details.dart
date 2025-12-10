@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/block_room_reason_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
+import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class BlockRoomDetailsScreen extends StatefulWidget {
   final List<RoomResponse> selectedRooms;
@@ -157,9 +158,7 @@ class _BlockRoomDetailsScreenState extends State<BlockRoomDetailsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      context.pop();
-                      context.pop();
-                      context.pop();
+                     context.go(AppRoutes.maintenanceBlock);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,

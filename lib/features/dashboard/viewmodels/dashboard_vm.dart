@@ -17,6 +17,8 @@ class DashboardVm extends GetxController {
   final UserApiService _userApiService;
   final ReservationListService _reservationListService;
 
+  final userName = ''.obs;
+
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
   final inHouseData = Rx<BookingStaticData?>(null);
@@ -35,10 +37,6 @@ class DashboardVm extends GetxController {
   final outOfOrderRooms = RxDouble(0);
   final outOfOrderRoomsRate = RxDouble(0);
 
-  // final projectedRevPar = RxDouble(0);
-  // final projectedAdr = RxDouble(0);
-
-  // final projectedOccupancy = RxDouble(0);
 
   final totalRevenueData = Rx<PropertyStaticsData?>(null);
   final averageDailyRateData = Rx<PropertyStaticsData?>(null);
@@ -56,6 +54,15 @@ class DashboardVm extends GetxController {
     this._userApiService,
     this._reservationListService,
   );
+
+  Future getUserName() async {
+    try {
+      final name = await LocalStorageManager.getUserName();
+      userName.value = name;
+    } catch (e) {
+      throw Exception('Error in GetUserName: $e');
+    }
+  }
 
   String getLastDayOfWeek(String fromDate) {
     try {
@@ -242,7 +249,6 @@ class DashboardVm extends GetxController {
             )
             .toList();
       }
-
     } catch (e) {
       throw Exception('Error in Search Filtering: $e');
     }

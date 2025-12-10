@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
@@ -12,26 +11,11 @@ class NetLockVm extends GetxController {
 
   NetLockVm(this._dashboardService);
 
-  void displayErrorMessage(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      backgroundColor: Colors.redAccent,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(12),
-      borderRadius: 8,
-      duration: const Duration(seconds: 3),
-      icon: const Icon(Icons.error_outline, color: Colors.white),
-    );
-  }
-
   Future<void> loadInitialData() async {
     try {
       isLoading.value = true;
       final response = await _dashboardService.getAllLockReservations();
       if (response["isSuccessful"] == true) {
-        displayErrorMessage('Error loading netlocks!');
         final result = response["result"] as List;
         netlockData.value = result
             .map(
@@ -92,10 +76,11 @@ class NetLockVm extends GetxController {
         "IsUserConsider": false,
         "Lock": false,
       };
+
       final response = await _dashboardService.lockBooking(payload);
       if (response["isSuccessful"] == true) {
-        MessageService().error(
-          response["errors"][0] ??
+        MessageService().success(
+          response["message"] ??
               '${selectedIndexes.length} reservation${selectedIndexes.length > 1 ? 's' : ''} unlocked and removed',
         );
         await loadInitialData();

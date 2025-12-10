@@ -48,7 +48,7 @@ class _ManagerReportState extends State<ManagerReport> {
   String? selectedCurrency;
   bool _showReport = false;
 
-  dynamic _getValue(dynamic  item) {
+  dynamic _getValue(dynamic item) {
     switch (_selectedPeriod) {
       case 0:
         return item.today;
@@ -62,7 +62,11 @@ class _ManagerReportState extends State<ManagerReport> {
   }
 
   void _handleRefresh() {
-    setState(() {});
+    setState(() {
+      _showReport = false;
+      selectedDate = _managerReportVm.systemWorkingDate.value;
+      selectedCurrency = null;
+    });
   }
 
   void _handleFilter() {}
@@ -114,119 +118,132 @@ class _ManagerReportState extends State<ManagerReport> {
           context,
         ).add(ResponsiveConfig.horizontalPadding(context)),
         children: [
-         Row(
-  crossAxisAlignment: CrossAxisAlignment.end,
-  children: [
-    // DATE PICKER
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Date", style: AppTextTheme.lightTextTheme.titleMedium),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: _pickDate,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade400),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // DATE PICKER
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Date",
+                      style: AppTextTheme.lightTextTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _pickDate,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        child: Text(
+                          selectedDate != null
+                              ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+                              : "Select",
+                          style: AppTextTheme.lightTextTheme.bodyMedium,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Text(
-                selectedDate != null
-                    ? DateFormat('yyyy-MM-dd').format(selectedDate!)
-                    : "Select",
-                style: AppTextTheme.lightTextTheme.bodyMedium,
+
+              // CURRENCY DROPDOWN
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Currency",
+                      style: AppTextTheme.lightTextTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Obx(() {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          underline: const SizedBox(),
+                          hint: const Text("Select"),
+                          value: selectedCurrency,
+                          items: _managerReportVm.currencyList
+                              .map(
+                                (e) => DropdownMenuItem(
+                                  value: e.code,
+                                  child: Text(e.code),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) =>
+                              setState(() => selectedCurrency = val),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
-            ),
+
+              const SizedBox(width: 24),
+
+              // GENERATE BUTTON
+              SizedBox(
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (selectedDate == null || selectedCurrency == null) {
+                      MessageService().error(
+                        "Please select a date and currency.",
+                      );
+                      return;
+                    }
+
+                    _managerReportVm.isReportLoading.value = true;
+
+                    await _managerReportVm.getManagerReport(
+                      selectedCurrency!,
+                      selectedDate!,
+                    );
+
+                    _managerReportVm.isReportLoading.value = false;
+
+                    setState(() {
+                      _currencyFormat = NumberFormat.currency(
+                        locale: 'en_US',
+                        symbol: _managerReportVm.getCurrencySymbol(
+                          selectedCurrency,
+                        ),
+                        decimalDigits: 2,
+                      );
+                      _showReport = true;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  child: const Text(
+                    "Generate",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-
-    // CURRENCY DROPDOWN
-    Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Currency", style: AppTextTheme.lightTextTheme.titleMedium),
-          const SizedBox(height: 8),
-          Obx(() {
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade400),
-              ),
-              child: DropdownButton<String>(
-                isExpanded: true,
-                underline: const SizedBox(),
-                hint: const Text("Select"),
-                value: selectedCurrency,
-                items: _managerReportVm.currencyList
-                    .map((e) => DropdownMenuItem(
-                          value: e.code,
-                          child: Text(e.code),
-                        ))
-                    .toList(),
-                onChanged: (val) => setState(() => selectedCurrency = val),
-              ),
-            );
-          }),
-        ],
-      ),
-    ),
-
-    const SizedBox(width: 24),
-
-    // GENERATE BUTTON
-    SizedBox(
-      height: 48,
-      child: ElevatedButton(
-        onPressed: () async {
-          if (selectedDate == null || selectedCurrency == null) {
-            MessageService().error(
-              "Please select a date and currency.",
-            );
-            return;
-          }
-
-          _managerReportVm.isReportLoading.value = true;
-
-          await _managerReportVm.getManagerReport(
-            selectedCurrency!,
-            selectedDate!,
-          );
-
-          _managerReportVm.isReportLoading.value = false;
-
-          setState(() {
-            _currencyFormat = NumberFormat.currency(
-              locale: 'en_US',
-              symbol: _managerReportVm.getCurrencySymbol(selectedCurrency),
-              decimalDigits: 2,
-            );
-            _showReport = true;
-          });
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-        ),
-        child: const Text(
-          "Generate",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    ),
-  ],
-)
-,
 
           const SizedBox(height: 40),
 
@@ -331,7 +348,7 @@ class _ManagerReportState extends State<ManagerReport> {
                     Text(
                       _currencyFormat.format(value),
                       style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                        fontWeight:FontWeight.normal,
+                        fontWeight: FontWeight.normal,
                         color: isNegative ? AppColors.red : AppColors.black,
                       ),
                     ),
@@ -403,11 +420,7 @@ class _ManagerReportState extends State<ManagerReport> {
         children: [
           Padding(
             padding: ResponsiveConfig.horizontalPadding(context),
-            child: Container(
-              width: 200,
-              height: 20,
-              color: Colors.white,
-            ),
+            child: Container(width: 200, height: 20, color: Colors.white),
           ),
           const SizedBox(height: 16),
           Padding(
@@ -418,17 +431,9 @@ class _ManagerReportState extends State<ManagerReport> {
                 3,
                 (_) => Row(
                   children: [
-                    Container(
-                      width: 20,
-                      height: 20,
-                      color: Colors.white,
-                    ),
+                    Container(width: 20, height: 20, color: Colors.white),
                     const SizedBox(width: 8),
-                    Container(
-                      width: 50,
-                      height: 16,
-                      color: Colors.white,
-                    ),
+                    Container(width: 50, height: 16, color: Colors.white),
                   ],
                 ),
               ),
@@ -450,16 +455,14 @@ class _ManagerReportState extends State<ManagerReport> {
                   (_) => Column(
                     children: [
                       Padding(
-                        padding: ResponsiveConfig.horizontalPadding(context)
-                            .copyWith(top: 8, bottom: 8),
+                        padding: ResponsiveConfig.horizontalPadding(
+                          context,
+                        ).copyWith(top: 8, bottom: 8),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Expanded(
-                              child: Container(
-                                height: 16,
-                                color: Colors.white,
-                              ),
+                              child: Container(height: 16, color: Colors.white),
                             ),
                             Container(
                               width: 100,
@@ -469,10 +472,7 @@ class _ManagerReportState extends State<ManagerReport> {
                           ],
                         ),
                       ),
-                      const Divider(
-                        color: Colors.transparent,
-                        height: 1,
-                      ),
+                      const Divider(color: Colors.transparent, height: 1),
                     ],
                   ),
                 ),

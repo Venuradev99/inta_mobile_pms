@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -72,7 +68,7 @@ class _LoginPageState extends State<LoginPage>
   }
 
   Future<void> _handleLogin() async {
-    // if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     await _userApiService.login(
       _usernameController.text.trim(),
@@ -87,12 +83,6 @@ class _LoginPageState extends State<LoginPage>
     if (value == null || value.isEmpty) {
       return 'Username is required';
     }
-    if (value.length < 3) {
-      return 'Username must be at least 3 characters';
-    }
-    if (!RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(value)) {
-      return 'Username can only contain letters, numbers, underscores, dots, or hyphens';
-    }
     return null;
   }
 
@@ -100,21 +90,12 @@ class _LoginPageState extends State<LoginPage>
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
     return null;
   }
 
   String? _validateHotelId(String? value) {
     if (value == null || value.isEmpty) {
       return 'Hotel ID is required';
-    }
-    if (value.length < 3) {
-      return 'Hotel ID must be at least 3 characters';
-    }
-    if (!RegExp(r'^[a-zA-Z0-9-]+$').hasMatch(value)) {
-      return 'Hotel ID can only contain letters, numbers, or hyphens';
     }
     return null;
   }
@@ -313,52 +294,51 @@ class _LoginPageState extends State<LoginPage>
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
 
             // Remember Me & Forgot Password
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: Checkbox(
-                        value: _rememberMe,
-                        onChanged: (value) =>
-                            setState(() => _rememberMe = value ?? false),
-                        activeColor: AppColors.primary,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                    ),
-                    SizedBox(width: ResponsiveConfig.scaleWidth(context, 8)),
-                    Text(
-                      'Remember me',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.darkgrey,
-                        fontSize:
-                            ResponsiveConfig.scaleWidth(context, 12) *
-                            ResponsiveConfig.fontScale(context),
-                      ),
-                    ),
-                  ],
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Handle forgot password
-                    HapticFeedback.lightImpact();
-                  },
-                  child: Text(
-                    'Forgot Password?',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w500,
-                      fontSize:
-                          ResponsiveConfig.scaleWidth(context, 12) *
-                          ResponsiveConfig.fontScale(context),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Row(
+            //       children: [
+            //         SizedBox(
+            //           height: 20,
+            //           width: 20,
+            //           child: Checkbox(
+            //             value: _rememberMe,
+            //             onChanged: (value) =>
+            //                 setState(() => _rememberMe = value ?? false),
+            //             activeColor: AppColors.primary,
+            //             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //           ),
+            //         ),
+            //         SizedBox(width: ResponsiveConfig.scaleWidth(context, 8)),
+            //         Text(
+            //           'Remember me',
+            //           style: theme.textTheme.bodySmall?.copyWith(
+            //             color: AppColors.darkgrey,
+            //             fontSize:
+            //                 ResponsiveConfig.scaleWidth(context, 12) *
+            //                 ResponsiveConfig.fontScale(context),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //     TextButton(
+            //       onPressed: () {
+            //         HapticFeedback.lightImpact();
+            //       },
+            //       child: Text(
+            //         'Forgot Password?',
+            //         style: theme.textTheme.bodySmall?.copyWith(
+            //           color: AppColors.primary,
+            //           fontWeight: FontWeight.w500,
+            //           fontSize:
+            //               ResponsiveConfig.scaleWidth(context, 12) *
+            //               ResponsiveConfig.fontScale(context),
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 32)),
 
@@ -396,6 +376,7 @@ class _LoginPageState extends State<LoginPage>
         ),
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
         TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           controller: controller,
           obscureText: isPassword && !_isPasswordVisible,
           keyboardType: keyboardType,

@@ -38,7 +38,17 @@ class LocalStorageManager {
     }
   }
 
-
+  static Future<String> getUserName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('masterData') ?? "";
+    if (jsonString.isNotEmpty) {
+      final json = jsonDecode(jsonString);
+      final masterData =  MasterData.fromJson(json);
+      return masterData.userName;
+    } else {
+      return '';
+    }
+  }
 
   static Future<void> setBaseCurrencyData(
     Map<String, dynamic> baseCurrencyData,
