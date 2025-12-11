@@ -1,4 +1,5 @@
 class GuestItem {
+  final String? reservationNumber;
   final int? bookingId;
   final String bookingRoomId;
   final String guestName;
@@ -36,6 +37,7 @@ class GuestItem {
   final String? roomNumber;
   final String? reservedDate;
   final String? reservationType;
+  final String? baseCurrencySymbol;
   final String? status;
   final String? workPlace;
   final String? civilStatus;
@@ -116,6 +118,7 @@ class GuestItem {
   String? resDate;
 
   GuestItem({
+    this.reservationNumber,
     this.bookingId,
     required this.bookingRoomId,
     required this.guestName,
@@ -131,6 +134,7 @@ class GuestItem {
     this.nationalityId,
     this.vipStatusId,
     this.swipeCardId,
+    this.baseCurrencySymbol,
     this.identityIssuingCountryId,
     this.identityIssuingCityId,
     this.dateofBirth,
@@ -235,6 +239,8 @@ class GuestItem {
   factory GuestItem.fromJson(Map<String, dynamic> json) {
     return GuestItem(
       bookingId: json['bookingId'] ?? 0,
+      reservationNumber: json['reservationNumber'] ?? '',
+      baseCurrencySymbol: json['baseCurrencySymbol'] ?? '',
       bookingRoomId: json['bookingRoomId'] ?? '',
       guestName: json['guestName'] ?? '',
       guestId: json['guestId'] ?? 0,
@@ -357,8 +363,10 @@ class GuestItem {
 
   Map<String, dynamic> toJson() {
     return {
+      'reservationNumber': reservationNumber,
       'bookingId': bookingId,
       'bookingRoomId': bookingRoomId,
+      'baseCurrencySymbol': baseCurrencySymbol,
       'guestName': guestName,
       'guestId': guestId,
       'titleId': titleId,
@@ -476,6 +484,8 @@ class GuestItem {
   @override
   String toString() {
     return 'GuestItem('
+        'baseCurrencySymbol: $baseCurrencySymbol, '
+        'reservationNumber: $reservationNumber, '
         'bookingId: $bookingId, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '

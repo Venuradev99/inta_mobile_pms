@@ -4,12 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:shimmer/shimmer.dart';
 
 class StayViewPageScreen extends StatefulWidget {
@@ -21,14 +19,20 @@ class StayViewPageScreen extends StatefulWidget {
 
 class _StayViewPageScreenState extends State<StayViewPageScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
-  DateTime _centerDate = DateTime(2025, 10, 29);
+  DateTime _centerDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _stayViewVm.loadToday();
-      _stayViewVm.loadInitialData(_centerDate);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _stayViewVm.loadToday();
+
+      setState(() {
+        _centerDate = _stayViewVm.today.value ?? DateTime.now();
+        print('Initialized center date: $_centerDate');
+      });
+
+      await _stayViewVm.loadInitialData(_centerDate);
     });
   }
 
@@ -261,7 +265,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final availableWidth =
         screenWidth - (horizontalPadding.left + horizontalPadding.right);
 
-    // Dynamic width calculation: 35% for room names, 65% distributed among days
     final List<DateTime> days = [
       _centerDate.subtract(const Duration(days: 1)),
       _centerDate,
@@ -336,13 +339,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                                     ),
                                   );
                           }),
-                          // const SizedBox(height: 20),
-                          // _buildOccupancyCard(
-                          //   roomWidth,
-                          //   dayWidth,
-                          //   days,
-                          //   textTheme,
-                          // ),
                         ],
                       );
                     },
@@ -355,153 +351,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       ),
     );
   }
-
-  // List<Widget> _buildRoomSectionsShimmer(double roomWidth, double dayWidth) {
-  //   return List.generate(3, (index) {
-  //     return Container(
-  //       margin: const EdgeInsets.only(bottom: 12),
-  //       decoration: BoxDecoration(
-  //         color: Colors.white,
-  //         borderRadius: BorderRadius.circular(12),
-  //         border: Border.all(color: Colors.grey[200]!),
-  //         boxShadow: [
-  //           BoxShadow(
-  //             color: Colors.black.withOpacity(0.02),
-  //             blurRadius: 8,
-  //             offset: const Offset(0, 2),
-  //           ),
-  //         ],
-  //       ),
-  //       child: Padding(
-  //         padding: const EdgeInsets.all(16),
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             // Header shimmer
-  //             Row(
-  //               children: [
-  //                 Shimmer.fromColors(
-  //                   baseColor: Colors.grey[300]!,
-  //                   highlightColor: Colors.grey[100]!,
-  //                   child: Container(
-  //                     width: 30,
-  //                     height: 24,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.white,
-  //                       borderRadius: BorderRadius.circular(6),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(width: 12),
-  //                 Shimmer.fromColors(
-  //                   baseColor: Colors.grey[300]!,
-  //                   highlightColor: Colors.grey[100]!,
-  //                   child: Container(
-  //                     width: 120,
-  //                     height: 16,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.white,
-  //                       borderRadius: BorderRadius.circular(4),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             const SizedBox(height: 16),
-  //             // Availability row shimmer
-  //             Row(
-  //               children: [
-  //                 Shimmer.fromColors(
-  //                   baseColor: Colors.grey[300]!,
-  //                   highlightColor: Colors.grey[100]!,
-  //                   child: Container(
-  //                     width: roomWidth,
-  //                     height: 40,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.white,
-  //                       borderRadius: BorderRadius.circular(4),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 const SizedBox(width: 8),
-  //                 Expanded(
-  //                   child: Row(
-  //                     children: List.generate(7, (dayIndex) {
-  //                       return Expanded(
-  //                         child: Padding(
-  //                           padding: const EdgeInsets.symmetric(horizontal: 2),
-  //                           child: Shimmer.fromColors(
-  //                             baseColor: Colors.grey[300]!,
-  //                             highlightColor: Colors.grey[100]!,
-  //                             child: Container(
-  //                               height: 40,
-  //                               decoration: BoxDecoration(
-  //                                 color: Colors.white,
-  //                                 borderRadius: BorderRadius.circular(4),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       );
-  //                     }),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             const SizedBox(height: 8),
-  //             // Room rows shimmer
-  //             ...List.generate(2, (rowIndex) {
-  //               return Padding(
-  //                 padding: const EdgeInsets.only(bottom: 8),
-  //                 child: Row(
-  //                   children: [
-  //                     Shimmer.fromColors(
-  //                       baseColor: Colors.grey[300]!,
-  //                       highlightColor: Colors.grey[100]!,
-  //                       child: Container(
-  //                         width: roomWidth,
-  //                         height: 50,
-  //                         decoration: BoxDecoration(
-  //                           color: Colors.white,
-  //                           borderRadius: BorderRadius.circular(4),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     const SizedBox(width: 8),
-  //                     Expanded(
-  //                       child: Row(
-  //                         children: List.generate(7, (dayIndex) {
-  //                           return Expanded(
-  //                             child: Padding(
-  //                               padding: const EdgeInsets.symmetric(
-  //                                 horizontal: 2,
-  //                               ),
-  //                               child: Shimmer.fromColors(
-  //                                 baseColor: Colors.grey[300]!,
-  //                                 highlightColor: Colors.grey[100]!,
-  //                                 child: Container(
-  //                                   height: 50,
-  //                                   decoration: BoxDecoration(
-  //                                     color: Colors.white,
-  //                                     borderRadius: BorderRadius.circular(4),
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           );
-  //                         }),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               );
-  //             }),
-  //           ],
-  //         ),
-  //       ),
-  //     );
-  //   });
-  // }
 
   List<Widget> _buildRoomSectionsShimmer(double roomWidth, double dayWidth) {
     return List.generate(10, (index) {
@@ -952,25 +801,12 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final String name = item['roomNo'];
     final bool isMaintenance = (item['maintenanceBlockId'] ?? 0) > 0;
     final bool hasOccupancy = item['roomData'].any(
-      (dayData) => dayData['checkInExist'] != null,
+      (dayData) =>
+          dayData['checkInExist'] != null && dayData['checkInExist'].isNotEmpty,
     );
 
-    // Process guest per day, spanning noOfNights
     final int numDays = days.length;
-    List<Map<String, dynamic>?> guestPerDay = List.filled(numDays, null);
-    for (int i = 0; i < numDays; i++) {
-      final dayData = item['roomData'][i];
-      if (dayData['checkInExist'] != null &&
-          dayData['checkInExist'].isNotEmpty) {
-        final checkIn = dayData['checkInExist'][0];
-        final double nights = checkIn['noOfNights'] ?? 1.0;
-        for (int j = 0; j < nights; j++) {
-          if (i + j < numDays) {
-            guestPerDay[i + j] = checkIn;
-          }
-        }
-      }
-    }
+    final double totalDaysWidth = dayWidth * numDays;
 
     final double namePaddingLeft = 16.0;
 
@@ -980,99 +816,106 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       color: Colors.grey[800],
     );
 
-    final List<Widget> dayCells = [];
-    if (isMaintenance) {
-      dayCells.add(
-        Expanded(
-          flex: 3,
-          child: Container(
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              border: Border(left: BorderSide(color: Colors.grey[200]!)),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.orange[50],
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.orange[200]!),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.build, size: 14, color: Colors.orange[700]),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Maintenance',
-                      style: TextStyle(
-                        color: Colors.orange[700],
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    } else {
-      for (int i = 0; i < numDays; i++) {
-        final dayData = item['roomData'][i];
-        Widget? child;
-        Color? cellBgColor;
-        if (guestPerDay[i] != null) {
-          final checkIn = guestPerDay[i]!;
-          final String guestName = checkIn['guestName'] ?? '';
-          final String colorCode = checkIn['colorCode'] ?? '#000000';
-          final Color guestColor = Color(
+    List<Widget> reservationBars = [];
+    for (int i = 0; i < numDays; i++) {
+      final dayData = item['roomData'][i];
+      if (dayData['checkInExist'] != null &&
+          dayData['checkInExist'].isNotEmpty) {
+        int startOn = dayData['startOn'] ?? 1;
+        List checkInList = dayData['checkInExist'];
+        for (int k = 0; k < checkInList.length; k++) {
+          final checkIn = checkInList[k];
+          String guestName = checkIn['guestName'] ?? '';
+          String colorCode = checkIn['colorCode'] ?? '#000000';
+          Color guestColor = Color(
             int.parse(colorCode.replaceFirst('#', '0xFF')),
           );
-          cellBgColor = guestColor.withOpacity(0.15);
-          child = Container(
-            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: guestColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
+          double noNights = checkIn['noOfNights'] ?? 1.0;
+          double barWidth = noNights * dayWidth;
+          if (noNights == 0) barWidth = dayWidth;
+          double offset = 0;
+          if (startOn == 1)
+            offset = 0;
+          else if (startOn == 2)
+            offset = dayWidth / 2;
+          else if (startOn == 3)
+            offset = (checkIn['index'] ?? k) == 0 ? 0 : dayWidth / 2;
+          double left = i * dayWidth + offset;
+          bool isMaintenanceDay =
+              (checkIn['maintenanceBlockId'] ?? 0) > 0 ||
+              (dayData['isCheckinDate'] ?? 0) == 3;
+          Widget barChild;
+          if (isMaintenanceDay) {
+            guestName = checkIn['guestName'] ?? '';
+            guestColor = Color(int.parse(colorCode.replaceFirst('#', '0xFF')))!;
+            barChild = Row(
+              children: [
+                Icon(Icons.build, size: 10, color: Colors.white),
+                const SizedBox(width: 4),
+                Text(
+                  guestName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+          } else {
+            barChild = Text(
               guestName,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                letterSpacing: -0.1,
               ),
               overflow: TextOverflow.ellipsis,
-              maxLines: 1,
+            );
+          }
+          reservationBars.add(
+            Positioned(
+              left: left,
+              top: 0,
+              child: InkWell(
+                onTap: () {
+                  if (guestName == 'BLOCKED') return;
+                  _handleGuestTap(item, days, section, checkIn, i);
+                },
+
+                child: Container(
+                  width: barWidth,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: guestColor,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  alignment: Alignment.centerLeft,
+                  child: barChild,
+                ),
+              ),
             ),
           );
-        } else if (!(dayData['available'] ?? true)) {
-          cellBgColor = AppColors.onPrimary;
-          child = const SizedBox.shrink(); // Or add text/icon if needed
-        } else {
-          child = const SizedBox.shrink();
         }
-        dayCells.add(
-          Expanded(
-            child: Container(
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: cellBgColor,
-                border: Border(left: BorderSide(color: Colors.grey[200]!)),
-              ),
-              child: child,
-            ),
-          ),
-        );
       }
     }
+
+    final List<Widget> backgroundDayCells = List.generate(numDays, (index) {
+      return Expanded(
+        child: Container(
+          height: 48,
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: index == 0 ? Colors.transparent : Colors.grey[200]!,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
 
     // Add room indicators
     List<Widget> indicators = [];
@@ -1121,40 +964,31 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                   ],
                 ),
               ),
-              ...dayCells,
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Row(children: backgroundDayCells),
+                    ...reservationBars,
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ],
     );
 
-    return hasOccupancy
-        ? InkWell(
-            onTap: () => _handleGuestTap(item, days, section, guestPerDay),
-            splashColor: AppColors.primary.withOpacity(0.1),
-            highlightColor: AppColors.primary.withOpacity(0.05),
-            child: content,
-          )
-        : content;
+    return content;
   }
 
   void _handleGuestTap(
     Map<String, dynamic> item,
     List<DateTime> days,
     Map<String, dynamic> section,
-    List<Map<String, dynamic>?> guestPerDay,
+    Map<String, dynamic> checkIn,
+    int startIndex,
   ) async {
-    int? startIndex, endIndex;
-    for (int i = 0; i < guestPerDay.length; i++) {
-      if (guestPerDay[i] != null) {
-        startIndex ??= i;
-        endIndex = i;
-      }
-    }
-
-    if (startIndex == null) return;
-
-    final checkIn = guestPerDay[startIndex]!;
     final String guestName = checkIn['guestName'];
     final int bookingRoomId = checkIn['bookingRoomId'];
     final DateTime startDate = days[startIndex];
@@ -1170,153 +1004,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     await _stayViewVm.getAllGuestData(bookingRoomId);
     final guestItem = _stayViewVm.allGuestDetails.value;
 
-     context.push(AppRoutes.viewReservation, extra: guestItem);
-  }
-
-  Widget _buildOccupancyCard(
-    double roomWidth,
-    double dayWidth,
-    List<DateTime> days,
-    TextTheme textTheme,
-  ) {
-    final List<Map<String, dynamic>> roomTypes = [
-      {
-        "roomTypeName": "Deluxe Queen",
-        "roomTypeId": 1,
-        "datas": [
-          {
-            "calenderDate": "2025-10-28T00:00:00",
-            "availability": 3.00,
-            "totalNoOfRooms": 4,
-            "bookingRooms": [],
-          },
-          {
-            "calenderDate": "2025-10-29T00:00:00",
-            "availability": 2.00,
-            "totalNoOfRooms": 4,
-            "bookingRooms": [],
-          },
-          {
-            "calenderDate": "2025-10-30T00:00:00",
-            "availability": 2.00,
-            "totalNoOfRooms": 4,
-            "bookingRooms": [],
-          },
-        ],
-        // ... rooms omitted for brevity
-      },
-      // Add more if needed
-    ];
-
-    final int numDays = days.length;
-    List<int> occupancies = [];
-    for (int i = 0; i < numDays; i++) {
-      double totalRooms = 0.0;
-      double totalAvailable = 0.0;
-      for (var section in roomTypes) {
-        final dayData = section['datas'][i];
-        totalRooms += dayData['totalNoOfRooms'] ?? 0.0;
-        totalAvailable += dayData['availability'] ?? 0.0;
-      }
-      final double occupancyPercent = totalRooms > 0
-          ? ((totalRooms - totalAvailable) / totalRooms * 100).roundToDouble()
-          : 0.0;
-      occupancies.add(occupancyPercent.toInt());
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary.withOpacity(0.05),
-            AppColors.primary.withOpacity(0.02),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Container(
-              width: roomWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.analytics_outlined,
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      'Occupancy',
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                        letterSpacing: -0.2,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ...occupancies.map(
-              (o) => Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        color: AppColors.primary.withOpacity(0.2),
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$o%',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        width: 32,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: o / 100,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    context.push(AppRoutes.viewReservation, extra: guestItem);
   }
 }

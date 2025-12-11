@@ -60,10 +60,12 @@ class UserApiService {
           final systemInfoResponse = await Future.wait([
             loadSystemInformation(),
             loadBaseCurrency(),
+            loadHotelInfo(),
           ]);
 
           final systemInfo = systemInfoResponse[0];
           final baseCurrency = systemInfoResponse[1];
+          final hotelInfo = systemInfoResponse[2];
 
           if (systemInfo["isSuccessful"]) {
             await LocalStorageManager.setSystemDate(
@@ -74,6 +76,12 @@ class UserApiService {
           if (baseCurrency["isSuccessful"]) {
             await LocalStorageManager.setBaseCurrencyData(
               baseCurrency["result"],
+            );
+          }
+
+          if (hotelInfo["isSuccessful"]) {
+            await LocalStorageManager.setHotelInfoData(
+              hotelInfo["result"],
             );
           }
           // Show success
@@ -166,6 +174,44 @@ class UserApiService {
       }
     } catch (e) {
       String msg = 'Error loading system information: $e';
+      MessageService().error(msg);
+      throw Exception(msg);
+    }
+  }
+
+  Future<Map<String, dynamic>> loadHotelInfo() async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      final url = AppResources.hotel;
+
+      final config = await UserApiService.getConfigJSON();
+      final baseUrl = config['baseUrl'] ?? '';
+
+      if (token.isEmpty) throw Exception('Session key not available');
+      if (baseUrl == null) throw Exception('baseUrl URL not available');
+
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        "hotelid": hotelId,
+        'requestedhotelid': (-1).toString(),
+      };
+
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        String msg = 'Failed to load hotel information';
+        MessageService().error(msg);
+        throw Exception(msg);
+      }
+    } catch (e) {
+      String msg = 'Error loading hotel information: $e';
       MessageService().error(msg);
       throw Exception(msg);
     }

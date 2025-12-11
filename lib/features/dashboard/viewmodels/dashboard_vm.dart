@@ -18,6 +18,7 @@ class DashboardVm extends GetxController {
   final ReservationListService _reservationListService;
 
   final userName = ''.obs;
+  final hotelName = ''.obs;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -61,6 +62,16 @@ class DashboardVm extends GetxController {
       userName.value = name;
     } catch (e) {
       throw Exception('Error in GetUserName: $e');
+    }
+  }
+
+  Future getHotelInfoData() async {
+    try {
+      final hotelInfo = await LocalStorageManager.getHotelInfoData();
+      hotelName.value = hotelInfo.hotelName ?? '';
+    
+    } catch (e) {
+      throw Exception('Error in GetHotelInfoData: $e');
     }
   }
 

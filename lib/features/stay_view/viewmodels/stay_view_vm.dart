@@ -34,10 +34,11 @@ class StayViewVm extends GetxController {
     }
   }
 
-  void loadToday() async {
+  Future loadToday() async {
     try {
       final todaySystemDate = await LocalStorageManager.getSystemDate();
       today.value = DateTime.parse(todaySystemDate);
+      print('Loaded today system date: ${today.value}');
     } catch (e) {
       throw Exception('Error getting today system date: $e');
     }
@@ -139,8 +140,9 @@ class StayViewVm extends GetxController {
     }
   }
 
-  Future<void> getAllGuestData( int bookingRoomId) async {
+  Future<void> getAllGuestData(int bookingRoomId) async {
     try {
+      final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       final response = await _reservationListService.getByBookingRoomId(
         bookingRoomId,
       );
@@ -168,6 +170,9 @@ class StayViewVm extends GetxController {
         }
 
         final guestItem = GuestItem(
+          baseCurrencySymbol: baseCurrencyData.symbol,
+          reservationNumber: result["bookingRoom"]["reservatioNumber"]
+              .toString(),
           bookingId: result["bookingId"] ?? 0,
           bookingRoomId: result["bookingRoom"]["bookingRoomId"].toString(),
           guestId: result["guest"]["guestId"] ?? 0,

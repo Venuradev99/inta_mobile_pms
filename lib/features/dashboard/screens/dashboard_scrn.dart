@@ -28,6 +28,7 @@ class _DashboardState extends State<Dashboard> {
       if (mounted) {
         await _dashboardVm.loadBookingStaticData();
         await _dashboardVm.getUserName();
+        await _dashboardVm.getHotelInfoData();
       }
     });
   }
@@ -69,7 +70,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.quickReservation);
+              context.push(AppRoutes.quickReservation);
             },
           ),
           IconButton(
@@ -79,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.stayView);
+              context.push(AppRoutes.stayView);
             },
           ),
           IconButton(
@@ -95,7 +96,7 @@ class _DashboardState extends State<Dashboard> {
               size: iconSize,
             ),
             onPressed: () {
-              context.go(AppRoutes.notifications);
+              context.push(AppRoutes.notifications);
             },
           ),
         ],
@@ -661,16 +662,19 @@ class _DashboardState extends State<Dashboard> {
                       ],
                     ),
                     const Spacer(),
-                    Text(
-                      'Inta PMS',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: AppColors.onPrimary.withOpacity(0.95),
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.3,
-                        fontSize:
-                            (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
-                      ),
-                    ),
+                    Obx(() {
+                      return Text(
+                        _dashboardVm.hotelName.value,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.onPrimary.withOpacity(0.95),
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.3,
+                          fontSize:
+                              (textTheme.bodyMedium?.fontSize ?? 14) *
+                              fontScale,
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -693,7 +697,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.home,
                   'Dashboard',
-                  () => context.go(AppRoutes.dashboard),
+                  () => context.push(AppRoutes.dashboard),
                   config,
                   isActive: true,
                 ),
@@ -702,7 +706,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.grid_view,
                   'Stay View',
-                  () => context.go(AppRoutes.stayView),
+                  () => context.push(AppRoutes.stayView),
                   config,
                 ),
                 _buildMenuTile(
@@ -710,7 +714,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_today,
                   'Quick Reservation',
-                  () => context.go(AppRoutes.quickReservation),
+                  () => context.push(AppRoutes.quickReservation),
                   config,
                 ),
                 _buildMenuTile(
@@ -718,7 +722,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.calendar_month,
                   'Reservation List',
-                  () => context.go(AppRoutes.reservationList),
+                  () => context.push(AppRoutes.reservationList),
                   config,
                 ),
                 _buildMenuTile(
@@ -726,7 +730,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.airplanemode_on,
                   'Arrival List',
-                  () => context.go(AppRoutes.arrivalList),
+                  () => context.push(AppRoutes.arrivalList),
                   config,
                 ),
                 // _buildMenuTile(
@@ -734,7 +738,7 @@ class _DashboardState extends State<Dashboard> {
                 //   textTheme,
                 //   Icons.hotel,
                 //   'In-house List',
-                //   () => context.go(AppRoutes.inhouseList),
+                //   () => context.push(AppRoutes.inhouseList),
                 //   config,
                 // ),
                 _buildMenuTile(
@@ -742,7 +746,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.emoji_transportation_rounded,
                   'Departure List',
-                  () => context.go(AppRoutes.departureList),
+                  () => context.push(AppRoutes.departureList),
                   config,
                 ),
                 _buildMenuTile(
@@ -750,7 +754,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.attach_money,
                   'Rates & Inventory',
-                  () => context.go(AppRoutes.ratesInventory),
+                  () => context.push(AppRoutes.ratesInventory),
                   config,
                 ),
                 // === REPORTS EXPANSION TILE ===
@@ -800,7 +804,7 @@ class _DashboardState extends State<Dashboard> {
                       textTheme,
                       Icons.nights_stay,
                       'Night Audit Report',
-                      () => context.go(AppRoutes.nightAuditReport),
+                      () => context.push(AppRoutes.nightAuditReport),
                       config,
                       // isActive: GoRouterState.of(context).location.contains(AppRoutes.nightAuditReport),
                     ),
@@ -809,7 +813,7 @@ class _DashboardState extends State<Dashboard> {
                       textTheme,
                       Icons.bar_chart,
                       'Manager Report',
-                      () => context.go(AppRoutes.managerReport),
+                      () => context.push(AppRoutes.managerReport),
                       config,
                       // isActive: GoRouterState.of(context).location.contains(AppRoutes.managerReport),
                     ),
@@ -828,7 +832,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.tire_repair_sharp,
                   'Maintenance Block',
-                  () => context.go(AppRoutes.maintenanceBlock),
+                  () => context.push(AppRoutes.maintenanceBlock),
                   config,
                 ),
                 _buildMenuTile(
@@ -836,7 +840,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.checklist,
                   'Work Order List',
-                  () => context.go(AppRoutes.workOrderList),
+                  () => context.push(AppRoutes.workOrderList),
                   config,
                 ),
                 _buildMenuTile(
@@ -844,7 +848,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.house,
                   'House Status',
-                  () => context.go(AppRoutes.houseStatus),
+                  () => context.push(AppRoutes.houseStatus),
                   config,
                 ),
                 Divider(
@@ -860,7 +864,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.lock,
                   'Net Lock',
-                  () => context.go(AppRoutes.netLock),
+                  () => context.push(AppRoutes.netLock),
                   config,
                 ),
                 _buildMenuTile(
@@ -868,7 +872,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.notifications,
                   'Notification',
-                  () => context.go(AppRoutes.notifications),
+                  () => context.push(AppRoutes.notifications),
                   config,
                 ),
                 _buildMenuTile(
@@ -876,7 +880,7 @@ class _DashboardState extends State<Dashboard> {
                   textTheme,
                   Icons.settings,
                   'Settings',
-                  () => context.go(AppRoutes.settings),
+                  () => context.push(AppRoutes.settings),
                   config,
                 ),
               ],
@@ -1144,7 +1148,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => context.go(AppRoutes.arrivalList),
+                        () => context.push(AppRoutes.arrivalList),
                       ),
                     ),
                     SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
@@ -1161,7 +1165,7 @@ class _DashboardState extends State<Dashboard> {
                         cardRadius,
                         iconSize,
                         fontScale,
-                        () => context.go(AppRoutes.departureList),
+                        () => context.push(AppRoutes.departureList),
                       ),
                     ),
                   ],
@@ -1185,7 +1189,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => context.go(AppRoutes.arrivalList),
+                  () => context.push(AppRoutes.arrivalList),
                 ),
                 SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
                 _buildOccupancyCard(
@@ -1200,7 +1204,7 @@ class _DashboardState extends State<Dashboard> {
                   cardRadius,
                   iconSize,
                   fontScale,
-                  () => context.go(AppRoutes.departureList),
+                  () => context.push(AppRoutes.departureList),
                 ),
               ],
             ),
@@ -1209,7 +1213,7 @@ class _DashboardState extends State<Dashboard> {
             children: [
               Expanded(
                 child: GestureDetector(
-                  // onTap: () => context.go(AppRoutes.inhouseList),
+                  // onTap: () => context.push(AppRoutes.inhouseList),
                   child: _buildInHouseCard(
                     context,
                     textTheme,
@@ -1223,7 +1227,7 @@ class _DashboardState extends State<Dashboard> {
               SizedBox(width: ResponsiveConfig.scaleWidth(context, 16)),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => context.go(AppRoutes.reservationList),
+                  onTap: () => context.push(AppRoutes.reservationList),
                   child: _buildBookingCard(
                     context,
                     textTheme,

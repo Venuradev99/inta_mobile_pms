@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
@@ -9,17 +7,27 @@ class ViewReservation extends StatefulWidget {
   final GuestItem? item;
   const ViewReservation({super.key, this.item});
   @override
-   State<ViewReservation> createState() => _ViewReservation();
+  State<ViewReservation> createState() => _ViewReservation();
 }
 
-class _ViewReservation extends State<ViewReservation>{
+class _ViewReservation extends State<ViewReservation> {
   GuestItem? item;
 
-   @override
+  @override
   void initState() {
     super.initState();
     item = widget.item;
   }
+
+String formatCurrency(double? value) {
+  if (value == null) return '${item?.baseCurrencySymbol}0.00';
+
+  final formatted = value.toStringAsFixed(2)
+      .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+\.)'), (Match m) => '${m[1]},');
+
+  return '${item?.baseCurrencySymbol}${formatted}';
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +80,10 @@ class _ViewReservation extends State<ViewReservation>{
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 16,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -89,14 +100,12 @@ class _ViewReservation extends State<ViewReservation>{
       length: 5,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: CustomAppBar(
-          title: 'Reservation Details',
-        ),
+        appBar: CustomAppBar(title: 'Reservation Details'),
         body: Column(
           children: [
             // Enhanced Guest Header Card
             _buildGuestHeaderCard(),
-            
+
             // Modern TabBar
             Container(
               decoration: BoxDecoration(
@@ -127,13 +136,13 @@ class _ViewReservation extends State<ViewReservation>{
                 tabs: const [
                   Tab(text: 'Overview'),
                   Tab(text: 'Guest Details'),
-                  Tab(text: 'Charges'),
+                  Tab(text: 'Room Charges'),
                   Tab(text: 'Folio'),
                   Tab(text: 'Remarks'),
                 ],
               ),
             ),
-            
+
             Expanded(
               child: TabBarView(
                 children: [
@@ -181,7 +190,11 @@ class _ViewReservation extends State<ViewReservation>{
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.person_outline, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.person_outline,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -201,13 +214,16 @@ class _ViewReservation extends State<ViewReservation>{
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.25),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            'Booking #${item!.folioId}',
+                            'Res No: ${item!.reservationNumber}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
@@ -218,7 +234,10 @@ class _ViewReservation extends State<ViewReservation>{
                         if (item!.roomNumber != null) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.25),
                               borderRadius: BorderRadius.circular(6),
@@ -262,16 +281,26 @@ class _ViewReservation extends State<ViewReservation>{
                 Row(
                   children: [
                     Expanded(
-                      child: _buildDateColumn('Check-In', item!.startDate, Icons.login),
+                      child: _buildDateColumn(
+                        'Check-In',
+                        item!.startDate,
+                        Icons.login,
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
-                          Icon(Icons.arrow_forward, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.arrow_forward,
+                            color: Colors.grey.shade400,
+                          ),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
@@ -289,31 +318,58 @@ class _ViewReservation extends State<ViewReservation>{
                       ),
                     ),
                     Expanded(
-                      child: _buildDateColumn('Check-Out', item!.endDate, Icons.logout),
+                      child: _buildDateColumn(
+                        'Check-Out',
+                        item!.endDate,
+                        Icons.logout,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 12),
-                _buildEnhancedInfoRow('Room Type', item!.roomType ?? '-', Icons.meeting_room),
-                _buildEnhancedInfoRow('Rate Plan', item!.reservationType ?? '-', Icons.label),
-                _buildEnhancedInfoRow('Daily Rate', '\$${item!.avgDailyRate?.toStringAsFixed(2) ?? 'N/A'}', Icons.payments),
+                _buildEnhancedInfoRow(
+                  'Room Type',
+                  item!.roomType ?? '-',
+                  Icons.meeting_room,
+                ),
+                _buildEnhancedInfoRow(
+                  'Rate Plan',
+                  item!.reservationType ?? '-',
+                  Icons.label,
+                ),
+                _buildEnhancedInfoRow(
+                  'Daily Rate',
+                  formatCurrency(item!.avgDailyRate),
+                  Icons.payments,
+                ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Financial Summary Card
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader('Financial Summary', Icons.account_balance_wallet),
+                _buildCardHeader(
+                  'Financial Summary',
+                  Icons.account_balance_wallet,
+                ),
                 const SizedBox(height: 16),
-                _buildFinancialRow('Total Charges', item!.totalAmount, isPositive: false),
-                _buildFinancialRow('Payments', item!.totalCredits ?? 0, isPositive: true),
+                _buildFinancialRow(
+                  'Total Charges',
+                  item!.totalAmount,
+                  isPositive: false,
+                ),
+                _buildFinancialRow(
+                  'Payments',
+                  item!.totalCredits ?? 0,
+                  isPositive: true,
+                ),
                 const Divider(height: 24, thickness: 1.5),
                 _buildFinancialRow(
                   'Balance Due',
@@ -324,9 +380,9 @@ class _ViewReservation extends State<ViewReservation>{
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Action Buttons with Enhanced Design
           Row(
             children: [
@@ -384,14 +440,18 @@ class _ViewReservation extends State<ViewReservation>{
                 _buildCardHeader('Contact Information', Icons.contact_phone),
                 const SizedBox(height: 16),
                 _buildEnhancedInfoRow('Phone', item!.phone ?? '-', Icons.phone),
-                _buildEnhancedInfoRow('Mobile', item!.mobile ?? '-', Icons.smartphone),
+                _buildEnhancedInfoRow(
+                  'Mobile',
+                  item!.mobile ?? '-',
+                  Icons.smartphone,
+                ),
                 _buildEnhancedInfoRow('Email', item!.email ?? '-', Icons.email),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Identity Information Card
           _buildModernCard(
             child: Column(
@@ -399,17 +459,37 @@ class _ViewReservation extends State<ViewReservation>{
               children: [
                 _buildCardHeader('Identity & Documents', Icons.badge),
                 const SizedBox(height: 16),
-                _buildEnhancedInfoRow('ID Type', item!.idType ?? 'Passport', Icons.credit_card),
-                _buildEnhancedInfoRow('ID Number', item!.idNumber ?? '-', Icons.numbers),
-                _buildEnhancedInfoRow('Expiry Date', item!.expiryDate ?? '-', Icons.event),
-                _buildEnhancedInfoRow('Date of Birth', item!.dob ?? '-', Icons.cake),
-                _buildEnhancedInfoRow('Nationality', item!.nationality ?? 'Sri Lanka', Icons.flag),
+                _buildEnhancedInfoRow(
+                  'ID Type',
+                  item!.idType ?? 'Passport',
+                  Icons.credit_card,
+                ),
+                _buildEnhancedInfoRow(
+                  'ID Number',
+                  item!.idNumber ?? '-',
+                  Icons.numbers,
+                ),
+                _buildEnhancedInfoRow(
+                  'Expiry Date',
+                  item!.expiryDate ?? '-',
+                  Icons.event,
+                ),
+                _buildEnhancedInfoRow(
+                  'Date of Birth',
+                  item!.dob ?? '-',
+                  Icons.cake,
+                ),
+                _buildEnhancedInfoRow(
+                  'Nationality',
+                  item!.nationality ?? 'Sri Lanka',
+                  Icons.flag,
+                ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Transport Information Card
           _buildModernCard(
             child: Column(
@@ -417,14 +497,22 @@ class _ViewReservation extends State<ViewReservation>{
               children: [
                 _buildCardHeader('Transport Details', Icons.directions_car),
                 const SizedBox(height: 16),
-                _buildEnhancedInfoRow('Arrival By', item!.arrivalBy ?? '-', Icons.flight_land),
-                _buildEnhancedInfoRow('Departure By', item!.departureBy ?? '-', Icons.flight_takeoff),
+                _buildEnhancedInfoRow(
+                  'Arrival By',
+                  item!.arrivalBy ?? '-',
+                  Icons.flight_land,
+                ),
+                _buildEnhancedInfoRow(
+                  'Departure By',
+                  item!.departureBy ?? '-',
+                  Icons.flight_takeoff,
+                ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Additional Information Card
           _buildModernCard(
             child: Column(
@@ -432,10 +520,26 @@ class _ViewReservation extends State<ViewReservation>{
               children: [
                 _buildCardHeader('Booking Details', Icons.info_outline),
                 const SizedBox(height: 16),
-                _buildEnhancedInfoRow('Guests', '${item!.adults} Adults, ${item!.children ?? 0} Children', Icons.people),
-                _buildEnhancedInfoRow('Business Source', item!.businessSource ?? '-', Icons.business),
-                _buildEnhancedInfoRow('Company', item!.company ?? '-', Icons.corporate_fare),
-                _buildEnhancedInfoRow('Travel Agent', item!.travelAgent ?? '-', Icons.travel_explore),
+                _buildEnhancedInfoRow(
+                  'Guests',
+                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
+                  Icons.people,
+                ),
+                _buildEnhancedInfoRow(
+                  'Business Source',
+                  item!.businessSource ?? '-',
+                  Icons.business,
+                ),
+                _buildEnhancedInfoRow(
+                  'Company',
+                  item!.company ?? '-',
+                  Icons.corporate_fare,
+                ),
+                _buildEnhancedInfoRow(
+                  'Travel Agent',
+                  item!.travelAgent ?? '-',
+                  Icons.travel_explore,
+                ),
               ],
             ),
           ),
@@ -457,29 +561,53 @@ class _ViewReservation extends State<ViewReservation>{
               children: [
                 _buildCardHeader('Daily Breakdown', Icons.receipt_long),
                 const SizedBox(height: 16),
-                _buildEnhancedInfoRow('Room', item!.roomNumber ?? 'AZA-139', Icons.meeting_room),
-                _buildEnhancedInfoRow('Rate Type', item!.reservationType ?? 'Dinner Only', Icons.label),
-                _buildEnhancedInfoRow('Occupancy', '${item!.adults} Adults, ${item!.children ?? 0} Children', Icons.people),
+                _buildEnhancedInfoRow(
+                  'Room',
+                  item!.roomNumber ?? 'AZA-139',
+                  Icons.meeting_room,
+                ),
+                _buildEnhancedInfoRow(
+                  'Rate Type',
+                  item!.rateType ?? 'Dinner Only',
+                  Icons.label,
+                ),
+                _buildEnhancedInfoRow(
+                  'Occupancy',
+                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
+                  Icons.people,
+                ),
                 if (item!.childAge != null)
-                  _buildEnhancedInfoRow('Child Age', item!.childAge!, Icons.child_care),
+                  _buildEnhancedInfoRow(
+                    'Child Age',
+                    item!.childAge!,
+                    Icons.child_care,
+                  ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildCardHeader('Charge Breakdown', Icons.calculate),
                 const SizedBox(height: 16),
-                _buildChargeRow('Room Charges', item!.roomCharges ?? 3125.00),
-                _buildChargeRow('Discount', -(item!.discount ?? 0), isDiscount: true),
+                _buildChargeRow('Room Charge', item!.roomCharges ?? 3125.00),
+                _buildChargeRow(
+                  'Discount',
+                  -(item!.discount ?? 0),
+                  isDiscount: true,
+                ),
                 _buildChargeRow('Tax', item!.tax ?? 531.25, isTax: true),
-                _buildChargeRow('Adjustment', item!.adjustment ?? 3.75),
+                _buildChargeRow('Auto Adjustment', item!.adjustment ?? 3.75),
                 const Divider(height: 24, thickness: 1.5),
-                _buildChargeRow('Net Amount', item!.netAmount ?? 3660.00, isTotal: true),
+                _buildChargeRow(
+                  'Net Amount',
+                  item!.netAmount ?? 3660.00,
+                  isTotal: true,
+                ),
               ],
             ),
           ),
@@ -546,11 +674,18 @@ class _ViewReservation extends State<ViewReservation>{
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.receipt_outlined, size: 64, color: Colors.grey.shade300),
+                      Icon(
+                        Icons.receipt_outlined,
+                        size: 64,
+                        color: Colors.grey.shade300,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'No charges recorded yet',
-                        style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -583,7 +718,9 @@ class _ViewReservation extends State<ViewReservation>{
                 style: TextStyle(
                   fontSize: 15,
                   height: 1.6,
-                  color: item!.remarks != null ? Colors.black87 : Colors.grey.shade500,
+                  color: item!.remarks != null
+                      ? Colors.black87
+                      : Colors.grey.shade500,
                 ),
               ),
             ),
@@ -649,10 +786,7 @@ class _ViewReservation extends State<ViewReservation>{
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.grey.shade700,
-              ),
+              style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
             ),
           ),
           Flexible(
@@ -697,7 +831,12 @@ class _ViewReservation extends State<ViewReservation>{
     );
   }
 
-  Widget _buildFinancialRow(String label, double amount, {bool isBalance = false, bool isPositive = false}) {
+  Widget _buildFinancialRow(
+    String label,
+    double amount, {
+    bool isBalance = false,
+    bool isPositive = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -712,7 +851,7 @@ class _ViewReservation extends State<ViewReservation>{
             ),
           ),
           Text(
-            '\$${amount.toStringAsFixed(2)}',
+           formatCurrency(amount),
             style: TextStyle(
               fontSize: isBalance ? 18 : 15,
               fontWeight: FontWeight.bold,
@@ -726,7 +865,13 @@ class _ViewReservation extends State<ViewReservation>{
     );
   }
 
-  Widget _buildChargeRow(String label, double amount, {bool isDiscount = false, bool isTax = false, bool isTotal = false}) {
+  Widget _buildChargeRow(
+    String label,
+    double amount, {
+    bool isDiscount = false,
+    bool isTax = false,
+    bool isTotal = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -741,7 +886,7 @@ class _ViewReservation extends State<ViewReservation>{
             ),
           ),
           Text(
-            '${amount >= 0 ? '\$' : '-\$'}${amount.abs().toStringAsFixed(2)}',
+            '${amount < 0 ? '-' : ''}${formatCurrency(amount.abs())}',
             style: TextStyle(
               fontSize: isTotal ? 18 : 15,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
@@ -779,7 +924,13 @@ class _ViewReservation extends State<ViewReservation>{
     );
   }
 
-  Widget _buildEnhancedFolioItem(String title, String date, String room, double amount, {bool isPosted = false}) {
+  Widget _buildEnhancedFolioItem(
+    String title,
+    String date,
+    String room,
+    double amount, {
+    bool isPosted = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -814,17 +965,21 @@ class _ViewReservation extends State<ViewReservation>{
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: isPosted ? Colors.green.shade700 : Colors.blue.shade700,
+                    color: isPosted
+                        ? Colors.green.shade700
+                        : Colors.blue.shade700,
                   ),
                 ),
               ),
               const Spacer(),
               Text(
-                '\$${amount.toStringAsFixed(2)}',
+               formatCurrency(amount),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: isPosted ? Colors.green.shade600 : Colors.blue.shade600,
+                  color: isPosted
+                      ? Colors.green.shade600
+                      : Colors.blue.shade600,
                 ),
               ),
             ],

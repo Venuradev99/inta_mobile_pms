@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:inta_mobile_pms/data/models/Base_currency_model.dart';
+import 'package:inta_mobile_pms/data/models/hotel_information_model.dart';
 import 'package:inta_mobile_pms/data/models/master_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,6 +48,25 @@ class LocalStorageManager {
       return masterData.userName;
     } else {
       return '';
+    }
+  }
+
+  static Future<void> setHotelInfoData(
+    Map<String, dynamic> hotelInfoData,
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('hotelInformation', jsonEncode(hotelInfoData));
+  }
+
+  static Future<HotelInformationModel> getHotelInfoData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('hotelInformation') ?? "";
+    if (jsonString.isNotEmpty) {
+      final json = jsonDecode(jsonString);
+      print(json);
+      return HotelInformationModel.fromJson(json);
+    } else {
+      return HotelInformationModel.empty();
     }
   }
 
