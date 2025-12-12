@@ -28,7 +28,6 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
- 
   @override
   void initState() {
     super.initState();
@@ -54,67 +53,196 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
     super.dispose();
   }
 
- // Replace the existing _showActionsBottomSheet method in MaintenanceBlock class
+  // void _unblockRoom(dynamic block) async {
+  //   final confirmed = await ConfirmationDialog.show(
+  //     context: context,
+  //     title: 'Clear Status',
+  //     message: 'Are you sure you want to unblock Room?',
+  //     confirmText: 'Yes',
+  //     cancelText: 'No',
+  //     confirmColor: AppColors.red,
+  //   );
+  //   if (confirmed == true) {
+  //     await _maintenanceBlockVm.unblockRoom(block);
+  //     if (!mounted) return;
+  //   }
+  // }
 
-void _showActionsBottomSheet(dynamic block) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true, // Important for DraggableScrollableSheet
-    backgroundColor: Colors.transparent, // Let ActionBottomSheet handle the background
-    builder: (context) => ActionBottomSheet(
-      guestName: block.roomName ?? 'Room ${block.maintenanceBlockId}',
-      actions: [
-        ActionItem(
-          icon: Icons.edit,
-          label: 'Edit Blocked Room',
-          onTap: () {
-            Navigator.pop(context);
-            // Navigate to edit screen
-            // context.push(AppRoutes.editBlockRoom, extra: block);
-          },
-        ),
-        // ActionItem(
-        //   icon: Icons.lock_open,
-        //   label: 'Unblock Room',
-        //   onTap: () {
-        //     Navigator.pop(context);
-        //     // Call unblock functionality
-        //     _maintenanceBlockVm.unblockRoom(block.maintenanceBlockId).then((_) {
-        //       _maintenanceBlockVm.loadAllMaintenanceBlocks();
-        //     }).catchError((error) {
-        //       // Show error snackbar
-        //       Get.snackbar(
-        //         'Error',
-        //         'Failed to unblock room: $error',
-        //         snackPosition: SnackPosition.BOTTOM,
-        //         backgroundColor: AppColors.red,
-        //         colorText: AppColors.onPrimary,
-        //       );
-        //     });
-        //   },
-        // ),
-        ActionItem(
-          icon: Icons.info_outline,
-          label: 'View Details',
-          onTap: () {
-            Navigator.pop(context);
-            // Navigate to details screen
-            // context.push(AppRoutes.blockRoomDetails, extra: block);
-          },
-        ),
-      ],
-    ),
-  );
-}
+  Future<Map<String, DateTime?>?> _showDateRangeDialog(
+    BuildContext context,
+    dynamic block,
+  ) {
+    DateTime? fromDate = block.fromDate != null
+        ? DateTime.parse(block.fromDate)
+        : null;
+    DateTime? toDate = block.toDate != null
+        ? DateTime.parse(block.toDate)
+        : null;
 
-void _showFilterBottomSheet() {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => const FilterBottomSheet(),
-  );
-}
+    return showDialog<Map<String, DateTime?>?>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: const Text(
+                "Unblock Room",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // From Date
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: fromDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          fromDate = picked;
+                          if (toDate != null && toDate!.isBefore(fromDate!)) {
+                            toDate = fromDate;
+                          }
+                        });
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: "From Date",
+                        border: OutlineInputBorder(),
+                      ),
+                      child: Text(
+                        fromDate != null
+                            ? "${fromDate!.day}-${fromDate!.month}-${fromDate!.year}"
+                            : "Select date",
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // To Date
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: toDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          toDate = picked;
+                          if (fromDate != null && toDate!.isBefore(fromDate!)) {
+                            fromDate = toDate;
+                          }
+                        });
+                      }
+                    },
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: "To Date",
+                        border: OutlineInputBorder(),
+                      ),
+                      child: Text(
+                        toDate != null
+                            ? "${toDate!.day}-${toDate!.month}-${toDate!.year}"
+                            : "Select date",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary, 
+                    foregroundColor: AppColors.background, 
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, {"from": fromDate, "to": toDate});
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showActionsBottomSheet(dynamic block) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ActionBottomSheet(
+        guestName: block.roomName ?? 'Room ${block.maintenanceBlockId}',
+        actions: [
+          ActionItem(
+            icon: Icons.edit,
+            label: 'Edit Blocked Room',
+            onTap: () {
+              Navigator.pop(context);
+              // context.push(AppRoutes.editBlockRoom, extra: block);
+            },
+          ),
+          ActionItem(
+            icon: Icons.lock_open,
+            label: 'Unblock Room',
+            onTap: () async {
+              Navigator.pop(context);
+              _showDateRangeDialog(context, block).then((dateRange) async {
+                if (dateRange != null) {
+                  final fromDate = dateRange['from'];
+                  final toDate = dateRange['to'];
+                  if (fromDate != null && toDate != null) {
+                    await _maintenanceBlockVm.unblockRoom(
+                      block,
+                      fromDate,
+                      toDate,
+                    );
+                  }
+                }
+              });
+              // await  _maintenanceBlockVm.unblockRoom(block.maintenanceBlockId);
+            },
+          ),
+          ActionItem(
+            icon: Icons.info_outline,
+            label: 'View Details',
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to details screen
+              // context.push(AppRoutes.blockRoomDetails, extra: block);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const FilterBottomSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +286,7 @@ void _showFilterBottomSheet() {
                 _searchController.clear();
               });
             } else {
-             context.go(AppRoutes.dashboard);
+              context.go(AppRoutes.dashboard);
             }
           },
         ),
@@ -191,110 +319,13 @@ void _showFilterBottomSheet() {
           IconButton(
             icon: const Icon(Icons.add, color: AppColors.black),
             onPressed: () {
-             context.push(AppRoutes.blockRoomSelection);
+              context.push(AppRoutes.blockRoomSelection);
             },
           ),
         ],
-        // bottom: PreferredSize(
-        //   preferredSize: const Size.fromHeight(48.0),
-        //   child: Container(
-        //     color: AppColors.surface,
-        //     child: TabBar(
-        //       controller: _tabController,
-        //       isScrollable: true,
-        //       labelColor: AppColors.primary,
-        //       unselectedLabelColor: AppColors.lightgrey,
-        //       indicator: const UnderlineTabIndicator(
-        //         borderSide: BorderSide(color: AppColors.primary, width: 2),
-        //       ),
-        //       tabs: statusCounts.entries
-        //           .map(
-        //             (entry) => Tab(
-        //               child: Row(
-        //                 mainAxisSize: MainAxisSize.min,
-        //                 children: [
-        //                   Text(entry.key),
-        //                   const SizedBox(width: 8),
-        //                   Container(
-        //                     padding: const EdgeInsets.symmetric(
-        //                       horizontal: 6,
-        //                       vertical: 2,
-        //                     ),
-        //                     decoration: BoxDecoration(
-        //                       color: _getStatusColor(
-        //                         entry.key,
-        //                       ).withOpacity(0.1),
-        //                       borderRadius: BorderRadius.circular(8),
-        //                     ),
-        //                     child: Text(
-        //                       '${entry.value}',
-        //                       style: TextStyle(
-        //                         color: _getStatusColor(entry.key),
-        //                         fontSize: 11,
-        //                         fontWeight: FontWeight.w500,
-        //                       ),
-        //                     ),
-        //                   ),
-        //                 ],
-        //               ),
-        //             ),
-        //           )
-        //           .toList(),
-        //     ),
-        //   ),
-        // ),
       ),
       body: Column(
         children: [
-          // Statistics Header
-          // Container(
-          //   width: double.infinity,
-          //   padding: ResponsiveConfig.horizontalPadding(
-          //     context,
-          //   ).add(ResponsiveConfig.verticalPadding(context)),
-          //   decoration: const BoxDecoration(
-          //     color: AppColors.surface,
-          //     boxShadow: [
-          //       BoxShadow(
-          //         color: Colors.black12,
-          //         blurRadius: 4,
-          //         offset: Offset(0, 2),
-          //       ),
-          //     ],
-          //   ),
-          //   child: Row(
-          //     children: [
-          //       Expanded(
-          //         child: StatCard(
-          //           title: 'Total Active',
-          //           value: '${filteredMaintenanceBlocks.length}',
-          //           color: AppColors.primary,
-          //           icon: Icons.assignment,
-          //         ),
-          //       ),
-          //       const SizedBox(width: 16),
-          //       Expanded(
-          //         child: StatCard(
-          //           title: 'High Priority',
-          //           value:
-          //               '${filteredMaintenanceBlocks.where((b) => b.priority == 'High').length}',
-          //           color: AppColors.red,
-          //           icon: Icons.priority_high,
-          //         ),
-          //       ),
-          //       const SizedBox(width: 16),
-          //       Expanded(
-          //         child: StatCard(
-          //           title: 'Completed',
-          //           value: '${statusCounts['Completed']}',
-          //           color: AppColors.green,
-          //           icon: Icons.check_circle,
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-          // Maintenance Block List
           Expanded(
             child: Obx(() {
               if (_maintenanceBlockVm.isLoading.value) {
@@ -302,7 +333,7 @@ void _showFilterBottomSheet() {
                   padding: ResponsiveConfig.horizontalPadding(
                     context,
                   ).add(const EdgeInsets.symmetric(vertical: 8)),
-                  itemCount: 8, 
+                  itemCount: 8,
                   itemBuilder: (context, index) =>
                       const MaintenanceBlockCardShimmer(),
                 );
@@ -343,7 +374,7 @@ void _showFilterBottomSheet() {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-         context.push(AppRoutes.blockRoomSelection);
+          context.push(AppRoutes.blockRoomSelection);
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: AppColors.onPrimary),
@@ -390,7 +421,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now()),
+      initialDate: isStart
+          ? (_startDate ?? DateTime.now())
+          : (_endDate ?? DateTime.now()),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -428,15 +461,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             children: [
               // Header with title and close button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Filter',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -467,7 +503,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                     ? '${_startDate!.day.toString().padLeft(2, '0')}-${(_startDate!.month).toString().padLeft(2, '0')}-${_startDate!.year}'
                                     : 'Select Date',
                                 style: TextStyle(
-                                  color: _startDate != null ? AppColors.black : AppColors.lightgrey,
+                                  color: _startDate != null
+                                      ? AppColors.black
+                                      : AppColors.lightgrey,
                                 ),
                               ),
                             ),
@@ -487,7 +525,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                     ? '${_endDate!.day.toString().padLeft(2, '0')}-${(_endDate!.month).toString().padLeft(2, '0')}-${_endDate!.year}'
                                     : 'Select Date',
                                 style: TextStyle(
-                                  color: _endDate != null ? AppColors.black : AppColors.lightgrey,
+                                  color: _endDate != null
+                                      ? AppColors.black
+                                      : AppColors.lightgrey,
                                 ),
                               ),
                             ),
@@ -497,46 +537,50 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                     const SizedBox(height: 16),
                     // Room Type Dropdown
-                    Obx(() => DropdownButtonFormField<RoomTypeResponse>(
-                          decoration: const InputDecoration(
-                            labelText: 'Room Type',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: _selectedRoomType,
-                          hint: const Text('Select Room Type'),
-                          items: _maintenanceBlockVm.roomTypesList.map((type) {
-                            return DropdownMenuItem<RoomTypeResponse>(
-                              value: type,
-                              child: Text(type.name),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedRoomType = value;
-                            });
-                          },
-                        )),
+                    Obx(
+                      () => DropdownButtonFormField<RoomTypeResponse>(
+                        decoration: const InputDecoration(
+                          labelText: 'Room Type',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedRoomType,
+                        hint: const Text('Select Room Type'),
+                        items: _maintenanceBlockVm.roomTypesList.map((type) {
+                          return DropdownMenuItem<RoomTypeResponse>(
+                            value: type,
+                            child: Text(type.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRoomType = value;
+                          });
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     // Room Dropdown
-                    Obx(() => DropdownButtonFormField<RoomResponse>(
-                          decoration: const InputDecoration(
-                            labelText: 'Room',
-                            border: OutlineInputBorder(),
-                          ),
-                          value: _selectedRoom,
-                          hint: const Text('Select Room'),
-                          items: _maintenanceBlockVm.roomsList.map((room) {
-                            return DropdownMenuItem<RoomResponse>(
-                              value: room,
-                              child: Text(room.name),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedRoom = value;
-                            });
-                          },
-                        )),
+                    Obx(
+                      () => DropdownButtonFormField<RoomResponse>(
+                        decoration: const InputDecoration(
+                          labelText: 'Room',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: _selectedRoom,
+                        hint: const Text('Select Room'),
+                        items: _maintenanceBlockVm.roomsList.map((room) {
+                          return DropdownMenuItem<RoomResponse>(
+                            value: room,
+                            child: Text(room.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedRoom = value;
+                          });
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     // Unblock Room Switch
                     SwitchListTile(
@@ -556,14 +600,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () {
-                              setState((){
+                              setState(() {
                                 _startDate = null;
                                 _endDate = null;
                                 _selectedRoomType = null;
                                 _selectedRoom = null;
                                 _unblockRoom = false;
                               });
-                              _maintenanceBlockVm.filterByFilterBottomSheet(isReset: true);
+                              _maintenanceBlockVm.filterByFilterBottomSheet(
+                                isReset: true,
+                              );
                               Navigator.pop(context);
                             },
                             style: OutlinedButton.styleFrom(
@@ -578,17 +624,24 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           child: ElevatedButton(
                             onPressed: () {
                               // Apply filters
-                              _maintenanceBlockVm.filterStartDate.value = _startDate;
-                              _maintenanceBlockVm.filterEndDate.value = _endDate;
-                              _maintenanceBlockVm.filterRoomTypeId.value = _selectedRoomType?.roomTypeId;
-                              _maintenanceBlockVm.filterRoomId.value = _selectedRoom?.roomId;
-                              _maintenanceBlockVm.filterIsUnblock.value = _unblockRoom;
-                              _maintenanceBlockVm.filterByFilterBottomSheet(isReset: false);
+                              _maintenanceBlockVm.filterStartDate.value =
+                                  _startDate;
+                              _maintenanceBlockVm.filterEndDate.value =
+                                  _endDate;
+                              _maintenanceBlockVm.filterRoomTypeId.value =
+                                  _selectedRoomType?.roomTypeId;
+                              _maintenanceBlockVm.filterRoomId.value =
+                                  _selectedRoom?.roomId;
+                              _maintenanceBlockVm.filterIsUnblock.value =
+                                  _unblockRoom;
+                              _maintenanceBlockVm.filterByFilterBottomSheet(
+                                isReset: false,
+                              );
                               Navigator.pop(context);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
-                              foregroundColor: AppColors.onPrimary
+                              foregroundColor: AppColors.onPrimary,
                             ),
                             child: const Text('Submit'),
                           ),

@@ -151,7 +151,7 @@ class HouseStatusVm extends GetxController {
         houseKeepingRemark: '',
         houseKeepingStatus: room.houseKeepingStatusId ?? 0,
         isRoom: room.isRoom ?? true,
-        operationType: 6,
+        operationType: 7,
       ).toJson();
 
       final response = await _houseKeepingServices.updateHouseStatus(payload);
@@ -209,14 +209,14 @@ class HouseStatusVm extends GetxController {
         houseKeepingRemark: room.remark ?? '',
         houseKeepingStatus: newStatusId,
         isRoom: room.isRoom ?? true,
-        operationType: 1,               // 1 = update housekeeping status
+        operationType: 5,         
       ).toJson();
 
       final response = await _houseKeepingServices.updateHouseStatus(payload);
 
       if (response["isSuccessful"] == true) {
         MessageService().success('Status updated successfully.');
-        await loadRooms();               // refresh UI
+        await loadRooms();
       } else {
         MessageService().error(
           response["errors"][0] ?? 'Error updating status!',
@@ -228,9 +228,6 @@ class HouseStatusVm extends GetxController {
   }
 
   Future<void> bulkUpdateStatus(List<RoomItem> rooms, int newStatusId) async {
-    // You can either call the single-room endpoint in a loop
-    // or – if the backend supports it – send a bulk payload.
-    // Here we keep it simple and loop.
     for (final r in rooms) {
       await updateStatus(r, newStatusId);
     }

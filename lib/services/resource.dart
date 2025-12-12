@@ -30,8 +30,8 @@ class AppResources {
   static const String title = 'title';
   static const String hotel = 'hotel';
   static const String report = 'report';
-
-  
+  static const String common = 'common';
+  static const String transportMode = 'transportMode';
 
   //authentication
   static const String authentication = 'authentication';
@@ -49,13 +49,10 @@ class AppResources {
   static const String searchReservationList = '$booking/SearchReservationList';
   static const String getAllRoomTypes =
       '$roomTypes/GetAll?startIndex=0&PageSize=0&withInactive=false&onlyRoomExistType=true';
-
   static const String getAllreservationTypes =
       '$reservationTypes/GetAll?startIndex=0&PageSize=0&withInactive=false';
-
   static const String getAllroomstatus =
       '$roomstatus/GetAll?startIndex=0&PageSize=20';
-
   static const String getAllbusinessSources =
       '$businessSources/GetAll?startIndex=0&PageSize=0&withInactive=true';
   static const String getByBookingRoomId = '$booking/GetByBookingRoomId';
@@ -81,8 +78,10 @@ class AppResources {
       '$nationality/GetAll?startIndex=0&PageSize=0';
   static const String getAllIdentityTypes =
       '$identityType/GetAll?startIndex=0&PageSize=0&withInactive=false';
-      static const String getAllCountries = '$country/GetAll';
-      static const String getAllTitle = '$title/GetAll?startIndex=0&PageSize=0';
+  static const String getAllCountries = '$country/GetAll';
+  static const String getAllTitle = '$title/GetAll?startIndex=0&PageSize=0';
+  static const String getAllBusinessCategory = '$common/GetAllBusinessCategory';
+  static const String transportationModes = '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';
@@ -106,18 +105,20 @@ class AppResources {
   static const String getAllBlockRoomReasons =
       '$reason/GetByCategory?ResonCategoryId=1&withInactive=false';
   static const String saveMaintenanceblock = '$maintenanceblock/save';
-  static const String unblockMaintenanceblock = '$maintenanceblock/UnblockDateRange';
-  static const String updateHouseStatus = '$rooms/UpdateHouseStatus'; 
+  static const String unblockMaintenanceblock =
+      '$maintenanceblock/UnblockDateRange';
+  static const String updateHouseStatus = '$rooms/UpdateHouseStatus';
 
-////Stay View
- static const String getBookingDetailsByDate = '$calenderBooking/GetBookingDetailsByDate';
- static const String getStatusColorForStayview = '$roomstatus/GetStatusColorForStayview';
+  ////Stay View
+  static const String getBookingDetailsByDate =
+      '$calenderBooking/GetBookingDetailsByDate';
+  static const String getStatusColorForStayview =
+      '$roomstatus/GetStatusColorForStayview';
 
-
-////reports
-static const String getNightAudits = '$auditTrial/nightAudit';
-static const String getCurrencies = '$currency/GetAll?startIndex=0&PageSize=0&withInactive=false';
-static const String getAllHotel = '$hotel/GetAllByUserAndMenu/374';
-static const String getManagerReport = '$report/ManagerReport';
-
+  ////reports
+  static const String getNightAudits = '$auditTrial/nightAudit';
+  static const String getCurrencies =
+      '$currency/GetAll?startIndex=0&PageSize=0&withInactive=false';
+  static const String getAllHotel = '$hotel/GetAllByUserAndMenu/374';
+  static const String getManagerReport = '$report/ManagerReport';
 }

@@ -3,6 +3,7 @@ class GuestItem {
   final int? bookingId;
   final String bookingRoomId;
   final String guestName;
+  final String? nationalityName;
   final int? guestId;
   final int? titleId;
   final String? fullAddress;
@@ -26,6 +27,7 @@ class GuestItem {
   final int? swipeCardId;
   final String resId;
   final String folioId;
+  final String? folioNumber;
   final String startDate;
   final String endDate;
   final int nights;
@@ -90,6 +92,7 @@ class GuestItem {
   final int? travelAgentCommisionPlanId;
   final double? travelAgentCommisionPlanValue;
   final String? grCardNumber;
+  final String? visibleCurrencyCode;
   final int? masterFolioBookingTransId;
   final List<FolioCharge>? folioCharges;
 
@@ -107,6 +110,8 @@ class GuestItem {
   String? releaseDate;
   int? businessCategoryId;
   int? businessSourceId;
+  String? businessSourceName;
+  String? businessCategoryName;
   int? marketId;
   bool? isToBeReleased;
   String? maxDep;
@@ -122,6 +127,8 @@ class GuestItem {
     this.bookingId,
     required this.bookingRoomId,
     required this.guestName,
+    this.nationalityName,
+    this.visibleCurrencyCode,
     this.guestId,
     this.titleId,
     this.zipCode,
@@ -145,6 +152,7 @@ class GuestItem {
     this.isAdult,
     this.isMainGuest,
     this.isBlackListed,
+    this.folioNumber,
     required this.resId,
     required this.folioId,
     required this.startDate,
@@ -223,6 +231,8 @@ class GuestItem {
     this.releaseDate,
     this.businessCategoryId,
     this.businessSourceId,
+    this.businessSourceName,
+    this.businessCategoryName,
     this.marketId,
     this.isToBeReleased,
     this.maxDep,
@@ -239,10 +249,12 @@ class GuestItem {
   factory GuestItem.fromJson(Map<String, dynamic> json) {
     return GuestItem(
       bookingId: json['bookingId'] ?? 0,
+      visibleCurrencyCode: json['visibleCurrencyCode'] ?? '', 
       reservationNumber: json['reservationNumber'] ?? '',
       baseCurrencySymbol: json['baseCurrencySymbol'] ?? '',
       bookingRoomId: json['bookingRoomId'] ?? '',
       guestName: json['guestName'] ?? '',
+      nationalityName: json['nationalityName'] ?? '',
       guestId: json['guestId'] ?? 0,
       titleId: json['titleId'] ?? 0,
       fullAddress: json['fullAddress'] ?? '',
@@ -267,6 +279,7 @@ class GuestItem {
       birthCityId: json['birthCityId'] ?? 0,
       resId: json['resId'] ?? '',
       folioId: json['folioId'] ?? '',
+      folioNumber: json['folioNumber'] ?? '',
       startDate: json['startDate'] ?? '',
       endDate: json['endDate'] ?? '',
       nights: json['nights'] ?? 0,
@@ -347,6 +360,8 @@ class GuestItem {
       releaseDate: json['releaseDate'],
       businessCategoryId: json['businessCategoryId'],
       businessSourceId: json['businessSourceId'],
+      businessSourceName: json['businessSourceName'],
+      businessCategoryName: json['businessCategoryName'],
       marketId: json['marketId'],
       isToBeReleased: json['isToBeReleased'],
       maxDep: json['maxDep'],
@@ -368,6 +383,7 @@ class GuestItem {
       'bookingRoomId': bookingRoomId,
       'baseCurrencySymbol': baseCurrencySymbol,
       'guestName': guestName,
+      'nationalityName': nationalityName,
       'guestId': guestId,
       'titleId': titleId,
       'zipCode': zipCode,
@@ -392,6 +408,7 @@ class GuestItem {
       'anniversaryDate': anniversaryDate,
       'resId': resId,
       'folioId': folioId,
+      'folioNumber': folioNumber,
       'startDate': startDate,
       'endDate': endDate,
       'nights': nights,
@@ -467,6 +484,8 @@ class GuestItem {
       'releaseDate': releaseDate,
       'businessCategoryId': businessCategoryId,
       'businessSourceId': businessSourceId,
+      'businessSourceName': businessSourceName,
+      'businessCategoryName': businessCategoryName,
       'marketId': marketId,
       'isToBeReleased': isToBeReleased,
       'maxDep': maxDep,
@@ -477,6 +496,7 @@ class GuestItem {
       'voucherNo': voucherNo,
       'resDate': resDate,
       'grCardNumber': grCardNumber,
+      'visibleCurrencyCode': visibleCurrencyCode,
       'masterFolioBookingTransId': masterFolioBookingTransId,
     };
   }
@@ -489,6 +509,7 @@ class GuestItem {
         'bookingId: $bookingId, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '
+        'naitonalityName: $nationalityName, '
         'workPlace: $workPlace, '
         'guestId: $guestId, '
         'titleId: $titleId,'
@@ -511,6 +532,7 @@ class GuestItem {
         'dateofBirth: $dateofBirth, '
         'resId: $resId, '
         'folioId: $folioId, '
+        'folioNumber: $folioNumber, '
         'startDate: $startDate, '
         'endDate: $endDate, '
         'nights: $nights, '
@@ -585,6 +607,8 @@ class GuestItem {
         'releaseDate: $releaseDate, '
         'businessCategoryId: $businessCategoryId, '
         'businessSourceId: $businessSourceId, '
+        'businessSourceName: $businessSourceName, '
+        'businessCategoryName: $businessCategoryName, '
         'marketId: $marketId, '
         'isToBeReleased: $isToBeReleased, '
         'maxDep: $maxDep, '
@@ -595,6 +619,7 @@ class GuestItem {
         'voucherNo: $voucherNo, '
         'resDate: $resDate, '
         'grCardNumber: $grCardNumber,'
+        'visibleCurrencyCode:$visibleCurrencyCode, '
         'masterFolioBookingTransId:$masterFolioBookingTransId'
         ')';
   }

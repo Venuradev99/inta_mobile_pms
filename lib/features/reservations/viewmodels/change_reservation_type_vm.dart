@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-
-import 'package:inta_mobile_pms/features/reservations/models/change_reservation_payload.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class ChangeReservationTypeVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationListService;
 
   final reservationTypes = <ReservationTypeItem>[].obs;
 

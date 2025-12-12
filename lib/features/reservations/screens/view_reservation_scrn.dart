@@ -20,12 +20,12 @@ class _ViewReservation extends State<ViewReservation> {
   }
 
 String formatCurrency(double? value) {
-  if (value == null) return '${item?.baseCurrencySymbol}0.00';
+  if (value == null) return '${item?.visibleCurrencyCode} 0.00';
 
   final formatted = value.toStringAsFixed(2)
       .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+\.)'), (Match m) => '${m[1]},');
 
-  return '${item?.baseCurrencySymbol}${formatted}';
+  return '${item?.visibleCurrencyCode} ${formatted}';
 }
 
 
@@ -457,7 +457,7 @@ String formatCurrency(double? value) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader('Identity & Documents', Icons.badge),
+                _buildCardHeader('Identity Information', Icons.badge),
                 const SizedBox(height: 16),
                 _buildEnhancedInfoRow(
                   'ID Type',
@@ -481,7 +481,7 @@ String formatCurrency(double? value) {
                 ),
                 _buildEnhancedInfoRow(
                   'Nationality',
-                  item!.nationality ?? 'Sri Lanka',
+                  item!.nationalityName ?? '',
                   Icons.flag,
                 ),
               ],
@@ -495,7 +495,7 @@ String formatCurrency(double? value) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader('Transport Details', Icons.directions_car),
+                _buildCardHeader('Transport Information', Icons.directions_car),
                 const SizedBox(height: 16),
                 _buildEnhancedInfoRow(
                   'Arrival By',
@@ -518,7 +518,7 @@ String formatCurrency(double? value) {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader('Booking Details', Icons.info_outline),
+                _buildCardHeader('Booking Information', Icons.info_outline),
                 const SizedBox(height: 16),
                 _buildEnhancedInfoRow(
                   'Guests',
@@ -526,19 +526,27 @@ String formatCurrency(double? value) {
                   Icons.people,
                 ),
                 _buildEnhancedInfoRow(
-                  'Business Source',
-                  item!.businessSource ?? '-',
+                  'Business Category',
+                  item!.businessCategoryName ?? '',
                   Icons.business,
                 ),
+                if(item!.businessCategoryId == 1)
+                _buildEnhancedInfoRow(
+                  'Online Travel Agent',
+                  item!.businessSourceName ?? '',
+                  Icons.business,
+                ),
+                 if(item!.businessCategoryId == 2)
+                _buildEnhancedInfoRow(
+                  'Agent',
+                  item!.businessSourceName ?? '',
+                  Icons.business,
+                ),
+                 if(item!.businessCategoryId == 5)
                 _buildEnhancedInfoRow(
                   'Company',
-                  item!.company ?? '-',
-                  Icons.corporate_fare,
-                ),
-                _buildEnhancedInfoRow(
-                  'Travel Agent',
-                  item!.travelAgent ?? '-',
-                  Icons.travel_explore,
+                  item!.businessSourceName ?? '',
+                  Icons.business,
                 ),
               ],
             ),
@@ -636,7 +644,7 @@ String formatCurrency(double? value) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Folio #${item!.folioId}',
+                'Folio #${item!.folioNumber}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

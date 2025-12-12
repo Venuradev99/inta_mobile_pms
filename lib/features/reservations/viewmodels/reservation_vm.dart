@@ -2,44 +2,59 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
+import 'package:inta_mobile_pms/features/reservations/models/business_source_category_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/models/identity_type_response..dart';
+import 'package:inta_mobile_pms/features/reservations/models/nationality_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/features/reservations/models/transportation_modes_response.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
-class ReservationListVm extends GetxController {
-  final ReservationListService _reservationListService;
+class ReservationVm extends GetxController {
+  final ReservationService _reservationService;
 
   final reservationList = Rx<Map<String, List<GuestItem>>?>(null);
-  final reservationFilteredList = Rx<Map<String, List<GuestItem>>?>(null);
+  final filteredList = Rx<Map<String, List<GuestItem>>?>(null);
   final receivedFilters = Rx<Map<String, dynamic>?>(null);
+  final isLoading = true.obs;
+  final isBottomSheetDataLoading = false.obs;
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
 
   var roomTypes = <FilterDropdownData>[].obs;
+  var identityTypes = <IdentityTypeResponse>[].obs;
+  var nationalityTypes = <NationalityResponse>[].obs;
   var reservationTypes = <FilterDropdownData>[].obs;
   var statuses = <FilterDropdownData>[].obs;
   var businessSources = <FilterDropdownData>[].obs;
+  var businessSourceCategories = <BusinessSourceCategory>[].obs;
+  var transportationModes = <TransportationMode>[].obs;
 
-  final isLoading = true.obs;
-  final isBottomSheetDataLoading = false.obs;
-
-  ReservationListVm(this._reservationListService);
+  ReservationVm(this._reservationService);
 
   String getToDateForWeek(String fromDate) {
-    DateTime startDate = DateTime.parse(fromDate);
-    DateTime endDate = startDate.add(Duration(days: 6));
-    return endDate.toIso8601String().substring(0, 10);
+    try {
+      DateTime startDate = DateTime.parse(fromDate);
+      DateTime endDate = startDate.add(Duration(days: 6));
+      return endDate.toIso8601String().substring(0, 10);
+    } catch (e) {
+      throw Exception('Error in GetToDateForWeek');
+    }
   }
 
   String getTomorrow(String fromDate) {
-    DateTime startDate = DateTime.parse(fromDate);
-    DateTime endDate = startDate.add(Duration(days: 1));
-    return endDate.toIso8601String().substring(0, 10);
+    try {
+      DateTime startDate = DateTime.parse(fromDate);
+      DateTime endDate = startDate.add(Duration(days: 1));
+      return endDate.toIso8601String().substring(0, 10);
+    } catch (e) {
+      throw Exception('Error in getTomorrow');
+    }
   }
 
-  Future<void> getReservationsMap() async {
+  Future<void> getReservationsMap(int searchType) async {
     try {
       isLoading.value = true;
       final today = await LocalStorageManager.getSystemDate();
@@ -52,30 +67,31 @@ class ReservationListVm extends GetxController {
         roomId: 0,
         roomTypeId: 0,
         searchByName: "",
-        searchType: 1,
+        searchType: searchType,
         status: 0,
         toDate: getToDateForWeek(today.toString()),
         businessCategoryId: 0,
       ).toJson();
 
       final response = await Future.wait([
-        _reservationListService.getAllReservationList(body),
-        _reservationListService.getAllroomstatus(),
-        _reservationListService.getAllRoomTypes(),
-        _reservationListService.getAllroomstatus(),
-        _reservationListService.getAllreservationTypes(),
-        _reservationListService.getAllbusinessSources(),
+        _reservationService.getAllReservationList(body),
+        _reservationService.getAllroomstatus(),
+        _reservationService.getAllRoomTypes(),
+        _reservationService.getAllroomstatus(),
+        _reservationService.getAllreservationTypes(),
+        _reservationService.getAllbusinessSources(),
       ]);
 
-      final reservationResponse = response[0];
+      final reservationListResponse = response[0];
       final statusResponse = response[1];
       final roomTypeResponse = response[2];
       final roomStatusResponse = response[3];
       final reservationTypeResponse = response[4];
       final businessSourcesResponse = response[5];
 
-      if (reservationResponse["isSuccessful"] == true) {
-        final result = reservationResponse["result"];
+      if (reservationListResponse["isSuccessful"] == true) {
+        final List<dynamic> result = reservationListResponse["result"];
+
         reservationList.value = {'today': [], 'tomorrow': [], 'thisweek': []};
 
         for (final item in result) {
@@ -88,15 +104,11 @@ class ReservationListVm extends GetxController {
             endDate: item['departureDate'] ?? '',
             nights: item['nights'] ?? 0,
             roomType: item['roomName'] ?? '',
+            reservationType: item['reservationType'] ?? '',
             adults: item['noOfAdults'] ?? 0,
             totalAmount: (item['totalAmount'] ?? 0).toDouble(),
-            balanceAmount: (item['balanceAmount'] ?? 0).toDouble(),
-            reservedDate: item['reservedDate'] ?? '',
-            reservationType: item['reservationType'] ?? '',
-            status: item['status'].toString(),
-            businessSource: item['businessSourceName'] ?? '',
-            roomNumber: item['roomId'].toString(),
-            // dateFilterType: item['IsArrivalDate'] ? 'arrival' : 'reserved',
+            balanceAmount: (item['balance'] ?? 0).toDouble(),
+            room: item['roomName'] ?? '',
           );
 
           if (item['arrivalDate'] == today.toString()) {
@@ -107,12 +119,12 @@ class ReservationListVm extends GetxController {
           }
           reservationList.value!["thisweek"]!.add(data);
         }
-        reservationFilteredList.value = reservationList.value;
+        filteredList.value = reservationList.value;
         reservationList.refresh();
-        reservationFilteredList.refresh();
+        filteredList.refresh();
       } else {
         MessageService().error(
-          reservationResponse["errors"][0] ?? 'Error getting reservation data!',
+          reservationListResponse["errors"][0] ?? 'Error loading arrival list!',
         );
       }
 
@@ -130,22 +142,21 @@ class ReservationListVm extends GetxController {
         }
       } else {
         MessageService().error(
-          statusResponse["errors"][0] ?? 'Error getting status data!',
+          statusResponse["errors"][0] ?? 'Error loading status!',
         );
       }
 
       if (roomTypeResponse["isSuccessful"]) {
         final result = roomTypeResponse["result"]["recordSet"];
         roomTypes.value = [];
-        roomTypes.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomTypeId"],
             "name": item["name"],
           });
           roomTypes.add(data);
+          roomTypes.refresh();
         }
-         roomTypes.refresh();
       } else {
         MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room details!',
@@ -155,15 +166,14 @@ class ReservationListVm extends GetxController {
       if (reservationTypeResponse["isSuccessful"]) {
         final result = reservationTypeResponse["result"]["recordSet"];
         reservationTypes.value = [];
-        reservationTypes.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["reservationTypeId"],
             "name": item["name"],
           });
           reservationTypes.add(data);
+          roomTypes.refresh();
         }
-         reservationTypes.refresh();
       } else {
         MessageService().error(
           reservationTypeResponse["errors"][0] ??
@@ -174,16 +184,14 @@ class ReservationListVm extends GetxController {
       if (roomStatusResponse["isSuccessful"]) {
         statuses.value = [];
         final result = roomStatusResponse["result"]["recordSet"];
-         statuses.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomStatusId"],
             "name": item["name"],
           });
           statuses.add(data);
+          roomTypes.refresh();
         }
-       
-         statuses.refresh();
       } else {
         MessageService().error(
           roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
@@ -193,15 +201,14 @@ class ReservationListVm extends GetxController {
       if (businessSourcesResponse["isSuccessful"]) {
         final result = businessSourcesResponse["result"]["recordSet"];
         businessSources.value = [];
-          businessSources.add(FilterDropdownData(id: -1, name: "All"));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["businessSourceId"],
             "name": item["name"],
           });
           businessSources.add(data);
+          roomTypes.refresh();
         }
-         businessSources.refresh();
       } else {
         MessageService().error(
           businessSourcesResponse["errors"][0] ??
@@ -216,17 +223,12 @@ class ReservationListVm extends GetxController {
     }
   }
 
-  bool isUnAssign(GuestItem guestItem) {
-    int status = int.tryParse(guestItem.status.toString()) ?? 0;
-    bool isAssign = guestItem.roomId == 0;
-    bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
-    return isUnAssignRoom;
-  }
-
-  void applyReservationFilters(Map<String, dynamic> filters) {
+  void applyFilters(Map<String, dynamic> filters) {
     var fullData = reservationList.value ?? {};
+
     receivedFilters.value = filters;
 
+    // Extract filters
     DateTime? startDate = filters['startDate'];
     DateTime? endDate = filters['endDate'];
     String? roomType = filters['roomType'];
@@ -235,6 +237,7 @@ class ReservationListVm extends GetxController {
     String? status = filters['status'];
     String? businessSource = filters['businessSource'];
     bool showUnassignedRooms = filters['showUnassignedRooms'] ?? false;
+    bool guestCheckedInToday = filters['guestCheckedInToday'] ?? false;
     bool showFailedBookings = filters['showFailedBookings'] ?? false;
     String guestName = (filters['guestName'] ?? '').toLowerCase();
     String reservationNumber = filters['reservationNumber'] ?? '';
@@ -245,7 +248,6 @@ class ReservationListVm extends GetxController {
     fullData.forEach((tab, items) {
       filteredMap[tab] = items.where((item) {
         bool match = true;
-        bool isUnassign = isUnAssign(item);
 
         if (startDate != null && endDate != null) {
           final itemStart = _parseDate(item.startDate);
@@ -269,9 +271,9 @@ class ReservationListVm extends GetxController {
         //   if (item.reservationType != reservationType) match = false;
         // }
 
-        if (status != null && status.isNotEmpty) {
-          if (item.status != status) match = false;
-        }
+        // if (status != null && status.isNotEmpty) {
+        //   if (item.status != status) match = false;
+        // }
 
         // if (businessSource != null && businessSource.isNotEmpty) {
         //   if (item.businessSource != businessSource) match = false;
@@ -283,9 +285,9 @@ class ReservationListVm extends GetxController {
           }
         }
 
-        if (reservationNumber.isNotEmpty) {
-          if (item.resId != reservationNumber) match = false;
-        }
+        // if (reservationNumber.isNotEmpty) {
+        //   if (item.resId != reservationNumber) match = false;
+        // }
 
         // if (cancellationNumber.isNotEmpty) {
         //   if ((item.cancellationNumber ?? '') != cancellationNumber)
@@ -296,11 +298,17 @@ class ReservationListVm extends GetxController {
         //   if ((item.voucherNumber ?? '') != voucherNumber) match = false;
         // }
 
-        if (showUnassignedRooms) {
-          if (isUnassign) {
-            match = false;
-          }
-        }
+        // if (showUnassignedRooms) {
+        //   if (item.roomNumber != null && item.roomNumber!.isNotEmpty) {
+        //     match = false;
+        //   }
+        // }
+
+        // if (guestCheckedInToday) {
+        //   if (item.roomNumber != null && item.roomNumber!.isNotEmpty) {
+        //     match = false;
+        //   }
+        // }
 
         // if (showFailedBookings) {
         //   if (!(item.status == 'Failed' || item.status == 'Incomplete')) {
@@ -311,9 +319,8 @@ class ReservationListVm extends GetxController {
         return match;
       }).toList();
     });
-
-    reservationFilteredList.value = filteredMap;
-    reservationFilteredList.refresh();
+    filteredList.value = filteredMap;
+    filteredList.refresh();
   }
 
   DateTime _parseDate(String dateStr) {
@@ -338,18 +345,90 @@ class ReservationListVm extends GetxController {
     }
   }
 
-  Future<void> getAllGuestData(GuestItem item) async {
+  Future<void> loadDataForGuest() async {
+    try {
+      final responses = await Future.wait([
+        _reservationService.getAllIdentityTypes(),
+        _reservationService.getAllNationality(),
+        _reservationService.getAllBusinessCategory(),
+        _reservationService.transportationModes(),
+      ]);
+      final identityTypeResponse = responses[0];
+      final nationalityResponse = responses[1];
+      final businessSourceCategoryResponse = responses[2];
+      final transportationModesResponse = responses[3];
+      if (identityTypeResponse["isSuccessful"] == true) {
+        final result = identityTypeResponse["result"]["recordSet"];
+        List<IdentityTypeResponse> identityTypesTemp = [];
+        for (final item in result) {
+          identityTypesTemp.add(IdentityTypeResponse.fromJson(item));
+        }
+        identityTypes.value = identityTypesTemp;
+      } else {
+        MessageService().error(
+          identityTypeResponse["errors"][0] ?? 'Error loading identity types!',
+        );
+      }
+
+      if (nationalityResponse["isSuccessful"] == true) {
+        final result = nationalityResponse["result"]["recordSet"];
+        List<NationalityResponse> nationalityTemp = [];
+        for (final item in result) {
+          nationalityTemp.add(NationalityResponse.fromJson(item));
+        }
+        nationalityTypes.value = nationalityTemp;
+      } else {
+        MessageService().error(
+          nationalityResponse["errors"][0] ?? 'Error loading nationalities!',
+        );
+      }
+
+      if (businessSourceCategoryResponse["isSuccessful"] == true) {
+        final result = businessSourceCategoryResponse["result"];
+        List<BusinessSourceCategory> businessCategoryTemp = [];
+        for (final item in result) {
+          businessCategoryTemp.add(BusinessSourceCategory.fromJson(item));
+        }
+        businessSourceCategories.value = businessCategoryTemp;
+      } else {
+        MessageService().error(
+          businessSourceCategoryResponse["errors"][0] ??
+              'Error loading business categories!',
+        );
+      }
+
+      if (transportationModesResponse["isSuccessful"] == true) {
+        final result = transportationModesResponse["result"]["recordSet"];
+        List<TransportationMode> transportationModesTemp = [];
+        for (final item in result) {
+          transportationModesTemp.add(TransportationMode.fromJson(item));
+        }
+        transportationModes.value = transportationModesTemp;
+      } else {
+        MessageService().error(
+          transportationModesResponse["errors"][0] ??
+              'Error loading transportation modes!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error loading data for guest: $e');
+      throw Exception('Error loading data for guest: $e');
+    }
+  }
+
+  Future<void> getAllGuestData(String bookingRoomId) async {
     try {
       isBottomSheetDataLoading.value = true;
-
-      final bookingRoomId = int.parse(item.bookingRoomId);
-      final response = await _reservationListService.getByBookingRoomId(
-        bookingRoomId,
+      final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
+      await loadDataForGuest();
+      final bookingResponse = await _reservationService.getByBookingRoomId(
+       int.parse(bookingRoomId)
       );
-      if (response["isSuccessful"] == true) {
-        final result = response["result"];
+      if (bookingResponse["isSuccessful"] == true) {
+        final result = bookingResponse["result"];
         final folioChargesList = result["bookingRoom"]["folioCharges"];
         final roomCharge = result["bookingRoom"]["roomCharges"];
+
         List<FolioCharge> folioCharges = [];
         double totalRoomCharges = 0;
 
@@ -368,7 +447,16 @@ class ReservationListVm extends GetxController {
           totalRoomCharges += item["totalAmount"];
         }
 
+        final sharers = (result["bookingRoom"]["sharers"] as List)
+            .map((e) => e as Map<String, dynamic>)
+            .toList();
+
         final guestItem = GuestItem(
+          baseCurrencySymbol: baseCurrencyData.symbol,
+          visibleCurrencyCode: result["bookingRoom"]["visibleCurrencyCode"]
+              .toString(),
+          reservationNumber: result["bookingRoom"]["reservatioNumber"]
+              .toString(),
           bookingId: result["bookingId"] ?? 0,
           bookingRoomId: result["bookingRoom"]["bookingRoomId"].toString(),
           guestId: result["guest"]["guestId"] ?? 0,
@@ -385,6 +473,8 @@ class ReservationListVm extends GetxController {
           identityType: result["guest"]["identityType"] ?? 0,
           dateofBirth: result["guest"]["dateofBirth"] ?? '',
           nationalityId: result["guest"]["nationalityId"] ?? 0,
+          nationalityName:
+              getNationalityName(result["guest"]["nationalityId"]) ?? '',
           anniversaryDate: result["guest"]["anniversaryDate"] ?? '',
           spouseDateofBirth: result["guest"]["spouseDateofBirth"] ?? '',
           birthCityId: result["guest"]["birthCityId"] ?? 0,
@@ -398,6 +488,7 @@ class ReservationListVm extends GetxController {
           titleId: result["guest"]["titleId"] ?? 0,
           resId: result["bookingRoom"]["reservatioNumber"].toString(),
           folioId: result["bookingRoom"]["folioId"].toString(),
+          folioNumber: result["bookingRoom"]["folioNumber"].toString(),
           startDate: getFirstTenCharacters(
             result["bookingRoom"]["arrivalDate"],
           ),
@@ -409,9 +500,7 @@ class ReservationListVm extends GetxController {
           adults: result["bookingRoom"]["noOfAdults"] ?? 0,
           totalAmount: result["bookingRoom"]["totalAmount"] ?? 0,
           balanceAmount: result["bookingRoom"]["balanceAmount"] ?? 0,
-          remainingNights:
-              result["bookingRoom"]["noOfNights"] ??
-              0, ////change remaining nights logic
+          remainingNights: result["bookingRoom"]["noOfNights"] ?? 0,
           roomNumber: result["bookingRoom"]["roomName"] ?? '',
           reservedDate: getFirstTenCharacters(
             result["bookingRoom"]["bookingDate"],
@@ -444,11 +533,11 @@ class ReservationListVm extends GetxController {
           email: result["guest"]["email"] ?? '',
           fax: result["guest"]["fax"] ?? '',
           idNumber: result["guest"]["identityNumber"] ?? '',
-          idType: result["guest"]["identityType"].toString(),
+          idType: getIdTypeName(result["guest"]["identityType"]).toString(),
           expiryDate: getFirstTenCharacters(result["guest"]["expiryDate"]),
           dob: getFirstTenCharacters(result["guest"]["dateofBirth"]),
           nationality: result["guest"]["nationalityId"].toString(),
-          arrivalBy: result["pickUpData"]["pickupMode"].toString(),
+          arrivalBy: getTransportModeName('arrivalMode', sharers).toString(),
           arrivalVehicle: result["pickUpData"]["vehicle"] ?? '',
           arrivalDate: getFirstTenCharacters(
             result["bookingRoom"]["arrivalDate"],
@@ -456,8 +545,11 @@ class ReservationListVm extends GetxController {
           arrivalTime: getFirstTenCharacters(
             result["bookingRoom"]["arrivalTime"],
           ),
-          departureBy: result["pickUpData"]["pickupMode"].toString(),
-          departureVehicle: result["pickUpData"]["vehicle"] ?? '',
+          departureBy: getTransportModeName(
+            'departureMode',
+            sharers,
+          ).toString(),
+          departureVehicle: result["dropOfData"]["vehicle"] ?? '',
           departureDate: getFirstTenCharacters(
             result["bookingRoom"]["departureDate"],
           ),
@@ -495,8 +587,14 @@ class ReservationListVm extends GetxController {
               result["billingInformation"]["releaseChargeAmountPercentage"] ??
               0.0,
           releaseDate: result["billingInformation"]["releaseDate"] ?? "",
-          businessCategoryId: result["companyOther"]["businessCategoryId"] ?? 0,
-          businessSourceId: result["companyOther"]["businessSourceId"] ?? 0,
+          businessCategoryId: result["bookingRoom"]["businessCategoryId"] ?? 0,
+          businessCategoryName:
+              getBusinessSourceCategoryName(
+                result["bookingRoom"]["businessCategoryId"],
+              ) ??
+              '',
+          businessSourceId: result["bookingRoom"]["businessSourceId"] ?? 0,
+          businessSourceName: result["bookingRoom"]["businessSourceName"] ?? '',
           marketId: result["companyOther"]["marketId"] ?? 0,
           isToBeReleased:
               result["billingInformation"]["isToBeReleased"] ?? false,
@@ -515,11 +613,10 @@ class ReservationListVm extends GetxController {
           masterFolioBookingTransId: result["masterFolioBookingTransId"] ?? 0,
           folioCharges: folioCharges,
         );
-
         allGuestDetails.value = guestItem;
       } else {
         MessageService().error(
-          response["errors"][0] ?? 'Error getting guest data!',
+          bookingResponse["errors"][0] ?? 'Error loading guest data!',
         );
       }
     } catch (e) {
@@ -527,6 +624,85 @@ class ReservationListVm extends GetxController {
       throw Exception('Error getting all Guest data: $e');
     } finally {
       isBottomSheetDataLoading.value = false;
+    }
+  }
+
+  String getIdTypeName(int idTypeId) {
+    try {
+      if (idTypeId.isNaN) {
+        return '';
+      }
+      for (final item in identityTypes) {
+        if (item.identityTypeId == idTypeId) {
+          return item.name;
+        }
+      }
+      return '';
+    } catch (e) {
+      throw Exception('Error in getIdTypeName: $e');
+    }
+  }
+
+  String? getNationalityName(int nationalityId) {
+    try {
+      if (nationalityId.isNaN) {
+        return '';
+      }
+      for (final item in nationalityTypes) {
+        if (item.nationalityId == nationalityId) {
+          return item.name;
+        }
+      }
+      return '';
+    } catch (e) {
+      throw Exception('Error in getNationalityName: $e');
+    }
+  }
+
+  String? getBusinessSourceCategoryName(int businessCategoryId) {
+    try {
+      if (businessCategoryId.isNaN) {
+        return '';
+      }
+      for (final item in businessSourceCategories) {
+        if (item.categoryId == businessCategoryId) {
+          return item.description;
+        }
+      }
+      return '';
+    } catch (e) {
+      throw Exception('Error in getBusinessSourceCategoryName: $e');
+    }
+  }
+
+  String? getTransportModeName(
+    String arrivalOrDeparture,
+    List<Map<String, dynamic>> sharersArr,
+  ) {
+    try {
+      for (final x in sharersArr) {
+        if (x['isMainGuest'] == true) {
+          if (arrivalOrDeparture == 'arrivalMode') {
+            final modeId = x['pickUpDropOffDataModel']["pickUpModeId"];
+            for (final mode in transportationModes) {
+              if (mode.transportationModeId == modeId) {
+                return mode.name;
+              }
+            }
+          } 
+          if (arrivalOrDeparture == 'departureMode') {
+            final modeId = x['pickUpDropOffDataModel']["dropOffModeId"];
+            for (final mode in transportationModes) {
+              if (mode.transportationModeId == modeId) {
+                return mode.name;
+              }
+            }
+          }
+        }
+      }
+      return '-';
+    } catch (e) {
+      throw Exception('Error in getTransportModeName: $e');
     }
   }
 
@@ -540,7 +716,7 @@ class ReservationListVm extends GetxController {
   Future<Map<String, dynamic>> getCancelReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> guestData = {};
-      final response = await _reservationListService.getCancellationReasons();
+      final response = await _reservationService.getCancellationReasons();
       if (response["isSuccessful"] == true) {
         final reasonList = [];
         final result = response["result"];
@@ -548,9 +724,14 @@ class ReservationListVm extends GetxController {
           reasonList.add({"id": item["reasonId"], "name": item["name"]});
         }
         guestData["reasons"] = reasonList;
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error loading cancel data!',
+        );
       }
       return guestData;
     } catch (e) {
+      MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     }
   }
@@ -558,7 +739,7 @@ class ReservationListVm extends GetxController {
   Future<Map<String, dynamic>> getNoShowReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> data = {};
-      final response = await _reservationListService.getNoShowReasons();
+      final response = await _reservationService.getNoShowReasons();
 
       if (response["isSuccessful"] == true) {
         List<Map<String, dynamic>> reasonList = [];
@@ -569,13 +750,51 @@ class ReservationListVm extends GetxController {
         data["reasons"] = reasonList;
       } else {
         MessageService().error(
-          response["errors"][0] ?? 'Error getting noshow data!',
+          response["errors"][0] ?? 'Error loading noshow data!',
         );
       }
       return data;
     } catch (e) {
       MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getVoidReservationData(GuestItem item) async {
+    try {
+      Map<String, dynamic> guestData = {};
+      final response = await _reservationService.getVoidReasons();
+
+      if (response["isSuccessful"] == true) {
+        final reasonList = [];
+        final result = response["result"];
+        for (final item in result) {
+          reasonList.add({"id": item["reasonId"], "name": item["name"]});
+        }
+        guestData["reasons"] = reasonList;
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error loading void data!',
+        );
+      }
+
+      return guestData;
+    } catch (e) {
+      MessageService().error('Error getting all Guest data: $e');
+      throw Exception('Error getting all Guest data: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> isNoShow(GuestItem item) async {
+    try {
+      final today = await LocalStorageManager.getSystemDate();
+      if (today.isNotEmpty && today == item.startDate) {
+        return {"isNoShow": true};
+      } else {
+        return {"isNoShow": false};
+      }
+    } catch (e) {
+      throw Exception('Error Getting no show or not: $e');
     }
   }
 
@@ -589,7 +808,7 @@ class ReservationListVm extends GetxController {
         "IsUnAssignRoom": true,
         "currentUserId": int.tryParse(userId),
       };
-      final response = await _reservationListService.updateBooking(request);
+      final response = await _reservationService.updateBooking(request);
       if (response["isSuccessful"] == true) {
         final msg = response["message"].isNotEmpty
             ? response["message"]
@@ -604,4 +823,12 @@ class ReservationListVm extends GetxController {
       throw Exception('Error unassign request: $e');
     }
   }
+
+  bool isUnAssign(GuestItem guestItem) {
+    int status = int.tryParse(guestItem.status.toString()) ?? 0;
+    bool isAssign = guestItem.roomId == 0;
+    bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
+    return isUnAssignRoom;
+  }
+
 }

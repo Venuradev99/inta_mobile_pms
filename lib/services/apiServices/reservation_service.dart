@@ -4,11 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:inta_mobile_pms/services/data_access_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
-class ReservationListService {
+class ReservationService {
   final DataAccessService _dataAccess;
   final AppResources _appResources;
 
-  ReservationListService(this._dataAccess, this._appResources);
+  ReservationService(this._dataAccess, this._appResources);
 
   Future<Map<String, dynamic>> getAllReservationList(
     Map<String, dynamic> body,
@@ -32,6 +32,28 @@ class ReservationListService {
       return {"error": error.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> transportationModes() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.transportationModes}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+
+    Future<Map<String, dynamic>> getAllBusinessCategory() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllBusinessCategory}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
 
   Future<Map<String, dynamic>> getAvailableRooms(
     Map<String, dynamic> body,

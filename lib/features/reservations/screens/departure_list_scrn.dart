@@ -9,7 +9,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservatio
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/departure_list_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
@@ -26,7 +26,7 @@ class DepartureList extends StatefulWidget {
 }
 
 class _DepartureListState extends State<DepartureList> {
-  final _departureListVm = Get.find<DepartureListVm>();
+  final _departureListVm = Get.find<ReservationVm>();
   late Map<String, List<GuestItem>> departuresMap;
 
   @override
@@ -34,7 +34,7 @@ class _DepartureListState extends State<DepartureList> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await _departureListVm.getDepartureMap();
+        await _departureListVm.getReservationsMap(2);
       }
     });
   }
@@ -63,7 +63,7 @@ class _DepartureListState extends State<DepartureList> {
                   statuses: _departureListVm.statuses.toList(),
                   businessSources: _departureListVm.businessSources.toList(),
                   filteredData: _departureListVm.receivedFilters.value ?? {},
-                  onApply: _departureListVm.applydepartureFilters,
+                  onApply: _departureListVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -97,7 +97,7 @@ class _DepartureListState extends State<DepartureList> {
                       'tomorrow': List.generate(3, (_) => guestItem),
                       'thisweek': List.generate(3, (_) => guestItem),
                     }
-                  : _departureListVm.departureFilteredList.value ?? {},
+                  : _departureListVm.filteredList.value ?? {},
               itemBuilder: (item) => _departureListVm.isLoading.value
                   ? _buildArrivalCardShimmer()
                   : _buildDepartureCard(item),
@@ -188,7 +188,7 @@ class _DepartureListState extends State<DepartureList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _departureListVm.getAllGuestData(item);
+    await _departureListVm.getAllGuestData(item.bookingRoomId);
     if (!mounted) return;
     final guestData = _departureListVm.allGuestDetails.value;
     showModalBottomSheet(

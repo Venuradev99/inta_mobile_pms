@@ -18,8 +18,6 @@ class NetLock extends StatefulWidget {
 class _NetLockState extends State<NetLock> {
   final _netLockVm = Get.find<NetLockVm>();
   final TextEditingController _searchController = TextEditingController();
-  List<ReservationData> _filteredReservations = [];
-  List<ReservationData> _allReservations = [];
   Set<int> _selectedRows = <int>{};
   bool _selectAll = false;
 

@@ -7,7 +7,7 @@ import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
@@ -15,7 +15,7 @@ import 'package:inta_mobile_pms/services/message_service.dart';
 class DashboardVm extends GetxController {
   final DashboardService _dashboardService;
   final UserApiService _userApiService;
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationService;
 
   final userName = ''.obs;
   final hotelName = ''.obs;
@@ -53,7 +53,7 @@ class DashboardVm extends GetxController {
   DashboardVm(
     this._dashboardService,
     this._userApiService,
-    this._reservationListService,
+    this._reservationService,
   );
 
   Future getUserName() async {
@@ -107,7 +107,7 @@ class DashboardVm extends GetxController {
       final responses = await Future.wait([
         _dashboardService.getBookingStatics(),
         _dashboardService.getInventoryPropertyOccupancyData(),
-        _reservationListService.getAllReservationList(body),
+        _reservationService.getAllReservationList(body),
       ]);
 
       final bookingResponse = responses[0];

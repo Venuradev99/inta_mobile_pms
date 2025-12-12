@@ -6,7 +6,7 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/edit_guest_details_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_list_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/filter_bottom_sheet_wgt.dart';
@@ -26,7 +26,7 @@ class ReservationList extends StatefulWidget {
 }
 
 class _ReservationListState extends State<ReservationList> {
-  final _reservationListVm = Get.find<ReservationListVm>();
+  final _reservationListVm = Get.find<ReservationVm>();
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class _ReservationListState extends State<ReservationList> {
       if (!mounted) {
         return;
       } else {
-        await _reservationListVm.getReservationsMap();
+        await _reservationListVm.getReservationsMap(1);
       }
     });
   }
@@ -65,7 +65,7 @@ class _ReservationListState extends State<ReservationList> {
                   statuses: _reservationListVm.statuses.toList(),
                   businessSources: _reservationListVm.businessSources.toList(),
                   filteredData: _reservationListVm.receivedFilters.value ?? {},
-                  onApply: _reservationListVm.applyReservationFilters,
+                  onApply: _reservationListVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -104,7 +104,7 @@ class _ReservationListState extends State<ReservationList> {
             if (_reservationListVm.isLoading.value == false)
               TabbedListView<GuestItem>(
                 tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-                dataMap: _reservationListVm.reservationFilteredList.value ?? {},
+                dataMap: _reservationListVm.filteredList.value ?? {},
                 itemBuilder: (item) => _buildReservationCard(item),
                 emptySubMessage: (period) => 'No reservations for this period',
               ),
@@ -173,7 +173,7 @@ class _ReservationListState extends State<ReservationList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _reservationListVm.getAllGuestData(item);
+    await _reservationListVm.getAllGuestData(item.bookingRoomId);
     final guestData = _reservationListVm.allGuestDetails.value;
 
     if (!mounted) return;

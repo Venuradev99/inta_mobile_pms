@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
@@ -19,6 +20,7 @@ class StayViewPageScreen extends StatefulWidget {
 
 class _StayViewPageScreenState extends State<StayViewPageScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
+  final _reservationVm = Get.find<ReservationVm>();
   DateTime _centerDate = DateTime.now();
 
   @override
@@ -29,7 +31,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
 
       setState(() {
         _centerDate = _stayViewVm.today.value ?? DateTime.now();
-        print('Initialized center date: $_centerDate');
       });
 
       await _stayViewVm.loadInitialData(_centerDate);
@@ -1001,9 +1002,8 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     //   return;
     // }
 
-    await _stayViewVm.getAllGuestData(bookingRoomId);
-    final guestItem = _stayViewVm.allGuestDetails.value;
-
+    await _reservationVm.getAllGuestData(bookingRoomId.toString());
+    final guestItem = _reservationVm.allGuestDetails.value;
     context.push(AppRoutes.viewReservation, extra: guestItem);
   }
 }

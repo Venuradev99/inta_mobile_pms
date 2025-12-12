@@ -165,6 +165,8 @@ class MaintenanceBlockVm extends GetxController {
     }
   }
 
+
+
   Future<void> unblockRoom(
     MaintenanceBlockItem block,
     DateTime fromDate,
@@ -203,7 +205,7 @@ class MaintenanceBlockVm extends GetxController {
         block.maintenanceBlockId,
       );
       if (response["isSuccessful"] == true) {
-        NavigationService().back();
+        // NavigationService().back();
         await loadAllMaintenanceBlocks();
         MessageService().success('Room unblocked successfully.');
       } else {

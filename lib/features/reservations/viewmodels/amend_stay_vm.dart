@@ -2,12 +2,12 @@ import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/reservations/models/amend_stay_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/amend_stay_save_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_details_response.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
 class AmendStayVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationListService;
 
   final Rxn<AmendStayResponse> amendStayData = Rxn<AmendStayResponse>();
   final Rxn<FolioPaymentDetailsResponse> folioDetails =

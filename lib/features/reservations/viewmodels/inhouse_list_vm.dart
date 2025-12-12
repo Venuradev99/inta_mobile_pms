@@ -2,12 +2,12 @@ import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
 class InhouseListVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationListService;
 
   final inhouseList = Rx<List<GuestItem>?>(null);
   final inhouseFilteredList = Rx<List<GuestItem>?>(null);

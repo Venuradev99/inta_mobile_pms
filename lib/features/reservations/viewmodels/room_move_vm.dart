@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_details_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/room_move_save_data.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class RoomMoveVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationListService;
   var roomTypes = <Map<String, dynamic>>[].obs;
   var availableRooms = <Map<String, dynamic>>[].obs;
   final Rxn<FolioPaymentDetailsResponse> folioDetails =

@@ -1,18 +1,18 @@
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class StopRoomMoveVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationService;
 
   final reasons = [].obs;
 
-  StopRoomMoveVm(this._reservationListService);
+  StopRoomMoveVm(this._reservationService);
 
   Future<void> loadInitialData() async {
     try {
-      final response = await _reservationListService.getStopRoomMoveReasons();
+      final response = await _reservationService.getStopRoomMoveReasons();
       if (response["isSuccessful"] == true) {
         final result = List<Map<String, dynamic>>.from(
           response["result"] as List,
@@ -43,7 +43,7 @@ class StopRoomMoveVm extends GetxController {
         "reasonId": 0,
         "shortCode": "",
       };
-      final response = await _reservationListService.saveReason(requestBody);
+      final response = await _reservationService.saveReason(requestBody);
       if (response["isSuccessful"] == true) {
          NavigationService().back();
         String msg = response["message"] ?? 'Stop room move successfully!';
@@ -69,7 +69,7 @@ class StopRoomMoveVm extends GetxController {
         ],
         "IsStopRoomMove": true,
       };
-      final response = await _reservationListService.updateBooking(requestBody);
+      final response = await _reservationService.updateBooking(requestBody);
       return response;
     } catch (e) {
       throw Exception("Error while stop moving room: $e");

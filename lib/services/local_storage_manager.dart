@@ -63,7 +63,6 @@ class LocalStorageManager {
     String jsonString = prefs.getString('hotelInformation') ?? "";
     if (jsonString.isNotEmpty) {
       final json = jsonDecode(jsonString);
-      print(json);
       return HotelInformationModel.fromJson(json);
     } else {
       return HotelInformationModel.empty();

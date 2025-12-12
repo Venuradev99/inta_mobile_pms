@@ -13,16 +13,14 @@ import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list
 import 'package:inta_mobile_pms/features/reports/viewmodels/manager_report_vm.dart';
 import 'package:inta_mobile_pms/features/reports/viewmodels/night_audit_report_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/amend_stay_vm.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/arrival_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/assign_rooms_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/audit_trail_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/cancel_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/change_reservation_type_vm.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/departure_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/edit_guest_details_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/inhouse_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/no_show_reservation_vm.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_list_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/room_move_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/stop_room_move_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/void_reservation_vm.dart';
@@ -32,7 +30,7 @@ import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/quick_reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reports_service.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:inta_mobile_pms/services/data_access_service.dart';
@@ -53,7 +51,7 @@ void main() async {
   final userApiService = UserApiService();
   final stayViewService = StayViewService(dataAccessService, appResources);
   final dashboardService = DashboardService(dataAccessService, appResources);
-  final reservationListService = ReservationListService(
+  final reservationService = ReservationService(
     dataAccessService,
     appResources,
   );
@@ -70,7 +68,7 @@ void main() async {
   //register Services
   Get.put<StayViewService>(stayViewService);
   Get.put<DashboardService>(dashboardService);
-  Get.put<ReservationListService>(reservationListService);
+  Get.put<ReservationService>(reservationService);
   Get.put<HouseKeepingService>(houseKeepingService);
   Get.put<UserApiService>(userApiService);
   Get.put<QuickReservationService>(quickReservationService);
@@ -81,43 +79,39 @@ void main() async {
     DashboardVm(
       Get.find<DashboardService>(),
       Get.find<UserApiService>(),
-      Get.find<ReservationListService>(),
+      Get.find<ReservationService>(),
     ),
   );
-  Get.put<ArrivalListVm>(ArrivalListVm(Get.find<ReservationListService>()));
+  Get.put<ReservationVm>(ReservationVm(Get.find<ReservationService>()));
   Get.put<VoidReservationVm>(
-    VoidReservationVm(Get.find<ReservationListService>()),
+    VoidReservationVm(Get.find<ReservationService>()),
   );
-  Get.put<StopRoomMoveVm>(StopRoomMoveVm(Get.find<ReservationListService>()));
-  Get.put<RoomMoveVm>(RoomMoveVm(Get.find<ReservationListService>()));
+  Get.put<StopRoomMoveVm>(StopRoomMoveVm(Get.find<ReservationService>()));
+  Get.put<RoomMoveVm>(RoomMoveVm(Get.find<ReservationService>()));
   Get.put<NoShowReservationVm>(
-    NoShowReservationVm(Get.find<ReservationListService>()),
+    NoShowReservationVm(Get.find<ReservationService>()),
   );
-  Get.put<InhouseListVm>(InhouseListVm(Get.find<ReservationListService>()));
+  Get.put<InhouseListVm>(InhouseListVm(Get.find<ReservationService>()));
   Get.put<CancelReservationVm>(
-    CancelReservationVm(Get.find<ReservationListService>()),
-  );
-  Get.put<DepartureListVm>(DepartureListVm(Get.find<ReservationListService>()));
-  Get.put<ReservationListVm>(
-    ReservationListVm(Get.find<ReservationListService>()),
+    CancelReservationVm(Get.find<ReservationService>()),
   );
   Get.put<WorkOrderListVm>(WorkOrderListVm(Get.find<HouseKeepingService>()));
   Get.put<HouseStatusVm>(HouseStatusVm(Get.find<HouseKeepingService>()));
   Get.put<ChangeReservationTypeVm>(
-    ChangeReservationTypeVm(Get.find<ReservationListService>()),
+    ChangeReservationTypeVm(Get.find<ReservationService>()),
   );
-  Get.put<AssignRoomsVm>(AssignRoomsVm(Get.find<ReservationListService>()));
-  Get.put<AmendStayVm>(AmendStayVm(Get.find<ReservationListService>()));
+  Get.put<AssignRoomsVm>(AssignRoomsVm(Get.find<ReservationService>()));
+  Get.put<AmendStayVm>(AmendStayVm(Get.find<ReservationService>()));
   Get.put<MaintenanceBlockVm>(
     MaintenanceBlockVm(Get.find<HouseKeepingService>()),
   );
   Get.put<NetLockVm>(NetLockVm(Get.find<DashboardService>()));
-  Get.put<AuditTrailVm>(AuditTrailVm(Get.find<ReservationListService>()));
+  Get.put<AuditTrailVm>(AuditTrailVm(Get.find<ReservationService>()));
   Get.put<EditGuestDetailsVm>(
-    EditGuestDetailsVm(Get.find<ReservationListService>()),
+    EditGuestDetailsVm(Get.find<ReservationService>()),
   );
   Get.put<StayViewVm>(
-    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationListService>()),
+    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationService>())
   );
   Get.put<QuickReservationVm>(
     QuickReservationVm(Get.find<QuickReservationService>()),

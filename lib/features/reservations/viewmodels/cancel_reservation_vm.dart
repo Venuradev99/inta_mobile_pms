@@ -1,10 +1,10 @@
 import 'package:get/get.dart';
-import 'package:inta_mobile_pms/services/apiServices/reservation_list_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class CancelReservationVm extends GetxController {
-  final ReservationListService _reservationListService;
+  final ReservationService _reservationListService;
 
   CancelReservationVm(this._reservationListService);
 

@@ -15,7 +15,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservatio
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/arrival_list_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
@@ -32,7 +32,7 @@ class ArrivalList extends StatefulWidget {
 }
 
 class _ArrivalListState extends State<ArrivalList> {
-  final _arrivalListVm = Get.find<ArrivalListVm>();
+  final _arrivalListVm = Get.find<ReservationVm>();
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _ArrivalListState extends State<ArrivalList> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await _arrivalListVm.getReservationsMap();
+        await _arrivalListVm.getReservationsMap(3);
       }
     });
   }
@@ -68,7 +68,7 @@ class _ArrivalListState extends State<ArrivalList> {
                   statuses: _arrivalListVm.statuses.toList(),
                   businessSources: _arrivalListVm.businessSources.toList(),
                   filteredData: _arrivalListVm.receivedFilters.value ?? {},
-                  onApply: _arrivalListVm.applyArrivalFilters,
+                  onApply: _arrivalListVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -103,7 +103,7 @@ class _ArrivalListState extends State<ArrivalList> {
                       'tomorrow': List.generate(3, (_) => guestItem),
                       'thisweek': List.generate(3, (_) => guestItem),
                     }
-                  : _arrivalListVm.arrivalFilteredList.value ?? {},
+                  : _arrivalListVm.filteredList.value ?? {},
               itemBuilder: (item) => isLoading.value
                   ? _buildArrivalCardShimmer()
                   : _buildArrivalCard(item),
@@ -176,7 +176,7 @@ class _ArrivalListState extends State<ArrivalList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _arrivalListVm.getAllGuestData(item);
+    await _arrivalListVm.getAllGuestData(item.bookingRoomId);
     if (!mounted) return;
     final guestData = _arrivalListVm.allGuestDetails.value;
     final isNoShowResponse = await _arrivalListVm.isNoShow(item);
