@@ -193,10 +193,32 @@ class ReservationService {
     }
   }
 
+  Future<Map<String, dynamic>> getFolios(int bookingId) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getFolios}/$bookingId';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getFolioPayments(int folioId) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getFolioPayments}/GetFolioPayments/$folioId/false';
+          '${_appResources.baseUrl}${AppResources.getFolioPayments}/$folioId/false';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getFolioCharges(int folioId) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getFolioCharges}/$folioId/0';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {

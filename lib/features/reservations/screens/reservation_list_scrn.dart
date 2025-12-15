@@ -168,6 +168,7 @@ class _ReservationListState extends State<ReservationList> {
       reservationType: item.reservationType,
       totalAmount: item.totalAmount,
       balanceAmount: item.balanceAmount,
+      baseCurrencySymbol: item.baseCurrencySymbol,
       onTap: () => _showActions(context, item),
     );
   }

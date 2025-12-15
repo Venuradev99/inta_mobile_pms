@@ -117,6 +117,7 @@ class _InHouseListState extends State<InHouseList> {
               adults: item.adults,
               totalAmount: item.totalAmount,
               balanceAmount: item.balanceAmount,
+               baseCurrencySymbol: item.baseCurrencySymbol,
               roomNumber: item.roomNumber,
               onTap: () => _showActions(context, item),
             );

@@ -16,6 +16,7 @@ class GuestCard extends StatelessWidget {
   final double balanceAmount;
   final String? roomNumber;
   final String? reservationType;
+    final String?  baseCurrencySymbol;
   final Widget? actionButton;
   final GestureTapCallback? onTap;
   final String? roomType;
@@ -37,7 +38,21 @@ class GuestCard extends StatelessWidget {
     this.actionButton,
     this.onTap,
     this.roomType,
+    this.baseCurrencySymbol
   });
+
+  String formatCurrency(double? value) {
+    if (value == null) return '$baseCurrencySymbol 0.00';
+
+    final formatted = value
+        .toStringAsFixed(2)
+        .replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+\.)'),
+          (Match m) => '${m[1]},',
+        );
+
+    return '${baseCurrencySymbol} ${formatted}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,14 +189,14 @@ class GuestCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Total: \$${totalAmount.toStringAsFixed(2)}',
+                   'Total:${formatCurrency(totalAmount)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const Spacer(),
                 Text(
-                  'Balance: \$${balanceAmount.toStringAsFixed(2)}',
+                  'Balance:${formatCurrency(balanceAmount)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.red,
                     fontWeight: FontWeight.w500,

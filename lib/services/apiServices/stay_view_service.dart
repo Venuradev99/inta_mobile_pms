@@ -30,4 +30,16 @@ class StayViewService {
       return {"error": error.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> getAvailableRooms(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAvailableRooms}';
+      final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
 }

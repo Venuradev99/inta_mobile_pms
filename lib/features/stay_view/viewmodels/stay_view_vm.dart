@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
@@ -16,15 +17,14 @@ class StayViewVm extends GetxController {
 
   final statusList = <StayViewStatusColor>[].obs;
   final isLoading = Rx<bool>(true);
+  final isAvailableRoomLoading = Rx<bool>(false);
   final isRecordsEmpty = Rx<bool>(false);
   final today = Rxn<DateTime>();
   var roomTypes = <Map<String, dynamic>>[].obs;
+  var availableRooms = <AvailableRooms>[].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
 
-  StayViewVm(
-    this._stayViewService,
-    this._reservationService
-  );
+  StayViewVm(this._stayViewService, this._reservationService);
 
   String yesterday(String today) {
     try {
@@ -44,6 +44,38 @@ class StayViewVm extends GetxController {
       today.value = DateTime.parse(todaySystemDate);
     } catch (e) {
       throw Exception('Error getting today system date: $e');
+    }
+  }
+
+  Future<List<AvailableRooms>> loadAvailableRooms(dynamic booking) async {
+    try {
+      isAvailableRoomLoading.value = true;
+      final payload = {
+        "RoomList": [],
+        "adults": 0,
+        "childs": 0,
+        "arrivalDate": booking['checkInDate'],
+        "departureDate": booking['checkOutDate'],
+        "roomType": booking['roomTypeId'],
+      };
+
+      final response = await _stayViewService.getAvailableRooms(payload);
+
+      if (response["isSuccessful"] == true) {
+        final result = response["result"] as Map<String, dynamic>;
+        availableRooms.value = result['availableRooms']
+            .map<AvailableRooms>((item) => AvailableRooms.fromJson(item))
+            .toList();
+            return availableRooms;
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
+        MessageService().error(msg);
+        return [];
+      }
+    } catch (e) {
+      throw Exception('Error loading available rooms: $e');
+    } finally {
+      isAvailableRoomLoading.value = false;
     }
   }
 

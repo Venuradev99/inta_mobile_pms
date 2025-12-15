@@ -170,6 +170,7 @@ class _ArrivalListState extends State<ArrivalList> {
       reservationType: item.reservationType,
       totalAmount: item.totalAmount,
       balanceAmount: item.balanceAmount,
+      baseCurrencySymbol: item.baseCurrencySymbol,
       actionButton: const SizedBox(height: 32),
       onTap: () => _showActions(context, item),
     );

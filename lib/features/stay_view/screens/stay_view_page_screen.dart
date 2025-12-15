@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/widgets/booking_room_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -73,26 +74,26 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       ),
                       const SizedBox(height: 16),
                       _buildLegendGrid(statuses),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Booking Indicators',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildIndicatorRow(
-                        Icons.call_split,
-                        'Split Reservation',
-                        const Color(0xFF00BCD4),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildIndicatorRow(
-                        Icons.groups,
-                        'Group Owner',
-                        const Color(0xFF795548),
-                      ),
+                      // const SizedBox(height: 24),
+                      // const Text(
+                      //   'Booking Indicators',
+                      //   style: TextStyle(
+                      //     fontSize: 16,
+                      //     fontWeight: FontWeight.w600,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 16),
+                      // _buildIndicatorRow(
+                      //   Icons.call_split,
+                      //   'Split Reservation',
+                      //   const Color(0xFF00BCD4),
+                      // ),
+                      // const SizedBox(height: 12),
+                      // _buildIndicatorRow(
+                      //   Icons.groups,
+                      //   'Group Owner',
+                      //   const Color(0xFF795548),
+                      // ),
                       const SizedBox(height: 24),
                       const Text(
                         'Room Indicators',
@@ -119,12 +120,12 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         'Smoking',
                         Colors.grey[700]!,
                       ),
-                      const SizedBox(height: 12),
-                      _buildIndicatorRow(
-                        Icons.link,
-                        'Connected Rooms',
-                        Colors.grey[700]!,
-                      ),
+                      // const SizedBox(height: 12),
+                      // _buildIndicatorRow(
+                      //   Icons.link,
+                      //   'Connected Rooms',
+                      //   Colors.grey[700]!,
+                      // ),
                       const SizedBox(height: 12),
                       _buildLegendItem('Inventory', Colors.blue[100]!),
                       const SizedBox(height: 12),
@@ -284,71 +285,97 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: CustomAppBar(title: 'Stay View', onInfoTap: _showInfoDialog),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await Future.delayed(const Duration(seconds: 1));
-        },
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildDateNavigator(textTheme),
-              Padding(
-                padding: ResponsiveConfig.horizontalPadding(
-                  context,
-                ).copyWith(top: 20, bottom: 24),
-                child: GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity! > 300) {
-                      setState(() {
-                        _centerDate = _centerDate.subtract(
-                          const Duration(days: 1),
-                        );
-                      });
-                    } else if (details.primaryVelocity! < -300) {
-                      setState(() {
-                        _centerDate = _centerDate.add(const Duration(days: 1));
-                      });
-                    }
-                  },
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHeaderRow(
-                            roomWidth,
-                            dayWidth,
-                            dayLabels,
-                            textTheme,
-                            days,
-                          ),
-                          const SizedBox(height: 12),
-                          Obx(() {
-                            return _stayViewVm.isLoading.value == true
-                                ? Column(
-                                    children: _buildRoomSectionsShimmer(
-                                      roomWidth,
-                                      dayWidth,
-                                    ),
-                                  )
-                                : Column(
-                                    children: _buildRoomSections(
-                                      roomWidth,
-                                      dayWidth,
-                                      textTheme,
-                                      days,
-                                    ),
-                                  );
-                          }),
-                        ],
-                      );
+      body: Stack(
+        children: [
+          // MAIN CONTENT
+          RefreshIndicator(
+            onRefresh: () async {
+              await Future.delayed(const Duration(seconds: 1));
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: [
+                _buildDateNavigator(textTheme),
+
+                Padding(
+                  padding: ResponsiveConfig.horizontalPadding(
+                    context,
+                  ).copyWith(top: 20, bottom: 24),
+                  child: GestureDetector(
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity! > 300) {
+                        setState(() {
+                          _centerDate = _centerDate.subtract(
+                            const Duration(days: 1),
+                          );
+                        });
+                      } else if (details.primaryVelocity! < -300) {
+                        setState(() {
+                          _centerDate = _centerDate.add(
+                            const Duration(days: 1),
+                          );
+                        });
+                      }
                     },
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildHeaderRow(
+                              roomWidth,
+                              dayWidth,
+                              dayLabels,
+                              textTheme,
+                              days,
+                            ),
+                            const SizedBox(height: 12),
+
+                            Obx(() {
+                              return _stayViewVm.isLoading.value
+                                  ? Column(
+                                      children: _buildRoomSectionsShimmer(
+                                        roomWidth,
+                                        dayWidth,
+                                      ),
+                                    )
+                                  : Column(
+                                      children: _buildRoomSections(
+                                        roomWidth,
+                                        dayWidth,
+                                        textTheme,
+                                        days,
+                                      ),
+                                    );
+                            }),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Obx(() {
+            if (!_reservationVm.isBottomSheetDataLoading.value) {
+              return const SizedBox.shrink();
+            }
+
+            return Container(
+              color: Colors.black.withOpacity(0.25),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 6.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -691,6 +718,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     List<DateTime> days,
   ) {
     final List<dynamic> datas = section['datas'] as List<dynamic>;
+    final roomTypeId = section['roomTypeId'] as int;
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[50],
@@ -715,6 +743,11 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               final assignCount = datas[index]['availability'].toInt();
               final total = datas[index]['totalNoOfRooms'];
               final unassignCount = datas[index]['bookingRooms'].length;
+              final List<Map<String, dynamic>> bookingRoomsList =
+                  (datas[index]['bookingRooms'] as List)
+                      .map((e) => Map<String, dynamic>.from(e as Map))
+                      .toList();
+
               return Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -726,9 +759,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       InkWell(
-                        onTap: () {
-                          // Handle avail button tap
-                        },
+                        onTap: () {},
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -759,8 +790,21 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       ),
                       if (unassignCount > 0)
                         InkWell(
-                          onTap: () {
-                            // Handle total button tap
+                          onTap: () async {
+                            // showDialog(
+                            //   context: context,
+                            //   builder: (context) {
+                            //     return BookingRoomDialog(
+                            //       bookingRooms: bookingRoomsList,
+                            //       onAssign: (booking, selectedRoom) {
+                            //         Navigator.pop(context);
+                            //       },
+                            //       onCancel: () {
+                            //         Navigator.pop(context);
+                            //       },
+                            //     );
+                            //   },
+                            // );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(

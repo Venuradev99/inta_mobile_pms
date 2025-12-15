@@ -167,6 +167,7 @@ class _DepartureListState extends State<DepartureList> {
               adults: item.adults,
               totalAmount: item.totalAmount,
               balanceAmount: item.balanceAmount,
+              baseCurrencySymbol: item.baseCurrencySymbol,
               actionButton: SizedBox(
                 height: 32,
                 child: ElevatedButton(
@@ -410,7 +411,7 @@ class _DepartureListState extends State<DepartureList> {
             label: 'Edit Guest Details',
             onTap: () {
               context.pop();
-              context.push(AppRoutes.editGuestDetails , extra: guestData);
+              context.push(AppRoutes.editGuestDetails, extra: guestData);
             },
           ),
           ActionItem(icon: Icons.receipt, label: 'Print Invoice'),

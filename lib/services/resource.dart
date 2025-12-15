@@ -68,7 +68,9 @@ class AppResources {
       '$reason/GetByCategory?ResonCategoryId=18&withInactive=false';
   static const String saveReason = reason;
   static const String getAmendStayData = amendStay;
-  static const String getFolioPayments = payment;
+  static const String getFolioPayments = '$payment/GetFolioPayments';
+  static const String getFolioCharges = '$booking/GetFolioChargeByFolioId';
+  static const String getFolios = '$booking/getfolios';
   static const String saveOtherInformation = '$booking/otherInformation';
   static const String getAuditTrial = '$auditTrial/getAuditTrial/';
   static const String updateGuests = guests;
@@ -81,7 +83,8 @@ class AppResources {
   static const String getAllCountries = '$country/GetAll';
   static const String getAllTitle = '$title/GetAll?startIndex=0&PageSize=0';
   static const String getAllBusinessCategory = '$common/GetAllBusinessCategory';
-  static const String transportationModes = '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
+  static const String transportationModes =
+      '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';

@@ -205,7 +205,6 @@ class MaintenanceBlockVm extends GetxController {
         block.maintenanceBlockId,
       );
       if (response["isSuccessful"] == true) {
-        // NavigationService().back();
         await loadAllMaintenanceBlocks();
         MessageService().success('Room unblocked successfully.');
       } else {

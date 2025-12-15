@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/business_source_category_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_charges_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_payment_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/identity_type_response..dart';
 import 'package:inta_mobile_pms/features/reservations/models/nationality_response.dart';
@@ -18,8 +21,11 @@ class ReservationVm extends GetxController {
   final reservationList = Rx<Map<String, List<GuestItem>>?>(null);
   final filteredList = Rx<Map<String, List<GuestItem>>?>(null);
   final receivedFilters = Rx<Map<String, dynamic>?>(null);
+
   final isLoading = true.obs;
   final isBottomSheetDataLoading = false.obs;
+  final isFolioDataLoading = false.obs;
+
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
 
@@ -31,6 +37,11 @@ class ReservationVm extends GetxController {
   var businessSources = <FilterDropdownData>[].obs;
   var businessSourceCategories = <BusinessSourceCategory>[].obs;
   var transportationModes = <TransportationMode>[].obs;
+
+  var allFolios = <FolioResponse>[].obs;
+  var folioPayments = <FolioPaymentResponse>[].obs;
+  var folioCharges = <FolioChargesResponse>[].obs;
+  var selectedFolio = ''.obs;
 
   ReservationVm(this._reservationService);
 
@@ -58,6 +69,7 @@ class ReservationVm extends GetxController {
     try {
       isLoading.value = true;
       final today = await LocalStorageManager.getSystemDate();
+      final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       final body = ReservationSearchRequest(
         businessSourceId: 0,
         exceptCancelled: false,
@@ -109,6 +121,7 @@ class ReservationVm extends GetxController {
             totalAmount: (item['totalAmount'] ?? 0).toDouble(),
             balanceAmount: (item['balance'] ?? 0).toDouble(),
             room: item['roomName'] ?? '',
+            baseCurrencySymbol: baseCurrencyData.symbol,
           );
 
           if (item['arrivalDate'] == today.toString()) {
@@ -345,6 +358,55 @@ class ReservationVm extends GetxController {
     }
   }
 
+  Future<void> loadFolioData(int folioId) async {
+    try {
+      isFolioDataLoading.value = true;
+      final responses = await Future.wait([
+        _reservationService.getFolioPayments(folioId),
+        _reservationService.getFolioCharges(folioId),
+      ]);
+
+      final folioPaymentsResponse = responses[0];
+      final folioChargesResponse = responses[1];
+
+      if (folioPaymentsResponse["isSuccessful"] == true) {
+        final result = List<Map<String, dynamic>>.from(
+          folioPaymentsResponse["result"]["chargeList"],
+        );
+
+        List<FolioPaymentResponse> folioPaymentsTemp = [];
+        for (final item in result) {
+          folioPaymentsTemp.add(FolioPaymentResponse.fromJson(item));
+        }
+        folioPayments.value = folioPaymentsTemp;
+      } else {
+        final msg =
+            folioPaymentsResponse["errors"][0] ??
+            'Error Loading Folio Payments!';
+        MessageService().error(msg);
+      }
+
+      if (folioChargesResponse["isSuccessful"] == true) {
+        final result = List<Map<String, dynamic>>.from(
+          folioChargesResponse["result"],
+        );
+        List<FolioChargesResponse> folioChargesTemp = [];
+        for (final item in result) {
+          folioChargesTemp.add(FolioChargesResponse.fromJson(item));
+        }
+        folioCharges.value = folioChargesTemp;
+      } else {
+        final msg =
+            folioChargesResponse["errors"][0] ?? 'Error Loading Folio Charges!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading folio data: $e');
+    } finally {
+      isFolioDataLoading.value = false;
+    }
+  }
+
   Future<void> loadDataForGuest() async {
     try {
       final responses = await Future.wait([
@@ -416,13 +478,39 @@ class ReservationVm extends GetxController {
     }
   }
 
+  Future<void> loadAllFolios(int bookingRoomId) async {
+    try {
+      final foliosResponse = await _reservationService.getFolios(bookingRoomId);
+
+      if (foliosResponse["isSuccessful"] == true) {
+        final result = foliosResponse["result"];
+        final foliosList = List<Map<String, dynamic>>.from(result);
+        List<FolioResponse> foliosTemp = [];
+        for (final item in foliosList) {
+          if (item['isMaster'] == true) {
+            selectedFolio.value = item['folioNo'];
+            loadFolioData(item['folioId']);
+          }
+          foliosTemp.add(FolioResponse.fromJson(item));
+        }
+
+        allFolios.value = foliosTemp;
+      } else {
+        final msg = foliosResponse["errors"][0] ?? 'Error Loading Folios!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading folios: $e');
+    } finally {}
+  }
+
   Future<void> getAllGuestData(String bookingRoomId) async {
     try {
       isBottomSheetDataLoading.value = true;
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       await loadDataForGuest();
       final bookingResponse = await _reservationService.getByBookingRoomId(
-       int.parse(bookingRoomId)
+        int.parse(bookingRoomId),
       );
       if (bookingResponse["isSuccessful"] == true) {
         final result = bookingResponse["result"];
@@ -689,7 +777,7 @@ class ReservationVm extends GetxController {
                 return mode.name;
               }
             }
-          } 
+          }
           if (arrivalOrDeparture == 'departureMode') {
             final modeId = x['pickUpDropOffDataModel']["dropOffModeId"];
             for (final mode in transportationModes) {
@@ -830,5 +918,4 @@ class ReservationVm extends GetxController {
     bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
     return isUnAssignRoom;
   }
-
 }

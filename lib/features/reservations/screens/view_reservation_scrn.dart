@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_charges_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_payment_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
+import 'package:intl/intl.dart';
 
 class ViewReservation extends StatefulWidget {
   final GuestItem? item;
@@ -10,24 +16,46 @@ class ViewReservation extends StatefulWidget {
   State<ViewReservation> createState() => _ViewReservation();
 }
 
-class _ViewReservation extends State<ViewReservation> {
+class _ViewReservation extends State<ViewReservation>
+    with TickerProviderStateMixin {
+  final ReservationVm _reservationVm = Get.find<ReservationVm>();
+  late final TabController _tabController;
   GuestItem? item;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     item = widget.item;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
+      if (bookingRoomId != null) {
+        await _reservationVm.loadAllFolios(bookingRoomId);
+        if (!mounted) return; // <-- widget could be gone
+        setState(() {}); // Only call if mounted
+      }
+    });
   }
 
-String formatCurrency(double? value) {
-  if (value == null) return '${item?.visibleCurrencyCode} 0.00';
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
-  final formatted = value.toStringAsFixed(2)
-      .replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+\.)'), (Match m) => '${m[1]},');
+  String formatCurrency(double? value) {
+    if (value == null) return '${item?.visibleCurrencyCode} 0.00';
 
-  return '${item?.visibleCurrencyCode} ${formatted}';
-}
+    final formatted = value
+        .toStringAsFixed(2)
+        .replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+\.)'),
+          (Match m) => '${m[1]},',
+        );
 
+    return '${item?.visibleCurrencyCode} ${formatted}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,6 +364,11 @@ String formatCurrency(double? value) {
                 ),
                 _buildEnhancedInfoRow(
                   'Rate Plan',
+                  item!.rateType ?? '-',
+                  Icons.label,
+                ),
+                _buildEnhancedInfoRow(
+                  'Reservation Type',
                   item!.reservationType ?? '-',
                   Icons.label,
                 ),
@@ -530,24 +563,24 @@ String formatCurrency(double? value) {
                   item!.businessCategoryName ?? '',
                   Icons.business,
                 ),
-                if(item!.businessCategoryId == 1)
-                _buildEnhancedInfoRow(
-                  'Online Travel Agent',
-                  item!.businessSourceName ?? '',
-                  Icons.business,
-                ),
-                 if(item!.businessCategoryId == 2)
-                _buildEnhancedInfoRow(
-                  'Agent',
-                  item!.businessSourceName ?? '',
-                  Icons.business,
-                ),
-                 if(item!.businessCategoryId == 5)
-                _buildEnhancedInfoRow(
-                  'Company',
-                  item!.businessSourceName ?? '',
-                  Icons.business,
-                ),
+                if (item!.businessCategoryId == 1)
+                  _buildEnhancedInfoRow(
+                    'Online Travel Agent',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
+                if (item!.businessCategoryId == 2)
+                  _buildEnhancedInfoRow(
+                    'Agent',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
+                if (item!.businessCategoryId == 5)
+                  _buildEnhancedInfoRow(
+                    'Company',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
               ],
             ),
           ),
@@ -624,7 +657,84 @@ String formatCurrency(double? value) {
     );
   }
 
-  // Enhanced Folio Details Tab
+  // Widget _buildFolioDetailsTab() {
+  //   return Column(
+  //     children: [
+  //       Container(
+  //         padding: const EdgeInsets.all(16),
+  //         decoration: BoxDecoration(
+  //           color: Colors.white,
+  //           boxShadow: [
+  //             BoxShadow(
+  //               color: Colors.black.withOpacity(0.05),
+  //               blurRadius: 4,
+  //               offset: const Offset(0, 2),
+  //             ),
+  //           ],
+  //         ),
+  //         child: Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               'Folio #${item!.folioNumber}',
+  //               style: const TextStyle(
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //                 color: AppColors.primary,
+  //               ),
+  //             ),
+  //             const SizedBox(height: 12),
+  //             Row(
+  //               children: [
+  //                 _buildLegendItem(Colors.blue.shade400, 'Pending'),
+  //                 const SizedBox(width: 16),
+  //                 _buildLegendItem(Colors.green.shade400, 'Posted'),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       Expanded(
+  //         child: item!.folioCharges != null && item!.folioCharges!.isNotEmpty
+  //             ? ListView.builder(
+  //                 padding: const EdgeInsets.all(16),
+  //                 itemCount: item!.folioCharges!.length,
+  //                 itemBuilder: (context, index) {
+  //                   final charge = item!.folioCharges![index];
+  //                   return _buildEnhancedFolioItem(
+  //                     charge.title,
+  //                     charge.date,
+  //                     charge.room,
+  //                     charge.amount,
+  //                     isPosted: charge.isPosted,
+  //                   );
+  //                 },
+  //               )
+  //             : Center(
+  //                 child: Column(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   children: [
+  //                     Icon(
+  //                       Icons.receipt_outlined,
+  //                       size: 64,
+  //                       color: Colors.grey.shade300,
+  //                     ),
+  //                     const SizedBox(height: 16),
+  //                     Text(
+  //                       'No charges recorded yet',
+  //                       style: TextStyle(
+  //                         fontSize: 16,
+  //                         color: Colors.grey.shade600,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //       ),
+  //     ],
+  //   );
+  // }
+
   Widget _buildFolioDetailsTab() {
     return Column(
       children: [
@@ -632,72 +742,296 @@ String formatCurrency(double? value) {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 4,
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
-                'Folio #${item!.folioNumber}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+              Icon(
+                Icons.account_balance_wallet,
+                color: AppColors.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Folio:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  fontSize: 15,
                 ),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  _buildLegendItem(Colors.blue.shade400, 'Pending'),
-                  const SizedBox(width: 16),
-                  _buildLegendItem(Colors.green.shade400, 'Posted'),
-                ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Obx(
+                  () => DropdownButtonFormField<String>(
+                    value: _reservationVm.selectedFolio.value,
+                    onChanged: (value) {
+                      if (value != null) {
+                        _reservationVm.selectedFolio.value = value;
+                        final folioId = _reservationVm.allFolios
+                            .firstWhere((f) => f.folioNo == value)
+                            .folioId;
+                        _reservationVm.loadFolioData(folioId);
+                      }
+                    },
+                    items: _reservationVm.allFolios
+                        .map((e) => e.folioNo)
+                        .toList()
+                        .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                        .toList(),
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Colors.grey.shade300,
+                          width: 1,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Colors.grey.shade300,
+                          width: 1,
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: AppColors.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    style: const TextStyle(color: Colors.black87, fontSize: 15),
+                    dropdownColor: Colors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
         ),
-        Expanded(
-          child: item!.folioCharges != null && item!.folioCharges!.isNotEmpty
-              ? ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: item!.folioCharges!.length,
-                  itemBuilder: (context, index) {
-                    final charge = item!.folioCharges![index];
-                    return _buildEnhancedFolioItem(
-                      charge.title,
-                      charge.date,
-                      charge.room,
-                      charge.amount,
-                      isPosted: charge.isPosted,
-                    );
-                  },
-                )
-              : Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.receipt_outlined,
-                        size: 64,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No charges recorded yet',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
+
+        TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: AppColors.primary,
+          tabs: const [
+            Tab(text: 'Charges'),
+            Tab(text: 'Payments'),
+          ],
+        ),
+
+        Obx(
+          () => Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _reservationVm.folioCharges.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No charges found',
+                          style: TextStyle(color: Colors.grey.shade600),
                         ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _reservationVm.folioCharges.length,
+                        itemBuilder: (context, index) {
+                          final charge = _reservationVm.folioCharges[index];
+                          return Card(
+                            elevation: 2,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          charge.chargeName,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        formatCurrency(charge.amount),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        DateFormat(
+                                          'yyyy-MM-dd',
+                                        ).format(charge.date),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Icon(
+                                        Icons.person,
+                                        size: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'User: ${charge.user}',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                ),
+
+                _reservationVm.folioPayments.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No payments found',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _reservationVm.folioPayments.length,
+                        itemBuilder: (context, index) {
+                          final payment = _reservationVm.folioPayments[index];
+                          return Card(
+                            elevation: 2,
+                            margin: const EdgeInsets.only(bottom: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          payment.paymentMode,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        formatCurrency(payment.totalAmount),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.calendar_today,
+                                        size: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        DateFormat(
+                                          'yyyy-MM-dd',
+                                        ).format(payment.dateOfStay),
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Icon(
+                                        Icons.meeting_room,
+                                        size: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Room: ${payment.roomName}',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Icon(
+                                        Icons.person,
+                                        size: 14,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'User: ${payment.user}',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -737,8 +1071,6 @@ String formatCurrency(double? value) {
       ),
     );
   }
-
-  // ==================== Enhanced Reusable Widgets ====================
 
   Widget _buildModernCard({required Widget child}) {
     return Container(
@@ -859,7 +1191,7 @@ String formatCurrency(double? value) {
             ),
           ),
           Text(
-           formatCurrency(amount),
+            formatCurrency(amount),
             style: TextStyle(
               fontSize: isBalance ? 18 : 15,
               fontWeight: FontWeight.bold,
@@ -981,7 +1313,7 @@ String formatCurrency(double? value) {
               ),
               const Spacer(),
               Text(
-               formatCurrency(amount),
+                formatCurrency(amount),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
