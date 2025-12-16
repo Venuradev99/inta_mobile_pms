@@ -72,7 +72,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
       if (mounted && guestDetails != null) {
         await _editGuestDetailsVm.loadGuestDetails(guestDetails);
 
-        _nameController.text = guestDetails.guestName;
+        _nameController.text = guestDetails.guestName!;
         _addressController.text = guestDetails.fullAddress ?? '';
         _cityController.text =
             guestDetails.cityName ?? guestDetails.zipCode ?? '';
@@ -80,7 +80,7 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
         _phoneNoController.text = guestDetails.phone ?? '';
         _emailController.text = guestDetails.email ?? '';
         _faxController.text = guestDetails.fax ?? '';
-        _registrationNoController.text = guestDetails.resId;
+        _registrationNoController.text = guestDetails.resId!;
         _idNumberController.text = guestDetails.idNumber ?? '';
         _companyController.text = guestDetails.company ?? '';
         _birthCityController.text = _editGuestDetailsVm.getCity(

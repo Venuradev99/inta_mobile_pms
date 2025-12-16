@@ -139,7 +139,7 @@ class _DepartureListState extends State<DepartureList> {
           }).toList();
 
           return StatusInfoDialog(
-            title: 'Housekeeping Status',
+            title: 'Booking Room Status',
             statusItems: items,
           );
         });
@@ -156,17 +156,20 @@ class _DepartureListState extends State<DepartureList> {
       return _departureListVm.isLoading.value
           ? GuestCardShimmer()
           : GuestCard(
-              guestName: item.guestName,
-              resId: item.resId,
-              folioId: item.folioId,
-              startDate: item.startDate,
-              endDate: item.endDate,
+              guestName: item.guestName!,
+              resId: item.resId!,
+              startDate: item.startDate!,
+              endDate: item.endDate!,
               reservationType: item.reservationType,
-              nights: item.nights,
+              nights: item.nights!,
+              room: item.room,
               nightsLabel: 'Nights Stay',
-              adults: item.adults,
-              totalAmount: item.totalAmount,
-              balanceAmount: item.balanceAmount,
+              colorCode: item.colorCode,
+              adults: item.adults!,
+              statusName: item.statusName,
+              children: item.children!,
+              totalAmount: item.totalAmount!,
+              balanceAmount: item.balanceAmount!,
               baseCurrencySymbol: item.baseCurrencySymbol,
               actionButton: SizedBox(
                 height: 32,
@@ -189,7 +192,7 @@ class _DepartureListState extends State<DepartureList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _departureListVm.getAllGuestData(item.bookingRoomId);
+    await _departureListVm.getAllGuestData(item.bookingRoomId!);
     if (!mounted) return;
     final guestData = _departureListVm.allGuestDetails.value;
     showModalBottomSheet(
@@ -200,7 +203,7 @@ class _DepartureListState extends State<DepartureList> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => ActionBottomSheet(
-        guestName: item.guestName,
+        guestName: item.guestName!,
         actions: [
           ActionItem(
             icon: Icons.visibility,

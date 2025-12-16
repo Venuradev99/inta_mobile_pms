@@ -1,8 +1,11 @@
+import 'dart:ui';
+
 class GuestItem {
   final String? reservationNumber;
   final int? bookingId;
-  final String bookingRoomId;
-  final String guestName;
+  final String? statusName;
+  final String? bookingRoomId;
+  final String? guestName;
   final String? nationalityName;
   final int? guestId;
   final int? titleId;
@@ -25,16 +28,16 @@ class GuestItem {
   final String? anniversaryDate;
   final int? birthCityId;
   final int? swipeCardId;
-  final String resId;
-  final String folioId;
+  final String? resId;
+  final String? folioId;
   final String? folioNumber;
-  final String startDate;
-  final String endDate;
-  final int nights;
+  final String? startDate;
+  final String? endDate;
+  final int? nights;
   final String? roomType;
-  final int adults;
-  final double totalAmount;
-  final double balanceAmount;
+  final int? adults;
+  final double? totalAmount;
+  final double? balanceAmount;
   final int? remainingNights;
   final String? roomNumber;
   final String? reservedDate;
@@ -93,6 +96,7 @@ class GuestItem {
   final double? travelAgentCommisionPlanValue;
   final String? grCardNumber;
   final String? visibleCurrencyCode;
+  final Color? colorCode;
   final int? masterFolioBookingTransId;
   final List<FolioCharge>? folioCharges;
 
@@ -125,8 +129,9 @@ class GuestItem {
   GuestItem({
     this.reservationNumber,
     this.bookingId,
-    required this.bookingRoomId,
-    required this.guestName,
+    this.bookingRoomId,
+    this.guestName,
+    this.statusName,
     this.nationalityName,
     this.visibleCurrencyCode,
     this.guestId,
@@ -153,15 +158,15 @@ class GuestItem {
     this.isMainGuest,
     this.isBlackListed,
     this.folioNumber,
-    required this.resId,
-    required this.folioId,
-    required this.startDate,
-    required this.endDate,
-    required this.nights,
+     this.resId,
+     this.folioId,
+     this.startDate,
+     this.endDate,
+     this.nights,
     this.roomType,
-    required this.adults,
-    required this.totalAmount,
-    required this.balanceAmount,
+     this.adults,
+     this.totalAmount,
+     this.balanceAmount,
     this.remainingNights,
     this.roomNumber,
     this.reservedDate,
@@ -243,12 +248,14 @@ class GuestItem {
     this.voucherNo,
     this.resDate,
     this.grCardNumber,
+    this.colorCode,
     this.masterFolioBookingTransId,
   });
 
   factory GuestItem.fromJson(Map<String, dynamic> json) {
     return GuestItem(
       bookingId: json['bookingId'] ?? 0,
+      statusName: json['statusName'] ?? '',
       visibleCurrencyCode: json['visibleCurrencyCode'] ?? '', 
       reservationNumber: json['reservationNumber'] ?? '',
       baseCurrencySymbol: json['baseCurrencySymbol'] ?? '',
@@ -259,6 +266,7 @@ class GuestItem {
       titleId: json['titleId'] ?? 0,
       fullAddress: json['fullAddress'] ?? '',
       zipCode: json['zipCode'] ?? '',
+      colorCode: json['colorCode'] ?? '',
       state: json['state'] ?? '',
       gender: json['gender'] ?? '',
       isAdult: json['isAdult'] ?? true,
@@ -380,6 +388,7 @@ class GuestItem {
     return {
       'reservationNumber': reservationNumber,
       'bookingId': bookingId,
+      'statusName': statusName,
       'bookingRoomId': bookingRoomId,
       'baseCurrencySymbol': baseCurrencySymbol,
       'guestName': guestName,
@@ -387,6 +396,7 @@ class GuestItem {
       'guestId': guestId,
       'titleId': titleId,
       'zipCode': zipCode,
+      'colorCode': colorCode,
       'state': state,
       'identityType': identityType,
       'nationalityId': nationalityId,
@@ -507,6 +517,7 @@ class GuestItem {
         'baseCurrencySymbol: $baseCurrencySymbol, '
         'reservationNumber: $reservationNumber, '
         'bookingId: $bookingId, '
+        'statusName: $statusName, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '
         'naitonalityName: $nationalityName, '
@@ -517,6 +528,7 @@ class GuestItem {
         'cityName: $cityName, '
         'imagePath: $imagePath, '
         'zipCode: $zipCode, '
+        'colorCode: $colorCode'
         'state: $state, '
         'gender: $gender'
         'isAdult: $isAdult, '

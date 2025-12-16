@@ -32,8 +32,8 @@ class _ViewReservation extends State<ViewReservation>
       int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
       if (bookingRoomId != null) {
         await _reservationVm.loadAllFolios(bookingRoomId);
-        if (!mounted) return; // <-- widget could be gone
-        setState(() {}); // Only call if mounted
+        if (!mounted) return;
+        setState(() {});
       }
     });
   }
@@ -165,7 +165,7 @@ class _ViewReservation extends State<ViewReservation>
                   Tab(text: 'Overview'),
                   Tab(text: 'Guest Details'),
                   Tab(text: 'Room Charges'),
-                  Tab(text: 'Folio'),
+                  Tab(text: 'Folio Details'),
                   Tab(text: 'Remarks'),
                 ],
               ),
@@ -230,7 +230,7 @@ class _ViewReservation extends State<ViewReservation>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item!.guestName,
+                      item!.guestName!,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -307,11 +307,35 @@ class _ViewReservation extends State<ViewReservation>
                 _buildCardHeader('Stay Information', Icons.calendar_month),
                 const SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: item!.colorCode!.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${item!.statusName}',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
                   children: [
                     Expanded(
                       child: _buildDateColumn(
                         'Check-In',
-                        item!.startDate,
+                        item!.startDate!,
                         Icons.login,
                       ),
                     ),
@@ -348,7 +372,7 @@ class _ViewReservation extends State<ViewReservation>
                     Expanded(
                       child: _buildDateColumn(
                         'Check-Out',
-                        item!.endDate,
+                        item!.endDate!,
                         Icons.logout,
                       ),
                     ),
@@ -363,7 +387,7 @@ class _ViewReservation extends State<ViewReservation>
                   Icons.meeting_room,
                 ),
                 _buildEnhancedInfoRow(
-                  'Rate Plan',
+                  'Rate Type',
                   item!.rateType ?? '-',
                   Icons.label,
                 ),
@@ -372,30 +396,26 @@ class _ViewReservation extends State<ViewReservation>
                   item!.reservationType ?? '-',
                   Icons.label,
                 ),
-                _buildEnhancedInfoRow(
-                  'Daily Rate',
-                  formatCurrency(item!.avgDailyRate),
-                  Icons.payments,
-                ),
+                // _buildEnhancedInfoRow(
+                //   'Daily Rate',
+                //   formatCurrency(item!.avgDailyRate),
+                //   Icons.payments,
+                // ),
               ],
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // Financial Summary Card
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader(
-                  'Financial Summary',
-                  Icons.account_balance_wallet,
-                ),
+                _buildCardHeader('Folio Summary', Icons.receipt_long),
                 const SizedBox(height: 16),
                 _buildFinancialRow(
                   'Total Charges',
-                  item!.totalAmount,
+                  item!.totalAmount!,
                   isPositive: false,
                 ),
                 _buildFinancialRow(
@@ -406,17 +426,87 @@ class _ViewReservation extends State<ViewReservation>
                 const Divider(height: 24, thickness: 1.5),
                 _buildFinancialRow(
                   'Balance Due',
-                  item!.balanceAmount,
+                  item!.balanceAmount!,
                   isBalance: true,
-                  isPositive: item!.balanceAmount <= 0,
+                  isPositive: item!.balanceAmount! <= 0,
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-          // Action Buttons with Enhanced Design
+          _buildModernCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCardHeader('Folio #', Icons.book),
+                const SizedBox(height: 16),
+                _buildFolioDropdown(),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildModernCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCardHeader('Folio Details', Icons.payment),
+                const SizedBox(height: 16),
+                _buildFolioDropdown(),
+                const SizedBox(height: 16),
+                Obx(() {
+                  final item = _reservationVm.folioSummary.value;
+                  if (item == null) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Column(
+                    children: [
+                      _buildFinancialRow('Room Charges', item.roomCharges),
+                      _buildFinancialRow('Extra Charges', item.extraCharges),
+                      _buildFinancialRow('Gross Amount', item.grossAmount),
+                      _buildFinancialRow('Full Discount', item.discountAmount),
+                      _buildFinancialRow(
+                        'Line Discount',
+                        item.lineDiscountAmount,
+                      ),
+                      _buildFinancialRow('Tax Amount', item.taxAmount),
+                      if (item.roundOffAmount != 0)
+                        _buildFinancialRow(
+                          'Auto Adjustment',
+                          item.roundOffAmount,
+                        ),
+                      _buildFinancialRow('Total Amount', item.totalAmount),
+                      _buildFinancialRow('Paid Amount', item.paidAmount),
+                      _buildFinancialRow('Balance Amount', item.balanceAmount),
+                    ],
+                  );
+                }),
+                const SizedBox(height: 16),
+                _buildFinancialRow(
+                  'Total Charges',
+                  item!.totalAmount!,
+                  isPositive: false,
+                ),
+                _buildFinancialRow(
+                  'Payments',
+                  item!.totalCredits ?? 0,
+                  isPositive: true,
+                ),
+                const Divider(height: 24, thickness: 1.5),
+                _buildFinancialRow(
+                  'Balance Due',
+                  item!.balanceAmount!,
+                  isBalance: true,
+                  isPositive: item!.balanceAmount! <= 0,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
@@ -455,6 +545,59 @@ class _ViewReservation extends State<ViewReservation>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFolioDropdown() {
+    return Row(
+      children: [
+        const SizedBox(width: 8),
+        Expanded(
+          child: Obx(
+            () => DropdownButtonFormField<String>(
+              value: _reservationVm.selectedFolio.value.isNotEmpty
+                  ? _reservationVm.selectedFolio.value
+                  : null,
+              onChanged: (value) {
+                if (value != null) {
+                  _reservationVm.selectedFolio.value = value;
+                  final folioId = _reservationVm.allFolios
+                      .firstWhere((f) => f.folioNo == value)
+                      .folioId;
+                  _reservationVm.loadFolioData(folioId);
+                }
+              },
+              items: _reservationVm.allFolios.map((folio) {
+                return DropdownMenuItem<String>(
+                  value: folio.folioNo,
+                  child: Text('${folio.folioNo} - ${folio.name}'),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+              ),
+              style: const TextStyle(color: Colors.black87, fontSize: 15),
+              dropdownColor: Colors.white,
+              icon: Icon(Icons.arrow_drop_down, color: Colors.grey.shade600),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -657,84 +800,6 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  // Widget _buildFolioDetailsTab() {
-  //   return Column(
-  //     children: [
-  //       Container(
-  //         padding: const EdgeInsets.all(16),
-  //         decoration: BoxDecoration(
-  //           color: Colors.white,
-  //           boxShadow: [
-  //             BoxShadow(
-  //               color: Colors.black.withOpacity(0.05),
-  //               blurRadius: 4,
-  //               offset: const Offset(0, 2),
-  //             ),
-  //           ],
-  //         ),
-  //         child: Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             Text(
-  //               'Folio #${item!.folioNumber}',
-  //               style: const TextStyle(
-  //                 fontSize: 18,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: AppColors.primary,
-  //               ),
-  //             ),
-  //             const SizedBox(height: 12),
-  //             Row(
-  //               children: [
-  //                 _buildLegendItem(Colors.blue.shade400, 'Pending'),
-  //                 const SizedBox(width: 16),
-  //                 _buildLegendItem(Colors.green.shade400, 'Posted'),
-  //               ],
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //       Expanded(
-  //         child: item!.folioCharges != null && item!.folioCharges!.isNotEmpty
-  //             ? ListView.builder(
-  //                 padding: const EdgeInsets.all(16),
-  //                 itemCount: item!.folioCharges!.length,
-  //                 itemBuilder: (context, index) {
-  //                   final charge = item!.folioCharges![index];
-  //                   return _buildEnhancedFolioItem(
-  //                     charge.title,
-  //                     charge.date,
-  //                     charge.room,
-  //                     charge.amount,
-  //                     isPosted: charge.isPosted,
-  //                   );
-  //                 },
-  //               )
-  //             : Center(
-  //                 child: Column(
-  //                   mainAxisAlignment: MainAxisAlignment.center,
-  //                   children: [
-  //                     Icon(
-  //                       Icons.receipt_outlined,
-  //                       size: 64,
-  //                       color: Colors.grey.shade300,
-  //                     ),
-  //                     const SizedBox(height: 16),
-  //                     Text(
-  //                       'No charges recorded yet',
-  //                       style: TextStyle(
-  //                         fontSize: 16,
-  //                         color: Colors.grey.shade600,
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _buildFolioDetailsTab() {
     return Column(
       children: [
@@ -781,11 +846,12 @@ class _ViewReservation extends State<ViewReservation>
                         _reservationVm.loadFolioData(folioId);
                       }
                     },
-                    items: _reservationVm.allFolios
-                        .map((e) => e.folioNo)
-                        .toList()
-                        .map((f) => DropdownMenuItem(value: f, child: Text(f)))
-                        .toList(),
+                    items: _reservationVm.allFolios.map((folio) {
+                      return DropdownMenuItem<String>(
+                        value: folio.folioNo,
+                        child: Text('${folio.folioNo} - ${folio.name}'),
+                      );
+                    }).toList(),
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,

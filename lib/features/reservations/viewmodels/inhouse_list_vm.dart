@@ -116,16 +116,16 @@ class InhouseListVm extends GetxController {
       bool match = true;
 
       if (startDate != null && endDate != null) {
-        final itemStart = _parseDate(item.startDate);
-        final itemEnd = _parseDate(item.endDate);
+        final itemStart = _parseDate(item.startDate!);
+        final itemEnd = _parseDate(item.endDate!);
         if (itemStart.isBefore(startDate) || itemEnd.isAfter(endDate)) {
           match = false;
         }
       } else if (startDate != null) {
-        final itemStart = _parseDate(item.startDate);
+        final itemStart = _parseDate(item.startDate!);
         if (itemStart != startDate) match = false;
       } else if (endDate != null) {
-        final itemEnd = _parseDate(item.endDate);
+        final itemEnd = _parseDate(item.endDate!);
         if (itemEnd != endDate) match = false;
       }
 
@@ -146,7 +146,7 @@ class InhouseListVm extends GetxController {
       // }
 
       if (guestName.isNotEmpty) {
-        if (!item.guestName.toLowerCase().contains(guestName.toLowerCase())) {
+        if (!item.guestName!.toLowerCase().contains(guestName.toLowerCase())) {
           match = false;
         }
       }

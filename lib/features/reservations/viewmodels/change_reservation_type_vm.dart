@@ -90,7 +90,7 @@ class ChangeReservationTypeVm extends GetxController {
           "isToBeReleased": guestItem.isToBeReleased,
         },
         "bookingId": guestItem.bookingId,
-        "bookingRoomId": int.tryParse(guestItem.bookingRoomId),
+        "bookingRoomId": int.tryParse(guestItem.bookingRoomId!),
         "companyOther": {
           "businessCategoryId": guestItem.businessCategoryId,
           "businessSourceId": guestItem.businessSourceId,

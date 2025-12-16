@@ -151,7 +151,7 @@ class _NetLockState extends State<NetLock> {
                       },
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
-                        hintText: 'Search reservations...',
+                        hintText: 'Search',
                         hintStyle: Theme.of(context).textTheme.bodyMedium
                             ?.copyWith(color: AppColors.lightgrey),
                         prefixIcon: Icon(

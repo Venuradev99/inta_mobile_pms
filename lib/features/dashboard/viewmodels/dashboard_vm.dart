@@ -256,7 +256,7 @@ class DashboardVm extends GetxController {
       if (query.isNotEmpty) {
         allReservationListFiltered.value = allReservationListFiltered
             .where(
-              (item) => item.resId.toLowerCase().contains(query.toLowerCase()),
+              (item) => item.resId!.toLowerCase().contains(query.toLowerCase()),
             )
             .toList();
       }

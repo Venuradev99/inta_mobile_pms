@@ -287,9 +287,9 @@ class _AssignRoomsBottomSheetState extends State<AssignRoomsBottomSheet> {
       ),
       child: Column(
         children: [
-          _buildInfoRow('Guest Name', widget.guestItem.guestName),
+          _buildInfoRow('Guest Name', widget.guestItem.guestName!),
           const SizedBox(height: 12),
-          _buildInfoRow('Res #', widget.guestItem.bookingRoomId),
+          _buildInfoRow('Res #', widget.guestItem.bookingRoomId!),
           const SizedBox(height: 12),
           _buildInfoRow('Room Type', widget.guestItem.roomType!),
         ],

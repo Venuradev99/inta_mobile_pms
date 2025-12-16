@@ -107,16 +107,16 @@ class _InHouseListState extends State<InHouseList> {
       return _inhouseListVm.isLoading.value
           ? GuestCardShimmer()
           : GuestCard(
-              guestName: item.guestName,
-              resId: item.resId,
-              folioId: item.folioId,
-              startDate: item.startDate,
-              endDate: item.endDate,
-              nights: item.remainingNights ?? item.nights,
+              guestName: item.guestName!,
+              resId: item.resId!,
+              startDate: item.startDate!,
+              endDate: item.endDate!,
+              nights:  item.nights!,
               nightsLabel: 'Nights Remaining',
-              adults: item.adults,
-              totalAmount: item.totalAmount,
-              balanceAmount: item.balanceAmount,
+              adults: item.adults!,
+              children: item.children!,
+              totalAmount: item.totalAmount!,
+              balanceAmount: item.balanceAmount!,
                baseCurrencySymbol: item.baseCurrencySymbol,
               roomNumber: item.roomNumber,
               onTap: () => _showActions(context, item),
@@ -133,7 +133,7 @@ class _InHouseListState extends State<InHouseList> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => ActionBottomSheet(
-        guestName: item.guestName,
+        guestName: item.guestName!,
         actions: [
           ActionItem(icon: Icons.visibility, label: 'View Reservation'),
           ActionItem(
@@ -174,7 +174,7 @@ class _InHouseListState extends State<InHouseList> {
                 'roomType': item.roomType ?? 'N/A',
                 'room': item.room ?? 'TBD',
                 'total': item.totalAmount,
-                'deposit': item.totalAmount - item.balanceAmount,
+                'deposit': item.totalAmount! - item.balanceAmount!,
               };
               Navigator.of(context).push(
                 PageRouteBuilder(

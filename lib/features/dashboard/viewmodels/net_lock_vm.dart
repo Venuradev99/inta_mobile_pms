@@ -44,6 +44,7 @@ class NetLockVm extends GetxController {
   }
 
   void filterReservations(String query) {
+    print('netlockData,${netlockData}');
     if (query.isEmpty) {
       netlockDataFiltered.value = netlockData;
     } else {
@@ -54,6 +55,12 @@ class NetLockVm extends GetxController {
                   query.toLowerCase(),
                 ) ||
                 reservation.roomType.toLowerCase().contains(
+                  query.toLowerCase(),
+                ) ||
+                 reservation.user.toLowerCase().contains(
+                  query.toLowerCase(),
+                ) ||
+                 reservation.roomName.toLowerCase().contains(
                   query.toLowerCase(),
                 ) ||
                 reservation.reservationNo.toLowerCase().contains(

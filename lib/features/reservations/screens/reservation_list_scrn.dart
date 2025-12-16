@@ -143,7 +143,7 @@ class _ReservationListState extends State<ReservationList> {
           }).toList();
 
           return StatusInfoDialog(
-            title: 'Housekeeping Status',
+            title: 'Booking Room Status',
             statusItems: items,
           );
         });
@@ -157,24 +157,27 @@ class _ReservationListState extends State<ReservationList> {
 
   Widget _buildReservationCard(GuestItem item) {
     return GuestCard(
-      guestName: item.guestName,
-      resId: item.resId,
-      folioId: item.folioId,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      nights: item.nights,
+      guestName: item.guestName!,
+      resId: item.resId!,
+      room: item.room,
+      startDate: item.startDate!,
+      endDate: item.endDate!,
+      nights: item.nights!,
+      colorCode: item.colorCode,
       nightsLabel: 'Nights Stay',
-      adults: item.adults,
+      adults: item.adults!,
+      statusName: item.statusName,
+      children: item.children!,
       reservationType: item.reservationType,
-      totalAmount: item.totalAmount,
-      balanceAmount: item.balanceAmount,
+      totalAmount: item.totalAmount!,
+      balanceAmount: item.balanceAmount!,
       baseCurrencySymbol: item.baseCurrencySymbol,
       onTap: () => _showActions(context, item),
     );
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _reservationListVm.getAllGuestData(item.bookingRoomId);
+    await _reservationListVm.getAllGuestData(item.bookingRoomId!);
     final guestData = _reservationListVm.allGuestDetails.value;
 
     if (!mounted) return;
@@ -192,7 +195,7 @@ class _ReservationListState extends State<ReservationList> {
       ),
       builder: (context) {
         return ActionBottomSheet(
-          guestName: item.guestName,
+          guestName: item.guestName!,
           actions: [
             ActionItem(
               icon: Icons.visibility,

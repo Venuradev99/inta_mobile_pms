@@ -89,6 +89,7 @@ class _ArrivalListState extends State<ArrivalList> {
           endDate: '',
           nights: 0,
           adults: 0,
+          children: 0,
           totalAmount: 0,
           balanceAmount: 0,
         );
@@ -145,7 +146,7 @@ class _ArrivalListState extends State<ArrivalList> {
           }).toList();
 
           return StatusInfoDialog(
-            title: 'Housekeeping Status',
+            title: 'Booking Room Status',
             statusItems: items,
           );
         });
@@ -159,17 +160,20 @@ class _ArrivalListState extends State<ArrivalList> {
 
   Widget _buildArrivalCard(GuestItem item) {
     return GuestCard(
-      guestName: item.guestName,
-      resId: item.resId,
-      folioId: item.folioId,
-      startDate: item.startDate,
-      endDate: item.endDate,
-      nights: item.nights,
+      guestName: item.guestName!,
+      resId: item.resId!,
+      room: item.room,
+      startDate: item.startDate!,
+      endDate: item.endDate!,
+      nights: item.nights!,
       nightsLabel: 'Nights Stay',
-      adults: item.adults,
+      adults: item.adults!,
+      colorCode: item.colorCode,
+      children: item.children!,
+      statusName: item.statusName,
       reservationType: item.reservationType,
-      totalAmount: item.totalAmount,
-      balanceAmount: item.balanceAmount,
+      totalAmount: item.totalAmount!,
+      balanceAmount: item.balanceAmount!,
       baseCurrencySymbol: item.baseCurrencySymbol,
       actionButton: const SizedBox(height: 32),
       onTap: () => _showActions(context, item),
@@ -177,7 +181,7 @@ class _ArrivalListState extends State<ArrivalList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _arrivalListVm.getAllGuestData(item.bookingRoomId);
+    await _arrivalListVm.getAllGuestData(item.bookingRoomId!);
     if (!mounted) return;
     final guestData = _arrivalListVm.allGuestDetails.value;
     final isNoShowResponse = await _arrivalListVm.isNoShow(item);
@@ -194,7 +198,7 @@ class _ArrivalListState extends State<ArrivalList> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => ActionBottomSheet(
-        guestName: item.guestName,
+        guestName: item.guestName!,
         actions: [
           ActionItem(
             icon: Icons.visibility,

@@ -6,7 +6,6 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
-import 'package:inta_mobile_pms/features/stay_view/widgets/booking_room_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -23,6 +22,8 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
   final _reservationVm = Get.find<ReservationVm>();
   DateTime _centerDate = DateTime.now();
+  double? _rowHeight = 40;
+  double? _barHeight = 35;
 
   @override
   void initState() {
@@ -74,26 +75,32 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                       ),
                       const SizedBox(height: 16),
                       _buildLegendGrid(statuses),
-                      // const SizedBox(height: 24),
-                      // const Text(
-                      //   'Booking Indicators',
-                      //   style: TextStyle(
-                      //     fontSize: 16,
-                      //     fontWeight: FontWeight.w600,
-                      //   ),
-                      // ),
-                      // const SizedBox(height: 16),
-                      // _buildIndicatorRow(
-                      //   Icons.call_split,
-                      //   'Split Reservation',
-                      //   const Color(0xFF00BCD4),
-                      // ),
-                      // const SizedBox(height: 12),
-                      // _buildIndicatorRow(
-                      //   Icons.groups,
-                      //   'Group Owner',
-                      //   const Color(0xFF795548),
-                      // ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Booking Indicators',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildIndicatorRow(
+                        Icons.star,
+                        'Group Reservation',
+                        AppColors.red,
+                      ),
+                      const SizedBox(height: 12),
+                      _buildIndicatorRow(
+                        Icons.person,
+                        'Group Leader',
+                        const Color(0xFF795548),
+                      ),
+                       const SizedBox(height: 12),
+                      _buildIndicatorRow(
+                        Icons.open_in_new,
+                        'Day Use Reservation',
+                        const Color(0xFF795548),
+                      ),
                       const SizedBox(height: 24),
                       const Text(
                         'Room Indicators',
@@ -451,7 +458,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               setState(() {
                 _centerDate = _centerDate.subtract(const Duration(days: 1));
               });
-
               _stayViewVm.loadInitialData(_centerDate);
             },
             tooltip: 'Previous Day',
@@ -483,6 +489,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                 setState(() {
                   _centerDate = picked;
                 });
+                _stayViewVm.loadInitialData(_centerDate);
               }
             },
             borderRadius: BorderRadius.circular(8),
@@ -568,7 +575,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           children: [
             Container(
               width: roomWidth,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
               alignment: Alignment.centerLeft,
               child: Text(
                 'Room / Guest',
@@ -598,7 +605,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               return Expanded(
                 child: Container(
                   width: dayWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 5),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: bgColor,
@@ -872,6 +879,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           final checkIn = checkInList[k];
           String guestName = checkIn['guestName'] ?? '';
           String colorCode = checkIn['colorCode'] ?? '#000000';
+          bool isGroup = checkIn['isGroupBooking'] ?? false;
+          bool isGroupLeader = checkIn['isGroupLeader'] ?? false;
+          String groupColor = checkIn['groupColor'] ?? '#000000';
           Color guestColor = Color(
             int.parse(colorCode.replaceFirst('#', '0xFF')),
           );
@@ -895,14 +905,55 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             guestColor = Color(int.parse(colorCode.replaceFirst('#', '0xFF')))!;
             barChild = Row(
               children: [
-                Icon(Icons.build, size: 10, color: Colors.white),
+                Icon(Icons.build, size: 25, color: Colors.white),
                 const SizedBox(width: 4),
                 Text(
                   guestName,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+          } else if (isGroup) {
+            guestName = checkIn['guestName'] ?? '';
+            Color iconColor = Color(
+              int.parse(groupColor.replaceFirst('#', '0xFF')),
+            )!;
+            barChild = Row(
+              children: [
+                Icon(Icons.star, size: 25, color: iconColor),
+                const SizedBox(width: 2),
+                if (isGroupLeader)
+                  Icon(Icons.person, size: 25, color: AppColors.darkgrey),
+                const SizedBox(width: 2),
+                Text(
+                  guestName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            );
+          } else if (colorCode == "#fdf51c") {
+              guestName = checkIn['guestName'] ?? '';
+      
+            barChild = Row(
+              children: [
+                Icon(Icons.open_in_new, size: 30, color: AppColors.darkgrey),
+                const SizedBox(width: 2),
+                Text(
+                  guestName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -913,8 +964,8 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               guestName,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
               ),
               overflow: TextOverflow.ellipsis,
             );
@@ -922,16 +973,15 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           reservationBars.add(
             Positioned(
               left: left,
-              top: 0,
+              top: (_rowHeight! - _barHeight!) / 2 ,
               child: InkWell(
                 onTap: () {
                   if (guestName == 'BLOCKED') return;
                   _handleGuestTap(item, days, section, checkIn, i);
                 },
-
                 child: Container(
                   width: barWidth,
-                  height: 48,
+                  height: _barHeight,
                   decoration: BoxDecoration(
                     color: guestColor,
                     borderRadius: BorderRadius.circular(6),
@@ -990,7 +1040,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             children: [
               Container(
                 width: roomWidth,
-                height: 48,
+                height: _rowHeight,
                 alignment: Alignment.centerLeft,
                 padding: EdgeInsets.only(left: namePaddingLeft),
                 child: Row(
