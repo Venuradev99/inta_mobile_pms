@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
@@ -148,6 +149,13 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.blockRoomSelection,
       builder: (context, state) => const BlockRoomSelectionScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.blockRoomAuditTrail,
+      builder: (context, state) {
+         final block = state.extra as MaintenanceBlockItem;
+         return  BlockRoomAuditTrail(block: block);
+      }
     ),
     GoRoute(
       path: AppRoutes.blockRoomDetails,

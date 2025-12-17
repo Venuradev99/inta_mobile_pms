@@ -42,4 +42,16 @@ class StayViewService {
       return {"error": error.toString()};
     }
   }
+
+    Future<Map<String, dynamic>> getDayUseList(
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getDayUseList}';
+      final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
 }

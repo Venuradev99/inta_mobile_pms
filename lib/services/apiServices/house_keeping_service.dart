@@ -85,6 +85,18 @@ class HouseKeepingService {
     }
   }
 
+   Future<Map<String, dynamic>> getAllHouseKeepingAuditTrail(
+    int id,int type, bool isRoom, DateTime date
+  ) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllHouseKeepingAuditTrail}/${id}?type=${type}&isRoom=${isRoom}&date=${date}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getAllRoomsForHouseStatus() async {
     try {
       final url =

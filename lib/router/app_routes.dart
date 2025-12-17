@@ -27,6 +27,7 @@ class AppRoutes {
   static const String noShowReservation = '/no-show-reservation';
   static const String blockRoomSelection = '/block-room-selection';
   static const String blockRoomDetails = '/block-room-details';
+   static const String blockRoomAuditTrail = '/block-room-audit-trail';
   static const String assignRooms = '/assign-rooms';
   static const String editGuestDetails = '/edit-guest-details';
     static const String editBlockRoomPage = '/edit-block-room';

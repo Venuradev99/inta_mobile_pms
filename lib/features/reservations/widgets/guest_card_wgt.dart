@@ -48,7 +48,7 @@ class GuestCard extends StatelessWidget {
   });
 
   String formatCurrency(double? value) {
-    final symbol = baseCurrencySymbol ?? '\$';
+    final symbol = baseCurrencySymbol ?? '';
     if (value == null) return '$symbol 0.00';
 
     final formatted = value

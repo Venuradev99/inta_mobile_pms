@@ -5,6 +5,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/dayuse_response.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
@@ -16,13 +17,17 @@ class StayViewVm extends GetxController {
   final ReservationService _reservationService;
 
   final statusList = <StayViewStatusColor>[].obs;
+
   final isLoading = Rx<bool>(true);
   final isAvailableRoomLoading = Rx<bool>(false);
+  final isLoadingDayUseList = Rx<bool>(false);
+
   final isRecordsEmpty = Rx<bool>(false);
   final today = Rxn<DateTime>();
   var roomTypes = <Map<String, dynamic>>[].obs;
   var availableRooms = <AvailableRooms>[].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
+  var datUseList = <DayUseResponse>[].obs;
 
   StayViewVm(this._stayViewService, this._reservationService);
 
@@ -66,7 +71,7 @@ class StayViewVm extends GetxController {
         availableRooms.value = result['availableRooms']
             .map<AvailableRooms>((item) => AvailableRooms.fromJson(item))
             .toList();
-            return availableRooms;
+        return availableRooms;
       } else {
         final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
         MessageService().error(msg);
@@ -76,6 +81,30 @@ class StayViewVm extends GetxController {
       throw Exception('Error loading available rooms: $e');
     } finally {
       isAvailableRoomLoading.value = false;
+    }
+  }
+
+  Future<void> loadAllDayUseList(Map<String, dynamic> payload) async {
+    try {
+      isLoadingDayUseList.value = true;
+      datUseList.clear();
+
+      final response = await _stayViewService.getDayUseList(payload);
+
+      if (response['isSuccessful'] == true) {
+        final List<DayUseResponse> dayUseListTemp = (response['result'] as List)
+            .map((item) => DayUseResponse.fromJson(item))
+            .toList();
+
+        datUseList.value = dayUseListTemp;
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading day use list: $e');
+    } finally {
+      isLoadingDayUseList.value = false;
     }
   }
 

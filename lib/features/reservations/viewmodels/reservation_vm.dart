@@ -7,10 +7,13 @@ import 'package:inta_mobile_pms/features/reservations/models/folio_charges_respo
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_summary_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/folio_tax_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/identity_type_response..dart';
 import 'package:inta_mobile_pms/features/reservations/models/nationality_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
+import 'package:inta_mobile_pms/features/reservations/models/room_charges.dart';
+import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/models/transportation_modes_response.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
@@ -26,6 +29,7 @@ class ReservationVm extends GetxController {
   final isLoading = true.obs;
   final isBottomSheetDataLoading = false.obs;
   final isFolioDataLoading = false.obs;
+  final isTaxDetailsLoading = false.obs;
 
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
@@ -41,6 +45,7 @@ class ReservationVm extends GetxController {
   var transportationModes = <TransportationMode>[].obs;
 
   var allFolios = <FolioResponse>[].obs;
+  var folioTaxList = <FolioTaxItem>[].obs;
   var folioPayments = <FolioPaymentResponse>[].obs;
   var folioCharges = <FolioChargesResponse>[].obs;
   var folioSummary = Rxn<FolioSummaryResponse>();
@@ -215,7 +220,7 @@ class ReservationVm extends GetxController {
             room: item['roomName'] ?? '',
             colorCode: getReservationColorCode(item['status']),
             statusName: getStatusName(item['status']),
-            baseCurrencySymbol: baseCurrencyData.symbol,
+            baseCurrencySymbol: baseCurrencyData.code,
           );
 
           if (item['arrivalDate'] == today.toString()) {
@@ -514,6 +519,32 @@ class ReservationVm extends GetxController {
     }
   }
 
+  Future<void> loadTaxDetails(int folioChargeId) async {
+    try {
+      isTaxDetailsLoading.value = false;
+      final response = await _reservationService.getFolioChargeTaxes(
+        folioChargeId,
+      );
+      if (response["isSuccessful"] == true) {
+        final result = response["result"];
+        final list = List<Map<String, dynamic>>.from(result);
+        ;
+        List<FolioTaxItem> taxTemp = [];
+        for (final item in list) {
+          taxTemp.add(FolioTaxItem.fromJson(item));
+        }
+        folioTaxList.value = taxTemp;
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Folios!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading folios: $e');
+    } finally {
+      isTaxDetailsLoading.value = false;
+    }
+  }
+
   Future<void> loadAllFolios(int bookingRoomId) async {
     try {
       final foliosResponse = await _reservationService.getFolios(bookingRoomId);
@@ -554,6 +585,9 @@ class ReservationVm extends GetxController {
         final roomCharge = result["bookingRoom"]["roomCharges"];
 
         List<FolioCharge> folioCharges = [];
+        List<RoomCharge> roomCharges = [];
+        List<SharerInfo> sharerInfo = [];
+
         double totalRoomCharges = 0;
 
         for (final item in folioChargesList) {
@@ -569,8 +603,17 @@ class ReservationVm extends GetxController {
 
         for (final item in roomCharge) {
           totalRoomCharges += item["totalAmount"];
+
+          final charges = RoomCharge.fromJson(item);
+          roomCharges.add(charges);
         }
 
+         for (final item in result["bookingRoom"]["sharers"]) {
+          final charges = SharerInfo.fromJson(item);
+          sharerInfo.add(charges);
+        }
+
+        print(sharerInfo);
         final sharers = (result["bookingRoom"]["sharers"] as List)
             .map((e) => e as Map<String, dynamic>)
             .toList();
@@ -586,6 +629,7 @@ class ReservationVm extends GetxController {
           bookingRoomId: result["bookingRoom"]["bookingRoomId"].toString(),
           guestId: result["guest"]["guestId"] ?? 0,
           guestName: result["guest"]["firstName"] ?? '',
+          fullNameWithTitle: result["guest"]["fullNameWithTitle"] ?? '',
           fullAddress: result["guest"]["fullAddress"] ?? '',
           cityName: result["guest"]["cityName"] ?? '',
           zipCode: result["guest"]["zipCode"] ?? '',
@@ -738,6 +782,8 @@ class ReservationVm extends GetxController {
           grCardNumber: result["billingInformation"]["grCardNumber"] ?? "",
           masterFolioBookingTransId: result["masterFolioBookingTransId"] ?? 0,
           folioCharges: folioCharges,
+          roomChargesList: roomCharges,
+          sharerInfo: sharerInfo,
         );
         allGuestDetails.value = guestItem;
       } else {

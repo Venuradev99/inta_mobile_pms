@@ -19,6 +19,7 @@ class DashboardVm extends GetxController {
 
   final userName = ''.obs;
   final hotelName = ''.obs;
+  final isSearching = false.obs;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -37,7 +38,6 @@ class DashboardVm extends GetxController {
   final complementaryRoomsRate = RxDouble(0);
   final outOfOrderRooms = RxDouble(0);
   final outOfOrderRoomsRate = RxDouble(0);
-
 
   final totalRevenueData = Rx<PropertyStaticsData?>(null);
   final averageDailyRateData = Rx<PropertyStaticsData?>(null);
@@ -69,7 +69,6 @@ class DashboardVm extends GetxController {
     try {
       final hotelInfo = await LocalStorageManager.getHotelInfoData();
       hotelName.value = hotelInfo.hotelName ?? '';
-    
     } catch (e) {
       throw Exception('Error in GetHotelInfoData: $e');
     }
@@ -246,6 +245,40 @@ class DashboardVm extends GetxController {
       MessageService().error('Error loading dashboard data: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> searchReservations() async {
+    try {
+      isSearching.value = true;
+      final payload = {
+        "businessSourceId": 0,
+        "exceptCancelled": false,
+        "fromDate": "2025-12-13",
+        "isArrivalDate": true,
+        "reservationTypeId": 0,
+        "roomId": 0,
+        "roomTypeId": 0,
+        "searchByName": "",
+        "searchType": 1,
+        "status": 0,
+        "toDate": "2025-12-17",
+        "businessCategoryId": 0,
+      };
+
+      final response = await _reservationService.getAllReservationList(payload);
+      if (response['isSuccessful'] == true) {
+
+
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error while searching reservations!',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error while Searching!');
+    } finally{
+      isSearching.value = false;
     }
   }
 

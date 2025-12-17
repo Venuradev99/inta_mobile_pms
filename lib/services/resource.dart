@@ -71,6 +71,7 @@ class AppResources {
   static const String getFolioPayments = '$payment/GetFolioPayments';
   static const String getFolioCharges = '$booking/GetFolioChargeByFolioId';
   static const String getFolios = '$booking/getfolios';
+  static const String getFolioChargeTaxes = '$booking/GetFolioChargeTaxes';
   static const String saveOtherInformation = '$booking/otherInformation';
   static const String getAuditTrial = '$auditTrial/getAuditTrial/';
   static const String updateGuests = guests;
@@ -111,12 +112,14 @@ class AppResources {
   static const String unblockMaintenanceblock =
       '$maintenanceblock/UnblockDateRange';
   static const String updateHouseStatus = '$rooms/UpdateHouseStatus';
+  static const String getAllHouseKeepingAuditTrail = '$auditTrial/getAuditTrial';
 
   ////Stay View
   static const String getBookingDetailsByDate =
       '$calenderBooking/GetBookingDetailsByDate';
   static const String getStatusColorForStayview =
       '$roomstatus/GetStatusColorForStayview';
+  static const String getDayUseList = '$booking/SearchRoomBookingForDateRange';
 
   ////reports
   static const String getNightAudits = '$auditTrial/nightAudit';

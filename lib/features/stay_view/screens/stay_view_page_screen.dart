@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/widgets/day_use_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -22,8 +23,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
   final _reservationVm = Get.find<ReservationVm>();
   DateTime _centerDate = DateTime.now();
-  double? _rowHeight = 40;
-  double? _barHeight = 35;
+  double? _rowHeight = 30;
+  double? _barHeight = 20;
+  double? _indicatorIconSize = 15;
 
   @override
   void initState() {
@@ -95,7 +97,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         'Group Leader',
                         const Color(0xFF795548),
                       ),
-                       const SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       _buildIndicatorRow(
                         Icons.open_in_new,
                         'Day Use Reservation',
@@ -905,7 +907,11 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             guestColor = Color(int.parse(colorCode.replaceFirst('#', '0xFF')))!;
             barChild = Row(
               children: [
-                Icon(Icons.build, size: 25, color: Colors.white),
+                Icon(
+                  Icons.build,
+                  size: _indicatorIconSize,
+                  color: Colors.white,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   guestName,
@@ -925,10 +931,14 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
             )!;
             barChild = Row(
               children: [
-                Icon(Icons.star, size: 25, color: iconColor),
+                Icon(Icons.star, size: _indicatorIconSize, color: iconColor),
                 const SizedBox(width: 2),
                 if (isGroupLeader)
-                  Icon(Icons.person, size: 25, color: AppColors.darkgrey),
+                  Icon(
+                    Icons.person,
+                    size: _indicatorIconSize,
+                    color: AppColors.darkgrey,
+                  ),
                 const SizedBox(width: 2),
                 Text(
                   guestName,
@@ -942,11 +952,15 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
               ],
             );
           } else if (colorCode == "#fdf51c") {
-              guestName = checkIn['guestName'] ?? '';
-      
+            guestName = checkIn['guestName'] ?? '';
+
             barChild = Row(
               children: [
-                Icon(Icons.open_in_new, size: 30, color: AppColors.darkgrey),
+                Icon(
+                  Icons.open_in_new,
+                  size: _indicatorIconSize,
+                  color: AppColors.darkgrey,
+                ),
                 const SizedBox(width: 2),
                 Text(
                   guestName,
@@ -973,11 +987,17 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           reservationBars.add(
             Positioned(
               left: left,
-              top: (_rowHeight! - _barHeight!) / 2 ,
+              top: (_rowHeight! - _barHeight!) / 2,
               child: InkWell(
                 onTap: () {
-                  if (guestName == 'BLOCKED') return;
-                  _handleGuestTap(item, days, section, checkIn, i);
+                  if (guestName == 'BLOCKED') {
+                    return;
+                  }
+                  if (colorCode == "#fdf51c") {
+                    _handleDayUseTap(item, days, section, checkIn, i);
+                  } else {
+                    _handleGuestTap(item, days, section, checkIn, i);
+                  }
                 },
                 child: Container(
                   width: barWidth,
@@ -1000,7 +1020,7 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final List<Widget> backgroundDayCells = List.generate(numDays, (index) {
       return Expanded(
         child: Container(
-          height: 48,
+          height: _rowHeight,
           decoration: BoxDecoration(
             border: Border(
               left: BorderSide(
@@ -1012,7 +1032,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       );
     });
 
-    // Add room indicators
     List<Widget> indicators = [];
     if (item['isSmokingRoom'] ?? false) {
       indicators.add(
@@ -1027,7 +1046,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
         Icon(Icons.cleaning_services, size: 14, color: Colors.grey[700]),
       );
     }
-    // Add more indicators as needed based on data
 
     final content = Column(
       children: [
@@ -1092,12 +1110,55 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     final String roomNumber = item['roomNo'];
     final int status = checkIn['status'] ?? 0;
 
-    // if(status == 0){
-    //   return;
-    // }
-
     await _reservationVm.getAllGuestData(bookingRoomId.toString());
     final guestItem = _reservationVm.allGuestDetails.value;
     context.push(AppRoutes.viewReservation, extra: guestItem);
+  }
+
+  void _handleDayUseTap(
+    Map<String, dynamic> item,
+    List<DateTime> days,
+    Map<String, dynamic> section,
+    Map<String, dynamic> checkIn,
+    int startIndex,
+  ) async {
+    final String guestName = checkIn['guestName'];
+    final int bookingRoomId = checkIn['bookingRoomId'];
+    final DateTime startDate = days[startIndex];
+    final double nights = checkIn['noOfNights'] ?? 1.0;
+    final DateTime endDate = startDate.add(Duration(days: nights.toInt()));
+    final String roomNumber = item['roomNo'];
+    final int status = checkIn['status'] ?? 0;
+
+    final String arrivalDate = "${formatArrivalDate(startDate)} 00:00";
+    final String departureDate =
+        "${formatArrivalDate(startDate.add(Duration(days: 1)))} 00:00";
+
+    final payload = {
+      "ArrivalDate": arrivalDate,
+      "departureDate": departureDate,
+      "RoomId": item["roomId"],
+      "RoomTypeId": section["roomTypeId"],
+    };
+
+    await _stayViewVm.loadAllDayUseList(payload);
+
+    showDialog(
+      context: context,
+      builder: (_) => DayUseListDialog(
+        dayUseList: _stayViewVm.datUseList,
+        onViewReservation: (item) async {
+          await _reservationVm.getAllGuestData(item.bookingRoomId.toString());
+          final guestItem = _reservationVm.allGuestDetails.value;
+          context.push(AppRoutes.viewReservation, extra: guestItem);
+        },
+      ),
+    );
+  }
+
+  String formatArrivalDate(DateTime date) {
+    return "${date.year.toString().padLeft(4, '0')}-"
+        "${date.month.toString().padLeft(2, '0')}-"
+        "${date.day.toString().padLeft(2, '0')}";
   }
 }

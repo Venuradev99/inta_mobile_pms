@@ -3,10 +3,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/reservations/models/folio_charges_response.dart';
-import 'package:inta_mobile_pms/features/reservations/models/folio_payment_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
+import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/folio_charge_details_dialog_wgt.dart';
 import 'package:intl/intl.dart';
 
 class ViewReservation extends StatefulWidget {
@@ -230,7 +230,7 @@ class _ViewReservation extends State<ViewReservation>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item!.guestName!,
+                      item!.fullNameWithTitle!,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -411,6 +411,46 @@ class _ViewReservation extends State<ViewReservation>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildCardHeader('Booking Information', Icons.info_outline),
+                const SizedBox(height: 16),
+                _buildEnhancedInfoRow(
+                  'Guests',
+                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
+                  Icons.people,
+                ),
+                _buildEnhancedInfoRow(
+                  'Business Category',
+                  item!.businessCategoryName ?? '',
+                  Icons.business,
+                ),
+                if (item!.businessCategoryId == 1)
+                  _buildEnhancedInfoRow(
+                    'Online Travel Agent',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
+                if (item!.businessCategoryId == 2)
+                  _buildEnhancedInfoRow(
+                    'Agent',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
+                if (item!.businessCategoryId == 5)
+                  _buildEnhancedInfoRow(
+                    'Company',
+                    item!.businessSourceName ?? '',
+                    Icons.business,
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          _buildModernCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 _buildCardHeader('Folio Summary', Icons.receipt_long),
                 const SizedBox(height: 16),
                 _buildFinancialRow(
@@ -430,19 +470,6 @@ class _ViewReservation extends State<ViewReservation>
                   isBalance: true,
                   isPositive: item!.balanceAmount! <= 0,
                 ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader('Folio #', Icons.book),
-                const SizedBox(height: 16),
-                _buildFolioDropdown(),
               ],
             ),
           ),
@@ -548,6 +575,149 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
+  Widget _buildSharerInfoCard(SharerInfo sharer) {
+  final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+  return Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    child: ExpansionTile(
+      title: Text(
+        sharer.fullNameWithTitle,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
+      ),
+      childrenPadding: const EdgeInsets.all(16),
+      children: [
+        _buildSectionTitle('Guest Information', Icons.info_outline),
+        const SizedBox(height: 8),
+        _buildInfoRow('Name', sharer.fullNameWithTitle, Icons.person),
+        _buildInfoRow(
+          'Gender',
+          sharer.gender == 'M' ? 'Male' : 'Female',
+          sharer.gender == 'M' ? Icons.male : Icons.female,
+        ),
+        _buildInfoRow('Mobile', sharer.mobile, Icons.phone),
+        _buildInfoRow('Email', sharer.email, Icons.email),
+        const SizedBox(height: 16),
+        _buildSectionTitle('Transport Information', Icons.directions),
+        const SizedBox(height: 8),
+        Text(
+          'Pickup:',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
+          _buildInfoRow(
+            'Date',
+            dateFormat.format(sharer.pickUpDropOffDataModel.pickUpDateTime!),
+            Icons.calendar_today,
+          ),
+        // _buildInfoRow(
+        //   'Description',
+        //   sharer.pickUpDropOffDataModel.pickUpDescription,
+        //   Icons.description,
+        // ),
+        _buildInfoRow(
+          'Mode',
+          sharer.pickUpDropOffDataModel.pickUpModeId.toString(),
+          Icons.directions_car,
+        ),
+        _buildInfoRow(
+          'Vehicle No',
+          sharer.pickUpDropOffDataModel.pickUpVehicleNo,
+          Icons.local_taxi,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Dropoff:',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.primary,
+          ),
+        ),
+        const SizedBox(height: 4),
+        if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
+          _buildInfoRow(
+            'Date',
+            dateFormat.format(sharer.pickUpDropOffDataModel.dropOffDateTime!),
+            Icons.calendar_today,
+          ),
+        // _buildInfoRow(
+        //   'Description',
+        //   sharer.pickUpDropOffDataModel.dropOffDescription,
+        //   Icons.description,
+        // ),
+        _buildInfoRow(
+          'Mode',
+          sharer.pickUpDropOffDataModel.dropOffModeId.toString(),
+          Icons.directions_car,
+        ),
+        _buildInfoRow(
+          'Vehicle No',
+          sharer.pickUpDropOffDataModel.dropOffVehicleNo,
+          Icons.local_taxi,
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildSectionTitle(String title, IconData icon) {
+  return Row(
+    children: [
+      Icon(icon, color: AppColors.primary, size: 20),
+      const SizedBox(width: 8),
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: AppColors.primary,
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildInfoRow(String label, String value, IconData icon) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 2,
+          child: Text(
+            '$label:',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value.isEmpty ? 'N/A' : value,
+            style: const TextStyle(fontSize: 14),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildFolioDropdown() {
     return Row(
       children: [
@@ -601,14 +771,12 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  // Enhanced Guest Info Tab with Sectioned Cards
   Widget _buildGuestInfoTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Contact Information Card
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,8 +795,6 @@ class _ViewReservation extends State<ViewReservation>
           ),
 
           const SizedBox(height: 16),
-
-          // Identity Information Card
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -666,64 +832,17 @@ class _ViewReservation extends State<ViewReservation>
 
           const SizedBox(height: 16),
 
-          // Transport Information Card
           _buildModernCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCardHeader('Transport Information', Icons.directions_car),
-                const SizedBox(height: 16),
-                _buildEnhancedInfoRow(
-                  'Arrival By',
-                  item!.arrivalBy ?? '-',
-                  Icons.flight_land,
-                ),
-                _buildEnhancedInfoRow(
-                  'Departure By',
-                  item!.departureBy ?? '-',
-                  Icons.flight_takeoff,
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Additional Information Card
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader('Booking Information', Icons.info_outline),
-                const SizedBox(height: 16),
-                _buildEnhancedInfoRow(
-                  'Guests',
-                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
-                  Icons.people,
-                ),
-                _buildEnhancedInfoRow(
-                  'Business Category',
-                  item!.businessCategoryName ?? '',
-                  Icons.business,
-                ),
-                if (item!.businessCategoryId == 1)
-                  _buildEnhancedInfoRow(
-                    'Online Travel Agent',
-                    item!.businessSourceName ?? '',
-                    Icons.business,
+                _buildCardHeader('Sharer Information', Icons.share),
+                ...item!.sharerInfo!.map(
+                  (sharer) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildSharerInfoCard(sharer),
                   ),
-                if (item!.businessCategoryId == 2)
-                  _buildEnhancedInfoRow(
-                    'Agent',
-                    item!.businessSourceName ?? '',
-                    Icons.business,
-                  ),
-                if (item!.businessCategoryId == 5)
-                  _buildEnhancedInfoRow(
-                    'Company',
-                    item!.businessSourceName ?? '',
-                    Icons.business,
-                  ),
+                ),
               ],
             ),
           ),
@@ -732,67 +851,64 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  // Enhanced Room Charges Tab
   Widget _buildRoomChargesTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader('Daily Breakdown', Icons.receipt_long),
-                const SizedBox(height: 16),
-                _buildEnhancedInfoRow(
-                  'Room',
-                  item!.roomNumber ?? 'AZA-139',
-                  Icons.meeting_room,
+          ...item!.roomChargesList!.map(
+            (roomCharge) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildModernCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildCardHeader(
+                      DateFormat(
+                        'dd MMM yyyy',
+                      ).format(DateTime.parse(roomCharge.dateOfStay)),
+                      Icons.receipt_long,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildEnhancedInfoRow(
+                      'Room',
+                      roomCharge.roomName,
+                      Icons.meeting_room,
+                    ),
+                    _buildEnhancedInfoRow(
+                      'Rate Type',
+                      roomCharge.rateTypeName,
+                      Icons.label,
+                    ),
+                    _buildEnhancedInfoRow(
+                      'Occupancy',
+                      '${roomCharge.noOfAdults} Adults, ${roomCharge.noOfChildren} Children',
+                      Icons.people,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildCardHeader('Charge Details', Icons.receipt_long),
+                    const SizedBox(height: 16),
+                    _buildChargeRow('Room Charge', roomCharge.grossAmount),
+                    _buildChargeRow(
+                      'Discount',
+                      -(roomCharge.discount),
+                      isDiscount: true,
+                    ),
+                    _buildChargeRow('Tax Amount', roomCharge.taxAmount),
+                    _buildChargeRow(
+                      'Auto Adjustment',
+                      roomCharge.roundOffAmount,
+                    ),
+                    const Divider(height: 24, thickness: 1.5),
+                    _buildChargeRow(
+                      'Net Amount',
+                      roomCharge.totalAmount,
+                      isTotal: true,
+                    ),
+                  ],
                 ),
-                _buildEnhancedInfoRow(
-                  'Rate Type',
-                  item!.rateType ?? 'Dinner Only',
-                  Icons.label,
-                ),
-                _buildEnhancedInfoRow(
-                  'Occupancy',
-                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
-                  Icons.people,
-                ),
-                if (item!.childAge != null)
-                  _buildEnhancedInfoRow(
-                    'Child Age',
-                    item!.childAge!,
-                    Icons.child_care,
-                  ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader('Charge Breakdown', Icons.calculate),
-                const SizedBox(height: 16),
-                _buildChargeRow('Room Charge', item!.roomCharges ?? 3125.00),
-                _buildChargeRow(
-                  'Discount',
-                  -(item!.discount ?? 0),
-                  isDiscount: true,
-                ),
-                _buildChargeRow('Tax', item!.tax ?? 531.25, isTax: true),
-                _buildChargeRow('Auto Adjustment', item!.adjustment ?? 3.75),
-                const Divider(height: 24, thickness: 1.5),
-                _buildChargeRow(
-                  'Net Amount',
-                  item!.netAmount ?? 3660.00,
-                  isTotal: true,
-                ),
-              ],
+              ),
             ),
           ),
         ],
@@ -920,81 +1036,107 @@ class _ViewReservation extends State<ViewReservation>
                         itemCount: _reservationVm.folioCharges.length,
                         itemBuilder: (context, index) {
                           final charge = _reservationVm.folioCharges[index];
-                          return Card(
-                            elevation: 2,
-                            margin: const EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildModernCard(
+                              onTap: () async {
+                                await _reservationVm.loadTaxDetails(
+                                  charge.folioChargeId,
+                                );
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return FolioChargeDetailsDialog(
+                                      charge: charge,
+                                      taxes: _reservationVm.folioTaxList,
+                                      baseCurrencySymbol:
+                                          item!.visibleCurrencyCode!,
+                                    );
+                                  },
+                                );
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Text(
-                                          charge.chargeName,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              charge.chargeName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          Text(
+                                            formatCurrency(charge.amount),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        formatCurrency(charge.amount),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                          fontSize: 16,
-                                        ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 14,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            DateFormat(
+                                              'yyyy-MM-dd',
+                                            ).format(charge.date),
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Icon(
+                                            Icons.person,
+                                            size: 14,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            charge.user,
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Text(
+                                            'Ref #${charge.referenceNo}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 14,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(charge.date),
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Icon(
-                                        Icons.person,
-                                        size: 14,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'User: ${charge.user}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           );
                         },
                       ),
-
                 _reservationVm.folioPayments.isEmpty
                     ? Center(
                         child: Text(
@@ -1007,89 +1149,92 @@ class _ViewReservation extends State<ViewReservation>
                         itemCount: _reservationVm.folioPayments.length,
                         itemBuilder: (context, index) {
                           final payment = _reservationVm.folioPayments[index];
-                          return Card(
-                            elevation: 2,
-                            margin: const EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildModernCard(
+                              onTap: () {},
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(
-                                        child: Text(
-                                          payment.paymentMode,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 16,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              payment.paymentMode,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 16,
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          Text(
+                                            formatCurrency(payment.totalAmount),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.primary,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        formatCurrency(payment.totalAmount),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.primary,
-                                          fontSize: 16,
-                                        ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 14,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            DateFormat(
+                                              'yyyy-MM-dd',
+                                            ).format(payment.dateOfStay),
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Icon(
+                                            Icons.meeting_room,
+                                            size: 14,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Room: ${payment.roomName}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Icon(
+                                            Icons.person,
+                                            size: 14,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'User: ${payment.user}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: 14,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(payment.dateOfStay),
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Icon(
-                                        Icons.meeting_room,
-                                        size: 14,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'Room: ${payment.roomName}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Icon(
-                                        Icons.person,
-                                        size: 14,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'User: ${payment.user}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade600,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           );
@@ -1103,7 +1248,6 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  // Enhanced Remarks Tab
   Widget _buildRemarksTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
@@ -1138,22 +1282,26 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  Widget _buildModernCard({required Widget child}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+  Widget _buildModernCard({required Widget child, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
 
@@ -1300,122 +1448,6 @@ class _ViewReservation extends State<ViewReservation>
                   ? AppColors.primary
                   : (isDiscount ? Colors.green.shade600 : Colors.black87),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade700,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEnhancedFolioItem(
-    String title,
-    String date,
-    String room,
-    double amount, {
-    bool isPosted = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isPosted ? Colors.green.shade200 : Colors.blue.shade200,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isPosted ? Colors.green.shade50 : Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  isPosted ? 'Posted' : 'Pending',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isPosted
-                        ? Colors.green.shade700
-                        : Colors.blue.shade700,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                formatCurrency(amount),
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isPosted
-                      ? Colors.green.shade600
-                      : Colors.blue.shade600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade500),
-              const SizedBox(width: 6),
-              Text(
-                date,
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-              const SizedBox(width: 16),
-              Icon(Icons.meeting_room, size: 14, color: Colors.grey.shade500),
-              const SizedBox(width: 6),
-              Text(
-                room,
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-            ],
           ),
         ],
       ),

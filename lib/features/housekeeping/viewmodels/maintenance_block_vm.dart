@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/block_room_reason_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenanceblock_save_payload.dart';
@@ -8,7 +9,6 @@ import 'package:inta_mobile_pms/features/housekeeping/models/unblock_maintenance
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
-import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class RoomTypeResponse {
   final int roomTypeId;
@@ -21,11 +21,13 @@ class MaintenanceBlockVm extends GetxController {
   final HouseKeepingService _houseKeepingService;
 
   final isLoading = true.obs;
+  final isBlockAuditTrailLoading = true.obs;
   RxList<MaintenanceBlockItem> maintenanceBlockList =
       <MaintenanceBlockItem>[].obs;
   RxList<MaintenanceBlockItem> maintenanceBlockListFiltered =
       <MaintenanceBlockItem>[].obs;
   final roomsList = <RoomResponse>[].obs;
+  final audiTrailList = <MaintenanceBlockAuditTrail>[].obs;
   final roomTypesList = <RoomTypeResponse>[].obs;
   final blockRoomReasonList = <BlockRoomReasonResponse>[].obs;
 
@@ -165,7 +167,43 @@ class MaintenanceBlockVm extends GetxController {
     }
   }
 
+  Future<void> loadAuditTrails(MaintenanceBlockItem block) async {
+    try {
+      isBlockAuditTrailLoading.value = true;
 
+      final id = block.maintenanceBlockId;
+      final type = 2;
+      final isRoom = true;
+      final date = DateTime.now();
+
+      final response = await _houseKeepingService.getAllHouseKeepingAuditTrail(
+        id,
+        type,
+        isRoom,
+        date,
+      );
+
+      if (response["isSuccessful"] == true) {
+        final result = (response["result"] as List?) ?? [];
+        audiTrailList.value = result
+            .map((item) => MaintenanceBlockAuditTrail.fromJson(item))
+            .toList();
+        maintenanceBlockListFiltered.value = maintenanceBlockList;
+      } else {
+        MessageService().error(
+          response["errors"][0] ??
+              'Error getting maintenance block audit trails!',
+        );
+      }
+    } catch (e) {
+      MessageService().error(
+        'Error in loading maintenance blocks audit trails: $e',
+      );
+      throw Exception('Error in loading maintenance blocks audit trails: $e');
+    } finally {
+      isBlockAuditTrailLoading.value = false;
+    }
+  }
 
   Future<void> unblockRoom(
     MaintenanceBlockItem block,
@@ -276,7 +314,9 @@ class MaintenanceBlockVm extends GetxController {
             .toList();
       }
       if (filterIsUnblock.value) {
-        listToFilter = listToFilter.where((block) => block.status == 0).toList();
+        listToFilter = listToFilter
+            .where((block) => block.status == 0)
+            .toList();
       }
       maintenanceBlockListFiltered.value = listToFilter;
     } catch (e) {

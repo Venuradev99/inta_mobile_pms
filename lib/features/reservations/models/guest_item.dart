@@ -1,11 +1,15 @@
 import 'dart:ui';
 
+import 'package:inta_mobile_pms/features/reservations/models/room_charges.dart';
+import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
+
 class GuestItem {
   final String? reservationNumber;
   final int? bookingId;
   final String? statusName;
   final String? bookingRoomId;
   final String? guestName;
+  final String? fullNameWithTitle;
   final String? nationalityName;
   final int? guestId;
   final int? titleId;
@@ -99,6 +103,8 @@ class GuestItem {
   final Color? colorCode;
   final int? masterFolioBookingTransId;
   final List<FolioCharge>? folioCharges;
+  final List<RoomCharge>? roomChargesList;
+  final List<SharerInfo>? sharerInfo;
 
   int? billingInstructionId;
   bool? isTaxInclusiveRate;
@@ -131,6 +137,7 @@ class GuestItem {
     this.bookingId,
     this.bookingRoomId,
     this.guestName,
+    this.fullNameWithTitle,
     this.statusName,
     this.nationalityName,
     this.visibleCurrencyCode,
@@ -158,15 +165,15 @@ class GuestItem {
     this.isMainGuest,
     this.isBlackListed,
     this.folioNumber,
-     this.resId,
-     this.folioId,
-     this.startDate,
-     this.endDate,
-     this.nights,
+    this.resId,
+    this.folioId,
+    this.startDate,
+    this.endDate,
+    this.nights,
     this.roomType,
-     this.adults,
-     this.totalAmount,
-     this.balanceAmount,
+    this.adults,
+    this.totalAmount,
+    this.balanceAmount,
     this.remainingNights,
     this.roomNumber,
     this.reservedDate,
@@ -250,17 +257,20 @@ class GuestItem {
     this.grCardNumber,
     this.colorCode,
     this.masterFolioBookingTransId,
+    this.roomChargesList,
+    this.sharerInfo,
   });
 
   factory GuestItem.fromJson(Map<String, dynamic> json) {
     return GuestItem(
       bookingId: json['bookingId'] ?? 0,
       statusName: json['statusName'] ?? '',
-      visibleCurrencyCode: json['visibleCurrencyCode'] ?? '', 
+      visibleCurrencyCode: json['visibleCurrencyCode'] ?? '',
       reservationNumber: json['reservationNumber'] ?? '',
       baseCurrencySymbol: json['baseCurrencySymbol'] ?? '',
       bookingRoomId: json['bookingRoomId'] ?? '',
       guestName: json['guestName'] ?? '',
+      fullNameWithTitle: json['fullNameWithTitle'] ?? '',
       nationalityName: json['nationalityName'] ?? '',
       guestId: json['guestId'] ?? 0,
       titleId: json['titleId'] ?? 0,
@@ -350,6 +360,16 @@ class GuestItem {
               json['folioCharges'].map((x) => FolioCharge.fromJson(x)),
             )
           : null,
+      roomChargesList: json['roomChargesList'] != null
+          ? List<RoomCharge>.from(
+              json['roomChargesList'].map((x) => RoomCharge.fromJson(x)),
+            )
+          : null,
+      sharerInfo: json['sharerInfo'] != null
+          ? List<SharerInfo>.from(
+              json['sharerInfo'].map((x) => SharerInfo.fromJson(x)),
+            )
+          : null,
       travelAgentCommisionPlanId: json['travelAgentCommisionPlanId'],
       travelAgentCommisionPlanValue: json['travelAgentCommisionPlanValue'],
       billingRateTypeId: json['billingRateTypeId'],
@@ -392,6 +412,7 @@ class GuestItem {
       'bookingRoomId': bookingRoomId,
       'baseCurrencySymbol': baseCurrencySymbol,
       'guestName': guestName,
+      'fullNameWithTitle': fullNameWithTitle,
       'nationalityName': nationalityName,
       'guestId': guestId,
       'titleId': titleId,
@@ -477,6 +498,8 @@ class GuestItem {
       'travelAgent': travelAgent,
       'remarks': remarks,
       'folioCharges': folioCharges?.map((f) => f.toJson()).toList(),
+      'roomChargesList': roomChargesList?.map((f) => f.toJson()).toList(),
+      'sharerInfo': sharerInfo?.map((f) => f.toJson()).toList(),
       'billingRateTypeId': billingRateTypeId,
       'billingInstructionId': billingInstructionId,
       'travelAgentCommisionPlanValue': travelAgentCommisionPlanValue,
@@ -520,6 +543,7 @@ class GuestItem {
         'statusName: $statusName, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '
+        'fullNameWithTitle: $fullNameWithTitle, '
         'naitonalityName: $nationalityName, '
         'workPlace: $workPlace, '
         'guestId: $guestId, '

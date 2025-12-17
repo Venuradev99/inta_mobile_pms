@@ -218,16 +218,14 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                   }
                 }
               });
-              // await  _maintenanceBlockVm.unblockRoom(block.maintenanceBlockId);
             },
           ),
           ActionItem(
-            icon: Icons.info_outline,
-            label: 'View Details',
+            icon: Icons.list_alt,
+            label: 'Audit Trail',
             onTap: () {
               Navigator.pop(context);
-              // Navigate to details screen
-              // context.push(AppRoutes.blockRoomDetails, extra: block);
+              context.push(AppRoutes.blockRoomAuditTrail, extra: block);
             },
           ),
         ],

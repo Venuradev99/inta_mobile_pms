@@ -1,4 +1,3 @@
-// lib/features/reservations/pages/amend_stay_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -29,7 +28,6 @@ class _AmendStayState extends State<AmendStay> {
   bool isApplyToAll = false;
   bool isEnabledTaxInclusive = false;
   String currencyCode = '';
-  // Controllers
   final TextEditingController _rateController = TextEditingController();
   late TextEditingController _arrivalController = TextEditingController();
   late TextEditingController _departureController = TextEditingController();
@@ -40,12 +38,8 @@ class _AmendStayState extends State<AmendStay> {
   TimeOfDay? _selectedArrivalTime;
   TimeOfDay? _selectedDepartureTime;
 
-  // bool _overrideRoomRate = false;
   DateTime? _selectedArrival;
   DateTime? _selectedDeparture;
-
-  // String? _selectedRoomType;
-  // String? _selectedRoom;
 
   @override
   void initState() {
