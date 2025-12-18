@@ -38,6 +38,7 @@ class DashboardVm extends GetxController {
   final complementaryRoomsRate = RxDouble(0);
   final outOfOrderRooms = RxDouble(0);
   final outOfOrderRoomsRate = RxDouble(0);
+  final totalRoomsInProperty = RxDouble(0);
 
   final totalRevenueData = Rx<PropertyStaticsData?>(null);
   final averageDailyRateData = Rx<PropertyStaticsData?>(null);
@@ -74,44 +75,31 @@ class DashboardVm extends GetxController {
     }
   }
 
-  String getLastDayOfWeek(String fromDate) {
-    try {
-      DateTime startDate = DateTime.parse(fromDate);
-      DateTime endDate = startDate.add(Duration(days: 6));
-      return endDate.toIso8601String().substring(0, 10);
-    } catch (e) {
-      throw Exception('Error in GetToDateForWeek');
-    }
-  }
-
   Future<void> loadBookingStaticData() async {
     try {
       isLoading.value = true;
-      final today = await LocalStorageManager.getSystemDate();
-      final body = ReservationSearchRequest(
-        businessSourceId: 0,
-        exceptCancelled: false,
-        fromDate: today.toString(),
-        isArrivalDate: true,
-        reservationTypeId: 0,
-        roomId: 0,
-        roomTypeId: 0,
-        searchByName: "",
-        searchType: 1,
-        status: 0,
-        toDate: getLastDayOfWeek(today.toString()),
-        businessCategoryId: 0,
-      ).toJson();
-
       final responses = await Future.wait([
+        _dashboardService.getInventoryStats(),
         _dashboardService.getBookingStatics(),
-        _dashboardService.getInventoryPropertyOccupancyData(),
-        _reservationService.getAllReservationList(body),
+        _dashboardService.getStatistics(),
       ]);
+      final inventoryStaticsResponse = responses[0];
+      final bookingResponse = responses[1];
+      final inventoryPropertyOccupancyResponse = responses[2];
 
-      final bookingResponse = responses[0];
-      final inventoryPropertyOccupancyResponse = responses[1];
-      final arrivalListResponse = responses[2];
+      if (inventoryStaticsResponse["isSuccessful"] == true){
+          final hotelInventory = inventoryStaticsResponse['result']['hotelInventory'] as List;
+           for (final item in hotelInventory) {
+              if(item['name'] == "Rooms In Property"){
+                totalRoomsInProperty.value = item['value'] ?? 0;
+              }
+           }
+      }else {
+        MessageService().error(
+          bookingResponse["errors"][0] ?? 'Error getting Inventory Data!',
+        );
+      }
+
 
       if (bookingResponse["isSuccessful"] == true) {
         List<dynamic> result = bookingResponse["result"];
@@ -142,103 +130,77 @@ class DashboardVm extends GetxController {
 
       if (inventoryPropertyOccupancyResponse["isSuccessful"] == true) {
         final propertyResult =
-            inventoryPropertyOccupancyResponse["result"]["propertyStatistics"];
+            inventoryPropertyOccupancyResponse["result"]["propertyStatisticsData"];
         final occupancyResult =
-            inventoryPropertyOccupancyResponse["result"]["occupancyStatics"];
+            inventoryPropertyOccupancyResponse["result"]["occupancyStatisticsData"];
         final inventoryResult =
-            inventoryPropertyOccupancyResponse["result"]["inventoryStatics"];
+            inventoryPropertyOccupancyResponse["result"]["inventoryStatisticsData"];
 
-        final totalRevenue = propertyResult["totalRevenue"];
+        for (final item in propertyResult) {
+          if (item['name'] == "Total Room Revenue") {
+            totalRevenueData.value = PropertyStaticsData(
+              name: item["name"],
+              today: roundTo2(item["today"]),
+              yesterday: roundTo2(item["yesterday"]),
+              percentage: roundTo2(item["percentage"]),
+            );
+          }
 
-        totalRevenueData.value = PropertyStaticsData(
-          name: totalRevenue["name"],
-          today: roundTo2(totalRevenue["today"]),
-          yesterday: roundTo2(totalRevenue["yesterday"]),
-          percentage: roundTo2(totalRevenue["percentage"]),
-        );
-        final averageDailyRate = propertyResult["averageDailyRate"];
+          if (item['name'] == "Avg. Daily Rate") {
+            averageDailyRateData.value = PropertyStaticsData(
+              name: item["name"] ?? '',
+              today: roundTo2(item["today"]),
+              yesterday: roundTo2(item["yesterday"]),
+              percentage: roundTo2(item["percentage"]),
+            );
+          }
 
-        averageDailyRateData.value = PropertyStaticsData(
-          name: averageDailyRate["name"] ?? '',
-          today: roundTo2(averageDailyRate["today"]),
-          yesterday: roundTo2(averageDailyRate["yesterday"]),
-          percentage: roundTo2(averageDailyRate["percentage"]),
-        );
+          if (item['name'] == "RevPAR") {
+            revParData.value = PropertyStaticsData(
+              name: item["name"] ?? '',
+              today: roundTo2(item["today"]),
+              yesterday: roundTo2(item["yesterday"]),
+              percentage: roundTo2(item["percentage"]),
+            );
+          }
 
-        final averageLengthOfStay = propertyResult["averageLengthOfStay"];
-
-        averageLengthOfStayData.value = PropertyStaticsData(
-          name: averageLengthOfStay["name"] ?? '',
-          today: roundTo2(averageLengthOfStay["today"]),
-          yesterday: roundTo2(averageLengthOfStay["yesterday"]),
-          percentage: roundTo2(averageLengthOfStay["percentage"]),
-        );
-
-        final revPar = propertyResult["revPar"];
-
-        revParData.value = PropertyStaticsData(
-          name: revPar["name"] ?? '',
-          today: roundTo2(revPar["today"]),
-          yesterday: roundTo2(revPar["yesterday"]),
-          percentage: roundTo2(revPar["percentage"]),
-        );
-
-        final totalPayment = propertyResult["totalPayment"];
-
-        totalPaymentData.value = PropertyStaticsData(
-          name: totalPayment["name"] ?? '',
-          today: roundTo2(totalPayment["today"]),
-          yesterday: roundTo2(totalPayment["yesterday"]),
-          percentage: roundTo2(totalPayment["percentage"]),
-        );
+          if (item['name'] == "Total Res. Payment") {
+            totalPaymentData.value = PropertyStaticsData(
+              name: item["name"] ?? '',
+              today: roundTo2(item["today"]),
+              yesterday: roundTo2(item["yesterday"]),
+              percentage: roundTo2(item["percentage"]),
+            );
+          }
+        }
 
         occupancyData.value = OccupancyData(
-          today: occupancyResult["today"],
-          yesterday: occupancyResult["yesterday"],
+          today: occupancyResult[0]["value"],
+          yesterday: 0,
         );
 
-        totalAvailableRooms.value = inventoryResult["totalAvailableRooms"];
-        totalAvailableRoomsRate.value =
-            inventoryResult["totalAvailableRoomsRate"];
-        totalRoomSold.value = inventoryResult["totalRoomsSold"];
-        totalRoomSoldRate.value = inventoryResult["totalRoomsSoldRate"];
-        outOfOrderRooms.value = inventoryResult["blockedRooms"];
-        outOfOrderRoomsRate.value = inventoryResult["blockedRoomsRate"];
-        complementaryRooms.value = inventoryResult["complementaryRooms"];
-        complementaryRoomsRate.value =
-            inventoryResult["complementaryRoomsRate"];
+        for (final item in inventoryResult) {
+          if (item['name'] == "Available Rooms") {
+            totalAvailableRooms.value = item["value"];
+            totalAvailableRoomsRate.value = totalRoomsInProperty == 0 ? 0 : totalAvailableRooms / totalRoomsInProperty.value;
+          }
+          if (item['name'] == "Sold Rooms") {
+            totalRoomSold.value = item["value"];
+            totalRoomSoldRate.value =totalRoomsInProperty == 0 ? 0 : totalRoomSold / totalRoomsInProperty.value;
+          }
+          if (item['name'] == "Blocked Rooms") {
+            outOfOrderRooms.value = item["value"];
+            outOfOrderRoomsRate.value = totalRoomsInProperty == 0 ? 0 : outOfOrderRooms / totalRoomsInProperty.value;
+          }
+          if (item['name'] == "Complimentary Rooms") {
+            complementaryRooms.value = item["value"];
+            complementaryRoomsRate.value = totalRoomsInProperty == 0 ? 0 : complementaryRooms / totalRoomsInProperty.value;
+          }
+        }
       } else {
         MessageService().error(
           inventoryPropertyOccupancyResponse["errors"][0] ??
               'Error loading dashboard inventory, occupancy, property data!',
-        );
-      }
-
-      if (arrivalListResponse["isSuccessful"] == true) {
-        final List<dynamic> result = arrivalListResponse["result"];
-
-        for (final item in result) {
-          final data = GuestItem(
-            bookingRoomId: item['bookingRoomId'].toString(),
-            guestName: item['bookingGuestWithTitle'] ?? '',
-            resId: item['reservationNo'] ?? '',
-            folioId: item['bookingId'].toString(),
-            startDate: item['arrivalDate'] ?? '',
-            endDate: item['departureDate'] ?? '',
-            nights: item['nights'] ?? 0,
-            roomType: item['roomName'] ?? '',
-            reservationType: item['reservationType'] ?? '',
-            adults: item['noOfAdults'] ?? 0,
-            totalAmount: (item['totalAmount'] ?? 0).toDouble(),
-            balanceAmount: (item['balanceAmount'] ?? 0).toDouble(),
-            room: item['roomName'] ?? '',
-          );
-          allReservationList.add(data);
-          allReservationListFiltered.add(data);
-        }
-      } else {
-        MessageService().error(
-          arrivalListResponse["errors"][0] ?? 'Error loading arrival list!',
         );
       }
     } catch (e) {
@@ -268,8 +230,6 @@ class DashboardVm extends GetxController {
 
       final response = await _reservationService.getAllReservationList(payload);
       if (response['isSuccessful'] == true) {
-
-
       } else {
         MessageService().error(
           response["errors"][0] ?? 'Error while searching reservations!',
@@ -277,7 +237,7 @@ class DashboardVm extends GetxController {
       }
     } catch (e) {
       throw Exception('Error while Searching!');
-    } finally{
+    } finally {
       isSearching.value = false;
     }
   }

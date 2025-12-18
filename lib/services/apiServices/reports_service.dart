@@ -7,17 +7,19 @@ class ReportsService {
 
   ReportsService(this._dataAccess, this._appResources);
 
-    Future<Map<String, dynamic>> getNightAudits() async {
+  Future<Map<String, dynamic>> getNightAuditReport(
+    Map<String, dynamic> body,
+  ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getNightAudits}';
-      final response = await _dataAccess.get(url);
+      final url = '${_appResources.baseUrl}${AppResources.getNightAuditReport}';
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
     }
   }
 
-   Future<Map<String, dynamic>> getCurrencies() async {
+  Future<Map<String, dynamic>> getCurrencies() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getCurrencies}';
       final response = await _dataAccess.get(url);
@@ -27,7 +29,7 @@ class ReportsService {
     }
   }
 
- Future<Map<String, dynamic>> getAllHotel() async {
+  Future<Map<String, dynamic>> getAllHotel() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllHotel}';
       final response = await _dataAccess.get(url);
@@ -37,14 +39,15 @@ class ReportsService {
     }
   }
 
-   Future<Map<String, dynamic>> getManagerReport(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> getManagerReport(
+    Map<String, dynamic> body,
+  ) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getManagerReport}';
-      final response = await _dataAccess.post(body,url);
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
     }
   }
-
 }

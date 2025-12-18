@@ -96,7 +96,6 @@ class ReservationVm extends GetxController {
       final response = await Future.wait([
         _reservationService.getAllroomstatus(),
         _reservationService.getAllRoomTypes(),
-        _reservationService.getAllroomstatus(),
         _reservationService.getAllreservationTypes(),
         _reservationService.getAllbusinessSources(),
         _reservationService.getAllReservationList(body),
@@ -104,10 +103,9 @@ class ReservationVm extends GetxController {
 
       final statusResponse = response[0];
       final roomTypeResponse = response[1];
-      final roomStatusResponse = response[2];
-      final reservationTypeResponse = response[3];
-      final businessSourcesResponse = response[4];
-      final reservationListResponse = response[5];
+      final reservationTypeResponse = response[2];
+      final businessSourcesResponse = response[3];
+      final reservationListResponse = response[4];
 
       if (reservationTypeResponse["isSuccessful"]) {
         final result = reservationTypeResponse["result"]["recordSet"];
@@ -132,6 +130,11 @@ class ReservationVm extends GetxController {
         statusList.value = [];
         final result = statusResponse["result"]["recordSet"];
         for (final item in result) {
+          final dropDownData = FilterDropdownData.fromJson({
+            "id": item["roomTypeId"],
+            "name": item["name"],
+          });
+
           final data = {
             "id": item["roomStatusId"],
             "name": item["name"] ?? '',
@@ -139,6 +142,7 @@ class ReservationVm extends GetxController {
             "colorCode": hexToColor(item["colorCode"]),
           };
           statusList.add(data);
+          statuses.add(dropDownData);
         }
       } else {
         MessageService().error(
@@ -160,23 +164,6 @@ class ReservationVm extends GetxController {
       } else {
         MessageService().error(
           roomTypeResponse["errors"][0] ?? 'Error getting room details!',
-        );
-      }
-
-      if (roomStatusResponse["isSuccessful"]) {
-        statuses.value = [];
-        final result = roomStatusResponse["result"]["recordSet"];
-        for (final item in result) {
-          final data = FilterDropdownData.fromJson({
-            "id": item["roomStatusId"],
-            "name": item["name"],
-          });
-          statuses.add(data);
-          statuses.refresh();
-        }
-      } else {
-        MessageService().error(
-          roomStatusResponse["errors"][0] ?? 'Error getting room Status!',
         );
       }
 
@@ -210,7 +197,7 @@ class ReservationVm extends GetxController {
             resId: item['reservationNo'] ?? '',
             startDate: item['arrivalDate'] ?? '',
             endDate: item['departureDate'] ?? '',
-            nights: item['nights'] ?? 0,
+            nights: item['noOfNights'] ?? 0,
             roomType: item['roomName'] ?? '',
             reservationType: item['reservationType'] ?? '',
             adults: item['noOfAdults'] ?? 0,
@@ -245,6 +232,50 @@ class ReservationVm extends GetxController {
       throw Exception('Error getting reservation list: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void search(String searchQuery) {
+    try {
+      if (searchQuery.isNotEmpty) {
+        Map<String, List<GuestItem>> filteredMap = {};
+        reservationList.value!.forEach((tab, items) {
+          filteredMap[tab] = items
+              .where(
+                (item) =>
+                    item.room!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.guestName!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.statusName!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.statusName!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.startDate!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.endDate!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.resId!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ) ||
+                    item.reservationType!.toLowerCase().contains(
+                      searchQuery.toLowerCase(),
+                    ),
+              )
+              .toList();
+        });
+        filteredList.value = filteredMap;
+      } else {
+        filteredList.value = reservationList.value;
+      }
+    } catch (e) {
+      throw Exception('Error filter searching : $e');
     }
   }
 
@@ -608,7 +639,7 @@ class ReservationVm extends GetxController {
           roomCharges.add(charges);
         }
 
-         for (final item in result["bookingRoom"]["sharers"]) {
+        for (final item in result["bookingRoom"]["sharers"]) {
           final charges = SharerInfo.fromJson(item);
           sharerInfo.add(charges);
         }

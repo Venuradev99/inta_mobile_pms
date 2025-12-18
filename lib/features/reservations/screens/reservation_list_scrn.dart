@@ -46,6 +46,8 @@ class _ReservationListState extends State<ReservationList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Reservation List',
+        showSearch: true,
+        onSearchChanged: (query) => _reservationListVm.search(query),
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(

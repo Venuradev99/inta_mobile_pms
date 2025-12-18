@@ -50,6 +50,8 @@ class _ArrivalListState extends State<ArrivalList> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Arrival List',
+        showSearch: true,
+        onSearchChanged: (query) => _arrivalListVm.search(query),
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -113,7 +115,7 @@ class _ArrivalListState extends State<ArrivalList> {
             ),
             if (isBottomSheetDataLoading == true)
               Container(
-                color: Colors.black.withOpacity(0.2), // slight dim effect
+                color: Colors.black.withOpacity(0.2), 
                 child: const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(

@@ -1,3 +1,4 @@
+// unchanged imports ...
 import 'package:flutter/material.dart';
 import 'package:get/Get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -9,7 +10,6 @@ import 'package:inta_mobile_pms/features/reports/viewmodels/manager_report_vm.da
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
-
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 
@@ -20,16 +20,18 @@ class ManagerReport extends StatefulWidget {
   State<ManagerReport> createState() => _ManagerReportState();
 }
 
-class _ManagerReportState extends State<ManagerReport> {
+class _ManagerReportState extends State<ManagerReport>
+    with SingleTickerProviderStateMixin {
   final _managerReportVm = Get.find<ManagerReportVm>();
 
-  int _selectedPeriod = 1;
+  late TabController _tabController;
 
   NumberFormat _currencyFormat = NumberFormat('#,##0.00');
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await _managerReportVm.loadInitialData();
@@ -41,6 +43,12 @@ class _ManagerReportState extends State<ManagerReport> {
     });
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   List<String> selectedHotels = [];
   DateTime? selectedDate;
 
@@ -49,7 +57,7 @@ class _ManagerReportState extends State<ManagerReport> {
   bool _showReport = false;
 
   dynamic _getValue(dynamic item) {
-    switch (_selectedPeriod) {
+    switch (_tabController.index) {
       case 0:
         return item.today;
       case 1:
@@ -114,174 +122,193 @@ class _ManagerReportState extends State<ManagerReport> {
         onRefreshTap: _handleRefresh,
       ),
       body: ListView(
-        padding: ResponsiveConfig.verticalPadding(
-          context,
-        ).add(ResponsiveConfig.horizontalPadding(context)),
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // DATE PICKER
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Date",
-                      style: AppTextTheme.lightTextTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: Text(
-                          selectedDate != null
-                              ? DateFormat('yyyy-MM-dd').format(selectedDate!)
-                              : "Select",
-                          style: AppTextTheme.lightTextTheme.bodyMedium,
+          /// FULL-WIDTH PRIMARY FILTER BACKGROUND
+          Container(
+            width: double.infinity,
+            color: AppColors.primary,
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                /// DATE PICK
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Date",
+                        style: AppTextTheme.lightTextTheme.titleMedium!
+                            .copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _pickDate,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: Text(
+                            selectedDate != null
+                                ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+                                : "Select",
+                            style: AppTextTheme.lightTextTheme.bodyMedium,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // CURRENCY DROPDOWN
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Currency",
-                      style: AppTextTheme.lightTextTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Obx(() {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade400),
-                        ),
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          underline: const SizedBox(),
-                          hint: const Text("Select"),
-                          value: selectedCurrency,
-                          items: _managerReportVm.currencyList
-                              .map(
-                                (e) => DropdownMenuItem(
-                                  value: e.code,
-                                  child: Text(e.code),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (val) =>
-                              setState(() => selectedCurrency = val),
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 24),
-
-              // GENERATE BUTTON
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (selectedDate == null || selectedCurrency == null) {
-                      MessageService().error(
-                        "Please select a date and currency.",
-                      );
-                      return;
-                    }
-
-                    _managerReportVm.isReportLoading.value = true;
-
-                    await _managerReportVm.getManagerReport(
-                      selectedCurrency!,
-                      selectedDate!,
-                    );
-
-                    _managerReportVm.isReportLoading.value = false;
-
-                    setState(() {
-                      _currencyFormat = NumberFormat.currency(
-                        locale: 'en_US',
-                        symbol: _managerReportVm.getCurrencySymbol(
-                          selectedCurrency,
-                        ),
-                        decimalDigits: 2,
-                      );
-                      _showReport = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  child: const Text(
-                    "Generate",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+
+                /// CURRENCY DROPDOWN
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Currency",
+                        style: AppTextTheme.lightTextTheme.titleMedium!
+                            .copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(() {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            underline: const SizedBox(),
+                            hint: const Text("Select"),
+                            value: selectedCurrency,
+                            items: _managerReportVm.currencyList
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.code,
+                                    child: Text(e.code),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) =>
+                                setState(() => selectedCurrency = val),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 24),
+
+                /// GENERATE BUTTON
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (selectedDate == null || selectedCurrency == null) {
+                        MessageService().error(
+                          "Please select a date and currency.",
+                        );
+                        return;
+                      }
+
+                      _managerReportVm.isReportLoading.value = true;
+
+                      await _managerReportVm.getManagerReport(
+                        selectedCurrency!,
+                        selectedDate!,
+                      );
+
+                      _managerReportVm.isReportLoading.value = false;
+
+                      setState(() {
+                        _currencyFormat = NumberFormat.currency(
+                          locale: 'en_US',
+                          symbol: _managerReportVm.getCurrencySymbol(
+                            selectedCurrency,
+                          ),
+                          decimalDigits: 2,
+                        );
+                        _showReport = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    child: Text(
+                      "Generate",
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-
-          const SizedBox(height: 40),
 
           Obx(() {
             if (_managerReportVm.isReportLoading.value) {
               return _buildReportShimmer(context);
             } else if (_showReport) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: ResponsiveConfig.horizontalPadding(context),
-                    child: Text(
-                      'As on Date: ${selectedDate != null ? DateFormat('yyyy-MM-dd').format(selectedDate!) : ''}',
-                      style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
-                        color: AppColors.darkgrey,
+              return Padding(
+                padding: ResponsiveConfig.verticalPadding(
+                  context,
+                ).add(ResponsiveConfig.horizontalPadding(context)),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Container(
+                      color: AppColors.primary,
+                      child: TabBar(
+                        labelColor: AppColors.onPrimary,
+                        unselectedLabelColor: AppColors.onPrimary.withOpacity(
+                          0.7,
+                        ),
+                        controller: _tabController,
+                        tabs: const [
+                          Tab(text: 'Today'),
+                          Tab(text: 'PTD'),
+                          Tab(text: 'YTD'),
+                        ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: ResponsiveConfig.horizontalPadding(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildPeriodRadio(0, 'Today'),
-                        _buildPeriodRadio(1, 'PDT'),
-                        _buildPeriodRadio(2, 'YTD'),
-                      ],
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height - 300,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: List.generate(3, (index) {
+                          return SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                ..._managerReportVm.financialSections.entries
+                                    .map(
+                                      (entry) => _buildFinancialSection(
+                                        context,
+                                        entry.key,
+                                        entry.value,
+                                      ),
+                                    ),
+                                _buildRoomSummarySection(context),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  ..._managerReportVm.financialSections.entries.map(
-                    (entry) =>
-                        _buildFinancialSection(context, entry.key, entry.value),
-                  ),
-                  _buildRoomSummarySection(context),
-                ],
+                  ],
+                ),
               );
             } else {
               return const SizedBox();
@@ -292,19 +319,7 @@ class _ManagerReportState extends State<ManagerReport> {
     );
   }
 
-  Widget _buildPeriodRadio(int value, String label) {
-    return Row(
-      children: [
-        Radio<int>(
-          value: value,
-          groupValue: _selectedPeriod,
-          onChanged: (val) => setState(() => _selectedPeriod = val!),
-          activeColor: AppColors.primary,
-        ),
-        Text(label, style: AppTextTheme.lightTextTheme.bodyMedium),
-      ],
-    );
-  }
+  // unchanged helpers...
 
   Widget _buildFinancialSection(
     BuildContext context,
@@ -441,7 +456,7 @@ class _ManagerReportState extends State<ManagerReport> {
           ),
           const SizedBox(height: 16),
           ...List.generate(
-            4, // Assuming approximately 4 sections including room summary
+            4,
             (_) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -451,7 +466,7 @@ class _ManagerReportState extends State<ManagerReport> {
                   color: Colors.white,
                 ),
                 ...List.generate(
-                  6, // Assuming average 6 items per section
+                  6,
                   (_) => Column(
                     children: [
                       Padding(

@@ -2,13 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onInfoTap;
   final VoidCallback? onFilterTap;
   final VoidCallback? onRefreshTap;
+  final ValueChanged<String>? onSearchChanged; 
+  final bool showSearch;
 
   const CustomAppBar({
     super.key,
@@ -16,7 +17,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onInfoTap,
     this.onFilterTap,
     this.onRefreshTap,
+    this.onSearchChanged,
+    this.showSearch = false,
   });
+
+  @override
+  State<CustomAppBar> createState() => _CustomAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class _CustomAppBarState extends State<CustomAppBar> {
+  bool _isSearching = false; // Whether the search field is visible
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,33 +47,73 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: const Icon(Icons.arrow_back, color: AppColors.black),
         onPressed: () => context.pop(),
       ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: AppColors.black,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      title: _isSearching
+          ? SizedBox(
+              height: 40,
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: widget.onSearchChanged,
+                style: const TextStyle(color: AppColors.black),
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: const TextStyle(color: AppColors.darkgrey),
+                  prefixIcon: const Icon(Icons.search, color: AppColors.darkgrey),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.darkgrey),
+                    onPressed: () {
+                      setState(() {
+                        _isSearching = false;
+                        _searchController.clear();
+                        if (widget.onSearchChanged != null) {
+                          widget.onSearchChanged!(""); // Clear the search callback
+                        }
+                      });
+                    },
+                  ),
+                  filled: true,
+                  fillColor: AppColors.onPrimary,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            )
+          : Text(
+              widget.title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
       actions: [
-        if (onInfoTap != null)
+        if (!_isSearching && widget.showSearch)
+          IconButton(
+            icon: const Icon(Icons.search, color: AppColors.black),
+            onPressed: () {
+              setState(() {
+                _isSearching = true;
+              });
+            },
+          ),
+        if (widget.onInfoTap != null)
           IconButton(
             icon: const Icon(Icons.info_outline, color: AppColors.black),
-            onPressed: onInfoTap,
+            onPressed: widget.onInfoTap,
           ),
-        if (onFilterTap != null)
+        if (widget.onFilterTap != null)
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
-            onPressed: onFilterTap,
+            onPressed: widget.onFilterTap,
           ),
-        if (onRefreshTap != null)
+        if (widget.onRefreshTap != null)
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: onRefreshTap,
+            onPressed: widget.onRefreshTap,
           ),
       ],
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

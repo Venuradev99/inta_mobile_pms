@@ -45,6 +45,8 @@ class _DepartureListState extends State<DepartureList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Departure List',
+        showSearch: true,
+        onSearchChanged: (query) => _departureListVm.search(query),
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(

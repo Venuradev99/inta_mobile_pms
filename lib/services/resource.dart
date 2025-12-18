@@ -40,10 +40,11 @@ class AppResources {
 
   //dashboard
   static const String getBookingStats = '$dashboard/GetBookingStatic';
-  static const String getInventoryStats = '$calenderBooking/GetQuickOverview';
+  static const String getInventoryStats = '$calenderBooking/GetQuickOverview'; 
   static const String getAllLockReservations =
       '$booking/GetAllLockReservations';
   static const String lockBooking = '$booking/lock';
+  static const String getStatistics = '$dashboard/GetMobileQuickOverviewStatistics';
 
   //reservation
   static const String searchReservationList = '$booking/SearchReservationList';
@@ -122,7 +123,7 @@ class AppResources {
   static const String getDayUseList = '$booking/SearchRoomBookingForDateRange';
 
   ////reports
-  static const String getNightAudits = '$auditTrial/nightAudit';
+  static const String getNightAuditReport = '$report/NightAuditReport';
   static const String getCurrencies =
       '$currency/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllHotel = '$hotel/GetAllByUserAndMenu/374';
