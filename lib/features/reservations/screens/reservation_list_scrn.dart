@@ -110,7 +110,7 @@ class _ReservationListState extends State<ReservationList> {
                 itemBuilder: (item) => _buildReservationCard(item),
                 emptySubMessage: (period) => 'No reservations for this period',
               ),
-            if (_reservationListVm.isBottomSheetDataLoading.value)
+            if (_reservationListVm.isAllGuestDataLoading.value)
               Container(
                 color: Colors.black.withOpacity(0.2),
                 child: const Center(

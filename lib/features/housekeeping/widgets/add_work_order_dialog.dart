@@ -98,10 +98,11 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                     return Column(
                       children: [
                         const SizedBox(height: 16),
-
-                        // Category Dropdown
                         DropdownButtonFormField<String>(
-                          initialValue: _selectedCategory.isNotEmpty
+                          value:
+                              categoryList.any(
+                                (c) => c.id.toString() == _selectedCategory,
+                              )
                               ? _selectedCategory
                               : null,
                           hint: const Text('Select category'),
@@ -310,8 +311,12 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                                 onTap: () async {
                                   final date = await showDatePicker(
                                     context: context,
-                                    initialDate: DateTime.parse(await _getToday()),
-                                    firstDate:  DateTime.parse(await _getToday()),
+                                    initialDate: DateTime.parse(
+                                      await _getToday(),
+                                    ),
+                                    firstDate: DateTime.parse(
+                                      await _getToday(),
+                                    ),
                                     lastDate: DateTime.now().add(
                                       const Duration(days: 365),
                                     ),
@@ -355,7 +360,16 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
                                   );
                                   if (time != null) {
                                     setState(() {
-                                      _dueTimeController.text = DateFormat('h:mm a').format(DateTime(0, 0, 0, time.hour, time.minute));
+                                      _dueTimeController.text =
+                                          DateFormat('h:mm a').format(
+                                            DateTime(
+                                              0,
+                                              0,
+                                              0,
+                                              time.hour,
+                                              time.minute,
+                                            ),
+                                          );
                                     });
                                   }
                                 },
@@ -411,7 +425,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () =>context.pop(),
+                  onPressed: () => context.pop(),
                   child: const Text('Cancel'),
                 ),
                 const SizedBox(width: 16),
@@ -432,7 +446,6 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
-
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.parse(await _getToday()),
@@ -500,7 +513,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
     }
   }
 
-  void _saveWorkOrder() {
+  void _saveWorkOrder() async {
     if (_formKey.currentState!.validate()) {
       DateTime dueDate = _getStandardDateTime(
         _dueDateController.text,
@@ -519,7 +532,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
         description: _descriptionController.text,
         reason: _selectedReason,
       );
-     context.pop();
+      await _workOrderListVm.saveWorkOrder(newWorkOrder);
     }
   }
 

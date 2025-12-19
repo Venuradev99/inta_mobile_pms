@@ -5,6 +5,7 @@ import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_orders_search_request.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 import 'package:intl/intl.dart';
 
 class WorkOrderListVm extends GetxController {
@@ -45,7 +46,7 @@ class WorkOrderListVm extends GetxController {
         status: 0,
         unitId: 0,
         workOrderNumber: '',
-        pageSize: 50,
+        pageSize: 0,
         pageIndex: 0,
         startIndex: 0,
       ).toJson();
@@ -266,10 +267,13 @@ class WorkOrderListVm extends GetxController {
         saveRequest,
       );
       if (response["isSuccessful"] == true) {
+        NavigationService().back();
         MessageService().success(
           response["message"] ?? 'Work order saved Successfully!',
         );
+        loadWorkOrders();
       } else {
+        NavigationService().back();
         MessageService().error(
           response["errors"][0] ?? 'Error saving work orders!',
         );
@@ -280,19 +284,47 @@ class WorkOrderListVm extends GetxController {
     }
   }
 
-  searchWorkOrders(searchQuery) {
+  searchWorkOrders(String searchQuery) {
     try {
       if (searchQuery.isNotEmpty) {
-        workOrdersFiltered.value = workOrdersFiltered
+        workOrdersFiltered.value = workOrders
             .where(
-              (workOrder) =>
+              (WorkOrder workOrder) =>
                   workOrder.orderNo.toLowerCase().contains(
                     searchQuery.toLowerCase(),
                   ) ||
                   workOrder.unitRoom.toLowerCase().contains(
                     searchQuery.toLowerCase(),
                   ) ||
+                  workOrder.blockTo.toString().toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.blockFrom.toString().toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.reason.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.description.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.dueDate.toString().toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.assignedTo.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
                   workOrder.status.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )
+                  ||
+                  workOrder.description.toLowerCase().contains(
                     searchQuery.toLowerCase(),
                   ),
             )

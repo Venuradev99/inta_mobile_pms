@@ -733,14 +733,6 @@ class _DashboardState extends State<Dashboard> {
                   () => context.push(AppRoutes.arrivalList),
                   config,
                 ),
-                // _buildMenuTile(
-                //   context,
-                //   textTheme,
-                //   Icons.hotel,
-                //   'In-house List',
-                //   () => context.push(AppRoutes.inhouseList),
-                //   config,
-                // ),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -757,7 +749,6 @@ class _DashboardState extends State<Dashboard> {
                   () => context.push(AppRoutes.ratesInventory),
                   config,
                 ),
-                // === REPORTS EXPANSION TILE ===
                 ExpansionTile(
                   leading: Container(
                     padding: EdgeInsets.all(

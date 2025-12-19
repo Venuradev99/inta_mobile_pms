@@ -129,12 +129,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
                         'Smoking',
                         Colors.grey[700]!,
                       ),
-                      // const SizedBox(height: 12),
-                      // _buildIndicatorRow(
-                      //   Icons.link,
-                      //   'Connected Rooms',
-                      //   Colors.grey[700]!,
-                      // ),
                       const SizedBox(height: 12),
                       _buildLegendItem('Inventory', Colors.blue[100]!),
                       const SizedBox(height: 12),
@@ -228,46 +222,6 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     );
   }
 
-  Widget _buildInfoItem(String title, String description, IconData icon) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey[700],
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = AppTextTheme.lightTextTheme;
@@ -296,82 +250,83 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
       appBar: CustomAppBar(title: 'Stay View', onInfoTap: _showInfoDialog),
       body: Stack(
         children: [
-          // MAIN CONTENT
-          RefreshIndicator(
-            onRefresh: () async {
-              await Future.delayed(const Duration(seconds: 1));
-            },
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              children: [
-                _buildDateNavigator(textTheme),
-
-                Padding(
-                  padding: ResponsiveConfig.horizontalPadding(
-                    context,
-                  ).copyWith(top: 20, bottom: 24),
-                  child: GestureDetector(
-                    onHorizontalDragEnd: (details) {
-                      if (details.primaryVelocity! > 300) {
-                        setState(() {
-                          _centerDate = _centerDate.subtract(
-                            const Duration(days: 1),
-                          );
-                        });
-                      } else if (details.primaryVelocity! < -300) {
-                        setState(() {
-                          _centerDate = _centerDate.add(
-                            const Duration(days: 1),
-                          );
-                        });
-                      }
-                    },
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildHeaderRow(
-                              roomWidth,
-                              dayWidth,
-                              dayLabels,
-                              textTheme,
-                              days,
-                            ),
-                            const SizedBox(height: 12),
-
-                            Obx(() {
-                              return _stayViewVm.isLoading.value
-                                  ? Column(
-                                      children: _buildRoomSectionsShimmer(
-                                        roomWidth,
-                                        dayWidth,
-                                      ),
-                                    )
-                                  : Column(
-                                      children: _buildRoomSections(
-                                        roomWidth,
-                                        dayWidth,
-                                        textTheme,
-                                        days,
-                                      ),
-                                    );
-                            }),
-                          ],
-                        );
-                      },
-                    ),
+          Column(
+            children: [
+              _buildDateNavigator(textTheme),
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: _buildHeaderRow(
+                  roomWidth,
+                  dayWidth,
+                  dayLabels,
+                  textTheme,
+                  days,
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await Future.delayed(const Duration(seconds: 1));
+                  },
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    children: [
+                      Padding(
+                        padding: ResponsiveConfig.horizontalPadding(
+                          context,
+                        ).copyWith(top: 20, bottom: 24),
+                        child: GestureDetector(
+                          onHorizontalDragEnd: (details) {
+                            if (details.primaryVelocity! > 300) {
+                              setState(() {
+                                _centerDate = _centerDate.subtract(
+                                  const Duration(days: 1),
+                                );
+                              });
+                            } else if (details.primaryVelocity! < -300) {
+                              setState(() {
+                                _centerDate = _centerDate.add(
+                                  const Duration(days: 1),
+                                );
+                              });
+                            }
+                          },
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return Obx(() {
+                                return _stayViewVm.isLoading.value
+                                    ? Column(
+                                        children: _buildRoomSectionsShimmer(
+                                          roomWidth,
+                                          dayWidth,
+                                        ),
+                                      )
+                                    : Column(
+                                        children: _buildRoomSections(
+                                          roomWidth,
+                                          dayWidth,
+                                          textTheme,
+                                          days,
+                                        ),
+                                      );
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+
+          // Loading overlay remains on top
           Obx(() {
-            if (!_reservationVm.isBottomSheetDataLoading.value) {
+            if (!_reservationVm.isAllGuestDataLoading.value) {
               return const SizedBox.shrink();
             }
-
             return Container(
               color: Colors.black.withOpacity(0.25),
               child: Center(
@@ -444,120 +399,154 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
     });
   }
 
-  Widget _buildDateNavigator(TextTheme textTheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.chevron_left, color: Colors.grey[700]),
-            onPressed: () {
-              setState(() {
-                _centerDate = _centerDate.subtract(const Duration(days: 1));
-              });
-              _stayViewVm.loadInitialData(_centerDate);
-            },
-            tooltip: 'Previous Day',
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.grey[100],
-              padding: const EdgeInsets.all(8),
-            ),
+ Widget _buildDateNavigator(TextTheme textTheme) {
+  final bool isMobile = ResponsiveConfig.isMobile(context);
+  final double fontScale = ResponsiveConfig.fontScale(context);
+
+  return Container(
+    padding: EdgeInsets.symmetric(
+      horizontal: isMobile ? 8 : 16,
+      vertical: isMobile ? 8 : 12,
+    ),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          iconSize: isMobile ? 20 : 24,
+          icon: Icon(Icons.chevron_left, color: Colors.grey[700]),
+          onPressed: () {
+            setState(() => _centerDate = _centerDate.subtract(const Duration(days: 1)));
+            _stayViewVm.loadInitialData(_centerDate);
+          },
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.grey[100],
+            padding: EdgeInsets.all(isMobile ? 4 : 8),
           ),
-          const SizedBox(width: 16),
-          InkWell(
-            onTap: () async {
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: _centerDate,
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-                builder: (context, child) {
-                  return Theme(
-                    data: Theme.of(context).copyWith(
-                      colorScheme: ColorScheme.light(
-                        primary: AppColors.primary,
-                      ),
-                    ),
-                    child: child!,
-                  );
-                },
-              );
-              if (picked != null && picked != _centerDate) {
-                setState(() {
-                  _centerDate = picked;
-                });
-                _stayViewVm.loadInitialData(_centerDate);
-              }
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[700]),
-                  const SizedBox(width: 8),
-                  Text(
-                    DateFormat('MMM d, yyyy').format(_centerDate),
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey[900],
-                    ),
+        ),
+
+        SizedBox(width: isMobile ? 8 : 16),
+
+        InkWell(
+          onTap: () async {
+            final DateTime? picked = await showDatePicker(
+              context: context,
+              initialDate: _centerDate,
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              builder: (context, child) {
+                return Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: ColorScheme.light(primary: AppColors.primary),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          IconButton(
-            icon: Icon(Icons.chevron_right, color: Colors.grey[700]),
-            onPressed: () {
-              setState(() {
-                _centerDate = _centerDate.add(const Duration(days: 1));
-              });
+                  child: child!,
+                );
+              },
+            );
+            if (picked != null && picked != _centerDate) {
+              setState(() => _centerDate = picked);
               _stayViewVm.loadInitialData(_centerDate);
-            },
-            tooltip: 'Next Day',
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.grey[100],
-              padding: const EdgeInsets.all(8),
+            }
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 8 : 16,
+              vertical: isMobile ? 6 : 10,
+            ),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: isMobile ? 14 : 16,
+                  color: Colors.grey[700],
+                ),
+                SizedBox(width: isMobile ? 4 : 8),
+                Text(
+                  DateFormat('MMM d, yyyy').format(_centerDate),
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontSize: (isMobile ? 12 : 14) * fontScale,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[900],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                _centerDate = _stayViewVm.today.value ?? DateTime.now();
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        ),
+
+        SizedBox(width: isMobile ? 8 : 16),
+
+        IconButton(
+          iconSize: isMobile ? 20 : 24,
+          icon: Icon(Icons.chevron_right, color: Colors.grey[700]),
+          onPressed: () {
+            setState(() => _centerDate = _centerDate.add(const Duration(days: 1)));
+            _stayViewVm.loadInitialData(_centerDate);
+          },
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.grey[100],
+            padding: EdgeInsets.all(isMobile ? 4 : 8),
+          ),
+        ),
+
+        SizedBox(width: isMobile ? 8 : 24),
+
+        isMobile
+            ? IconButton(
+                tooltip: "Today",
+                icon: Icon(Icons.today, size: 18, color: Colors.white),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.all(8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  setState(() =>
+                      _centerDate = _stayViewVm.today.value ?? DateTime.now());
+                },
+              )
+
+            // 🖥 Desktop/Tablet: full button
+            : ElevatedButton.icon(
+                onPressed: () {
+                  setState(() =>
+                      _centerDate = _stayViewVm.today.value ?? DateTime.now());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.today, size: 18),
+                label: Text(
+                  'Today',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14 * fontScale,
+                  ),
+                ),
               ),
-            ),
-            icon: const Icon(Icons.today, size: 18),
-            label: const Text(
-              'Today',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
+
 
   Widget _buildHeaderRow(
     double roomWidth,
@@ -927,8 +916,9 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
           } else if (isGroup) {
             guestName = checkIn['guestName'] ?? '';
             Color iconColor = Color(
-              int.parse(groupColor.replaceFirst('#', '0xFF')),
-            )!;
+              int.tryParse(groupColor?.replaceFirst('#', '0xFF') ?? '') ??
+                  0xFF000000,
+            );
             barChild = Row(
               children: [
                 Icon(Icons.star, size: _indicatorIconSize, color: iconColor),

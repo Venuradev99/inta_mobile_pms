@@ -81,7 +81,7 @@ class _ArrivalListState extends State<ArrivalList> {
       body: Obx(() {
         final isLoading = _arrivalListVm.isLoading;
         final isBottomSheetDataLoading =
-            _arrivalListVm.isBottomSheetDataLoading.value;
+            _arrivalListVm.isAllGuestDataLoading.value;
         GuestItem guestItem = GuestItem(
           bookingRoomId: '',
           guestName: '',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/houseKeeper_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/update_house_status_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
@@ -13,7 +14,7 @@ class HouseStatusVm extends GetxController {
   final roomList = <RoomItem>[].obs;
   final groupedRooms = <String, List<RoomItem>>{}.obs;
   final houseKeepingStatusList = [].obs;
-  final houseKeepersList = [];
+  final houseKeepersList = <HouseKeeper>[];
   final isLoading = true.obs;
 
   HouseStatusVm(this._houseKeepingServices);
@@ -30,8 +31,12 @@ class HouseStatusVm extends GetxController {
     try {
       isLoading.value = true;
       houseKeepingStatusList.clear();
-      final houseKeepingStatus = await _houseKeepingServices
-          .getAllHouseKeepingStatus();
+      final responses = await Future.wait([
+        _houseKeepingServices.getAllHouseKeepingStatus(),
+        _houseKeepingServices.getHouseKeepers(),
+      ]);
+      final houseKeepingStatus = responses[0];
+      final houseKeepingers = responses[1];
 
       if (houseKeepingStatus["isSuccessful"] == true) {
         final result = houseKeepingStatus["result"]["recordSet"];
@@ -49,6 +54,25 @@ class HouseStatusVm extends GetxController {
               'Error getting House Keeping Status!',
         );
       }
+
+      if (houseKeepingers["isSuccessful"] == true) {
+        final result = houseKeepingers["result"];
+        for (final item in result) {
+          houseKeepersList.add(
+            HouseKeeper.fromJson({
+              "userId": item["userId"] ?? 0,
+              "firstName": item["firstName"] ?? '',
+              "lastName": item["lastName"] ?? '',
+              "houseKeeperName": '${item["userId"]} ${item["lastName"]}',
+            }),
+          );
+        }
+      } else {
+        MessageService().error(
+          houseKeepingers["errors"][0] ?? 'Error getting HouseKeepers!',
+        );
+      }
+
       roomList.clear();
       final roomResult = await _houseKeepingServices
           .getAllRoomsForHouseStatus();
@@ -82,6 +106,36 @@ class HouseStatusVm extends GetxController {
       throw Exception('Error loading rooms: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+  Future<void> updateRoomHousekeeper(RoomItem room, HouseKeeper houseKeeper) async {
+    try {
+      final payload = UpdateHouseStatusPayload(
+        id: houseKeeper.userId!,
+        houseKeeper: room.houseKeeper!,
+        houseKeepingRemark: room.remark ?? '',
+        houseKeepingStatus: room.houseKeepingStatusId!,
+        isRoom: room.isRoom ?? true,
+        operationType: 7,
+      ).toJson();
+
+      final response = await _houseKeepingServices.updateHouseStatus(payload);
+
+      if (response["isSuccessful"] == true) {
+        NavigationService().back();
+        MessageService().success(
+          response["message"] ?? 'Remark updated successfully.',
+        );
+        await loadRooms();
+      } else {
+        NavigationService().back();
+        MessageService().error(
+          response["errors"][0] ?? 'Error updating remark!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error updating remark: $e');
+      throw Exception('Error updating remark: $e');
     }
   }
 
@@ -209,7 +263,7 @@ class HouseStatusVm extends GetxController {
         houseKeepingRemark: room.remark ?? '',
         houseKeepingStatus: newStatusId,
         isRoom: room.isRoom ?? true,
-        operationType: 5,         
+        operationType: 5,
       ).toJson();
 
       final response = await _houseKeepingServices.updateHouseStatus(payload);

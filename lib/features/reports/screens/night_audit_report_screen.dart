@@ -5,6 +5,8 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reports/models/currency_item.dart';
 import 'package:inta_mobile_pms/features/reports/models/hotel_item.dart';
 import 'package:inta_mobile_pms/features/reports/viewmodels/night_audit_report_vm.dart';
+import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
 class NightAuditReport extends StatefulWidget {
@@ -30,8 +32,8 @@ class _ReportWidgetState extends State<NightAuditReport>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 9, vsync: this);
-    for (int i = 0; i < 9; i++) {
+    _tabController = TabController(length: 10, vsync: this);
+    for (int i = 0; i < 10; i++) {
       _horizontalControllers.add(ScrollController());
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -56,45 +58,31 @@ class _ReportWidgetState extends State<NightAuditReport>
     super.dispose();
   }
 
-  _loadReportData() async {
-    if (_selectedCurrency == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a currency',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
+  Future<void> _loadReportData() async {
+    try {
+      if (_selectedCurrency == null) {
+        MessageService().error('Please select a currency');
+        return;
+      }
 
-    if (_selectedHotel == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a hotel',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return;
+      if (_selectedHotel == null) {
+        MessageService().error('Please select a hotel');
+        return;
+      }
+      if (_selectedCurrency != null &&
+          _selectedDate != null &&
+          _selectedHotel != null) {
+        await _nightAuditReportVm.loadNightAuditReport(
+          _selectedDate!,
+          _selectedHotel!.hotelId,
+          _selectedCurrency!.currencyId,
+        );
+      } else {
+        MessageService().error('Invalid data selected!');
+      }
+    } catch (e) {
+      throw Exception('Error loading report: $e');
     }
-
-    if (_selectedDate == null) {
-      Get.snackbar(
-        'Error',
-        'Please select a date',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    await _nightAuditReportVm.loadNightAuditReport(
-      _selectedDate!,
-      _selectedHotel!.hotelId,
-      _selectedCurrency!.currencyId,
-    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -105,7 +93,7 @@ class _ReportWidgetState extends State<NightAuditReport>
       lastDate: DateTime(2100),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() async {
+      setState(() {
         _selectedDate = picked;
       });
     }
@@ -126,7 +114,6 @@ class _ReportWidgetState extends State<NightAuditReport>
     {'field': "totalRent", 'header': "Total Rent"},
     {'field': "varPercentage", 'header': "Var%"},
     {'field': "checkingBy", 'header': "Checking By"},
-    {'field': "status", 'header': "Status"},
   ];
 
   final checkedOutColsJson = [
@@ -193,6 +180,29 @@ class _ReportWidgetState extends State<NightAuditReport>
     {"field": "totalRent", "header": "Total Rent"},
     {"field": "varPercentage", "header": "Var%"},
     {"field": "checkingBy", "header": "Checking By"},
+  ];
+
+  final paxStatusCols = [
+    {"field": "status", "header": "Status"},
+    {"field": "rooms", "header": "Rooms"},
+    {"field": "adults", "header": "Adults"},
+    {"field": "children", "header": "Children"},
+  ];
+
+  final paxAnalysisCols = [
+    {"field": "rateType", "header": "Rate Type"},
+    {"field": "adults", "header": "Adults"},
+    {"field": "children", "header": "Children"},
+  ];
+  final roomStatusCols = [
+    {"field": "date", "header": "Date"},
+    {"field": "totalRooms", "header": "Total Rooms"},
+    {"field": "occupied", "header": "Occupied"},
+    // { "field": "dueOut", "header": "Due Out" }, // commented out as in original
+    {"field": "vacant", "header": "Vacant"},
+    {"field": "departed", "header": "Departed"},
+    // { "field": "reserve", "header": "Reserve" }, // commented out as in original
+    {"field": "blocked", "header": "Blocked"},
   ];
 
   @override
@@ -315,7 +325,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                             ),
                           ),
                           DropdownButton<HotelItem>(
-                            value:  _selectedHotel,
+                            value: _selectedHotel,
                             hint: Text(
                               "Select",
                               style: TextStyle(
@@ -407,6 +417,11 @@ class _ReportWidgetState extends State<NightAuditReport>
                 Tab(text: 'Checked Out'),
                 Tab(text: 'Daily Sales'),
                 Tab(text: 'Receipt Detail'),
+                Tab(text: 'Receipt Summary'),
+                Tab(text: 'Msc. Charges'),
+                Tab(text: 'Room Status'),
+                Tab(text: 'Pax Status'),
+                Tab(text: 'Pax Analysis'),
               ],
             ),
           ),
@@ -447,14 +462,76 @@ class _ReportWidgetState extends State<NightAuditReport>
                                       DataColumn(label: Text(col['header']!)),
                                 )
                                 .toList(),
-                            rows: _nightAuditReportVm.roomCharges.map((item) {
-                              return DataRow(
-                                cells: roomChargeCols.map((col) {
-                                  final value = item[col['field']] ?? '';
-                                  return DataCell(Text(value.toString()));
-                                }).toList(),
-                              );
-                            }).toList(),
+                            rows: [
+                              ..._nightAuditReportVm.roomCharges.map((item) {
+                                return DataRow(
+                                  cells: roomChargeCols.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }).toList(),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["nrmlTariff"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["ofrdTariff"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["discountAmount"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["totalTax"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["totalRent"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["varPercentage"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(Text('')),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -503,16 +580,83 @@ class _ReportWidgetState extends State<NightAuditReport>
                                       DataColumn(label: Text(col['header']!)),
                                 )
                                 .toList(),
-                            rows: _nightAuditReportVm.checkedOutRecodes.map((
-                              item,
-                            ) {
-                              return DataRow(
-                                cells: checkedOutColsJson.map((col) {
-                                  final value = item[col['field']] ?? '';
-                                  return DataCell(Text(value.toString()));
-                                }).toList(),
-                              );
-                            }).toList(),
+                            rows: [
+                              ..._nightAuditReportVm.checkedOutRecodes.map((
+                                item,
+                              ) {
+                                return DataRow(
+                                  cells: checkedOutColsJson.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }).toList(),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(Text('')),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["roomCharge"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["extraCharges"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["discount"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["taxAmount"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["adjust"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["receivedAmount"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["balanceAmount"],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -532,16 +676,71 @@ class _ReportWidgetState extends State<NightAuditReport>
                                       DataColumn(label: Text(col['header']!)),
                                 )
                                 .toList(),
-                            rows: _nightAuditReportVm.dailySalesRecodes.map((
-                              item,
-                            ) {
-                              return DataRow(
-                                cells: dailySalesColsJson.map((col) {
-                                  final value = item[col['field']] ?? '';
-                                  return DataCell(Text(value.toString()));
-                                }).toList(),
-                              );
-                            }).toList(),
+                            rows: [
+                              ..._nightAuditReportVm.dailySalesRecodes.map((
+                                item,
+                              ) {
+                                return DataRow(
+                                  cells: dailySalesColsJson.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }).toList(),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total')),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["roomCharges"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["extraCharges"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["roomTax"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["extraTax"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["discount"],
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      formatNumber(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["totalSales"],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -575,6 +774,219 @@ class _ReportWidgetState extends State<NightAuditReport>
                         ),
                       ),
                     ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[3],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[3],
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: receiptDetailsColsJson
+                                .map(
+                                  (col) =>
+                                      DataColumn(label: Text(col['header']!)),
+                                )
+                                .toList(),
+                            rows: _nightAuditReportVm.receiptDetailsRecodes.map(
+                              (item) {
+                                return DataRow(
+                                  cells: receiptDetailsColsJson.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              },
+                            ).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[3],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[3],
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: miscellaneousCols
+                                .map(
+                                  (col) =>
+                                      DataColumn(label: Text(col['header']!)),
+                                )
+                                .toList(),
+                            rows: [
+                              ..._nightAuditReportVm.miscellaneousRecodes.map((
+                                item,
+                              ) {
+                                return DataRow(
+                                  cells: miscellaneousCols.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }).toList(),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total'.toString())),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm.miscTotals["quantity"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm.miscTotals["amount"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(Text(''.toString())),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[3],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[3],
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: roomStatusCols
+                                .map(
+                                  (col) =>
+                                      DataColumn(label: Text(col['header']!)),
+                                )
+                                .toList(),
+                            rows: _nightAuditReportVm.roomStatusRecodes.map((
+                              item,
+                            ) {
+                              return DataRow(
+                                cells: roomStatusCols.map((col) {
+                                  final value = item[col['field']] ?? '';
+                                  return DataCell(Text(value.toString()));
+                                }).toList(),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[3],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[3],
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: paxStatusCols
+                                .map(
+                                  (col) =>
+                                      DataColumn(label: Text(col['header']!)),
+                                )
+                                .toList(),
+                            rows: [
+                              ..._nightAuditReportVm.paxStatusRecodes.map((
+                                item,
+                              ) {
+                                return DataRow(
+                                  cells: paxStatusCols.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total'.toString())),
+                                  DataCell(Text(''.toString())),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm
+                                          .paxStatusTotals["adult"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm
+                                          .paxStatusTotals["children"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ].toList(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[3],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[3],
+                          scrollDirection: Axis.horizontal,
+                          child: DataTable(
+                            columns: paxAnalysisCols
+                                .map(
+                                  (col) =>
+                                      DataColumn(label: Text(col['header']!)),
+                                )
+                                .toList(),
+                            rows: [
+                              ..._nightAuditReportVm.paxAnalysisRecodes.map((
+                                item,
+                              ) {
+                                return DataRow(
+                                  cells: paxAnalysisCols.map((col) {
+                                    final value = item[col['field']] ?? '';
+                                    return DataCell(Text(value.toString()));
+                                  }).toList(),
+                                );
+                              }).toList(),
+                              DataRow(
+                                cells: [
+                                  DataCell(Text('Total'.toString())),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm
+                                          .paxAnalysisTotals["adult"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text(
+                                      _nightAuditReportVm
+                                          .paxAnalysisTotals["children"]
+                                          .toString(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               );
@@ -583,5 +995,11 @@ class _ReportWidgetState extends State<NightAuditReport>
         ],
       ),
     );
+  }
+
+  String formatNumber(num? value) {
+    if (value == null) return '0.00';
+    final formatter = NumberFormat('#,##0.00');
+    return formatter.format(value);
   }
 }

@@ -88,7 +88,7 @@ class _DepartureListState extends State<DepartureList> {
         );
 
         final isBottomSheetDataLoading =
-            _departureListVm.isBottomSheetDataLoading.value;
+            _departureListVm.isAllGuestDataLoading.value;
         return Stack(
           children: [
             TabbedListView<GuestItem>(

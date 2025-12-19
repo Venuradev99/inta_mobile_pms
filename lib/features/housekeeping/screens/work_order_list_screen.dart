@@ -50,28 +50,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: _isSearchVisible
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search maintenance blocks...',
-                  border: InputBorder.none,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    // _searchQuery = value;
-                    _workOrderListVm.searchWorkOrders(value);
-                  });
-                },
-              )
-            : Text(
-                'Work Orders',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
         backgroundColor: AppColors.surface,
         elevation: 0,
         leading: IconButton(
@@ -81,15 +59,39 @@ class _WorkOrderListState extends State<WorkOrderList> {
           ),
           onPressed: () {
             if (_isSearchVisible) {
+              _searchController.clear();
+              _workOrderListVm.searchWorkOrders(''); // reset filter
               setState(() {
                 _isSearchVisible = false;
-                _searchQuery = '';
-                _searchController.clear();
               });
             } else {
               context.go(AppRoutes.dashboard);
             }
           },
+        ),
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _isSearchVisible
+              ? TextField(
+                  key: const ValueKey('searchField'),
+                  controller: _searchController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search ...',
+                    border: InputBorder.none,
+                  ),
+                  onChanged: (value) {
+                    _workOrderListVm.searchWorkOrders(value);
+                  },
+                )
+              : Text(
+                  'Work Orders',
+                  key: const ValueKey('titleText'),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         actions: [
           if (!_isSearchVisible)
@@ -105,9 +107,9 @@ class _WorkOrderListState extends State<WorkOrderList> {
             IconButton(
               icon: const Icon(Icons.clear, color: AppColors.black),
               onPressed: () {
+                _searchController.clear();
+                _workOrderListVm.searchWorkOrders(''); // reset filter
                 setState(() {
-                  _searchQuery = '';
-                  _searchController.clear();
                   _isSearchVisible = false;
                 });
               },
@@ -116,44 +118,9 @@ class _WorkOrderListState extends State<WorkOrderList> {
             icon: const Icon(Icons.filter_list, color: AppColors.black),
             onPressed: _showFilterBottomSheet,
           ),
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.black),
-            onPressed: () {
-              context.push(AppRoutes.blockRoomSelection);
-            },
-          ),
         ],
       ),
-      // appBar: AppBar(
-      //   title: const Text(
-      //     'Work Orders',
-      //     style: TextStyle(
-      //       fontSize: 22,
-      //       fontWeight: FontWeight.w600,
-      //       color: AppColors.black,
-      //     ),
-      //   ),
-      //   backgroundColor: AppColors.surface,
-      //   elevation: 0,
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back, color: AppColors.black),
-      //     onPressed: () =>context.go(AppRoutes.dashboard),
-      //   ),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.search, color: AppColors.black),
-      //       onPressed: () {
 
-      //       },
-      //     ),
-      //     IconButton(
-      //       icon: const Icon(Icons.filter_list, color: AppColors.black),
-      //       onPressed: () {
-      //         // Implement filter functionality
-      //       },
-      //     ),
-      //   ],
-      // ),
       body: Obx(() {
         final workOrders = _workOrderListVm.workOrdersFiltered.toList();
         final isLoading = _workOrderListVm.isLoading;
@@ -292,8 +259,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
             ),
 
             const SizedBox(height: 8),
-
-            // Category and Priority Row
             Row(
               children: [
                 Container(
@@ -654,7 +619,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           child: Column(
             children: [
-              // Header with title and close button
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -874,7 +838,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                 _selectedCategory = null;
                                 _selectedPriority = null;
                                 _selectedStatus = null;
-
                               });
                               _workOrderListVm.filterByFilterBottomSheet(
                                 isReset: true,
@@ -892,20 +855,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {
-                              // Apply filters
                               _workOrderListVm.filterStartDate.value =
                                   _startDate;
                               _workOrderListVm.filterEndDate.value = _endDate;
                               _workOrderListVm.filterOrderNo.value = _orderNo;
                               _workOrderListVm.filterRoomId.value =
                                   _selectedRoom?.id;
-                                   _workOrderListVm.filterAssignToId.value =
+                              _workOrderListVm.filterAssignToId.value =
                                   _selectedAssignTo?.id;
-                                   _workOrderListVm.filterStatusId.value =
+                              _workOrderListVm.filterStatusId.value =
                                   _selectedStatus?.id;
-                                   _workOrderListVm.filterPriorityId.value =
+                              _workOrderListVm.filterPriorityId.value =
                                   _selectedPriority?.id;
-                                   _workOrderListVm.filterCategoryId.value =
+                              _workOrderListVm.filterCategoryId.value =
                                   _selectedCategory?.id;
                               _workOrderListVm.filterIsCompleted.value =
                                   _isCompleted;

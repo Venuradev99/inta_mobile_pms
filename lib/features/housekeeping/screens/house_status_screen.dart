@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/houseKeeper_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
@@ -235,7 +236,7 @@ class _HouseStatusState extends State<HouseStatus> {
   Widget _buildSectionHeader(String section, List<RoomItem> sectionRooms) {
     if (!isEditMode) {
       return Text(
-        section == ''? 'No Housekeeper Assigned' : section,
+        section == '' ? 'No Housekeeper Assigned' : section,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
           fontWeight: FontWeight.w700,
           color: AppColors.darkgrey,
@@ -249,7 +250,7 @@ class _HouseStatusState extends State<HouseStatus> {
     return Row(
       children: [
         Text(
-         section == ''? 'No Housekeeper Assigned' : section,
+          section == '' ? 'No Housekeeper Assigned' : section,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.darkgrey,
@@ -414,6 +415,7 @@ class _HouseStatusState extends State<HouseStatus> {
       ),
     );
   }
+
   void _bulkSetStatus() async {
     if (selectedRooms.isEmpty) return;
 
@@ -458,7 +460,7 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _bulkClearRemark() async {
     if (selectedRooms.isEmpty) return;
-     final confirmed = await ConfirmationDialog.show(
+    final confirmed = await ConfirmationDialog.show(
       context: context,
       title: 'Clear Remarks',
       message: 'Are you sure you want to clear remarks?',
@@ -468,7 +470,7 @@ class _HouseStatusState extends State<HouseStatus> {
       // icon: Icons.meeting_room,
     );
     if (confirmed == true) {
-       await _houseStatusVm.bulkClearStatus(selectedRooms);
+      await _houseStatusVm.bulkClearStatus(selectedRooms);
       if (!mounted) return;
     }
   }
@@ -515,6 +517,7 @@ class _HouseStatusState extends State<HouseStatus> {
         break;
     }
   }
+
   void _showSetStatusDialog(RoomItem room) async {
     final selectedId = await showDialog<int>(
       context: context,
@@ -538,18 +541,89 @@ class _HouseStatusState extends State<HouseStatus> {
       // icon: Icons.meeting_room,
     );
     if (confirmed == true) {
-       await _houseStatusVm.clearStatus(room);
+      await _houseStatusVm.clearStatus(room);
       if (!mounted) return;
     }
   }
 
   void _showEditHousekeeperDialog(RoomItem room) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit housekeeper for ${room.roomName}')),
-    );
+  final houseKeepers = _houseStatusVm.houseKeepersList.toList();
+  HouseKeeper? selectedHouseKeeper;
+
+  if (room.houseKeeper != null) {
+    try {
+      selectedHouseKeeper = houseKeepers.firstWhere(
+        (hk) => hk.userId == room.houseKeeper
+      );
+    } catch (_) {}
   }
 
-  void _unassignHousekeeper(RoomItem room) async{
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Edit Housekeeper'),
+            content: DropdownButtonFormField<HouseKeeper>(
+              decoration: const InputDecoration(
+                labelText: 'Select Housekeeper',
+                border: OutlineInputBorder(),
+              ),
+              value: selectedHouseKeeper,
+              hint: const Text('Choose a housekeeper'),
+              items: houseKeepers.map((HouseKeeper hk) {
+                return DropdownMenuItem<HouseKeeper>(
+                  value: hk,
+                  child: Text(hk.houseKeeperName),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedHouseKeeper = value;
+                });
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
+                ),
+                onPressed: () async {
+                  if (selectedHouseKeeper == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select a housekeeper'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                 await _houseStatusVm.updateRoomHousekeeper(
+                    room,
+                    selectedHouseKeeper!,
+                  );
+
+        
+                },
+                child: const Text('Update'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+
+  void _unassignHousekeeper(RoomItem room) async {
     final confirmed = await ConfirmationDialog.show(
       context: context,
       title: 'Unassign Housekeeper',
@@ -643,6 +717,7 @@ class _HouseStatusState extends State<HouseStatus> {
   void _clearRemark(RoomItem room) async {
     await _houseStatusVm.clearRemark(room);
   }
+
   void _showStatusInfoDialog(BuildContext context) {
     showDialog(
       context: context,

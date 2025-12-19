@@ -27,7 +27,7 @@ class ReservationVm extends GetxController {
   final receivedFilters = Rx<Map<String, dynamic>?>(null);
 
   final isLoading = true.obs;
-  final isBottomSheetDataLoading = false.obs;
+  final isAllGuestDataLoading = false.obs;
   final isFolioDataLoading = false.obs;
   final isTaxDetailsLoading = false.obs;
 
@@ -604,7 +604,7 @@ class ReservationVm extends GetxController {
 
   Future<void> getAllGuestData(String bookingRoomId) async {
     try {
-      isBottomSheetDataLoading.value = true;
+      isAllGuestDataLoading.value = true;
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       await loadDataForGuest();
       final bookingResponse = await _reservationService.getByBookingRoomId(
@@ -826,7 +826,7 @@ class ReservationVm extends GetxController {
       MessageService().error('Error getting all Guest data: $e');
       throw Exception('Error getting all Guest data: $e');
     } finally {
-      isBottomSheetDataLoading.value = false;
+      isAllGuestDataLoading.value = false;
     }
   }
 
