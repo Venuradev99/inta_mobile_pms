@@ -7,7 +7,6 @@ import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/stop_room_move_vm.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class StopRoomMoveScreen extends StatefulWidget {
   final String? bookingRoomId;

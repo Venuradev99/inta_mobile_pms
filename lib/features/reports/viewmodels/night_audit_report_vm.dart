@@ -1,7 +1,6 @@
 import 'package:get/Get.dart';
 import 'package:inta_mobile_pms/features/reports/models/currency_item.dart';
 import 'package:inta_mobile_pms/features/reports/models/hotel_item.dart';
-import 'package:inta_mobile_pms/features/reports/models/night_audit_models.dart';
 import 'package:inta_mobile_pms/services/apiServices/reports_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
@@ -22,9 +21,11 @@ class NightAuditReportVm extends GetxController {
   var paxAnalysisRecodes = <Map<String, dynamic>>[].obs;
   var paxStatusRecodes = <Map<String, dynamic>>[].obs;
   var receiptDetailsRecodes = <Map<String, dynamic>>[].obs;
+  var arrangedReceptDetailsRecodes = <Map<String, dynamic>>[].obs;
   var receiptSummaryPayModeWiseRecodes = <Map<String, dynamic>>[].obs;
   var receiptSummaryUserWiseRecodes = <Map<String, dynamic>>[].obs;
   var roomCharges = <Map<String, dynamic>>[].obs;
+  var arrangedSummaryRecodes = <Map<String, dynamic>>[].obs;
 
   var paxStatusTotals = {"adult": 0, "chilren": 0}.obs;
   var paxAnalysisTotals = {"adult": 0, "chilren": 0}.obs;
@@ -51,10 +52,23 @@ class NightAuditReportVm extends GetxController {
     "taxAmount": 0.0,
     "nights": 0.0,
   }.obs;
+  var receiptDetailsTotals = {"amount": 0.0}.obs;
+  var receiptSummaryPayTotals = {"amount": 0.0}.obs;
+  var receiptSummaryUserTotals = {"amount": 0.0}.obs;
+
   var roomChargesTotals = {
     "totalTax": 0.0,
     "totalRent": 0.0,
-    "serviceChargeAmount": 0.0,
+    "varPercentage": 0.0,
+    "ofrdTariff": 0.0,
+    "nrmlTariff": 0.0,
+    "discountAmount": 0.0,
+  }.obs;
+
+  var complementaryTotals = {
+    "totalTax": 0.0,
+    "totalRent": 0.0,
+    "varPercentage": 0.0,
     "ofrdTariff": 0.0,
     "nrmlTariff": 0.0,
     "discountAmount": 0.0,
@@ -161,15 +175,61 @@ class NightAuditReportVm extends GetxController {
     }
   }
 
-  arrangeComplimentaryRecodes(List<dynamic> data) {
-    complimentaryRecodes.value =
-        (data as List<dynamic>?)
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
-        [];
+  String formatIsoDate(String isoString) {
+    try {
+      final date = DateTime.parse(isoString);
+      return DateFormat('dd-MMM-yyyy').format(date);
+    } catch (e) {
+      return isoString;
+    }
   }
 
-  void arrangeDailySalesRecodes(List<dynamic> data) {
+  String formatIsoDateTime(String isoString) {
+    try {
+      final date = DateTime.parse(isoString);
+      return DateFormat('dd-MMM-yyyy hh:mm a').format(date);
+    } catch (e) {
+      return isoString;
+    }
+  }
+
+  arrangeComplimentaryRecodes(List<dynamic> data) {
+    final totals = {
+      "totalTax": 0.0,
+      "totalRent": 0.0,
+      "varPercentage": 0.0,
+      "ofrdTariff": 0.0,
+      "nrmlTariff": 0.0,
+      "discountAmount": 0.0,
+    };
+
+    complimentaryRecodes.value =
+        (data as List<dynamic>?)?.map((e) {
+          final map = Map<String, dynamic>.from(e);
+          map["rentDate"] = formatIsoDate(map["rentDate"]);
+          return map;
+        }).toList() ??
+        [];
+
+    for (final element in complimentaryRecodes) {
+      totals["totalTax"] =
+          totals["totalTax"]! + (element["totalTax"] as num? ?? 0);
+      totals["totalRent"] =
+          totals["totalRent"]! + (element["totalRent"] as num? ?? 0);
+      totals["varPercentage"] =
+          totals["varPercentage"]! + (element["varPercentage"] as num? ?? 0);
+      totals["ofrdTariff"] =
+          totals["ofrdTariff"]! + (element["ofrdTariff"] as num? ?? 0);
+      totals["nrmlTariff"] =
+          totals["nrmlTariff"]! + (element["nrmlTariff"] as num? ?? 0);
+      totals["discountAmount"] =
+          totals["discountAmount"]! + (element["discountAmount"] as num? ?? 0);
+    }
+
+    totals.forEach((key, value) => complementaryTotals[key] = value);
+  }
+
+  arrangeDailySalesRecodes(List<dynamic> data) {
     // Initialize totals map
     final Map<String, double> totals = {
       "adjustment": 0.0,
@@ -245,10 +305,46 @@ class NightAuditReportVm extends GetxController {
 
   arrangeReceiptDetailsRecodes(List<dynamic> data) {
     receiptDetailsRecodes.value =
-        (data as List<dynamic>?)
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
+        (data as List<dynamic>?)?.map((e) {
+          final map = Map<String, dynamic>.from(e);
+          map["paymentDate"] = e["paymentDate"] != null
+              ? formatIsoDate(e["paymentDate"])
+              : "";
+          map["enteredOn"] = e["enteredOn"] != null
+              ? formatIsoDateTime(e["enteredOn"])
+              : "";
+
+          return map;
+        }).toList() ??
         [];
+
+    List<Map<String, dynamic>> tempArr = [];
+    double totalAmount = 0.0;
+
+    for (var recode in receiptDetailsRecodes) {
+      var selectedObj = tempArr.firstWhere(
+        (x) => x['mode'] == recode["mode"],
+        orElse: () => {},
+      );
+
+      if (selectedObj.isNotEmpty) {
+        (selectedObj['recodes'] as List).add(recode);
+        selectedObj['subTotalAmount'] =
+            (selectedObj['subTotalAmount'] ?? 0) + (recode["amount"] ?? 0);
+      } else {
+        tempArr.add({
+          'paymentModeID': recode["paymentModeID"],
+          'mode': recode["mode"],
+          'recodes': [recode],
+          'subTotalAmount': recode["amount"] ?? 0,
+        });
+      }
+
+      totalAmount += recode["amount"] ?? 0;
+    }
+
+    arrangedReceptDetailsRecodes.value = tempArr;
+    receiptDetailsTotals["amount"] = totalAmount;
   }
 
   arrangeReceiptSummaryPayModeWiseRecodes(List<dynamic> data) {
@@ -257,6 +353,12 @@ class NightAuditReportVm extends GetxController {
             ?.map((e) => Map<String, dynamic>.from(e))
             .toList() ??
         [];
+
+    receiptSummaryPayModeWiseRecodes.forEach((element) {
+      receiptSummaryUserTotals["amount"] =
+          (receiptSummaryPayTotals["amount"] ?? 0) +
+          (element["amount"] as num? ?? 0);
+    });
   }
 
   arrangeReceiptSummaryUserWiseRecodes(List<dynamic> data) {
@@ -265,17 +367,26 @@ class NightAuditReportVm extends GetxController {
             ?.map((e) => Map<String, dynamic>.from(e))
             .toList() ??
         [];
+
+    receiptSummaryPayModeWiseRecodes.forEach((element) {
+      receiptSummaryPayTotals["amount"] =
+          (receiptSummaryPayTotals["amount"] ?? 0) +
+          (element["amount"] as num? ?? 0);
+    });
   }
 
   arrangeRoomStatusRecodes(List<dynamic> data) {
     roomStatusRecodes.value =
-        (data as List<dynamic>?)
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
+        (data as List<dynamic>?)?.map((e) {
+          final map = Map<String, dynamic>.from(e);
+          map["date"] = e["date"] != null ? formatIsoDate(e["date"]) : "";
+
+          return map;
+        }).toList() ??
         [];
   }
 
-  void arrangeCheckedOutRecodes(List<dynamic> data) {
+  arrangeCheckedOutRecodes(List<dynamic> data) {
     final totals = {
       "adjust": 0.0,
       "balanceAmount": 0.0,
@@ -289,9 +400,19 @@ class NightAuditReportVm extends GetxController {
     };
 
     checkedOutRecodes.value =
-        (data as List<dynamic>?)
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
+        (data as List<dynamic>?)?.map((e) {
+          final map = Map<String, dynamic>.from(e);
+
+          map["arrival"] = e["arrival"] != null
+              ? formatIsoDate(e["arrival"])
+              : "";
+
+          map["departure"] = e["departure"] != null
+              ? formatIsoDate(e["departure"])
+              : "";
+
+          return map;
+        }).toList() ??
         [];
 
     for (final element in checkedOutRecodes) {
@@ -317,20 +438,25 @@ class NightAuditReportVm extends GetxController {
     totals.forEach((key, value) => checkedOutTotals[key] = value);
   }
 
-  void arrangeRoomCharges(List<dynamic> data) {
+  arrangeRoomCharges(List<dynamic> data) {
     final totals = {
       "totalTax": 0.0,
       "totalRent": 0.0,
-      "serviceChargeAmount": 0.0,
+      "varPercentage": 0.0,
       "ofrdTariff": 0.0,
       "nrmlTariff": 0.0,
       "discountAmount": 0.0,
     };
 
     roomCharges.value =
-        (data as List<dynamic>?)
-            ?.map((e) => Map<String, dynamic>.from(e))
-            .toList() ??
+        (data as List<dynamic>?)?.map((e) {
+          final map = Map<String, dynamic>.from(e);
+          map["rentDate"] = e["rentDate"] != null
+              ? formatIsoDate(e["rentDate"])
+              : "";
+
+          return map;
+        }).toList() ??
         [];
 
     for (final element in roomCharges) {
@@ -338,9 +464,8 @@ class NightAuditReportVm extends GetxController {
           totals["totalTax"]! + (element["totalTax"] as num? ?? 0);
       totals["totalRent"] =
           totals["totalRent"]! + (element["totalRent"] as num? ?? 0);
-      totals["serviceChargeAmount"] =
-          totals["serviceChargeAmount"]! +
-          (element["serviceChargeAmount"] as num? ?? 0);
+      totals["varPercentage"] =
+          totals["varPercentage"]! + (element["varPercentage"] as num? ?? 0);
       totals["ofrdTariff"] =
           totals["ofrdTariff"]! + (element["ofrdTariff"] as num? ?? 0);
       totals["nrmlTariff"] =

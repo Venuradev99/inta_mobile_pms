@@ -78,17 +78,9 @@ class _PmsAppBarState extends State<PmsAppBar> {
         elevation: 4,
         centerTitle: false, // Left-align to allow expansion
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(16),
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
-        title: Row(
-          children: [
-            Expanded(
-              child: _buildSearchField(textTheme),
-            ),
-          ],
-        ),
+        title: Row(children: [Expanded(child: _buildSearchField(textTheme))]),
         actions: widget.actions,
         iconTheme: const IconThemeData(color: AppColors.black),
         leading: widget.leading,
@@ -100,11 +92,11 @@ class _PmsAppBarState extends State<PmsAppBar> {
         elevation: 4,
         centerTitle: !_isSearching,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(16),
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
         ),
-        title: _isSearching ? _buildSearchField(textTheme) : _buildTitle(textTheme),
+        title: _isSearching
+            ? _buildSearchField(textTheme)
+            : _buildTitle(textTheme),
         actions: _buildActions(),
         iconTheme: const IconThemeData(color: AppColors.black),
         leading: _isSearching ? _buildBackButton() : widget.leading,
@@ -132,14 +124,17 @@ class _PmsAppBarState extends State<PmsAppBar> {
       ),
       child: TextField(
         controller: _searchController,
-        autofocus: widget.alwaysVisibleSearch ? false : true, 
+        autofocus: widget.alwaysVisibleSearch ? false : true,
         decoration: InputDecoration(
           hintText: widget.searchHint,
           hintStyle: textTheme.bodyMedium?.copyWith(
             color: AppColors.primary.withOpacity(0.7),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16 , vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
                   icon: Icon(
@@ -176,7 +171,6 @@ class _PmsAppBarState extends State<PmsAppBar> {
 
     List<Widget> actions = [];
 
-    // Add search button if search is enabled
     if (widget.showSearch) {
       actions.add(
         IconButton(
@@ -186,7 +180,6 @@ class _PmsAppBarState extends State<PmsAppBar> {
       );
     }
 
-    // Add other actions
     actions.addAll(widget.actions);
 
     return actions;

@@ -20,8 +20,6 @@ class WorkOrderList extends StatefulWidget {
 class _WorkOrderListState extends State<WorkOrderList> {
   final _workOrderListVm = Get.find<WorkOrderListVm>();
 
-  String _selectedFilter = 'All';
-  String _searchQuery = '';
   bool _isSearchVisible = false;
   final TextEditingController _searchController = TextEditingController();
 
@@ -506,7 +504,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
         return AppColors.red;
       case 'medium':
         return AppColors.yellow;
-        ;
       case 'low':
         return AppColors.green;
       default:

@@ -1,11 +1,8 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/booking_static_data.dart';
-import 'package:inta_mobile_pms/features/dashboard/models/hotel_inventory_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
-import 'package:inta_mobile_pms/features/dashboard/models/today_statistics_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/services/apiServices/dashboard_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
@@ -19,6 +16,7 @@ class DashboardVm extends GetxController {
 
   final userName = ''.obs;
   final hotelName = ''.obs;
+  final baseCurrency = ''.obs;
   final isSearching = false.obs;
 
   final arrivalData = Rx<BookingStaticData?>(null);
@@ -57,21 +55,22 @@ class DashboardVm extends GetxController {
     this._reservationService,
   );
 
-  Future getUserName() async {
+  void refreshDashboard() {
+    loadBookingStaticData();
+  }
+
+  Future<void> getInitialData() async {
     try {
       final name = await LocalStorageManager.getUserName();
       userName.value = name;
-    } catch (e) {
-      throw Exception('Error in GetUserName: $e');
-    }
-  }
 
-  Future getHotelInfoData() async {
-    try {
       final hotelInfo = await LocalStorageManager.getHotelInfoData();
       hotelName.value = hotelInfo.hotelName ?? '';
+
+      final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
+      baseCurrency.value = baseCurrencyData.code;
     } catch (e) {
-      throw Exception('Error in GetHotelInfoData: $e');
+      throw Exception('Error in GetUserName: $e');
     }
   }
 
@@ -87,19 +86,19 @@ class DashboardVm extends GetxController {
       final bookingResponse = responses[1];
       final inventoryPropertyOccupancyResponse = responses[2];
 
-      if (inventoryStaticsResponse["isSuccessful"] == true){
-          final hotelInventory = inventoryStaticsResponse['result']['hotelInventory'] as List;
-           for (final item in hotelInventory) {
-              if(item['name'] == "Rooms In Property"){
-                totalRoomsInProperty.value = item['value'] ?? 0;
-              }
-           }
-      }else {
+      if (inventoryStaticsResponse["isSuccessful"] == true) {
+        final hotelInventory =
+            inventoryStaticsResponse['result']['hotelInventory'] as List;
+        for (final item in hotelInventory) {
+          if (item['name'] == "Rooms In Property") {
+            totalRoomsInProperty.value = item['value'] ?? 0;
+          }
+        }
+      } else {
         MessageService().error(
           bookingResponse["errors"][0] ?? 'Error getting Inventory Data!',
         );
       }
-
 
       if (bookingResponse["isSuccessful"] == true) {
         List<dynamic> result = bookingResponse["result"];
@@ -182,19 +181,27 @@ class DashboardVm extends GetxController {
         for (final item in inventoryResult) {
           if (item['name'] == "Available Rooms") {
             totalAvailableRooms.value = item["value"];
-            totalAvailableRoomsRate.value = totalRoomsInProperty == 0 ? 0 : totalAvailableRooms / totalRoomsInProperty.value;
+            totalAvailableRoomsRate.value = totalRoomsInProperty == 0
+                ? 0
+                : totalAvailableRooms / totalRoomsInProperty.value;
           }
           if (item['name'] == "Sold Rooms") {
             totalRoomSold.value = item["value"];
-            totalRoomSoldRate.value =totalRoomsInProperty == 0 ? 0 : totalRoomSold / totalRoomsInProperty.value;
+            totalRoomSoldRate.value = totalRoomsInProperty == 0
+                ? 0
+                : totalRoomSold / totalRoomsInProperty.value;
           }
           if (item['name'] == "Blocked Rooms") {
             outOfOrderRooms.value = item["value"];
-            outOfOrderRoomsRate.value = totalRoomsInProperty == 0 ? 0 : outOfOrderRooms / totalRoomsInProperty.value;
+            outOfOrderRoomsRate.value = totalRoomsInProperty == 0
+                ? 0
+                : outOfOrderRooms / totalRoomsInProperty.value;
           }
           if (item['name'] == "Complimentary Rooms") {
             complementaryRooms.value = item["value"];
-            complementaryRoomsRate.value = totalRoomsInProperty == 0 ? 0 : complementaryRooms / totalRoomsInProperty.value;
+            complementaryRoomsRate.value = totalRoomsInProperty == 0
+                ? 0
+                : complementaryRooms / totalRoomsInProperty.value;
           }
         }
       } else {
@@ -239,22 +246,6 @@ class DashboardVm extends GetxController {
       throw Exception('Error while Searching!');
     } finally {
       isSearching.value = false;
-    }
-  }
-
-  void filterSearchGuestItem(String query) {
-    try {
-      allReservationListFiltered.value = allReservationList.toList();
-
-      if (query.isNotEmpty) {
-        allReservationListFiltered.value = allReservationListFiltered
-            .where(
-              (item) => item.resId!.toLowerCase().contains(query.toLowerCase()),
-            )
-            .toList();
-      }
-    } catch (e) {
-      throw Exception('Error in Search Filtering: $e');
     }
   }
 

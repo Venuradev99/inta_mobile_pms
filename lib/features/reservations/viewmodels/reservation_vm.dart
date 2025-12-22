@@ -643,8 +643,6 @@ class ReservationVm extends GetxController {
           final charges = SharerInfo.fromJson(item);
           sharerInfo.add(charges);
         }
-
-        print(sharerInfo);
         final sharers = (result["bookingRoom"]["sharers"] as List)
             .map((e) => e as Map<String, dynamic>)
             .toList();

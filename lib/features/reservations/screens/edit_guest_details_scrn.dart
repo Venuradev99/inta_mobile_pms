@@ -53,7 +53,6 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
   String? _nationality = 'Sri Lanka';
   String? _vipStatus;
   String? _birthCountry;
-  String? _purposeOfVisit;
 
   // Dates
   DateTime? _expiryDate;

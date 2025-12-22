@@ -29,7 +29,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
-  bool _isSearching = false; // Whether the search field is visible
+  bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override

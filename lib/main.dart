@@ -43,12 +43,13 @@ void main() async {
   final configString = await rootBundle.loadString('assets/config.json');
   final config = jsonDecode(configString);
   String baseUrl = config['baseUrl'];
+  String version = config['version'];
 
   final appResources = AppResources(baseUrl: baseUrl);
   final dataAccessService = DataAccessService();
 
   //services
-  final userApiService = UserApiService();
+  final userApiService = UserApiService(version);
   final stayViewService = StayViewService(dataAccessService, appResources);
   final dashboardService = DashboardService(dataAccessService, appResources);
   final reservationService = ReservationService(

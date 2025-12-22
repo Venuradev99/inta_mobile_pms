@@ -94,7 +94,6 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
   late final TextEditingController _noShowFeeController;
   final TextEditingController commentController = TextEditingController();
   bool _isRateInclusiveTax = false;
-  String? _selectedOwner;
   String? _selectedReason;
 
   @override
@@ -108,12 +107,6 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
       setState(() {});
     });
   }
-
-  final List<String> _owners = [
-    '142 - AZA Pabasara Dissanayake',
-    '143 - John Smith',
-    '144 - Jane Doe',
-  ];
 
   @override
   void dispose() {
@@ -194,26 +187,6 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
           ),
           _buildBottomActions(context, theme, padding),
         ],
-      ),
-    );
-  }
-
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -363,77 +336,6 @@ class _NoShowReservationPageState extends State<NoShowReservationPage> {
                 activeColor: AppColors.primary,
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChangeOwnerCard(
-    BuildContext context,
-    ThemeData theme,
-    double padding,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(
-          ResponsiveConfig.cardRadius(context),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              padding,
-              padding * 0.75,
-              padding,
-              padding * 0.5,
-            ),
-            child: Text(
-              'Change Owner',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.lightgrey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _owners.length,
-            separatorBuilder: (context, index) => _buildDivider(),
-            itemBuilder: (context, index) {
-              final owner = _owners[index];
-              return RadioListTile<String>(
-                value: owner,
-                groupValue: _selectedOwner,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedOwner = value;
-                  });
-                },
-                title: Text(
-                  owner,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.darkgrey,
-                  ),
-                ),
-                activeColor: AppColors.primary,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: padding,
-                  vertical: 0,
-                ),
-              );
-            },
           ),
         ],
       ),

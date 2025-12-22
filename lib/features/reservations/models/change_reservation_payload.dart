@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class ChangeReservationPayload {
   final bool applyToAll;
   final BillingInformation billingInformation;

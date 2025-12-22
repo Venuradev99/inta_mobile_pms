@@ -9,6 +9,12 @@ import 'package:inta_mobile_pms/services/navigation_service.dart';
 import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
+  late String version;
+
+  UserApiService(this.version);
+
+  get getVersion => version;
+
   static Future<Map<String, dynamic>> getConfigJSON() async {
     try {
       final configString = await rootBundle.loadString('assets/config.json');
@@ -80,9 +86,7 @@ class UserApiService {
           }
 
           if (hotelInfo["isSuccessful"]) {
-            await LocalStorageManager.setHotelInfoData(
-              hotelInfo["result"],
-            );
+            await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
           }
           // Show success
           NavigationService().go(AppRoutes.dashboard);

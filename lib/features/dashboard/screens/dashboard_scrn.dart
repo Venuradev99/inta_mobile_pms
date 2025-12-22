@@ -27,8 +27,7 @@ class _DashboardState extends State<Dashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await _dashboardVm.loadBookingStaticData();
-        await _dashboardVm.getUserName();
-        await _dashboardVm.getHotelInfoData();
+        await _dashboardVm.getInitialData();
       }
     });
   }
@@ -42,6 +41,19 @@ class _DashboardState extends State<Dashboard> {
     } catch (e) {
       throw Exception('Error launching URL: $e');
     }
+  }
+
+  String formatCurrency(double? value) {
+    if (value == null) return '${_dashboardVm.baseCurrency} 0.00';
+
+    final formatted = value
+        .toStringAsFixed(2)
+        .replaceAllMapped(
+          RegExp(r'(\d)(?=(\d{3})+\.)'),
+          (Match m) => '${m[1]},',
+        );
+
+    return '${_dashboardVm.baseCurrency} ${formatted}';
   }
 
   @override
@@ -59,9 +71,7 @@ class _DashboardState extends State<Dashboard> {
       appBar: PmsAppBar(
         title: '',
         alwaysVisibleSearch: false,
-        onSearchChanged: (query) {
-          _dashboardVm.filterSearchGuestItem(query);
-        },
+        onSearchChanged: (query) {},
         actions: [
           IconButton(
             icon: Icon(
@@ -98,6 +108,10 @@ class _DashboardState extends State<Dashboard> {
             onPressed: () {
               context.push(AppRoutes.notifications);
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: AppColors.black),
+            onPressed: () => _dashboardVm.refreshDashboard(),
           ),
         ],
       ),
@@ -817,7 +831,7 @@ class _DashboardState extends State<Dashboard> {
                   endIndent: ResponsiveConfig.defaultPadding(context),
                 ),
                 // Maintenance Section
-                _buildSectionHeader(context, textTheme, config, 'Maintenance'),
+                _buildSectionHeader(context, textTheme, config, 'Housekeeping'),
                 _buildMenuTile(
                   context,
                   textTheme,
@@ -1407,10 +1421,10 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Total Room Revenue',
-                '\$${totalRevenueData?.today}',
-                'Y\'day: \$${totalRevenueData?.yesterday}',
-                '+${totalRevenueData?.percentage}%',
-                true,
+                formatCurrency(totalRevenueData?.today),
+                'Y\'day: ${formatCurrency(totalRevenueData?.yesterday)}',
+                '${totalRevenueData?.percentage} %',
+                (totalRevenueData?.percentage ?? 0) > 0,
                 AppColors.primary,
                 Icons.trending_up,
               ),
@@ -1422,43 +1436,13 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Avg. Daily Rate',
-                '\$${averageDailyRateData?.today}',
-                'Y\'day: \$${averageDailyRateData?.yesterday}',
-                '+${averageDailyRateData?.percentage}%',
-                true,
+                formatCurrency(averageDailyRateData?.today),
+                'Y\'day: ${formatCurrency(averageDailyRateData?.yesterday)}',
+                '${averageDailyRateData?.percentage} %',
+                (averageDailyRateData?.percentage ?? 0) > 0,
                 AppColors.primary,
                 Icons.show_chart,
               ),
-              // _buildStatCard(
-              //   context,
-              //   textTheme,
-              //   config,
-              //   cardRadius,
-              //   iconSize,
-              //   fontScale,
-              //   'Booking Lead Time',
-              //   '\$${bookingLeadTimeData?.today}',
-              //   'Y\'day: \$${bookingLeadTimeData?.yesterday}',
-              //   '+${bookingLeadTimeData?.percentage}%',
-              //   false,
-              //   AppColors.primary,
-              //   Icons.trending_down,
-              // ),
-              // _buildStatCard(
-              //   context,
-              //   textTheme,
-              //   config,
-              //   cardRadius,
-              //   iconSize,
-              //   fontScale,
-              //   'Avg. Length of Stay',
-              //   '\$${averageLengthOfStayData?.today}Nights',
-              //   'Y\'day: \$${averageLengthOfStayData?.yesterday}',
-              //   '+${averageLengthOfStayData?.percentage}%',
-              //   false,
-              //   AppColors.primary,
-              //   Icons.trending_down,
-              // ),
               _buildStatCard(
                 context,
                 textTheme,
@@ -1467,10 +1451,10 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'Total Res. Payment',
-                '\$${totalPaymentData?.today}',
-                'Y\'day: \$${totalPaymentData?.yesterday}',
-                '+${totalPaymentData?.percentage}%',
-                true,
+                formatCurrency(totalPaymentData?.today),
+                'Y\'day: ${formatCurrency(totalPaymentData?.yesterday)}',
+                '${totalPaymentData?.percentage} %',
+                (totalPaymentData?.percentage ?? 0) > 0,
                 AppColors.primary,
                 Icons.trending_up,
               ),
@@ -1482,10 +1466,10 @@ class _DashboardState extends State<Dashboard> {
                 iconSize,
                 fontScale,
                 'RevPar',
-                '\$${revParData?.today}',
-                'Y\'day: \$${revParData?.yesterday}',
-                '+${revParData?.percentage}%',
-                true,
+                formatCurrency(revParData?.today),
+                'Y\'day: ${formatCurrency(revParData?.yesterday)}',
+                '${revParData?.percentage} %',
+                (revParData?.percentage ?? 0) > 0,
                 AppColors.primary,
                 Icons.trending_up,
               ),
@@ -2215,7 +2199,7 @@ class _DashboardState extends State<Dashboard> {
                   '${occupancyData?.today}%',
                   AppColors.primary,
                   Icons.today,
-                )
+                ),
               ],
             ),
           ),

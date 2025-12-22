@@ -4,8 +4,6 @@ import 'package:get/Get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/reports/models/manager_report.dart';
-import 'package:inta_mobile_pms/features/reports/models/manager_report_payload.dart';
 import 'package:inta_mobile_pms/features/reports/viewmodels/manager_report_vm.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:intl/intl.dart';
@@ -208,8 +206,6 @@ class _ManagerReportState extends State<ManagerReport>
                 ),
 
                 const SizedBox(width: 24),
-
-                /// GENERATE BUTTON
                 SizedBox(
                   height: 48,
                   child: ElevatedButton(

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/assign_rooms_scrn.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/edit_guest_details_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/no_show_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/action_bottom_sheet_wgt.dart';

@@ -631,35 +631,6 @@ class _AmendStayState extends State<AmendStay> {
     );
   }
 
-  Widget _buildSwitchRow(
-    String label,
-    bool value,
-    ValueChanged<bool> onChanged,
-  ) {
-    return Padding(
-      padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-              color: AppColors.darkgrey,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.primary,
-            inactiveThumbColor: Colors.grey.shade400,
-            inactiveTrackColor: Colors.grey.shade300,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDivider() {
     return Divider(
       height: 1,
@@ -731,39 +702,6 @@ class _AmendStayState extends State<AmendStay> {
         ],
       ),
     );
-  }
-
-  Future<void> _showDatePicker(
-    BuildContext context,
-    DateTime? initialDate,
-    ValueChanged<DateTime> onDateSelected,
-  ) async {
-    final DateTime today = DateTime.now();
-    final DateTime todayDate = DateTime(today.year, today.month, today.day);
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate ?? todayDate,
-      firstDate: todayDate,
-      lastDate: todayDate.add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: AppColors.primary,
-              onPrimary: AppColors.onPrimary,
-              surface: AppColors.surface,
-              onSurface: AppColors.onSurface,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != initialDate) {
-      onDateSelected(picked);
-    }
   }
 
   void _handleSave() async {

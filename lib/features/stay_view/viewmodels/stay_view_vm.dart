@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/dayuse_response.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';
@@ -30,6 +29,10 @@ class StayViewVm extends GetxController {
   var datUseList = <DayUseResponse>[].obs;
 
   StayViewVm(this._stayViewService, this._reservationService);
+
+  void refreshStayView(DateTime centerDate) {
+    loadInitialData(centerDate);
+  }
 
   String yesterday(String today) {
     try {

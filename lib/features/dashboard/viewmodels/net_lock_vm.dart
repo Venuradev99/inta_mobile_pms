@@ -44,7 +44,6 @@ class NetLockVm extends GetxController {
   }
 
   void filterReservations(String query) {
-    print('netlockData,${netlockData}');
     if (query.isEmpty) {
       netlockDataFiltered.value = netlockData;
     } else {

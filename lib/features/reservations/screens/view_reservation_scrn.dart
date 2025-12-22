@@ -1351,7 +1351,7 @@ Widget _buildInfoRow(String label, String value, IconData icon) {
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.left,
             ),
           ),
         ],

@@ -111,7 +111,7 @@ class HouseStatusVm extends GetxController {
   Future<void> updateRoomHousekeeper(RoomItem room, HouseKeeper houseKeeper) async {
     try {
       final payload = UpdateHouseStatusPayload(
-        id: houseKeeper.userId!,
+        id: houseKeeper.userId,
         houseKeeper: room.houseKeeper!,
         houseKeepingRemark: room.remark ?? '',
         houseKeepingStatus: room.houseKeepingStatusId!,

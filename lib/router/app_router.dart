@@ -32,7 +32,7 @@ import 'package:inta_mobile_pms/features/reservations/screens/view_reservation_s
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation_type_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/edit_reservation_screen.dart';
-import 'package:inta_mobile_pms/features/stay_view/screens/stay_view_page_screen.dart';
+import 'package:inta_mobile_pms/features/stay_view/screens/stay_view_screen.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
@@ -48,7 +48,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: AppRoutes.stayView,
-      builder: (context, state) => const StayViewPageScreen(),
+      builder: (context, state) => const StayViewScreen(),
     ),
     GoRoute(
       path: AppRoutes.arrivalList,

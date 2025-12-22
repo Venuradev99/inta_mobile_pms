@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
@@ -14,15 +16,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
+  String _version = '0.0.0.0';
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _hotelIdController = TextEditingController();
 
-  final UserApiService _userApiService = UserApiService();
+  final UserApiService _userApiService = Get.find<UserApiService>();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
-  bool _rememberMe = false;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -32,6 +34,13 @@ class _LoginPageState extends State<LoginPage>
   void initState() {
     super.initState();
     _initializeAnimations();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final v = await _userApiService.getVersion;
+      setState(() {
+        _version = v;
+      });
+    });
   }
 
   void _initializeAnimations() {
@@ -77,7 +86,6 @@ class _LoginPageState extends State<LoginPage>
     );
     setState(() => _isLoading = false);
   }
-
 
   String? _validateUsername(String? value) {
     if (value == null || value.isEmpty) {
@@ -339,7 +347,6 @@ class _LoginPageState extends State<LoginPage>
             //     ),
             //   ],
             // ),
-
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 32)),
 
             // Login Button
@@ -553,7 +560,7 @@ class _LoginPageState extends State<LoginPage>
 
         // Version Info
         Text(
-          'Inta PMS v1.0.0.1',
+          'Inta PMS v${_version}',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: AppColors.lightgrey,
             fontSize:

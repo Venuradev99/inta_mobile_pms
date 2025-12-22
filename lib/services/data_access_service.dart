@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:inta_mobile_pms/data/models/Api_response_model.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
@@ -23,32 +22,17 @@ class DataAccessService {
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     final Map<String, dynamic> responseBody = json.decode(response.body);
-
     if (response.statusCode == 401) {
-       NavigationService().go(AppRoutes.login);
+      NavigationService().go(AppRoutes.login);
       await LocalStorageManager.clearUserData();
 
       String errorMsg =
           responseBody["errors"][0] ?? 'Unauthorized, try login again!';
       MessageService().error(errorMsg);
 
-      return ApiResponse(
-        errors: [errorMsg],
-        isSuccessful: responseBody['isSuccessful'] ?? false,
-        isDBAccessible: responseBody['isDBAccessible'] ?? false,
-        result: responseBody['result'],
-        message: responseBody['message'] ?? '',
-        statusCode: response.statusCode,
-      ).toJson();
+      return responseBody;
     } else {
-      return ApiResponse(
-        errors: responseBody['errors'] ?? [],
-        isSuccessful: responseBody['isSuccessful'] ?? false,
-        isDBAccessible: responseBody['isDBAccessible'] ?? false,
-        result: responseBody['result'],
-        message: responseBody['message'] ?? '',
-        statusCode: response.statusCode,
-      ).toJson();
+      return responseBody;
     }
   }
 
@@ -75,7 +59,7 @@ class DataAccessService {
     }
   }
 
-   Future<Map<String, dynamic>> delete(String url) async {
+  Future<Map<String, dynamic>> delete(String url) async {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
@@ -157,6 +141,4 @@ class DataAccessService {
       throw Exception('POST error: $e');
     }
   }
-
-
 }

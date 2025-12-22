@@ -12,14 +12,14 @@ import 'package:intl/intl.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 
-class StayViewPageScreen extends StatefulWidget {
-  const StayViewPageScreen({super.key});
+class StayViewScreen extends StatefulWidget {
+  const StayViewScreen({super.key});
 
   @override
-  State<StayViewPageScreen> createState() => _StayViewPageScreenState();
+  State<StayViewScreen> createState() => _StayViewScreenState();
 }
 
-class _StayViewPageScreenState extends State<StayViewPageScreen> {
+class _StayViewScreenState extends State<StayViewScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
   final _reservationVm = Get.find<ReservationVm>();
   DateTime _centerDate = DateTime.now();
@@ -247,7 +247,11 @@ class _StayViewPageScreenState extends State<StayViewPageScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: CustomAppBar(title: 'Stay View', onInfoTap: _showInfoDialog),
+      appBar: CustomAppBar(
+        title: 'Stay View',
+         onInfoTap: _showInfoDialog,
+         onRefreshTap: () => _stayViewVm.refreshStayView(_centerDate),
+         ),
       body: Stack(
         children: [
           Column(
