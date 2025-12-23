@@ -25,7 +25,7 @@ class ReservationList extends StatefulWidget {
 }
 
 class _ReservationListState extends State<ReservationList> {
-  final _reservationListVm = Get.find<ReservationVm>();
+  final _reservationVm = Get.find<ReservationVm>();
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _ReservationListState extends State<ReservationList> {
       if (!mounted) {
         return;
       } else {
-        await _reservationListVm.getReservationsMap(1);
+        await _reservationVm.getReservationsMap(1);
       }
     });
   }
@@ -45,8 +45,10 @@ class _ReservationListState extends State<ReservationList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Reservation List',
-        showSearch: true,
-        onSearchChanged: (query) => _reservationListVm.search(query),
+        onSearchChanged: (query) => _reservationVm.search(query),
+        onRefreshTap: () async {
+           await _reservationVm.getReservationsMap(1);
+        },
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -60,13 +62,13 @@ class _ReservationListState extends State<ReservationList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'reservation',
-                  roomTypes: _reservationListVm.roomTypes.toList(),
-                  reservationTypes: _reservationListVm.reservationTypes
+                  roomTypes: _reservationVm.roomTypes.toList(),
+                  reservationTypes: _reservationVm.reservationTypes
                       .toList(),
-                  statuses: _reservationListVm.statuses.toList(),
-                  businessSources: _reservationListVm.businessSources.toList(),
-                  filteredData: _reservationListVm.receivedFilters.value ?? {},
-                  onApply: _reservationListVm.applyFilters,
+                  statuses: _reservationVm.statuses.toList(),
+                  businessSources: _reservationVm.businessSources.toList(),
+                  filteredData: _reservationVm.receivedFilters.value ?? {},
+                  onApply: _reservationVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -91,7 +93,7 @@ class _ReservationListState extends State<ReservationList> {
 
         return Stack(
           children: [
-            if (_reservationListVm.isLoading.value == true)
+            if (_reservationVm.isLoading.value == true)
               TabbedListView<GuestItem>(
                 tabLabels: const ['Today', 'Tomorrow', 'This Week'],
                 dataMap: {
@@ -102,14 +104,14 @@ class _ReservationListState extends State<ReservationList> {
                 itemBuilder: (item) => _buildReservationCardShimmer(),
                 emptySubMessage: (period) => 'No reservations for this period',
               ),
-            if (_reservationListVm.isLoading.value == false)
+            if (_reservationVm.isLoading.value == false)
               TabbedListView<GuestItem>(
                 tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-                dataMap: _reservationListVm.filteredList.value ?? {},
+                dataMap: _reservationVm.filteredList.value ?? {},
                 itemBuilder: (item) => _buildReservationCard(item),
                 emptySubMessage: (period) => 'No reservations for this period',
               ),
-            if (_reservationListVm.isAllGuestDataLoading.value)
+            if (_reservationVm.isAllGuestDataLoading.value)
               Container(
                 color: Colors.black.withOpacity(0.2),
                 child: const Center(
@@ -132,7 +134,7 @@ class _ReservationListState extends State<ReservationList> {
       barrierDismissible: true,
       builder: (context) {
         return Obx(() {
-          final statusList = _reservationListVm.statusList;
+          final statusList = _reservationVm.statusList;
 
           final List<StatusItem> items = statusList.map((status) {
             return StatusItem(
@@ -178,14 +180,14 @@ class _ReservationListState extends State<ReservationList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _reservationListVm.getAllGuestData(item.bookingRoomId!);
-    final guestData = _reservationListVm.allGuestDetails.value;
+    await _reservationVm.getAllGuestData(item.bookingRoomId!);
+    final guestData = _reservationVm.allGuestDetails.value;
 
     if (!mounted) return;
     bool isNoshow = int.tryParse(item.status.toString()) == 2;
     int status = int.tryParse(guestData?.status.toString() ?? '') ?? 0;
     bool isAssign = guestData?.roomId == 0;
-    bool isUnAssignRoom = _reservationListVm.isUnAssign(guestData!);
+    bool isUnAssignRoom = _reservationVm.isUnAssign(guestData!);
 
     showModalBottomSheet(
       context: context,
@@ -205,7 +207,7 @@ class _ReservationListState extends State<ReservationList> {
                 Navigator.of(context).pop();
                 context.push(
                   AppRoutes.viewReservation,
-                  extra: _reservationListVm.allGuestDetails.value,
+                  extra: _reservationVm.allGuestDetails.value,
                 );
               },
             ),
@@ -243,7 +245,7 @@ class _ReservationListState extends State<ReservationList> {
                 icon: Icons.not_interested,
                 label: 'No Show Reservation',
                 onTap: () async {
-                  final noShowReasons = await _reservationListVm
+                  final noShowReasons = await _reservationVm
                       .getNoShowReservationData(item);
                   if (!mounted) return;
                   final noShowData = NoShowReservationData(
@@ -292,7 +294,7 @@ class _ReservationListState extends State<ReservationList> {
               icon: Icons.cancel,
               label: 'Cancel Reservation',
               onTap: () async {
-                final cancelReservationData = await _reservationListVm
+                final cancelReservationData = await _reservationVm
                     .getCancelReservationData(item);
                 if (!mounted) return;
                 final data = {
@@ -344,7 +346,7 @@ class _ReservationListState extends State<ReservationList> {
                     icon: Icons.meeting_room,
                   );
                   if (confirmed == true) {
-                    await _reservationListVm.unassignRoom(guestData);
+                    await _reservationVm.unassignRoom(guestData);
                     if (!mounted) return;
                   }
                 },

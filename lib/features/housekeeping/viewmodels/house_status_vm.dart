@@ -63,7 +63,7 @@ class HouseStatusVm extends GetxController {
               "userId": item["userId"] ?? 0,
               "firstName": item["firstName"] ?? '',
               "lastName": item["lastName"] ?? '',
-              "houseKeeperName": '${item["userId"]} ${item["lastName"]}',
+              "houseKeeperName": '${item["firstName"]} ${item["lastName"]}',
             }),
           );
         }
@@ -108,11 +108,12 @@ class HouseStatusVm extends GetxController {
       isLoading.value = false;
     }
   }
+  
   Future<void> updateRoomHousekeeper(RoomItem room, HouseKeeper houseKeeper) async {
     try {
       final payload = UpdateHouseStatusPayload(
-        id: houseKeeper.userId,
-        houseKeeper: room.houseKeeper!,
+        id: room.id!,
+        houseKeeper: houseKeeper.userId,
         houseKeepingRemark: room.remark ?? '',
         houseKeepingStatus: room.houseKeepingStatusId!,
         isRoom: room.isRoom ?? true,

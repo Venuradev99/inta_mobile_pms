@@ -575,149 +575,148 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  Widget _buildSharerInfoCard(SharerInfo sharer) {
-  final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-  return Card(
-    elevation: 2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    child: ExpansionTile(
-      title: Text(
-        sharer.fullNameWithTitle,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
-        ),
-      ),
-      childrenPadding: const EdgeInsets.all(16),
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
       children: [
-        _buildSectionTitle('Guest Information', Icons.info_outline),
-        const SizedBox(height: 8),
-        _buildInfoRow('Name', sharer.fullNameWithTitle, Icons.person),
-        _buildInfoRow(
-          'Gender',
-          sharer.gender == 'M' ? 'Male' : 'Female',
-          sharer.gender == 'M' ? Icons.male : Icons.female,
-        ),
-        _buildInfoRow('Mobile', sharer.mobile, Icons.phone),
-        _buildInfoRow('Email', sharer.email, Icons.email),
-        const SizedBox(height: 16),
-        _buildSectionTitle('Transport Information', Icons.directions),
-        const SizedBox(height: 8),
+        Icon(icon, size: 20, color: AppColors.primary),
+        const SizedBox(width: 8),
         Text(
-          'Pickup:',
+          title,
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
-        ),
-        const SizedBox(height: 4),
-        if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
-          _buildInfoRow(
-            'Date',
-            dateFormat.format(sharer.pickUpDropOffDataModel.pickUpDateTime!),
-            Icons.calendar_today,
-          ),
-        // _buildInfoRow(
-        //   'Description',
-        //   sharer.pickUpDropOffDataModel.pickUpDescription,
-        //   Icons.description,
-        // ),
-        _buildInfoRow(
-          'Mode',
-          sharer.pickUpDropOffDataModel.pickUpModeId.toString(),
-          Icons.directions_car,
-        ),
-        _buildInfoRow(
-          'Vehicle No',
-          sharer.pickUpDropOffDataModel.pickUpVehicleNo,
-          Icons.local_taxi,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Dropoff:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.primary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
-          _buildInfoRow(
-            'Date',
-            dateFormat.format(sharer.pickUpDropOffDataModel.dropOffDateTime!),
-            Icons.calendar_today,
-          ),
-        // _buildInfoRow(
-        //   'Description',
-        //   sharer.pickUpDropOffDataModel.dropOffDescription,
-        //   Icons.description,
-        // ),
-        _buildInfoRow(
-          'Mode',
-          sharer.pickUpDropOffDataModel.dropOffModeId.toString(),
-          Icons.directions_car,
-        ),
-        _buildInfoRow(
-          'Vehicle No',
-          sharer.pickUpDropOffDataModel.dropOffVehicleNo,
-          Icons.local_taxi,
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildSectionTitle(String title, IconData icon) {
-  return Row(
-    children: [
-      Icon(icon, color: AppColors.primary, size: 20),
-      const SizedBox(width: 8),
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primary,
+  Widget _buildSharerInfoCard(SharerInfo sharer) {
+    final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.grey.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ExpansionTile(
+        leading: Icon(Icons.person, color: AppColors.primary),
+        title: Text(
+          sharer.fullNameWithTitle,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
         ),
-      ),
-    ],
-  );
-}
-
-Widget _buildInfoRow(String label, String value, IconData icon) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: Colors.grey.shade600),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 2,
-          child: Text(
-            '$label:',
+        iconColor: AppColors.primary,
+        collapsedIconColor: Colors.grey.shade600,
+        childrenPadding: const EdgeInsets.all(16),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionTitle('Guest Information', Icons.info_outline),
+          const SizedBox(height: 12),
+          _buildInfoRowSharer('Name', sharer.fullNameWithTitle, Icons.person),
+          _buildInfoRowSharer(
+            'Gender',
+            sharer.gender == 'M' ? 'Male' : 'Female',
+            sharer.gender == 'M' ? Icons.male : Icons.female,
+          ),
+          _buildInfoRowSharer('Mobile', sharer.mobile, Icons.phone),
+          _buildInfoRowSharer('Email', sharer.email, Icons.email),
+          const Divider(height: 32, thickness: 1),
+          _buildSectionTitle('Transport Information', Icons.directions),
+          const SizedBox(height: 12),
+          Text(
+            'Pickup:',
             style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w500,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
             ),
           ),
-        ),
-        Expanded(
-          flex: 3,
-          child: Text(
-            value.isEmpty ? 'N/A' : value,
-            style: const TextStyle(fontSize: 14),
-            textAlign: TextAlign.right,
+          const SizedBox(height: 8),
+          if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
+            _buildInfoRowSharer(
+              'Date',
+              dateFormat.format(sharer.pickUpDropOffDataModel.pickUpDateTime!),
+              Icons.calendar_today,
+            ),
+          _buildInfoRowSharer(
+            'Mode',
+            sharer.pickUpDropOffDataModel.pickUpModeId.toString(),
+            Icons.directions_car,
           ),
-        ),
-      ],
-    ),
-  );
-}
+          _buildInfoRowSharer(
+            'Vehicle No',
+            sharer.pickUpDropOffDataModel.pickUpVehicleNo,
+            Icons.local_taxi,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Dropoff:',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
+            _buildInfoRowSharer(
+              'Date',
+              dateFormat.format(sharer.pickUpDropOffDataModel.dropOffDateTime!),
+              Icons.calendar_today,
+            ),
+          _buildInfoRowSharer(
+            'Mode',
+            sharer.pickUpDropOffDataModel.dropOffModeId.toString(),
+            Icons.directions_car,
+          ),
+          _buildInfoRowSharer(
+            'Vehicle No',
+            sharer.pickUpDropOffDataModel.dropOffVehicleNo,
+            Icons.local_taxi,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRowSharer(String label, String value, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey.shade600),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: Text(
+              '$label:',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value.isEmpty ? 'N/A' : value,
+              style: const TextStyle(fontSize: 14),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildFolioDropdown() {
     return Row(
       children: [

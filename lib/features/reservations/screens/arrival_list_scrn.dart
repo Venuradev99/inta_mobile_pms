@@ -32,7 +32,7 @@ class ArrivalList extends StatefulWidget {
 }
 
 class _ArrivalListState extends State<ArrivalList> {
-  final _arrivalListVm = Get.find<ReservationVm>();
+  final _reservationVm = Get.find<ReservationVm>();
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _ArrivalListState extends State<ArrivalList> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await _arrivalListVm.getReservationsMap(3);
+        await _reservationVm.getReservationsMap(3);
       }
     });
   }
@@ -50,8 +50,10 @@ class _ArrivalListState extends State<ArrivalList> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Arrival List',
-        showSearch: true,
-        onSearchChanged: (query) => _arrivalListVm.search(query),
+        onSearchChanged: (query) => _reservationVm.search(query),
+          onRefreshTap: () async {
+           await _reservationVm.getReservationsMap(1);
+        },
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -65,12 +67,12 @@ class _ArrivalListState extends State<ArrivalList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'arrival',
-                  roomTypes: _arrivalListVm.roomTypes.toList(),
-                  reservationTypes: _arrivalListVm.reservationTypes.toList(),
-                  statuses: _arrivalListVm.statuses.toList(),
-                  businessSources: _arrivalListVm.businessSources.toList(),
-                  filteredData: _arrivalListVm.receivedFilters.value ?? {},
-                  onApply: _arrivalListVm.applyFilters,
+                  roomTypes: _reservationVm.roomTypes.toList(),
+                  reservationTypes: _reservationVm.reservationTypes.toList(),
+                  statuses: _reservationVm.statuses.toList(),
+                  businessSources: _reservationVm.businessSources.toList(),
+                  filteredData: _reservationVm.receivedFilters.value ?? {},
+                  onApply: _reservationVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -79,9 +81,9 @@ class _ArrivalListState extends State<ArrivalList> {
         },
       ),
       body: Obx(() {
-        final isLoading = _arrivalListVm.isLoading;
+        final isLoading = _reservationVm.isLoading;
         final isBottomSheetDataLoading =
-            _arrivalListVm.isAllGuestDataLoading.value;
+            _reservationVm.isAllGuestDataLoading.value;
         GuestItem guestItem = GuestItem(
           bookingRoomId: '',
           guestName: '',
@@ -106,7 +108,7 @@ class _ArrivalListState extends State<ArrivalList> {
                       'tomorrow': List.generate(3, (_) => guestItem),
                       'thisweek': List.generate(3, (_) => guestItem),
                     }
-                  : _arrivalListVm.filteredList.value ?? {},
+                  : _reservationVm.filteredList.value ?? {},
               itemBuilder: (item) => isLoading.value
                   ? _buildArrivalCardShimmer()
                   : _buildArrivalCard(item),
@@ -136,7 +138,7 @@ class _ArrivalListState extends State<ArrivalList> {
       barrierDismissible: true,
       builder: (context) {
         return Obx(() {
-          final statusList = _arrivalListVm.statusList;
+          final statusList = _reservationVm.statusList;
 
           final List<StatusItem> items = statusList.map((status) {
             return StatusItem(
@@ -183,10 +185,10 @@ class _ArrivalListState extends State<ArrivalList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _arrivalListVm.getAllGuestData(item.bookingRoomId!);
+    await _reservationVm.getAllGuestData(item.bookingRoomId!);
     if (!mounted) return;
-    final guestData = _arrivalListVm.allGuestDetails.value;
-    final isNoShowResponse = await _arrivalListVm.isNoShow(item);
+    final guestData = _reservationVm.allGuestDetails.value;
+    final isNoShowResponse = await _reservationVm.isNoShow(item);
     int status = int.tryParse(guestData?.status.toString() ?? '') ?? 0;
     bool isNoShow = isNoShowResponse["isNoShow"];
     bool isAssign = guestData?.roomId == 0;
@@ -241,7 +243,7 @@ class _ArrivalListState extends State<ArrivalList> {
                 );
                 if (confirmed == true) {
                   context.pop();
-                  await _arrivalListVm.unassignRoom(guestData!);
+                  await _reservationVm.unassignRoom(guestData!);
                   if (!mounted) return;
                 }
               },
@@ -293,7 +295,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.cancel,
             label: 'Cancel Reservation',
             onTap: () async {
-              final cancelReservationData = await _arrivalListVm
+              final cancelReservationData = await _reservationVm
                   .getCancelReservationData(item);
               if (!mounted) return;
               final data = {
@@ -341,7 +343,7 @@ class _ArrivalListState extends State<ArrivalList> {
             icon: Icons.block,
             label: 'Void Reservation',
             onTap: () async {
-              final voidReservationData = await _arrivalListVm
+              final voidReservationData = await _reservationVm
                   .getVoidReservationData(item);
               if (!mounted) return;
               context.pop();
@@ -390,7 +392,7 @@ class _ArrivalListState extends State<ArrivalList> {
               icon: Icons.not_interested,
               label: 'No Show Reservation',
               onTap: () async {
-                final noShowReservationData = await _arrivalListVm
+                final noShowReservationData = await _reservationVm
                     .getNoShowReservationData(item);
                 if (!mounted) return;
                 context.pop();

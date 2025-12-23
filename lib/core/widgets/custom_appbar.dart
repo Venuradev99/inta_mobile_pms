@@ -8,8 +8,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onInfoTap;
   final VoidCallback? onFilterTap;
   final VoidCallback? onRefreshTap;
-  final ValueChanged<String>? onSearchChanged; 
-  final bool showSearch;
+  final ValueChanged<String>? onSearchChanged;
 
   const CustomAppBar({
     super.key,
@@ -18,7 +17,6 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onFilterTap,
     this.onRefreshTap,
     this.onSearchChanged,
-    this.showSearch = false,
   });
 
   @override
@@ -36,6 +34,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _closeSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+    });
+
+    widget.onSearchChanged?.call("");
   }
 
   @override
@@ -58,22 +65,17 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 decoration: InputDecoration(
                   hintText: 'Search...',
                   hintStyle: const TextStyle(color: AppColors.darkgrey),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.darkgrey),
+                  prefixIcon:
+                      const Icon(Icons.search, color: AppColors.darkgrey),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.darkgrey),
-                    onPressed: () {
-                      setState(() {
-                        _isSearching = false;
-                        _searchController.clear();
-                        if (widget.onSearchChanged != null) {
-                          widget.onSearchChanged!(""); // Clear the search callback
-                        }
-                      });
-                    },
+                    icon:
+                        const Icon(Icons.close, color: AppColors.darkgrey),
+                    onPressed: _closeSearch,
                   ),
                   filled: true,
                   fillColor: AppColors.onPrimary,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -89,7 +91,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   ),
             ),
       actions: [
-        if (!_isSearching && widget.showSearch)
+        // 🔍 Search icon ONLY if callback exists
+        if (!_isSearching && widget.onSearchChanged != null)
           IconButton(
             icon: const Icon(Icons.search, color: AppColors.black),
             onPressed: () {
@@ -98,16 +101,19 @@ class _CustomAppBarState extends State<CustomAppBar> {
               });
             },
           ),
+
         if (widget.onInfoTap != null)
           IconButton(
             icon: const Icon(Icons.info_outline, color: AppColors.black),
             onPressed: widget.onInfoTap,
           ),
+
         if (widget.onFilterTap != null)
           IconButton(
             icon: const Icon(Icons.filter_list, color: AppColors.black),
             onPressed: widget.onFilterTap,
           ),
+
         if (widget.onRefreshTap != null)
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,6 @@ import 'package:inta_mobile_pms/features/reservations/viewmodels/audit_trail_vm.
 import 'package:inta_mobile_pms/features/reservations/viewmodels/cancel_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/change_reservation_type_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/edit_guest_details_vm.dart';
-import 'package:inta_mobile_pms/features/reservations/viewmodels/inhouse_list_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/no_show_reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/room_move_vm.dart';
@@ -48,7 +48,7 @@ void main() async {
   final appResources = AppResources(baseUrl: baseUrl);
   final dataAccessService = DataAccessService();
 
-  //services
+
   final userApiService = UserApiService(version);
   final stayViewService = StayViewService(dataAccessService, appResources);
   final dashboardService = DashboardService(dataAccessService, appResources);
@@ -66,7 +66,7 @@ void main() async {
   );
   final reportsService = ReportsService(dataAccessService, appResources);
 
-  //register Services
+
   Get.put<StayViewService>(stayViewService);
   Get.put<DashboardService>(dashboardService);
   Get.put<ReservationService>(reservationService);
@@ -75,7 +75,7 @@ void main() async {
   Get.put<QuickReservationService>(quickReservationService);
   Get.put<ReportsService>(reportsService);
 
-  //Inject services
+ 
   Get.put<DashboardVm>(
     DashboardVm(
       Get.find<DashboardService>(),
@@ -92,7 +92,6 @@ void main() async {
   Get.put<NoShowReservationVm>(
     NoShowReservationVm(Get.find<ReservationService>()),
   );
-  Get.put<InhouseListVm>(InhouseListVm(Get.find<ReservationService>()));
   Get.put<CancelReservationVm>(
     CancelReservationVm(Get.find<ReservationService>()),
   );

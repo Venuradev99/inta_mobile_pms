@@ -96,7 +96,7 @@ class _DashboardState extends State<Dashboard> {
           IconButton(
             icon: Icon(Icons.print, color: AppColors.black, size: iconSize),
             onPressed: () {
-              openBrowser('http://192.168.1.176:2234');
+              // openBrowser('http://192.168.1.176:2234');
             },
           ),
           IconButton(
@@ -641,22 +641,6 @@ class _DashboardState extends State<Dashboard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Welcome Back',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.onPrimary.withOpacity(0.85),
-                                  fontWeight: FontWeight.w500,
-                                  fontSize:
-                                      (textTheme.bodySmall?.fontSize ?? 12) *
-                                      fontScale,
-                                ),
-                              ),
-                              SizedBox(
-                                height: ResponsiveConfig.scaleHeight(
-                                  context,
-                                  6,
-                                ),
-                              ),
                               Obx(() {
                                 return Text(
                                   _dashboardVm.userName.value,

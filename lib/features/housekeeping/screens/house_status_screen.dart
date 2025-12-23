@@ -5,13 +5,13 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/houseKeeper_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_item_model.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/remark_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/set_status_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
-import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HouseStatus extends StatefulWidget {
@@ -25,6 +25,7 @@ class _HouseStatusState extends State<HouseStatus> {
   List<RoomItem> rooms = [];
   bool isEditMode = false;
   Set<RoomItem> selectedRooms = {};
+  Map<String, bool> expandedSections = {};
   @override
   void initState() {
     super.initState();
@@ -40,45 +41,22 @@ class _HouseStatusState extends State<HouseStatus> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () => context.go(AppRoutes.dashboard),
-        ),
-        title: Text(
-          'House Status',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: AppColors.black),
-            onPressed: () => _showStatusInfoDialog(context),
-          ),
-          if (!isEditMode)
-            IconButton(
-              icon: const Icon(Icons.edit, color: AppColors.black),
-              onPressed: () {
-                setState(() {
-                  isEditMode = true;
-                });
-              },
-            ),
-          if (isEditMode)
-            IconButton(
-              icon: const Icon(Icons.close, color: AppColors.black),
-              onPressed: () {
-                setState(() {
-                  isEditMode = false;
-                  selectedRooms.clear();
-                });
-              },
-            ),
-        ],
+      appBar: CustomAppBar(
+        title: 'House Status',
+        onInfoTap: () => _showStatusInfoDialog(context),
+        onRefreshTap: () async {
+          await _houseStatusVm.loadRooms();
+          rooms = _houseStatusVm.roomList;
+
+          // setState(() {
+          //   if (isEditMode) {
+          //     isEditMode = false;
+          //     selectedRooms.clear();
+          //   } else {
+          //     isEditMode = true;
+          //   }
+          // });
+        },
       ),
       body: Obx(() {
         final groupedRooms = _houseStatusVm.groupedRooms;
@@ -124,17 +102,38 @@ class _HouseStatusState extends State<HouseStatus> {
                       itemBuilder: (context, index) {
                         final section = groupedRooms.keys.elementAt(index);
                         final sectionRooms = groupedRooms[section]!;
+                        expandedSections.putIfAbsent(section, () => true);
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (index > 0) const SizedBox(height: 24),
-                            _buildSectionHeader(section, sectionRooms),
-                            const SizedBox(height: 12),
-                            ...sectionRooms.map(
-                              (room) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _buildRoomCard(room),
+                            ExpansionTile(
+                              title: _buildSectionHeader(section, sectionRooms),
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: EdgeInsets.zero,
+                              expandedCrossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                              initiallyExpanded: expandedSections[section]!,
+                              onExpansionChanged: (expanded) {
+                                setState(() {
+                                  expandedSections[section] = expanded!;
+                                });
+                              },
+                              shape: const RoundedRectangleBorder(
+                                side: BorderSide.none,
                               ),
+                              collapsedShape: const RoundedRectangleBorder(
+                                side: BorderSide.none,
+                              ),
+                              children: [
+                                const SizedBox(height: 12),
+                                ...sectionRooms.map(
+                                  (room) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: _buildRoomCard(room),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         );
@@ -289,7 +288,6 @@ class _HouseStatusState extends State<HouseStatus> {
     );
     final bgColor = _houseStatusVm.getBackgroundColor(room.housekeepingStatus);
     return InkWell(
-      // onTap: isEditMode ? null : () => _showRoomActionsSheet(room),
       onTap: isEditMode
           ? null
           : () {
@@ -467,7 +465,6 @@ class _HouseStatusState extends State<HouseStatus> {
       confirmText: 'Yes',
       cancelText: 'No',
       confirmColor: AppColors.red,
-      // icon: Icons.meeting_room,
     );
     if (confirmed == true) {
       await _houseStatusVm.bulkClearStatus(selectedRooms);
@@ -547,81 +544,78 @@ class _HouseStatusState extends State<HouseStatus> {
   }
 
   void _showEditHousekeeperDialog(RoomItem room) {
-  final houseKeepers = _houseStatusVm.houseKeepersList.toList();
-  HouseKeeper? selectedHouseKeeper;
+    final houseKeepers = _houseStatusVm.houseKeepersList.toList();
+    HouseKeeper? selectedHouseKeeper;
 
-  if (room.houseKeeper != null) {
-    try {
-      selectedHouseKeeper = houseKeepers.firstWhere(
-        (hk) => hk.userId == room.houseKeeper
-      );
-    } catch (_) {}
-  }
+    if (room.houseKeeper != null) {
+      try {
+        selectedHouseKeeper = houseKeepers.firstWhere(
+          (hk) => hk.userId == room.houseKeeper,
+        );
+      } catch (_) {}
+    }
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Edit Housekeeper'),
-            content: DropdownButtonFormField<HouseKeeper>(
-              decoration: const InputDecoration(
-                labelText: 'Select Housekeeper',
-                border: OutlineInputBorder(),
-              ),
-              value: selectedHouseKeeper,
-              hint: const Text('Choose a housekeeper'),
-              items: houseKeepers.map((HouseKeeper hk) {
-                return DropdownMenuItem<HouseKeeper>(
-                  value: hk,
-                  child: Text(hk.houseKeeperName),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedHouseKeeper = value;
-                });
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Housekeeper'),
+              content: DropdownButtonFormField<HouseKeeper>(
+                decoration: const InputDecoration(
+                  labelText: 'Select Housekeeper',
+                  border: OutlineInputBorder(),
                 ),
-                onPressed: () async {
-                  if (selectedHouseKeeper == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please select a housekeeper'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                    return;
-                  }
-
-                 await _houseStatusVm.updateRoomHousekeeper(
-                    room,
-                    selectedHouseKeeper!,
+                value: selectedHouseKeeper,
+                hint: const Text('Choose a housekeeper'),
+                items: houseKeepers.map((HouseKeeper hk) {
+                  return DropdownMenuItem<HouseKeeper>(
+                    value: hk,
+                    child: Text(hk.houseKeeperName),
                   );
-
-        
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedHouseKeeper = value;
+                  });
                 },
-                child: const Text('Update'),
               ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                  ),
+                  onPressed: () async {
+                    if (selectedHouseKeeper == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please select a housekeeper'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
 
+                    await _houseStatusVm.updateRoomHousekeeper(
+                      room,
+                      selectedHouseKeeper!,
+                    );
+                  },
+                  child: const Text('Update'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _unassignHousekeeper(RoomItem room) async {
     final confirmed = await ConfirmationDialog.show(

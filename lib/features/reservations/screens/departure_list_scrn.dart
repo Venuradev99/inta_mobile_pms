@@ -25,7 +25,7 @@ class DepartureList extends StatefulWidget {
 }
 
 class _DepartureListState extends State<DepartureList> {
-  final _departureListVm = Get.find<ReservationVm>();
+  final _reservationVm = Get.find<ReservationVm>();
   late Map<String, List<GuestItem>> departuresMap;
 
   @override
@@ -33,7 +33,7 @@ class _DepartureListState extends State<DepartureList> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        await _departureListVm.getReservationsMap(2);
+        await _reservationVm.getReservationsMap(2);
       }
     });
   }
@@ -44,8 +44,10 @@ class _DepartureListState extends State<DepartureList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Departure List',
-        showSearch: true,
-        onSearchChanged: (query) => _departureListVm.search(query),
+        onSearchChanged: (query) => _reservationVm.search(query),
+        onRefreshTap: () async {
+          await _reservationVm.getReservationsMap(1);
+        },
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -59,12 +61,12 @@ class _DepartureListState extends State<DepartureList> {
               builder: (context, scrollController) => Obx(() {
                 return FilterBottomSheet(
                   type: 'departure',
-                  roomTypes: _departureListVm.roomTypes.toList(),
-                  reservationTypes: _departureListVm.reservationTypes.toList(),
-                  statuses: _departureListVm.statuses.toList(),
-                  businessSources: _departureListVm.businessSources.toList(),
-                  filteredData: _departureListVm.receivedFilters.value ?? {},
-                  onApply: _departureListVm.applyFilters,
+                  roomTypes: _reservationVm.roomTypes.toList(),
+                  reservationTypes: _reservationVm.reservationTypes.toList(),
+                  statuses: _reservationVm.statuses.toList(),
+                  businessSources: _reservationVm.businessSources.toList(),
+                  filteredData: _reservationVm.receivedFilters.value ?? {},
+                  onApply: _reservationVm.applyFilters,
                   scrollController: scrollController,
                 );
               }),
@@ -87,19 +89,19 @@ class _DepartureListState extends State<DepartureList> {
         );
 
         final isBottomSheetDataLoading =
-            _departureListVm.isAllGuestDataLoading.value;
+            _reservationVm.isAllGuestDataLoading.value;
         return Stack(
           children: [
             TabbedListView<GuestItem>(
               tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-              dataMap: _departureListVm.isLoading.value
+              dataMap: _reservationVm.isLoading.value
                   ? {
                       'today': List.generate(3, (_) => guestItem),
                       'tomorrow': List.generate(3, (_) => guestItem),
                       'thisweek': List.generate(3, (_) => guestItem),
                     }
-                  : _departureListVm.filteredList.value ?? {},
-              itemBuilder: (item) => _departureListVm.isLoading.value
+                  : _reservationVm.filteredList.value ?? {},
+              itemBuilder: (item) => _reservationVm.isLoading.value
                   ? _buildArrivalCardShimmer()
                   : _buildDepartureCard(item),
               emptySubMessage: (period) =>
@@ -128,7 +130,7 @@ class _DepartureListState extends State<DepartureList> {
       barrierDismissible: true,
       builder: (context) {
         return Obx(() {
-          final statusList = _departureListVm.statusList;
+          final statusList = _reservationVm.statusList;
 
           final List<StatusItem> items = statusList.map((status) {
             return StatusItem(
@@ -154,7 +156,7 @@ class _DepartureListState extends State<DepartureList> {
 
   Widget _buildDepartureCard(GuestItem item) {
     return Obx(() {
-      return _departureListVm.isLoading.value
+      return _reservationVm.isLoading.value
           ? GuestCardShimmer()
           : GuestCard(
               guestName: item.guestName!,
@@ -193,9 +195,9 @@ class _DepartureListState extends State<DepartureList> {
   }
 
   void _showActions(BuildContext context, GuestItem item) async {
-    await _departureListVm.getAllGuestData(item.bookingRoomId!);
+    await _reservationVm.getAllGuestData(item.bookingRoomId!);
     if (!mounted) return;
-    final guestData = _departureListVm.allGuestDetails.value;
+    final guestData = _reservationVm.allGuestDetails.value;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -262,7 +264,7 @@ class _DepartureListState extends State<DepartureList> {
             icon: Icons.block,
             label: 'Void Reservation',
             onTap: () async {
-              final voidReservationData = await _departureListVm
+              final voidReservationData = await _reservationVm
                   .getVoidReservationData(item);
               if (!mounted) return;
               context.pop();

@@ -16,7 +16,6 @@ import 'package:inta_mobile_pms/features/reservations/screens/departure_list_scr
 import 'package:inta_mobile_pms/features/dashboard/screens/settings_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/house_status_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/edit_guest_details_scrn.dart';
-import 'package:inta_mobile_pms/features/reservations/screens/inhouse_list_scrn.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/maintenance_block_screen.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/net_lock_scrn.dart';
 import 'package:inta_mobile_pms/features/dashboard/screens/notifications_scrn.dart';
@@ -53,10 +52,6 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.arrivalList,
       builder: (context, state) => const ArrivalList(),
-    ),
-    GoRoute(
-      path: AppRoutes.inhouseList,
-      builder: (context, state) => const InHouseList(),
     ),
     GoRoute(
       path: AppRoutes.departureList,

@@ -4,6 +4,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/empty_state_wgt.dart';
@@ -168,8 +169,8 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary, 
-                    foregroundColor: AppColors.background, 
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.background,
                   ),
                   onPressed: () {
                     Navigator.pop(context, {"from": fromDate, "to": toDate});
@@ -246,82 +247,17 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: _isSearchVisible
-            ? TextField(
-                controller: _searchController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search maintenance blocks...',
-                  border: InputBorder.none,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    // _searchQuery = value;
-                    _maintenanceBlockVm.filteredMaintenanceBlocks(value);
-                  });
-                },
-              )
-            : Text(
-                'Maintenance Block',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            _isSearchVisible ? Icons.arrow_back : Icons.arrow_back,
-            color: AppColors.black,
-          ),
-          onPressed: () {
-            if (_isSearchVisible) {
-              setState(() {
-                _isSearchVisible = false;
-                _searchQuery = '';
-                _searchController.clear();
-              });
-            } else {
-              context.go(AppRoutes.dashboard);
-            }
-          },
-        ),
-        actions: [
-          if (!_isSearchVisible)
-            IconButton(
-              icon: const Icon(Icons.search, color: AppColors.black),
-              onPressed: () {
-                setState(() {
-                  _isSearchVisible = true;
-                });
-              },
-            ),
-          if (_isSearchVisible)
-            IconButton(
-              icon: const Icon(Icons.clear, color: AppColors.black),
-              onPressed: () {
-                setState(() {
-                  _searchQuery = '';
-                  _searchController.clear();
-                  _isSearchVisible = false;
-                });
-                _maintenanceBlockVm.resetSearch();
-              },
-            ),
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: AppColors.black),
-            onPressed: _showFilterBottomSheet,
-          ),
-          IconButton(
-            icon: const Icon(Icons.add, color: AppColors.black),
-            onPressed: () {
-              context.push(AppRoutes.blockRoomSelection);
-            },
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Maintenance Block',
+        onSearchChanged: (value) {
+          _maintenanceBlockVm.filteredMaintenanceBlocks(value);
+        },
+        onFilterTap: _showFilterBottomSheet,
+        onRefreshTap: () async {
+          await _maintenanceBlockVm.loadAllMaintenanceBlocks();
+        },
       ),
+
       body: Column(
         children: [
           Expanded(

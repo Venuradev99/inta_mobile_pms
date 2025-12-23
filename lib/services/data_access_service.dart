@@ -28,9 +28,9 @@ class DataAccessService {
 
       String errorMsg =
           responseBody["errors"][0] ?? 'Unauthorized, try login again!';
-      MessageService().error(errorMsg);
+      MessageService().unauthorizedError(errorMsg, isUnauthorized: true);
 
-      return responseBody;
+      throw Exception('Unauthorized');
     } else {
       return responseBody;
     }

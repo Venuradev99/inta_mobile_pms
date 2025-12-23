@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/dropdown_data.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
@@ -19,9 +20,6 @@ class WorkOrderList extends StatefulWidget {
 
 class _WorkOrderListState extends State<WorkOrderList> {
   final _workOrderListVm = Get.find<WorkOrderListVm>();
-
-  bool _isSearchVisible = false;
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -47,76 +45,16 @@ class _WorkOrderListState extends State<WorkOrderList> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            _isSearchVisible ? Icons.arrow_back : Icons.arrow_back,
-            color: AppColors.black,
-          ),
-          onPressed: () {
-            if (_isSearchVisible) {
-              _searchController.clear();
-              _workOrderListVm.searchWorkOrders(''); // reset filter
-              setState(() {
-                _isSearchVisible = false;
-              });
-            } else {
-              context.go(AppRoutes.dashboard);
-            }
-          },
-        ),
-        title: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: _isSearchVisible
-              ? TextField(
-                  key: const ValueKey('searchField'),
-                  controller: _searchController,
-                  autofocus: true,
-                  decoration: const InputDecoration(
-                    hintText: 'Search ...',
-                    border: InputBorder.none,
-                  ),
-                  onChanged: (value) {
-                    _workOrderListVm.searchWorkOrders(value);
-                  },
-                )
-              : Text(
-                  'Work Orders',
-                  key: const ValueKey('titleText'),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-        ),
-        actions: [
-          if (!_isSearchVisible)
-            IconButton(
-              icon: const Icon(Icons.search, color: AppColors.black),
-              onPressed: () {
-                setState(() {
-                  _isSearchVisible = true;
-                });
-              },
-            ),
-          if (_isSearchVisible)
-            IconButton(
-              icon: const Icon(Icons.clear, color: AppColors.black),
-              onPressed: () {
-                _searchController.clear();
-                _workOrderListVm.searchWorkOrders(''); // reset filter
-                setState(() {
-                  _isSearchVisible = false;
-                });
-              },
-            ),
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: AppColors.black),
-            onPressed: _showFilterBottomSheet,
-          ),
-        ],
+      appBar: CustomAppBar(
+        title: 'Work Orders',
+        onSearchChanged: (value) {
+          _workOrderListVm.searchWorkOrders(value);
+        },
+        onRefreshTap: () async {
+          await _workOrderListVm.loadWorkOrders();
+          await _workOrderListVm.loadDataForAddWorkOrder();
+        },
+        onFilterTap: _showFilterBottomSheet,
       ),
 
       body: Obx(() {
@@ -147,24 +85,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: AppColors.primary,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Active',
-                      style: TextStyle(
-                        color: AppColors.surface,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ),
                 ],
