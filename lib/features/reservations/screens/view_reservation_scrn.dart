@@ -57,6 +57,13 @@ class _ViewReservation extends State<ViewReservation>
     return '${item?.visibleCurrencyCode} ${formatted}';
   }
 
+  String formatDateTime(String dateTimeStr) {
+    DateTime date = DateTime.parse(dateTimeStr);
+
+    DateFormat formatter = DateFormat('yyyy-MMM-dd hh:mm a');
+    return formatter.format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.item == null) {
@@ -335,7 +342,7 @@ class _ViewReservation extends State<ViewReservation>
                     Expanded(
                       child: _buildDateColumn(
                         'Check-In',
-                        item!.startDate!,
+                        item!.arrivalTime!,
                         Icons.login,
                       ),
                     ),
@@ -372,7 +379,7 @@ class _ViewReservation extends State<ViewReservation>
                     Expanded(
                       child: _buildDateColumn(
                         'Check-Out',
-                        item!.endDate!,
+                        item!.departureTime!,
                         Icons.logout,
                       ),
                     ),
@@ -389,12 +396,13 @@ class _ViewReservation extends State<ViewReservation>
                 _buildEnhancedInfoRow(
                   'Rate Type',
                   item!.rateType ?? '-',
-                  Icons.label,
+                  Icons.rate_review,
                 ),
+
                 _buildEnhancedInfoRow(
-                  'Reservation Type',
-                  item!.reservationType ?? '-',
-                  Icons.label,
+                  'Guests',
+                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
+                  Icons.people,
                 ),
                 // _buildEnhancedInfoRow(
                 //   'Daily Rate',
@@ -413,10 +421,11 @@ class _ViewReservation extends State<ViewReservation>
               children: [
                 _buildCardHeader('Booking Information', Icons.info_outline),
                 const SizedBox(height: 16),
+
                 _buildEnhancedInfoRow(
-                  'Guests',
-                  '${item!.adults} Adults, ${item!.children ?? 0} Children',
-                  Icons.people,
+                  'Reservation Type',
+                  item!.reservationType ?? '-',
+                  Icons.beach_access,
                 ),
                 _buildEnhancedInfoRow(
                   'Business Category',
@@ -441,6 +450,11 @@ class _ViewReservation extends State<ViewReservation>
                     item!.businessSourceName ?? '',
                     Icons.business,
                   ),
+                _buildEnhancedInfoRow(
+                  'Market',
+                  item!.marketCode ?? '-',
+                  Icons.shop,
+                ),
               ],
             ),
           ),
@@ -1358,7 +1372,14 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  Widget _buildDateColumn(String label, String date, IconData icon) {
+  Widget _buildDateColumn(String label, String dateTimeStr, IconData icon) {
+    DateTime date = DateTime.parse(dateTimeStr);
+
+    String formattedDate = DateFormat(
+      'yyyy-MMM-dd',
+    ).format(date); // e.g., 2025-Dec-13
+    String formattedTime = DateFormat('hh:mm a').format(date); // e.g., 03:40 PM
+
     return Column(
       children: [
         Icon(icon, color: AppColors.primary, size: 28),
@@ -1372,13 +1393,25 @@ class _ViewReservation extends State<ViewReservation>
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          date,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+        Column(
+          children: [
+            Text(
+              formattedDate,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              formattedTime,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
         ),
       ],
     );

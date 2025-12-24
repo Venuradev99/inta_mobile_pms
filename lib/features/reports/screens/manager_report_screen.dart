@@ -121,7 +121,6 @@ class _ManagerReportState extends State<ManagerReport>
       ),
       body: ListView(
         children: [
-          /// FULL-WIDTH PRIMARY FILTER BACKGROUND
           Container(
             width: double.infinity,
             color: AppColors.primary,
@@ -129,7 +128,6 @@ class _ManagerReportState extends State<ManagerReport>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                /// DATE PICK
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,15 +146,15 @@ class _ManagerReportState extends State<ManagerReport>
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade400),
                           ),
                           child: Text(
                             selectedDate != null
                                 ? DateFormat('yyyy-MM-dd').format(selectedDate!)
                                 : "Select",
-                            style: AppTextTheme.lightTextTheme.bodyMedium,
+                            style: AppTextTheme.lightTextTheme.bodyMedium!
+                                .copyWith(color: Colors.white),
                           ),
                         ),
                       ),
@@ -164,7 +162,8 @@ class _ManagerReportState extends State<ManagerReport>
                   ),
                 ),
 
-                /// CURRENCY DROPDOWN
+                const SizedBox(width: 12),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,32 +178,53 @@ class _ManagerReportState extends State<ManagerReport>
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade400),
                           ),
                           child: DropdownButton<String>(
                             isExpanded: true,
                             underline: const SizedBox(),
-                            hint: const Text("Select"),
+                            iconEnabledColor: Colors.white,
+                            dropdownColor: Colors.white,
+                            hint: Text(
+                              "Select",
+                              style: AppTextTheme.lightTextTheme.bodyMedium!
+                                  .copyWith(color: Colors.white),
+                            ),
                             value: selectedCurrency,
-                            items: _managerReportVm.currencyList
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e.code,
-                                    child: Text(e.code),
+                            items: _managerReportVm.currencyList.map((e) {
+                              return DropdownMenuItem<String>(
+                                value: e.code,
+                                child: Text(
+                                  e.code,
+                                  style: AppTextTheme.lightTextTheme.bodyMedium!
+                                      .copyWith(color: Colors.black87),
+                                ),
+                              );
+                            }).toList(),
+                            selectedItemBuilder: (context) {
+                              return _managerReportVm.currencyList.map((e) {
+                                return Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    e.code,
+                                    style: AppTextTheme
+                                        .lightTextTheme
+                                        .bodyMedium!
+                                        .copyWith(color: Colors.white),
                                   ),
-                                )
-                                .toList(),
-                            onChanged: (val) =>
-                                setState(() => selectedCurrency = val),
+                                );
+                              }).toList();
+                            },
+                            onChanged: (val) {
+                              setState(() => selectedCurrency = val);
+                            },
                           ),
                         );
                       }),
                     ],
                   ),
                 ),
-
                 const SizedBox(width: 24),
                 SizedBox(
                   height: 48,
@@ -253,7 +273,6 @@ class _ManagerReportState extends State<ManagerReport>
               ],
             ),
           ),
-
           Obx(() {
             if (_managerReportVm.isReportLoading.value) {
               return _buildReportShimmer(context);

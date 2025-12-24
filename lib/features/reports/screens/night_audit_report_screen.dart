@@ -238,7 +238,7 @@ class _ReportWidgetState extends State<NightAuditReport>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Report Dashboard')),
+      appBar: AppBar(title: const Text('Night Audit Report')),
       body: Column(
         children: [
           Container(
@@ -690,7 +690,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _leftColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _rightColAlign(value.toString());
                               }
                             }).toList(),
@@ -786,7 +786,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _leftColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _rightColAlign(value.toString());
                               }
                             }).toList(),
@@ -867,7 +867,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _rightColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _leftColAlign(value.toString());
                               }
                             }).toList(),
@@ -1027,10 +1027,10 @@ class _ReportWidgetState extends State<NightAuditReport>
                                     return DataRow(
                                       cells: receiptPaySummaryCols.map((col) {
                                         if (['mode'].contains(col['field'])) {
-                                          final value = item[col['field']];
+                                          final value = item[col['header']];
                                           return _leftCell(value.toString());
                                         } else {
-                                          final value = item[col['field']];
+                                          final value = item[col['header']];
                                           final formatted = formatCurrency(
                                             value,
                                           );
@@ -1074,7 +1074,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _rightColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _leftColAlign(value.toString());
                               }
                             }).toList(),
@@ -1137,7 +1137,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _leftColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _rightColAlign(value.toString());
                               }
                             }).toList(),
@@ -1176,7 +1176,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _leftColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _rightColAlign(value.toString());
                               }
                             }).toList(),
@@ -1230,7 +1230,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 final value = col['header'];
                                 return _leftColAlign(value.toString());
                               } else {
-                                final value = col['field'];
+                                final value = col['header'];
                                 return _rightColAlign(value.toString());
                               }
                             }).toList(),

@@ -6,10 +6,12 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/dayuse_response.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/unassign_booking_item.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
+import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class StayViewVm extends GetxController {
   final StayViewService _stayViewService;
@@ -27,6 +29,9 @@ class StayViewVm extends GetxController {
   var availableRooms = <AvailableRooms>[].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
   var datUseList = <DayUseResponse>[].obs;
+  var unassignBookingList = <UnassignBookingItem>[].obs;
+
+  DateTime centerDate = DateTime.now();
 
   StayViewVm(this._stayViewService, this._reservationService);
 
@@ -55,30 +60,70 @@ class StayViewVm extends GetxController {
     }
   }
 
-  Future<List<AvailableRooms>> loadAvailableRooms(dynamic booking) async {
+  Future<void> assignRoom(
+    UnassignBookingItem unassignItem,
+    AvailableRooms? selectedRoom,
+  ) async {
+    try {
+      final request = {
+        "isAssignRoom": true,
+        "bookingRoomList": [
+          {
+            "bookingRoomId": unassignItem.bookingRoomId,
+            "roomId": selectedRoom?.roomId,
+            "arrivalDate": unassignItem.checkInDate.toString(),
+            "departureDate": unassignItem.checkOutDate.toString(),
+          },
+        ],
+      };
+      final response = await _reservationService.updateBooking(request);
+      if (response["isSuccessful"] == true) {
+        final msg = response["message"].isNotEmpty
+            ? response["message"]
+            : 'Room unassigned successfully!';
+        NavigationService().back();
+        MessageService().success(msg);
+        refreshStayView(centerDate);
+      } else {
+        final msg = response["errors"][0] ?? 'Room assign failed!';
+        NavigationService().back();
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      MessageService().error('Error room assign request: $e');
+      throw Exception('Error  room assign request: $e');
+    }
+  }
+
+  Future<void> loadAvailableRooms(
+    List<Map<String, dynamic>> bookingRoomList,
+  ) async {
     try {
       isAvailableRoomLoading.value = true;
-      final payload = {
-        "RoomList": [],
-        "adults": 0,
-        "childs": 0,
-        "arrivalDate": booking['checkInDate'],
-        "departureDate": booking['checkOutDate'],
-        "roomType": booking['roomTypeId'],
-      };
+      unassignBookingList.value = [];
+      for (final booking in bookingRoomList) {
+        UnassignBookingItem bookingItem = UnassignBookingItem.fromJson(booking);
+        final payload = {
+          "RoomList": [],
+          "adults": 0,
+          "childs": 0,
+          "arrivalDate": booking['checkInDate'],
+          "departureDate": booking['checkOutDate'],
+          "roomType": booking['roomTypeId'],
+        };
 
-      final response = await _stayViewService.getAvailableRooms(payload);
+        final response = await _stayViewService.getAvailableRooms(payload);
 
-      if (response["isSuccessful"] == true) {
-        final result = response["result"] as Map<String, dynamic>;
-        availableRooms.value = result['availableRooms']
-            .map<AvailableRooms>((item) => AvailableRooms.fromJson(item))
-            .toList();
-        return availableRooms;
-      } else {
-        final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
-        MessageService().error(msg);
-        return [];
+        if (response["isSuccessful"] == true) {
+          final result = response["result"] as Map<String, dynamic>;
+          bookingItem.availableRooms = List<Map<String, dynamic>>.from(
+            result['availableRooms'],
+          ).map((item) => AvailableRooms.fromJson(item)).toList();
+        } else {
+          final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
+          MessageService().error(msg);
+        }
+        unassignBookingList.value.add(bookingItem);
       }
     } catch (e) {
       throw Exception('Error loading available rooms: $e');
@@ -114,7 +159,7 @@ class StayViewVm extends GetxController {
   Future<void> loadInitialData(DateTime date) async {
     try {
       isLoading.value = true;
-
+      centerDate = date;
       final payload = {
         "numberOfDates": 3,
         "roomTypeId": 0,
@@ -131,7 +176,6 @@ class StayViewVm extends GetxController {
       if (bookingStatsResponse["isSuccessful"] == true) {
         final roomTypeList = bookingStatsResponse["result"]["roomType"] ?? [];
 
-        // Deep conversion with proper typing
         roomTypes.value = roomTypeList.map<Map<String, dynamic>>((roomType) {
           return {
             "roomTypeName": roomType["roomTypeName"],

@@ -741,9 +741,7 @@ class ReservationVm extends GetxController {
           arrivalDate: getFirstTenCharacters(
             result["bookingRoom"]["arrivalDate"],
           ),
-          arrivalTime: getFirstTenCharacters(
-            result["bookingRoom"]["arrivalTime"],
-          ),
+          arrivalTime: result["bookingRoom"]["arrivalTime"],
           departureBy: getTransportModeName(
             'departureMode',
             sharers,
@@ -752,9 +750,7 @@ class ReservationVm extends GetxController {
           departureDate: getFirstTenCharacters(
             result["bookingRoom"]["departureDate"],
           ),
-          departureTime: getFirstTenCharacters(
-            result["bookingRoom"]["departureTime"],
-          ),
+          departureTime: result["bookingRoom"]["departureTime"],
           arrival: getFirstTenCharacters(result["bookingRoom"]["arrivalDate"]),
           departure: getFirstTenCharacters(
             result["bookingRoom"]["departureDate"],

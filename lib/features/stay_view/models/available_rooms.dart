@@ -24,4 +24,9 @@ class AvailableRooms {
       'name': name,
     };
   }
+
+  @override
+  String toString() {
+    return 'AvailableRooms(roomId: $roomId, roomStatusId: $roomStatusId, name: $name)';
+  }
 }

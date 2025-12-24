@@ -6,6 +6,7 @@ import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/widgets/unassign_room_dialog.dart';
 import 'package:inta_mobile_pms/features/stay_view/widgets/day_use_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:intl/intl.dart';
@@ -249,9 +250,9 @@ class _StayViewScreenState extends State<StayViewScreen> {
       backgroundColor: Colors.grey[50],
       appBar: CustomAppBar(
         title: 'Stay View',
-         onInfoTap: _showInfoDialog,
-         onRefreshTap: () => _stayViewVm.refreshStayView(_centerDate),
-         ),
+        onInfoTap: _showInfoDialog,
+        onRefreshTap: () => _stayViewVm.refreshStayView(_centerDate),
+      ),
       body: Stack(
         children: [
           Column(
@@ -403,154 +404,165 @@ class _StayViewScreenState extends State<StayViewScreen> {
     });
   }
 
- Widget _buildDateNavigator(TextTheme textTheme) {
-  final bool isMobile = ResponsiveConfig.isMobile(context);
-  final double fontScale = ResponsiveConfig.fontScale(context);
+  Widget _buildDateNavigator(TextTheme textTheme) {
+    final bool isMobile = ResponsiveConfig.isMobile(context);
+    final double fontScale = ResponsiveConfig.fontScale(context);
 
-  return Container(
-    padding: EdgeInsets.symmetric(
-      horizontal: isMobile ? 8 : 16,
-      vertical: isMobile ? 8 : 12,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          iconSize: isMobile ? 20 : 24,
-          icon: Icon(Icons.chevron_left, color: Colors.grey[700]),
-          onPressed: () {
-            setState(() => _centerDate = _centerDate.subtract(const Duration(days: 1)));
-            _stayViewVm.loadInitialData(_centerDate);
-          },
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.grey[100],
-            padding: EdgeInsets.all(isMobile ? 4 : 8),
-          ),
-        ),
-
-        SizedBox(width: isMobile ? 8 : 16),
-
-        InkWell(
-          onTap: () async {
-            final DateTime? picked = await showDatePicker(
-              context: context,
-              initialDate: _centerDate,
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-              builder: (context, child) {
-                return Theme(
-                  data: Theme.of(context).copyWith(
-                    colorScheme: ColorScheme.light(primary: AppColors.primary),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-            if (picked != null && picked != _centerDate) {
-              setState(() => _centerDate = picked);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 16,
+        vertical: isMobile ? 8 : 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!, width: 1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            iconSize: isMobile ? 20 : 24,
+            icon: Icon(Icons.chevron_left, color: Colors.grey[700]),
+            onPressed: () {
+              setState(
+                () =>
+                    _centerDate = _centerDate.subtract(const Duration(days: 1)),
+              );
               _stayViewVm.loadInitialData(_centerDate);
-            }
-          },
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 8 : 16,
-              vertical: isMobile ? 6 : 10,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: isMobile ? 14 : 16,
-                  color: Colors.grey[700],
-                ),
-                SizedBox(width: isMobile ? 4 : 8),
-                Text(
-                  DateFormat('MMM d, yyyy').format(_centerDate),
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontSize: (isMobile ? 12 : 14) * fontScale,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[900],
-                  ),
-                ),
-              ],
+            },
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey[100],
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
             ),
           ),
-        ),
 
-        SizedBox(width: isMobile ? 8 : 16),
+          SizedBox(width: isMobile ? 8 : 16),
 
-        IconButton(
-          iconSize: isMobile ? 20 : 24,
-          icon: Icon(Icons.chevron_right, color: Colors.grey[700]),
-          onPressed: () {
-            setState(() => _centerDate = _centerDate.add(const Duration(days: 1)));
-            _stayViewVm.loadInitialData(_centerDate);
-          },
-          style: IconButton.styleFrom(
-            backgroundColor: Colors.grey[100],
-            padding: EdgeInsets.all(isMobile ? 4 : 8),
-          ),
-        ),
-
-        SizedBox(width: isMobile ? 8 : 24),
-
-        isMobile
-            ? IconButton(
-                tooltip: "Today",
-                icon: Icon(Icons.today, size: 18, color: Colors.white),
-                style: IconButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.all(8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () {
-                  setState(() =>
-                      _centerDate = _stayViewVm.today.value ?? DateTime.now());
+          InkWell(
+            onTap: () async {
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: _centerDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2100),
+                builder: (context, child) {
+                  return Theme(
+                    data: Theme.of(context).copyWith(
+                      colorScheme: ColorScheme.light(
+                        primary: AppColors.primary,
+                      ),
+                    ),
+                    child: child!,
+                  );
                 },
-              )
-
-            // 🖥 Desktop/Tablet: full button
-            : ElevatedButton.icon(
-                onPressed: () {
-                  setState(() =>
-                      _centerDate = _stayViewVm.today.value ?? DateTime.now());
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: const Icon(Icons.today, size: 18),
-                label: Text(
-                  'Today',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14 * fontScale,
-                  ),
-                ),
+              );
+              if (picked != null && picked != _centerDate) {
+                setState(() => _centerDate = picked);
+                _stayViewVm.loadInitialData(_centerDate);
+              }
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 16,
+                vertical: isMobile ? 6 : 10,
               ),
-      ],
-    ),
-  );
-}
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: isMobile ? 14 : 16,
+                    color: Colors.grey[700],
+                  ),
+                  SizedBox(width: isMobile ? 4 : 8),
+                  Text(
+                    DateFormat('MMM d, yyyy').format(_centerDate),
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontSize: (isMobile ? 12 : 14) * fontScale,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[900],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
+          SizedBox(width: isMobile ? 8 : 16),
+
+          IconButton(
+            iconSize: isMobile ? 20 : 24,
+            icon: Icon(Icons.chevron_right, color: Colors.grey[700]),
+            onPressed: () {
+              setState(
+                () => _centerDate = _centerDate.add(const Duration(days: 1)),
+              );
+              _stayViewVm.loadInitialData(_centerDate);
+            },
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.grey[100],
+              padding: EdgeInsets.all(isMobile ? 4 : 8),
+            ),
+          ),
+
+          SizedBox(width: isMobile ? 8 : 24),
+
+          isMobile
+              ? IconButton(
+                  tooltip: "Today",
+                  icon: Icon(Icons.today, size: 18, color: Colors.white),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.all(8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    setState(
+                      () => _centerDate =
+                          _stayViewVm.today.value ?? DateTime.now(),
+                    );
+                  },
+                )
+              // 🖥 Desktop/Tablet: full button
+              : ElevatedButton.icon(
+                  onPressed: () {
+                    setState(
+                      () => _centerDate =
+                          _stayViewVm.today.value ?? DateTime.now(),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.today, size: 18),
+                  label: Text(
+                    'Today',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14 * fontScale,
+                    ),
+                  ),
+                ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildHeaderRow(
     double roomWidth,
@@ -573,7 +585,7 @@ class _StayViewScreenState extends State<StayViewScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
               alignment: Alignment.centerLeft,
               child: Text(
-                'Room / Guest',
+                'Room',
                 style: textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: Colors.grey[900],
@@ -793,20 +805,37 @@ class _StayViewScreenState extends State<StayViewScreen> {
                       if (unassignCount > 0)
                         InkWell(
                           onTap: () async {
-                            // showDialog(
-                            //   context: context,
-                            //   builder: (context) {
-                            //     return BookingRoomDialog(
-                            //       bookingRooms: bookingRoomsList,
-                            //       onAssign: (booking, selectedRoom) {
-                            //         Navigator.pop(context);
-                            //       },
-                            //       onCancel: () {
-                            //         Navigator.pop(context);
-                            //       },
-                            //     );
-                            //   },
-                            // );
+                            await _stayViewVm.loadAvailableRooms(
+                              bookingRoomsList,
+                            );
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return UnassignRoomDialog(
+                                  unassignBookingList: _stayViewVm
+                                      .unassignBookingList
+                                      .toList(),
+                                  onViewReservation: (unassignItem) async {
+                                    await _reservationVm.getAllGuestData(
+                                      unassignItem.bookingRoomId.toString(),
+                                    );
+                                    final guestItem =
+                                        _reservationVm.allGuestDetails.value;
+                                    context.push(
+                                      AppRoutes.viewReservation,
+                                      extra: guestItem,
+                                    );
+                                  },
+                                  onAssignRoom:
+                                      (unassignItem, selectedRoom) async {
+                                        await _stayViewVm.assignRoom(
+                                          unassignItem,
+                                          selectedRoom,
+                                        );
+                                      },
+                                );
+                              },
+                            );
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
