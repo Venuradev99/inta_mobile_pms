@@ -301,55 +301,8 @@ class _LoginPageState extends State<LoginPage>
 
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 16)),
 
-            // Remember Me & Forgot Password
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     Row(
-            //       children: [
-            //         SizedBox(
-            //           height: 20,
-            //           width: 20,
-            //           child: Checkbox(
-            //             value: _rememberMe,
-            //             onChanged: (value) =>
-            //                 setState(() => _rememberMe = value ?? false),
-            //             activeColor: AppColors.primary,
-            //             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //           ),
-            //         ),
-            //         SizedBox(width: ResponsiveConfig.scaleWidth(context, 8)),
-            //         Text(
-            //           'Remember me',
-            //           style: theme.textTheme.bodySmall?.copyWith(
-            //             color: AppColors.darkgrey,
-            //             fontSize:
-            //                 ResponsiveConfig.scaleWidth(context, 12) *
-            //                 ResponsiveConfig.fontScale(context),
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //     TextButton(
-            //       onPressed: () {
-            //         HapticFeedback.lightImpact();
-            //       },
-            //       child: Text(
-            //         'Forgot Password?',
-            //         style: theme.textTheme.bodySmall?.copyWith(
-            //           color: AppColors.primary,
-            //           fontWeight: FontWeight.w500,
-            //           fontSize:
-            //               ResponsiveConfig.scaleWidth(context, 12) *
-            //               ResponsiveConfig.fontScale(context),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 32)),
 
-            // Login Button
             _buildLoginButton(context),
           ],
         ),
@@ -460,11 +413,6 @@ class _LoginPageState extends State<LoginPage>
           ? null
           : () async {
               await _handleLogin();
-              // Ensure navigation to dashboard after login
-
-              // if (mounted) {
-              //  context.go(AppRoutes.dashboard);
-              // }
             },
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,

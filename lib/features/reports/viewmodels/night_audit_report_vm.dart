@@ -282,7 +282,11 @@ class NightAuditReportVm extends GetxController {
         (data as List<dynamic>?)?.map((e) {
           totalAmount += (e["amount"] as num).toDouble();
           totalQuantity += (e["quantity"] as num).toInt();
-          return Map<String, dynamic>.from(e);
+
+           final map = Map<String, dynamic>.from(e);
+          map["enteredOn"] = formatIsoDateTime(map["enteredOn"]);
+          return map;
+
         }).toList() ??
         [];
     miscTotals["amount"] = totalAmount;
@@ -355,7 +359,7 @@ class NightAuditReportVm extends GetxController {
         [];
 
     receiptSummaryPayModeWiseRecodes.forEach((element) {
-      receiptSummaryUserTotals["amount"] =
+      receiptSummaryPayTotals["amount"] =
           (receiptSummaryPayTotals["amount"] ?? 0) +
           (element["amount"] as num? ?? 0);
     });
@@ -369,8 +373,8 @@ class NightAuditReportVm extends GetxController {
         [];
 
     receiptSummaryPayModeWiseRecodes.forEach((element) {
-      receiptSummaryPayTotals["amount"] =
-          (receiptSummaryPayTotals["amount"] ?? 0) +
+      receiptSummaryUserTotals["amount"] =
+          (receiptSummaryUserTotals["amount"] ?? 0) +
           (element["amount"] as num? ?? 0);
     });
   }
@@ -408,7 +412,7 @@ class NightAuditReportVm extends GetxController {
               : "";
 
           map["departure"] = e["departure"] != null
-              ? formatIsoDate(e["departure"])
+              ? formatIsoDateTime(e["departure"])
               : "";
 
           return map;

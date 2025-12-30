@@ -88,15 +88,14 @@ class ManagerReportVm extends GetxController {
     }
   }
 
-  Future<void> getManagerReport(String currency, DateTime selectedDate) async {
+  Future<void> getManagerReport(CurrencyItem currency, DateTime selectedDate, List<HotelItem> hotels) async {
     try {
       isReportLoading.value = true;
-      final hotelId = await LocalStorageManager.getHotelId();
       final payload = ManagerReportPayload(
-        currency: getCurrencyId(currency),
+        currency: currency.currencyId,
         reportId: 213,
         selectedDate: selectedDate.toIso8601String().substring(0, 10),
-        hotelIdsList: hotelId,
+        hotelIdsList: hotels.map((HotelItem hotel) => hotel.hotelId).toList().join(',').toString(),
       ).toJson();
 
       final response = await _reportsService.getManagerReport(payload);
@@ -277,7 +276,7 @@ class ManagerReportVm extends GetxController {
             .map(
               (item) => RoomSummaryData(
                 id: item["id"] ?? 0,
-                category: item["category"] ?? "POS Revenue Payment",
+                category: item["category"] ?? "Room Summary",
                 description: item["description"] ?? '',
                 today: double.tryParse(item["today"].toString()) ?? 0.0,
                 ptd: double.tryParse(item["ptd"].toString()) ?? 0.0,
@@ -295,7 +294,10 @@ class ManagerReportVm extends GetxController {
         financialSections['Total Revenue'] = posRevenueData.toList();
         financialSections['Payment'] = paymentData.toList();
         financialSections['City Ledger'] = cityLedgerData.toList();
-        roomSummaryItems.value = roomSummaryData;
+         financialSections['Room Summary'] = roomSummaryData.toList();
+        // roomSummaryItems.value = roomSummaryData;
+
+        print(financialSections);
       } else {
         MessageService().error(
           response["error"][0] ?? 'Error gettings report data',

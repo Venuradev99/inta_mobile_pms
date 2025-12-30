@@ -41,7 +41,9 @@ class _ReportWidgetState extends State<NightAuditReport>
         await _nightAuditReportVm.loadInitialData();
 
         setState(() {
-          _selectedDate = _nightAuditReportVm.systemWorkingDate.value;
+          _selectedDate = _nightAuditReportVm.systemWorkingDate.value.subtract(
+            const Duration(days: 1),
+          );
           _currencyList = _nightAuditReportVm.currencyList.toList();
           _hotelList = _nightAuditReportVm.hotelList.toList();
         });
@@ -708,6 +710,10 @@ class _ReportWidgetState extends State<NightAuditReport>
                                     ].contains(col['field'])) {
                                       final value = item[col['field']];
                                       return _leftCell(value.toString());
+                                    }
+                                    else if(col['field'] == 'nights'){
+                                      final value = item[col['field']];
+                                      return _rightCell(value);
                                     } else {
                                       final value = item[col['field']];
                                       final formatted = formatCurrency(value);
@@ -991,9 +997,10 @@ class _ReportWidgetState extends State<NightAuditReport>
                                 cells: [
                                   DataCell(Text('Total'.toString())),
                                   _rightCell(
-                                    _nightAuditReportVm
-                                        .receiptSummaryUserTotals["amount"]
-                                        .toString(),
+                                    formatCurrency(
+                                      _nightAuditReportVm
+                                          .receiptSummaryUserTotals["amount"],
+                                    ),
                                   ),
                                 ],
                               ),
