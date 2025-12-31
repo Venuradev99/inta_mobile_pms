@@ -52,7 +52,7 @@ class _SettingsState extends State<Settings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Notification Settings Section
-            _buildNotificationSettingsSection(textTheme),
+            // _buildNotificationSettingsSection(textTheme),
             
             const SizedBox(height: 24),
             

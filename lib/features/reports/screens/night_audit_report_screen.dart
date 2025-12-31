@@ -32,8 +32,8 @@ class _ReportWidgetState extends State<NightAuditReport>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 11, vsync: this);
-    for (int i = 0; i < 11; i++) {
+    _tabController = TabController(length: 10, vsync: this);
+    for (int i = 0; i < 10; i++) {
       _horizontalControllers.add(ScrollController());
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -442,8 +442,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                 Tab(text: 'Checked Out'),
                 Tab(text: 'Daily Sales'),
                 Tab(text: 'Receipt Detail'),
-                Tab(text: 'Receipt User Summary'),
-                Tab(text: 'Receipt Payment Summary'),
+                Tab(text: 'Receipt Summary'),
                 Tab(text: 'Msc. Charges'),
                 Tab(text: 'Room Status'),
                 Tab(text: 'Pax Status'),
@@ -710,8 +709,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                                     ].contains(col['field'])) {
                                       final value = item[col['field']];
                                       return _leftCell(value.toString());
-                                    }
-                                    else if(col['field'] == 'nights'){
+                                    } else if (col['field'] == 'nights') {
                                       final value = item[col['field']];
                                       return _rightCell(value);
                                     } else {
@@ -961,101 +959,108 @@ class _ReportWidgetState extends State<NightAuditReport>
                         child: SingleChildScrollView(
                           controller: _horizontalControllers[3],
                           scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            columns: receiptUserSummaryCols.map((col) {
-                              if (['user'].contains(col['field'])) {
-                                final value = col['header'];
-                                return _leftColAlign(value.toString());
-                              } else {
-                                final value = col['header'];
-                                return _rightColAlign(value.toString());
-                              }
-                            }).toList(),
-                            rows: [
-                              ..._nightAuditReportVm
-                                  .receiptSummaryUserWiseRecodes
-                                  .map((item) {
-                                    return DataRow(
-                                      cells: receiptUserSummaryCols.map((col) {
-                                        if (['user'].contains(col['field'])) {
-                                          final value = item[col['field']];
-                                          return _leftCell(value.toString());
-                                        } else {
-                                          final value = item[col['field']];
-                                          final formatted = formatCurrency(
-                                            value,
-                                          );
-                                          return _rightCell(
-                                            formatted.toString(),
-                                          );
-                                        }
-                                      }).toList(),
-                                    );
-                                  })
-                                  .toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total'.toString())),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .receiptSummaryUserTotals["amount"],
-                                    ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              DataTable(
+                                columns: receiptUserSummaryCols.map((col) {
+                                  if (['user'].contains(col['field'])) {
+                                    final value = col['header'];
+                                    return _leftColAlign(value.toString());
+                                  } else {
+                                    final value = col['header'];
+                                    return _rightColAlign(value.toString());
+                                  }
+                                }).toList(),
+                                rows: [
+                                  ..._nightAuditReportVm
+                                      .receiptSummaryUserWiseRecodes
+                                      .map((item) {
+                                        return DataRow(
+                                          cells: receiptUserSummaryCols.map((
+                                            col,
+                                          ) {
+                                            if ([
+                                              'user',
+                                            ].contains(col['field'])) {
+                                              final value = item[col['field']];
+                                              return _leftCell(
+                                                value.toString(),
+                                              );
+                                            } else {
+                                              final value = item[col['field']];
+                                              final formatted = formatCurrency(
+                                                value,
+                                              );
+                                              return _rightCell(
+                                                formatted.toString(),
+                                              );
+                                            }
+                                          }).toList(),
+                                        );
+                                      })
+                                      .toList(),
+                                  DataRow(
+                                    cells: [
+                                      DataCell(Text('Total'.toString())),
+                                      _rightCell(
+                                        formatCurrency(
+                                          _nightAuditReportVm
+                                              .receiptSummaryUserTotals["amount"],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[3],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[3],
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                            columns: receiptPaySummaryCols.map((col) {
-                              if (['mode'].contains(col['field'])) {
-                                final value = col['header'];
-                                return _leftColAlign(value.toString());
-                              } else {
-                                final value = col['header'];
-                                return _rightColAlign(value.toString());
-                              }
-                            }).toList(),
-                            rows: [
-                              ..._nightAuditReportVm
-                                  .receiptSummaryPayModeWiseRecodes
-                                  .map((item) {
-                                    return DataRow(
-                                      cells: receiptPaySummaryCols.map((col) {
-                                        if (['mode'].contains(col['field'])) {
-                                          final value = item[col['header']];
-                                          return _leftCell(value.toString());
-                                        } else {
-                                          final value = item[col['header']];
-                                          final formatted = formatCurrency(
-                                            value,
-                                          );
-                                          return _rightCell(
-                                            formatted.toString(),
-                                          );
-                                        }
-                                      }).toList(),
-                                    );
-                                  })
-                                  .toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total'.toString())),
-                                  _rightCell(
-                                    _nightAuditReportVm
-                                        .receiptSummaryPayTotals["amount"]
-                                        .toString(),
+                              DataTable(
+                                columns: receiptPaySummaryCols.map((col) {
+                                  if (['mode'].contains(col['field'])) {
+                                    final value = col['header'];
+                                    return _leftColAlign(value.toString());
+                                  } else {
+                                    final value = col['header'];
+                                    return _rightColAlign(value.toString());
+                                  }
+                                }).toList(),
+                                rows: [
+                                  ..._nightAuditReportVm
+                                      .receiptSummaryPayModeWiseRecodes
+                                      .map((item) {
+                                        return DataRow(
+                                          cells: receiptPaySummaryCols.map((
+                                            col,
+                                          ) {
+                                            if ([
+                                              'mode',
+                                            ].contains(col['field'])) {
+                                              final value = item[col['field']];
+                                              return _leftCell(
+                                                value.toString(),
+                                              );
+                                            } else {
+                                              final value = item[col['field']];
+                                              final formatted = formatCurrency(
+                                                value,
+                                              );
+                                              return _rightCell(
+                                                formatted.toString(),
+                                              );
+                                            }
+                                          }).toList(),
+                                        );
+                                      })
+                                      .toList(),
+                                  DataRow(
+                                    cells: [
+                                      DataCell(Text('Total'.toString())),
+                                      _rightCell(
+                                        _nightAuditReportVm
+                                            .receiptSummaryPayTotals["amount"]
+                                            .toString(),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

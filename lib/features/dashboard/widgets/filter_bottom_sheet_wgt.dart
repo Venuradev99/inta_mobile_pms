@@ -56,7 +56,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-     _setFilters();
+    _setFilters();
   }
 
   @override
@@ -138,31 +138,45 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     }
 
     widget.onApply(filters);
-   context.pop();
+    context.pop();
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
     final todaySystemWorkingDate = await LocalStorageManager.getSystemDate();
-    DateTime? firstDate = DateTime.parse(todaySystemWorkingDate);
-    DateTime? lastDate = firstDate.add(const Duration(days: 6));
+
+    final DateTime systemDate = DateTime.parse(todaySystemWorkingDate);
+
+    // 👇 allow any past date
+    final DateTime minDate = DateTime(1900);
+
+    // 👇 limit future selection (optional)
+    final DateTime maxDate = systemDate.add(const Duration(days: 6));
+
+    final DateTime initialDate = isStart
+        ? (startDate ?? systemDate)
+        : (endDate ?? startDate ?? systemDate);
+
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: firstDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
+      initialDate: initialDate,
+      firstDate: isStart ? minDate : (startDate ?? minDate),
+      lastDate: maxDate,
     );
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          startDate = picked;
-          if (endDate != null && endDate!.isBefore(startDate!)) {
-            endDate = null;
-          }
-        } else {
-          endDate = picked;
+
+    if (picked == null) return;
+
+    setState(() {
+      if (isStart) {
+        startDate = picked;
+
+        // reset end date if invalid
+        if (endDate != null && endDate!.isBefore(startDate!)) {
+          endDate = null;
         }
-      });
-    }
+      } else {
+        endDate = picked;
+      }
+    });
   }
 
   @override
@@ -190,7 +204,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               0,
               16,
               80,
-            ), // Bottom padding for fixed buttons
+            ), 
             children: [
               // Drag handle (centered at top)
               const SizedBox(height: 8),
@@ -299,23 +313,22 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       const SizedBox(height: 16),
       // Room type dropdown
       _buildDropdown(
-          'Room Type',
-          widget.roomTypes ?? [FilterDropdownData(id: 0, name: '')],
-          selectedRoomType,
-          (value) => selectedRoomType = value,
-        ),
+        'Room Type',
+        widget.roomTypes ?? [FilterDropdownData(id: 0, name: '')],
+        selectedRoomType,
+        (value) => selectedRoomType = value,
+      ),
 
       if (widget.type != 'departure') ...[
         const SizedBox(height: 16),
+
         // Reservation type dropdown
-       
         _buildDropdown(
-            'Reservation Type',
-            widget.reservationTypes ?? [FilterDropdownData(id: 0, name: '')],
-            selectedReservationType,
-            (value) => selectedReservationType = value,
-          ),
-       
+          'Reservation Type',
+          widget.reservationTypes ?? [FilterDropdownData(id: 0, name: '')],
+          selectedReservationType,
+          (value) => selectedReservationType = value,
+        ),
       ],
     ];
 
@@ -361,15 +374,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         //   contentPadding: EdgeInsets.zero,
         // ),
         const SizedBox(height: 16),
-       
-        
-         _buildDropdown(
-            'Status',
-            widget.statuses ?? [FilterDropdownData(id: 0, name: '')],
-            selectedStatus,
-            (value) => selectedStatus = value,
-          ),
-       
+
+        _buildDropdown(
+          'Status',
+          widget.statuses ?? [FilterDropdownData(id: 0, name: '')],
+          selectedStatus,
+          (value) => selectedStatus = value,
+        ),
 
         const SizedBox(height: 16),
 

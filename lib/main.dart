@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -47,8 +46,6 @@ void main() async {
 
   final appResources = AppResources(baseUrl: baseUrl);
   final dataAccessService = DataAccessService();
-
-
   final userApiService = UserApiService(version);
   final stayViewService = StayViewService(dataAccessService, appResources);
   final dashboardService = DashboardService(dataAccessService, appResources);

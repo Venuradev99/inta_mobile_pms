@@ -14,20 +14,40 @@ class ManagerReportVm extends GetxController {
   final hotelList = <HotelItem>[].obs;
   final currencyList = <CurrencyItem>[].obs;
   final systemWorkingDate = DateTime.now().obs;
+  List<dynamic> responseData = [];
   final isLoading = true.obs;
   final isReportLoading = false.obs;
+  final selectedHotel = 0.obs;
+  final isShowHotelDropdown = false.obs;
+  final receivedHotels = [].obs;
 
-  final paymentData = <PaymentRecordData>[].obs;
-  final roomChargeData = <RevenueRecordData>[].obs;
-  final extraChargeData = <RevenueRecordData>[].obs;
-  final adjustmentData = <RevenueRecordData>[].obs;
-  final taxData = <RevenueRecordData>[].obs;
-  final discountData = <RevenueRecordData>[].obs;
-  final payoutData = <RevenueRecordData>[].obs;
-  final posRevenueData = <RevenueRecordData>[].obs;
-  final posRevenuePaymentData = <PosPaymentData>[].obs;
-  final cityLedgerData = <CityLedgerData>[].obs;
-  final roomSummaryData = <RoomSummaryData>[].obs;
+  final paymentData = [].obs;
+  final roomChargeData = [].obs;
+  final extraChargeData = [].obs;
+  final adjustmentData = [].obs;
+  final taxData = [].obs;
+  final discountData = [].obs;
+  final payoutData = [].obs;
+  final posRevenueData = [].obs;
+  final posRevenuePaymentData = [].obs;
+  final cityLedgerData = [].obs;
+  final roomSummaryData = [].obs;
+
+  final paymentDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final roomChargeDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final extraChargeDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final adjustmentDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final taxDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final discountDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final payoutDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final posRevenueDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final posRevenuePaymentDataTotals = {
+    "today": 0.0,
+    "ptd": 0.0,
+    "ytd": 0.0,
+  }.obs;
+  final cityLedgerDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+  final roomSummaryDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
 
   final financialSections = <String, List<dynamic>>{}.obs;
   final roomSummaryItems = <RoomSummaryData>[].obs;
@@ -71,13 +91,14 @@ class ManagerReportVm extends GetxController {
               (item) => CurrencyItem(
                 currencyId: item["currencyId"],
                 code: item["code"],
-                symbol: item["symbol"]
+                symbol: item["symbol"],
               ),
             )
             .toList();
       } else {
         MessageService().error(
-          currencyResponse["error"][0] ?? 'Error gettings Hotels',
+          currencyResponse["error"][selectedHotel.value] ??
+              'Error gettings Hotels',
         );
       }
     } catch (e) {
@@ -88,216 +109,306 @@ class ManagerReportVm extends GetxController {
     }
   }
 
-  Future<void> getManagerReport(CurrencyItem currency, DateTime selectedDate, List<HotelItem> hotels) async {
+  loadTablesAccordingToHotel() {
+    final data = responseData;
+    final cityLedgerDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotel.value]["cityLedgerRecodes"],
+    );
+    cityLedgerData.value = cityLedgerDataResult.map((item) {
+      cityLedgerDataTotals["today"] =
+          cityLedgerDataTotals["today"]! + (item["today"] as num? ?? 0);
+      cityLedgerDataTotals["ptd"] =
+          cityLedgerDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+      cityLedgerDataTotals["ytd"] =
+          cityLedgerDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+      return {
+        "id": item["id"] ?? 0,
+        "category": item["category"] ?? 'City Ledger',
+        "description": item["description"] ?? 'Opening Balance',
+        "today": item["today"] ?? 0.0,
+        "ptd": item["ptd"] ?? 0.0,
+        "ytd": item["ytd"] ?? 0.0,
+      };
+    }).toList();
+
+    final paymentDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotel.value]["paymentRecodes"],
+    );
+    paymentData.value = paymentDataResult.map((item) {
+      paymentDataTotals["today"] =
+          paymentDataTotals["today"]! + (item["today"] as num? ?? 0);
+      paymentDataTotals["ptd"] =
+          paymentDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+      paymentDataTotals["ytd"] =
+          paymentDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+
+      return {
+        "id": item["id"] ?? 0,
+        "category": item["category"] ?? 'Payment',
+        "code": item["code"] ?? '',
+        "description": item["description"] ?? '',
+        "today": item["today"] ?? 0.0,
+        "ptd": item["ptd"] ?? 0.0,
+        "ytd": item["ytd"] ?? 0.0,
+      };
+    }).toList();
+
+    final revenueRecordDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotel.value]["revenueRecodes"],
+    );
+
+    roomChargeData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Room Charge')
+        .map((item) {
+          roomChargeDataTotals["today"] =
+              roomChargeDataTotals["today"]! + (item["today"] as num? ?? 0);
+          roomChargeDataTotals["ptd"] =
+              roomChargeDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          roomChargeDataTotals["ytd"] =
+              roomChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    roomChargeData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Room Charge')
+        .map((item) {
+          roomChargeDataTotals["today"] =
+              roomChargeDataTotals["today"]! + (item["today"] as num? ?? 0);
+          roomChargeDataTotals["ptd"] =
+              roomChargeDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          roomChargeDataTotals["ytd"] =
+              roomChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    extraChargeData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Extra Charge')
+        .map((item) {
+          extraChargeDataTotals["today"] =
+              extraChargeDataTotals["today"]! + (item["today"] as num? ?? 0);
+          extraChargeDataTotals["ptd"] =
+              extraChargeDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          extraChargeDataTotals["ytd"] =
+              extraChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    adjustmentData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Adjustment')
+        .map((item) {
+          adjustmentDataTotals["today"] =
+              adjustmentDataTotals["today"]! + (item["today"] as num? ?? 0);
+          adjustmentDataTotals["ptd"] =
+              adjustmentDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          adjustmentDataTotals["ytd"] =
+              adjustmentDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    taxData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Tax')
+        .map((item) {
+          taxDataTotals["today"] =
+              taxDataTotals["today"]! + (item["today"] as num? ?? 0);
+          taxDataTotals["ptd"] =
+              taxDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          taxDataTotals["ytd"] =
+              taxDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    discountData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Discount')
+        .map((item) {
+          discountDataTotals["today"] =
+              discountDataTotals["today"]! + (item["today"] as num? ?? 0);
+          discountDataTotals["ptd"] =
+              discountDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          discountDataTotals["ytd"] =
+              discountDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    payoutData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'Pay Outs')
+        .map((item) {
+          payoutDataTotals["today"] =
+              payoutDataTotals["today"]! + (item["today"] as num? ?? 0);
+          payoutDataTotals["ptd"] =
+              payoutDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          payoutDataTotals["ytd"] =
+              payoutDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    posRevenueData.value = revenueRecordDataResult
+        .where((item) => item["category"] == 'POS Revenue')
+        .map((item) {
+          posRevenueDataTotals["today"] =
+              posRevenueDataTotals["today"]! + (item["today"] as num? ?? 0);
+          posRevenueDataTotals["ptd"] =
+              posRevenueDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+          posRevenueDataTotals["ytd"] =
+              posRevenueDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+          return {
+            "id": item["id"] ?? 0,
+            "category": item["category"] ?? 'City Ledger',
+            "description": item["description"] ?? 'Opening Balance',
+            "today": item["today"] ?? 0.0,
+            "ptd": item["ptd"] ?? 0.0,
+            "ytd": item["ytd"] ?? 0.0,
+          };
+        })
+        .toList();
+
+    final posPaymentDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotel.value]["posPaymentRecodes"],
+    );
+
+    posRevenuePaymentData.value = posPaymentDataResult.map((item) {
+      posRevenuePaymentDataTotals["today"] =
+          posRevenuePaymentDataTotals["today"]! + (item["today"] as num? ?? 0);
+      posRevenuePaymentDataTotals["ptd"] =
+          posRevenuePaymentDataTotals["ptd"]! + (item["ptd"] as num? ?? 0);
+      posRevenuePaymentDataTotals["ytd"] =
+          posRevenuePaymentDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
+      return {
+        "id": item["id"] ?? 0,
+        "category": item["category"] ?? 'City Ledger',
+        "code": item["code"] ?? '',
+        "description": item["description"] ?? 'Opening Balance',
+        "today": item["today"] ?? 0.0,
+        "ptd": item["ptd"] ?? 0.0,
+        "ytd": item["ytd"] ?? 0.0,
+      };
+    }).toList();
+
+    final roomSummaryDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotel.value]["roomSummaryRecodes"],
+    );
+
+    roomSummaryData.value = roomSummaryDataResult.map((item) {
+      final today = _toNum(item["today"]);
+      final ptd = _toNum(item["ptd"]);
+      final ytd = _toNum(item["ytd"]);
+
+      roomSummaryDataTotals["today"] = roomSummaryDataTotals["today"]! + today;
+      roomSummaryDataTotals["ptd"] = roomSummaryDataTotals["ptd"]! + ptd;
+      roomSummaryDataTotals["ytd"] = roomSummaryDataTotals["ytd"]! + ytd;
+
+      return {
+        "id": item["id"] ?? 0,
+        "category": item["category"] ?? 'City Ledger',
+        "description": item["description"] ?? 'Opening Balance',
+        "today": today,
+        "ptd": ptd,
+        "ytd": ytd,
+      };
+    }).toList();
+  }
+
+  num _toNum(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  Future<void> getManagerReport(
+    CurrencyItem currency,
+    DateTime selectedDate,
+    List<HotelItem> hotels,
+  ) async {
     try {
       isReportLoading.value = true;
       final payload = ManagerReportPayload(
         currency: currency.currencyId,
         reportId: 213,
         selectedDate: selectedDate.toIso8601String().substring(0, 10),
-        hotelIdsList: hotels.map((HotelItem hotel) => hotel.hotelId).toList().join(',').toString(),
+        hotelIdsList: hotels
+            .map((HotelItem hotel) => hotel.hotelId)
+            .toList()
+            .join(',')
+            .toString(),
       ).toJson();
 
       final response = await _reportsService.getManagerReport(payload);
 
       if (response["isSuccessful"] == true) {
-        final cityLedgerDataResult = List<Map<String, dynamic>>.from(
-          response["result"]["reportData"][0]["cityLedgerRecodes"],
-        );
-        cityLedgerData.value = cityLedgerDataResult
-            .map(
-              (item) => CityLedgerData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? 'City Ledger',
-                description: item["description"] ?? 'Opening Balance',
-                today: item["today"] ?? 0.0,
-                ptd: item["ptd"] ?? 0.0,
-                ytd: item["ytd"] ?? 0.0,
-              ),
-            )
+        receivedHotels.value = (response["result"]["reportData"] as List)
+            .asMap()
+            .entries
+            .map((entry) {
+              final index = entry.key;
+              final hotel = entry.value;
+
+              return {
+                "index": index,
+                "hotelId": hotel["hotelId"],
+                "hotelName": hotel["hotelName"],
+              };
+            })
             .toList();
 
-        final paymentDataResult = List<Map<String, dynamic>>.from(
-          response["result"]["reportData"][0]["paymentRecodes"],
-        );
-        paymentData.value = paymentDataResult
-            .map(
-              (item) => PaymentRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? 'Payment',
-                code: item["code"] ?? '',
-                description: item["description"] ?? '',
-                today: item["today"] ?? 0.0,
-                ptd: item["ptd"] ?? 0.0,
-                ytd: item["ytd"] ?? 0.0,
-              ),
-            )
-            .toList();
+        responseData = response["result"]["reportData"];
 
-        final revenueRecordDataResult = List<Map<String, dynamic>>.from(
-          response["result"]["reportData"][0]["revenueRecodes"],
-        );
-
-        roomChargeData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Room Charge')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        roomChargeData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Room Charge')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        extraChargeData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Extra Charge')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        adjustmentData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Adjustment')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        taxData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Tax')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        discountData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Discount')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        payoutData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'Pay Outs')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        posRevenueData.value = revenueRecordDataResult
-            .where((item) => item["category"] == 'POS Revenue')
-            .map(
-              (item) => RevenueRecordData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        final posPaymentDataResult = List<Map<String, dynamic>>.from(
-          response["result"]["reportData"][0]["posPaymentRecodes"],
-        );
-
-        posRevenuePaymentData.value = posPaymentDataResult
-            .map(
-              (item) => PosPaymentData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? "POS Revenue Payment",
-                code: item["code"] ?? '',
-                description: item["description"] ?? '',
-                today: (item["today"] ?? 0).toDouble(),
-                ptd: (item["ptd"] ?? 0).toDouble(),
-                ytd: (item["ytd"] ?? 0).toDouble(),
-              ),
-            )
-            .toList();
-
-        final roomSummaryDataResult = List<Map<String, dynamic>>.from(
-          response["result"]["reportData"][0]["posPaymentRecodes"],
-        );
-
-        roomSummaryData.value = roomSummaryDataResult
-            .map(
-              (item) => RoomSummaryData(
-                id: item["id"] ?? 0,
-                category: item["category"] ?? "Room Summary",
-                description: item["description"] ?? '',
-                today: double.tryParse(item["today"].toString()) ?? 0.0,
-                ptd: double.tryParse(item["ptd"].toString()) ?? 0.0,
-                ytd: double.tryParse(item["ytd"].toString()) ?? 0.0,
-              ),
-            )
-            .toList();
-
-        financialSections['Room Charges'] = roomChargeData.toList();
-        financialSections['Extra Charges'] = extraChargeData.toList();
-        financialSections['Adjustments'] = adjustmentData.toList();
-        financialSections['Tax'] = taxData.toList();
-        financialSections['Discount'] = discountData.toList();
-        financialSections['Pay Outs'] = payoutData.toList();
-        financialSections['Total Revenue'] = posRevenueData.toList();
-        financialSections['Payment'] = paymentData.toList();
-        financialSections['City Ledger'] = cityLedgerData.toList();
-         financialSections['Room Summary'] = roomSummaryData.toList();
-        // roomSummaryItems.value = roomSummaryData;
-
-        print(financialSections);
+        loadTablesAccordingToHotel();
       } else {
         MessageService().error(
           response["error"][0] ?? 'Error gettings report data',
@@ -308,6 +419,7 @@ class ManagerReportVm extends GetxController {
       throw Exception('Error loading Report: $e');
     } finally {
       isReportLoading.value = false;
+      isShowHotelDropdown.value = true;
     }
   }
 
@@ -322,7 +434,6 @@ class ManagerReportVm extends GetxController {
     } catch (e) {
       throw Exception('Error getting currency symbol: $e');
     }
-    
   }
 
   int getCurrencyId(String currencyCode) {

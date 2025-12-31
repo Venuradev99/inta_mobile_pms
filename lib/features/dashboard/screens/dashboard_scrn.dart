@@ -739,14 +739,14 @@ class _DashboardState extends State<Dashboard> {
                   () => context.push(AppRoutes.departureList),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.attach_money,
-                  'Rates & Inventory',
-                  () => context.push(AppRoutes.ratesInventory),
-                  config,
-                ),
+                // _buildMenuTile(
+                //   context,
+                //   textTheme,
+                //   Icons.attach_money,
+                //   'Rates & Inventory',
+                //   () => context.push(AppRoutes.ratesInventory),
+                //   config,
+                // ),
                 ExpansionTile(
                   leading: Container(
                     padding: EdgeInsets.all(
@@ -856,14 +856,14 @@ class _DashboardState extends State<Dashboard> {
                   () => context.push(AppRoutes.netLock),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.notifications,
-                  'Notification',
-                  () => context.push(AppRoutes.notifications),
-                  config,
-                ),
+                // _buildMenuTile(
+                //   context,
+                //   textTheme,
+                //   Icons.notifications,
+                //   'Notification',
+                //   () => context.push(AppRoutes.notifications),
+                //   config,
+                // ),
                 _buildMenuTile(
                   context,
                   textTheme,
