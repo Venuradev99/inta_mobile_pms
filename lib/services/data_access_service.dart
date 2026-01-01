@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
@@ -8,17 +7,9 @@ import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class DataAccessService {
   Map<String, dynamic>? configData;
-  String? baseUrl;
+  late String baseUrl;
 
-  Future<void> loadConfigData() async {
-    try {
-      final configString = await rootBundle.loadString('assets/config.json');
-      final response = json.decode(configString);
-      baseUrl = response['baseUrl'].toString();
-    } catch (e) {
-      throw Exception('Failed to load configuration: $e');
-    } finally {}
-  }
+  DataAccessService(this.baseUrl);
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     final Map<String, dynamic> responseBody = json.decode(response.body);

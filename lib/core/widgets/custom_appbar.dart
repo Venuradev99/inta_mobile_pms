@@ -110,7 +110,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
         if (widget.onFilterTap != null)
           IconButton(
-            icon: const Icon(Icons.filter_list, color: AppColors.black),
+            icon: const Icon(Icons.search, color: AppColors.black), //changed the icon to search icon
             onPressed: widget.onFilterTap,
           ),
 

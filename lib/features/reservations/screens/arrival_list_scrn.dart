@@ -50,7 +50,7 @@ class _ArrivalListState extends State<ArrivalList> {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Arrival List',
-        onSearchChanged: (query) => _reservationVm.search(query),
+        // onSearchChanged: (query) => _reservationVm.search(query),
           onRefreshTap: () async {
            await _reservationVm.getReservationsMap(1);
         },

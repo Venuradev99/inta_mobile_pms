@@ -45,7 +45,7 @@ class _ReservationListState extends State<ReservationList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Reservation List',
-        onSearchChanged: (query) => _reservationVm.search(query),
+        // onSearchChanged: (query) => _reservationVm.search(query),
         onRefreshTap: () async {
            await _reservationVm.getReservationsMap(1);
         },

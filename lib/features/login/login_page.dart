@@ -180,33 +180,12 @@ class _LoginPageState extends State<LoginPage>
   Widget _buildLogoSection(BuildContext context) {
     return Column(
       children: [
-        // App Logo
-        Container(
+        // App Logo (just the image)
+        Image.asset(
+          _userApiService.appIconPath, // path to your image
           height: ResponsiveConfig.scaleHeight(context, 120),
           width: ResponsiveConfig.scaleWidth(context, 120),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(
-              ResponsiveConfig.cardRadius(context) * 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              'INTA',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.onPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveConfig.scaleWidth(context, 28),
-              ),
-            ),
-          ),
+          fit: BoxFit.contain,
         ),
         SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
 
@@ -235,6 +214,65 @@ class _LoginPageState extends State<LoginPage>
       ],
     );
   }
+
+  // Widget _buildLogoSection(BuildContext context) {
+  //   return Column(
+  //     children: [
+  //       // App Logo
+  //       Container(
+  //         height: ResponsiveConfig.scaleHeight(context, 120),
+  //         width: ResponsiveConfig.scaleWidth(context, 120),
+  //         decoration: BoxDecoration(
+  //           color: AppColors.primary,
+  //           borderRadius: BorderRadius.circular(
+  //             ResponsiveConfig.cardRadius(context) * 1.5,
+  //           ),
+  //           boxShadow: [
+  //             BoxShadow(
+  //               color: AppColors.primary.withOpacity(0.3),
+  //               blurRadius: 20,
+  //               offset: const Offset(0, 8),
+  //             ),
+  //           ],
+  //         ),
+  //         child: Center(
+  //           child: Text(
+  //             'INTA',
+  //             style: Theme.of(context).textTheme.titleLarge?.copyWith(
+  //               color: AppColors.onPrimary,
+  //               fontWeight: FontWeight.bold,
+  //               fontSize: ResponsiveConfig.scaleWidth(context, 28),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //       SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+
+  //       // Welcome Text
+  //       Text(
+  //         'Welcome to Inta PMS Mobile',
+  //         style: Theme.of(context).textTheme.titleMedium?.copyWith(
+  //           color: AppColors.darkgrey,
+  //           fontSize:
+  //               ResponsiveConfig.scaleWidth(context, 18) *
+  //               ResponsiveConfig.fontScale(context),
+  //         ),
+  //         textAlign: TextAlign.center,
+  //       ),
+  //       SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
+  //       Text(
+  //         'Welcome back! Please sign in to continue.',
+  //         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+  //           color: AppColors.lightgrey,
+  //           fontSize:
+  //               ResponsiveConfig.scaleWidth(context, 14) *
+  //               ResponsiveConfig.fontScale(context),
+  //         ),
+  //         textAlign: TextAlign.center,
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildLoginForm(BuildContext context, ThemeData theme) {
     return Container(

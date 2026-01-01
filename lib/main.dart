@@ -43,10 +43,11 @@ void main() async {
   final config = jsonDecode(configString);
   String baseUrl = config['baseUrl'];
   String version = config['version'];
+  String appIconPath = config['appIconPath'];
 
   final appResources = AppResources(baseUrl: baseUrl);
-  final dataAccessService = DataAccessService();
-  final userApiService = UserApiService(version);
+  final dataAccessService = DataAccessService(baseUrl);
+  final userApiService = UserApiService(version, baseUrl, appIconPath);
   final stayViewService = StayViewService(dataAccessService, appResources);
   final dashboardService = DashboardService(dataAccessService, appResources);
   final reservationService = ReservationService(
@@ -63,7 +64,6 @@ void main() async {
   );
   final reportsService = ReportsService(dataAccessService, appResources);
 
-
   Get.put<StayViewService>(stayViewService);
   Get.put<DashboardService>(dashboardService);
   Get.put<ReservationService>(reservationService);
@@ -72,7 +72,6 @@ void main() async {
   Get.put<QuickReservationService>(quickReservationService);
   Get.put<ReportsService>(reportsService);
 
- 
   Get.put<DashboardVm>(
     DashboardVm(
       Get.find<DashboardService>(),
@@ -81,9 +80,7 @@ void main() async {
     ),
   );
   Get.put<ReservationVm>(ReservationVm(Get.find<ReservationService>()));
-  Get.put<VoidReservationVm>(
-    VoidReservationVm(Get.find<ReservationService>()),
-  );
+  Get.put<VoidReservationVm>(VoidReservationVm(Get.find<ReservationService>()));
   Get.put<StopRoomMoveVm>(StopRoomMoveVm(Get.find<ReservationService>()));
   Get.put<RoomMoveVm>(RoomMoveVm(Get.find<ReservationService>()));
   Get.put<NoShowReservationVm>(
@@ -108,7 +105,7 @@ void main() async {
     EditGuestDetailsVm(Get.find<ReservationService>()),
   );
   Get.put<StayViewVm>(
-    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationService>())
+    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationService>()),
   );
   Get.put<QuickReservationVm>(
     QuickReservationVm(Get.find<QuickReservationService>()),

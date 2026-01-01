@@ -44,7 +44,7 @@ class _DepartureListState extends State<DepartureList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Departure List',
-        onSearchChanged: (query) => _reservationVm.search(query),
+        // onSearchChanged: (query) => _reservationVm.search(query),
         onRefreshTap: () async {
           await _reservationVm.getReservationsMap(1);
         },

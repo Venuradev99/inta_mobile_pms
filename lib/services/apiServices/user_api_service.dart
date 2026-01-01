@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
@@ -10,27 +9,16 @@ import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
   late String version;
+  late String baseUrl;
+  late String appIconPath;
 
-  UserApiService(this.version);
+  UserApiService(this.version,this.baseUrl, this.appIconPath);
 
   get getVersion => version;
-
-  static Future<Map<String, dynamic>> getConfigJSON() async {
-    try {
-      final configString = await rootBundle.loadString('assets/config.json');
-      final response = json.decode(configString);
-      return response;
-    } catch (e) {
-      String msg = 'Failed to load configuration: $e';
-      MessageService().error(msg);
-      throw Exception(msg);
-    }
-  }
+  get getIconPath => appIconPath;
 
   Future<void> login(String username, String password, String hotelId) async {
     try {
-      final config = await UserApiService.getConfigJSON();
-      final baseUrl = config['baseUrl'] ?? '';
       final loginUrl = '$baseUrl${AppResources.authentication}';
       final response = await http.post(
         Uri.parse(loginUrl),
@@ -49,7 +37,6 @@ class UserApiService {
         final token = responseData["access_token"];
 
         if (token != null && token.isNotEmpty) {
-          // Save data locally
           await LocalStorageManager.setMasterData({
             "userName": responseData["userName"],
             "userId": responseData["userid"],
@@ -88,14 +75,13 @@ class UserApiService {
           if (hotelInfo["isSuccessful"]) {
             await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
           }
-          // Show success
+          
           NavigationService().go(AppRoutes.dashboard);
           MessageService().success("Login successful");
         } else {
           MessageService().error("No access token found in response");
         }
       } else {
-        //login failed message
         MessageService().error(
           "${jsonDecode(response.body)["error_description"]}",
         );
@@ -110,13 +96,8 @@ class UserApiService {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
       final url = AppResources.getSystemWorkingDate;
-
-      final config = await UserApiService.getConfigJSON();
-      final baseUrl = config['baseUrl'] ?? '';
-
       if (token.isEmpty) throw Exception('Session key not available');
-      if (baseUrl == null) throw Exception('baseUrl URL not available');
-
+   
       final headers = {
         'Authorization': token,
         'Content-Type': 'application/json',
@@ -151,11 +132,7 @@ class UserApiService {
       final hotelId = await LocalStorageManager.getHotelId();
       final url = AppResources.getBaseCurrency;
 
-      final config = await UserApiService.getConfigJSON();
-      final baseUrl = config['baseUrl'] ?? '';
-
       if (token.isEmpty) throw Exception('Session key not available');
-      if (baseUrl == null) throw Exception('baseUrl URL not available');
 
       final headers = {
         'Authorization': token,
@@ -189,12 +166,7 @@ class UserApiService {
       final hotelId = await LocalStorageManager.getHotelId();
       final url = AppResources.hotel;
 
-      final config = await UserApiService.getConfigJSON();
-      final baseUrl = config['baseUrl'] ?? '';
-
       if (token.isEmpty) throw Exception('Session key not available');
-      if (baseUrl == null) throw Exception('baseUrl URL not available');
-
       final headers = {
         'Authorization': token,
         'Content-Type': 'application/json',
@@ -224,9 +196,6 @@ class UserApiService {
   Future<void> logout() async {
     try {
       await LocalStorageManager.clearUserData();
-      // final logoutUrl = AppResources.logoutUrl;
-      // final response = await http.post(Uri.parse(logoutUrl));
-
       NavigationService().go(AppRoutes.login);
     } catch (e) {
       String msg = 'Error occured while logout: $e';
