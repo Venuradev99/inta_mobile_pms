@@ -1,7 +1,6 @@
 import 'package:get/Get.dart';
 import 'package:inta_mobile_pms/features/reports/models/currency_item.dart';
 import 'package:inta_mobile_pms/features/reports/models/hotel_item.dart';
-import 'package:inta_mobile_pms/features/reports/models/manager_report.dart';
 import 'package:inta_mobile_pms/features/reports/models/manager_report_payload.dart';
 import 'package:inta_mobile_pms/services/apiServices/reports_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
@@ -20,6 +19,8 @@ class ManagerReportVm extends GetxController {
   final selectedHotel = 0.obs;
   final isShowHotelDropdown = false.obs;
   final receivedHotels = [].obs;
+  final isMultipleHotelCheckbox = false.obs;
+  int multipleHotelIndex = 0;
 
   final paymentData = [].obs;
   final roomChargeData = [].obs;
@@ -32,6 +33,7 @@ class ManagerReportVm extends GetxController {
   final posRevenuePaymentData = [].obs;
   final cityLedgerData = [].obs;
   final roomSummaryData = [].obs;
+  final statisticRecordsData = [].obs;
 
   final paymentDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
   final roomChargeDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
@@ -50,9 +52,35 @@ class ManagerReportVm extends GetxController {
   final roomSummaryDataTotals = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
 
   final financialSections = <String, List<dynamic>>{}.obs;
-  final roomSummaryItems = <RoomSummaryData>[].obs;
 
   ManagerReportVm(this._reportsService);
+
+  void resetData() {
+    paymentData.value = [];
+    roomChargeData.value = [];
+    extraChargeData.value = [];
+    adjustmentData.value = [];
+    taxData.value = [];
+    discountData.value = [];
+    payoutData.value = [];
+    posRevenueData.value = [];
+    posRevenuePaymentData.value = [];
+    cityLedgerData.value = [];
+    roomSummaryData.value = [];
+    statisticRecordsData.value = [];
+
+    paymentDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0};
+    roomChargeDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0};
+    extraChargeDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    adjustmentDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    taxDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    discountDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    payoutDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    posRevenueDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0}.obs;
+    posRevenuePaymentDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0};
+    cityLedgerDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0};
+    roomSummaryDataTotals.value = {"today": 0.0, "ptd": 0.0, "ytd": 0.0};
+  }
 
   Future<void> loadInitialData() async {
     try {
@@ -110,9 +138,28 @@ class ManagerReportVm extends GetxController {
   }
 
   loadTablesAccordingToHotel() {
+    final selectedHotelId = isMultipleHotelCheckbox.value == true
+        ? multipleHotelIndex
+        : selectedHotel.value;
     final data = responseData;
+
+    final statisticRecordsDataResult = List<Map<String, dynamic>>.from(
+      data[selectedHotelId]["statisticRecords"],
+    );
+    statisticRecordsData.value = statisticRecordsDataResult.map((item) {
+      return {
+        "id": item["id"] ?? 0,
+        "category": item["category"] ?? 'Statistics',
+        "description": item["description"] ?? '',
+        "today": item["today"] ?? 0.0,
+        "ptd": item["ptd"] ?? 0.0,
+        "ytd": item["ytd"] ?? 0.0,
+      };
+    }).toList();
+
+    
     final cityLedgerDataResult = List<Map<String, dynamic>>.from(
-      data[selectedHotel.value]["cityLedgerRecodes"],
+      data[selectedHotelId]["cityLedgerRecodes"],
     );
     cityLedgerData.value = cityLedgerDataResult.map((item) {
       cityLedgerDataTotals["today"] =
@@ -123,8 +170,8 @@ class ManagerReportVm extends GetxController {
           cityLedgerDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
       return {
         "id": item["id"] ?? 0,
-        "category": item["category"] ?? 'City Ledger',
-        "description": item["description"] ?? 'Opening Balance',
+        "category": item["category"] ?? '',
+        "description": item["description"] ?? '',
         "today": item["today"] ?? 0.0,
         "ptd": item["ptd"] ?? 0.0,
         "ytd": item["ytd"] ?? 0.0,
@@ -132,7 +179,7 @@ class ManagerReportVm extends GetxController {
     }).toList();
 
     final paymentDataResult = List<Map<String, dynamic>>.from(
-      data[selectedHotel.value]["paymentRecodes"],
+      data[selectedHotelId]["paymentRecodes"],
     );
     paymentData.value = paymentDataResult.map((item) {
       paymentDataTotals["today"] =
@@ -154,7 +201,7 @@ class ManagerReportVm extends GetxController {
     }).toList();
 
     final revenueRecordDataResult = List<Map<String, dynamic>>.from(
-      data[selectedHotel.value]["revenueRecodes"],
+      data[selectedHotelId]["revenueRecodes"],
     );
 
     roomChargeData.value = revenueRecordDataResult
@@ -168,8 +215,8 @@ class ManagerReportVm extends GetxController {
               roomChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -188,8 +235,8 @@ class ManagerReportVm extends GetxController {
               roomChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -208,8 +255,8 @@ class ManagerReportVm extends GetxController {
               extraChargeDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -228,8 +275,8 @@ class ManagerReportVm extends GetxController {
               adjustmentDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -248,8 +295,8 @@ class ManagerReportVm extends GetxController {
               taxDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -268,8 +315,8 @@ class ManagerReportVm extends GetxController {
               discountDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -288,8 +335,8 @@ class ManagerReportVm extends GetxController {
               payoutDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -308,8 +355,8 @@ class ManagerReportVm extends GetxController {
               posRevenueDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
           return {
             "id": item["id"] ?? 0,
-            "category": item["category"] ?? 'City Ledger',
-            "description": item["description"] ?? 'Opening Balance',
+            "category": item["category"] ?? '',
+            "description": item["description"] ?? '',
             "today": item["today"] ?? 0.0,
             "ptd": item["ptd"] ?? 0.0,
             "ytd": item["ytd"] ?? 0.0,
@@ -318,7 +365,7 @@ class ManagerReportVm extends GetxController {
         .toList();
 
     final posPaymentDataResult = List<Map<String, dynamic>>.from(
-      data[selectedHotel.value]["posPaymentRecodes"],
+      data[selectedHotelId]["posPaymentRecodes"],
     );
 
     posRevenuePaymentData.value = posPaymentDataResult.map((item) {
@@ -330,9 +377,9 @@ class ManagerReportVm extends GetxController {
           posRevenuePaymentDataTotals["ytd"]! + (item["ytd"] as num? ?? 0);
       return {
         "id": item["id"] ?? 0,
-        "category": item["category"] ?? 'City Ledger',
+        "category": item["category"] ?? '',
         "code": item["code"] ?? '',
-        "description": item["description"] ?? 'Opening Balance',
+        "description": item["description"] ?? '',
         "today": item["today"] ?? 0.0,
         "ptd": item["ptd"] ?? 0.0,
         "ytd": item["ytd"] ?? 0.0,
@@ -340,7 +387,7 @@ class ManagerReportVm extends GetxController {
     }).toList();
 
     final roomSummaryDataResult = List<Map<String, dynamic>>.from(
-      data[selectedHotel.value]["roomSummaryRecodes"],
+      data[selectedHotelId]["roomSummaryRecodes"],
     );
 
     roomSummaryData.value = roomSummaryDataResult.map((item) {
@@ -354,8 +401,8 @@ class ManagerReportVm extends GetxController {
 
       return {
         "id": item["id"] ?? 0,
-        "category": item["category"] ?? 'City Ledger',
-        "description": item["description"] ?? 'Opening Balance',
+        "category": item["category"] ?? '',
+        "description": item["description"] ?? '',
         "today": today,
         "ptd": ptd,
         "ytd": ytd,
@@ -374,8 +421,10 @@ class ManagerReportVm extends GetxController {
     CurrencyItem currency,
     DateTime selectedDate,
     List<HotelItem> hotels,
+    bool isMultipleHotel,
   ) async {
     try {
+      isMultipleHotelCheckbox.value = isMultipleHotel;
       isReportLoading.value = true;
       final payload = ManagerReportPayload(
         currency: currency.currencyId,
@@ -397,7 +446,9 @@ class ManagerReportVm extends GetxController {
             .map((entry) {
               final index = entry.key;
               final hotel = entry.value;
-
+              if (isMultipleHotel == true && hotel["hotelId"] == -1) {
+                multipleHotelIndex = index;
+              }
               return {
                 "index": index,
                 "hotelId": hotel["hotelId"],
