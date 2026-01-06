@@ -18,6 +18,7 @@ class DashboardVm extends GetxController {
   final hotelName = ''.obs;
   final baseCurrency = ''.obs;
   final isSearching = false.obs;
+  final currentWorkingDate = ''.obs;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -69,6 +70,10 @@ class DashboardVm extends GetxController {
 
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       baseCurrency.value = baseCurrencyData.code;
+
+      final workingDate = await LocalStorageManager.getSystemDate();
+      currentWorkingDate.value = workingDate;
+      
     } catch (e) {
       throw Exception('Error in GetUserName: $e');
     }
@@ -178,30 +183,50 @@ class DashboardVm extends GetxController {
           yesterday: 0,
         );
 
+        if (occupancyData.value!.today > 100) {
+          occupancyData.value = OccupancyData(today: 100, yesterday: 0);
+        }
+
         for (final item in inventoryResult) {
           if (item['name'] == "Available Rooms") {
             totalAvailableRooms.value = item["value"];
-            totalAvailableRoomsRate.value = totalRoomsInProperty == 0
-                ? 0
-                : totalAvailableRooms / totalRoomsInProperty.value;
+            if (totalRoomsInProperty.value < totalAvailableRooms.value) {
+              totalAvailableRoomsRate.value = 1;
+            } else {
+              totalAvailableRoomsRate.value = totalRoomsInProperty == 0
+                  ? 0
+                  : totalAvailableRooms / totalRoomsInProperty.value;
+            }
           }
           if (item['name'] == "Sold Rooms") {
             totalRoomSold.value = item["value"];
-            totalRoomSoldRate.value = totalRoomsInProperty == 0
-                ? 0
-                : totalRoomSold / totalRoomsInProperty.value;
+            if (totalRoomsInProperty.value < totalRoomSold.value) {
+              totalRoomSoldRate.value = 1;
+            } else {
+              totalRoomSoldRate.value = totalRoomsInProperty == 0
+                  ? 0
+                  : totalRoomSold / totalRoomsInProperty.value;
+            }
           }
           if (item['name'] == "Blocked Rooms") {
             outOfOrderRooms.value = item["value"];
-            outOfOrderRoomsRate.value = totalRoomsInProperty == 0
-                ? 0
-                : outOfOrderRooms / totalRoomsInProperty.value;
+            if (totalRoomsInProperty.value < outOfOrderRooms.value) {
+              outOfOrderRoomsRate.value = 1;
+            } else {
+              outOfOrderRoomsRate.value = totalRoomsInProperty == 0
+                  ? 0
+                  : outOfOrderRooms / totalRoomsInProperty.value;
+            }
           }
           if (item['name'] == "Complimentary Rooms") {
             complementaryRooms.value = item["value"];
-            complementaryRoomsRate.value = totalRoomsInProperty == 0
-                ? 0
-                : complementaryRooms / totalRoomsInProperty.value;
+            if (totalRoomsInProperty.value < complementaryRooms.value) {
+              complementaryRoomsRate.value = 1;
+            } else {
+              complementaryRoomsRate.value = totalRoomsInProperty == 0
+                  ? 0
+                  : complementaryRooms / totalRoomsInProperty.value;
+            }
           }
         }
       } else {

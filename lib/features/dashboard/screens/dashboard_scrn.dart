@@ -93,22 +93,22 @@ class _DashboardState extends State<Dashboard> {
               context.push(AppRoutes.stayView);
             },
           ),
-          IconButton(
-            icon: Icon(Icons.print, color: AppColors.black, size: iconSize),
-            onPressed: () {
-              // openBrowser('http://192.168.1.176:2234');
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.notifications,
-              color: AppColors.black,
-              size: iconSize,
-            ),
-            onPressed: () {
-              context.push(AppRoutes.notifications);
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.print, color: AppColors.black, size: iconSize),
+          //   onPressed: () {
+          //     // openBrowser('http://192.168.1.176:2234');
+          //   },
+          // ),
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.notifications,
+          //     color: AppColors.black,
+          //     size: iconSize,
+          //   ),
+          //   onPressed: () {
+          //     context.push(AppRoutes.notifications);
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),
             onPressed: () => _dashboardVm.refreshDashboard(),
@@ -875,7 +875,26 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
-          // Bottom Logout
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+            decoration: BoxDecoration(
+              color: AppColors.surface.withOpacity(0.5),
+              border: Border(
+                top: BorderSide(color: AppColors.onSurface.withOpacity(0.1)),
+              ),
+            ),
+            child: Obx(
+              () => Text(
+               'Working Date: ${_dashboardVm.currentWorkingDate.value}',
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.primary.withOpacity(0.6),
+                  fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                  fontWeight: FontWeight.w500
+                ),
+              ),
+            ),
+          ),
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),

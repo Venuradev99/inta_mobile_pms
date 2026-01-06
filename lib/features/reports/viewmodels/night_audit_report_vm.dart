@@ -372,7 +372,7 @@ class NightAuditReportVm extends GetxController {
             .toList() ??
         [];
 
-    receiptSummaryPayModeWiseRecodes.forEach((element) {
+    receiptSummaryUserWiseRecodes.forEach((element) {
       receiptSummaryUserTotals["amount"] =
           (receiptSummaryUserTotals["amount"] ?? 0) +
           (element["amount"] as num? ?? 0);
@@ -423,8 +423,7 @@ class NightAuditReportVm extends GetxController {
       totals["adjust"] = totals["adjust"]! + (element["adjust"] as num? ?? 0);
       totals["balanceAmount"] =
           totals["balanceAmount"]! + (element["balanceAmount"] as num? ?? 0);
-      totals["discount"] =
-          totals["discount"]! + (element["discount"] as num? ?? 0);
+      
       totals["extraCharges"] =
           totals["extraCharges"]! + (element["extraCharges"] as num? ?? 0);
       totals["receivedAmount"] =

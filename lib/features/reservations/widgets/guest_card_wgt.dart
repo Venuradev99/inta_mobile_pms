@@ -61,17 +61,52 @@ class GuestCard extends StatelessWidget {
     return '$symbol $formatted';
   }
 
+  String formatDateShort(String dateStr) {
+    if (dateStr.isEmpty) return '';
+
+    DateTime? date;
+    try {
+      date = DateTime.parse(dateStr);
+    } catch (e) {
+      return ''; 
+    }
+
+    final monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    final month = monthNames[date.month - 1]; 
+    final day = date.day;
+
+    return "$month $day";
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final statusColor = colorCode ?? Colors.grey;
-    final icon = roomType != null ? Icons.apartment : Icons.apartment; // Placeholder; can be customized based on roomType
+    final icon = roomType != null
+        ? Icons.apartment
+        : Icons.apartment; // Placeholder; can be customized based on roomType
 
     return GestureDetector(
       onTap: onTap,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isNarrow = constraints.maxWidth < 360; // Adjust threshold as needed for very small screens
+          final isNarrow =
+              constraints.maxWidth <
+              360; // Adjust threshold as needed for very small screens
 
           return Container(
             padding: EdgeInsets.all(isNarrow ? 12 : 16),
@@ -130,7 +165,7 @@ class GuestCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '$startDate - $endDate',
+                        '${formatDateShort(startDate)} - ${formatDateShort(endDate)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           fontSize: isNarrow ? 12 : null,
@@ -335,7 +370,11 @@ class GuestCardShimmer extends StatelessWidget {
                 SizedBox(height: isNarrow ? 8 : 12),
                 Row(
                   children: [
-                    Container(width: 100, height: isNarrow ? 10 : 12, color: Colors.grey[300]),
+                    Container(
+                      width: 100,
+                      height: isNarrow ? 10 : 12,
+                      color: Colors.grey[300],
+                    ),
                     SizedBox(width: isNarrow ? 8 : 12),
                     Container(
                       width: 60,
@@ -350,9 +389,17 @@ class GuestCardShimmer extends StatelessWidget {
                 SizedBox(height: isNarrow ? 4 : 8),
                 Row(
                   children: [
-                    Container(width: 80, height: isNarrow ? 10 : 12, color: Colors.grey[300]),
+                    Container(
+                      width: 80,
+                      height: isNarrow ? 10 : 12,
+                      color: Colors.grey[300],
+                    ),
                     SizedBox(width: isNarrow ? 8 : 12),
-                    Container(width: 100, height: isNarrow ? 10 : 12, color: Colors.grey[300]),
+                    Container(
+                      width: 100,
+                      height: isNarrow ? 10 : 12,
+                      color: Colors.grey[300],
+                    ),
                     const Spacer(),
                     Container(
                       width: 40,
@@ -367,9 +414,17 @@ class GuestCardShimmer extends StatelessWidget {
                 SizedBox(height: isNarrow ? 4 : 8),
                 Row(
                   children: [
-                    Container(width: 100, height: isNarrow ? 12 : 14, color: Colors.grey[300]),
+                    Container(
+                      width: 100,
+                      height: isNarrow ? 12 : 14,
+                      color: Colors.grey[300],
+                    ),
                     const Spacer(),
-                    Container(width: 80, height: isNarrow ? 12 : 14, color: Colors.grey[300]),
+                    Container(
+                      width: 80,
+                      height: isNarrow ? 12 : 14,
+                      color: Colors.grey[300],
+                    ),
                   ],
                 ),
               ],

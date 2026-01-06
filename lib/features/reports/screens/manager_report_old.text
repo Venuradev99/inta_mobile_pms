@@ -38,12 +38,13 @@ class _ReportWidgetState extends State<ManagerReport>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 11, vsync: this);
-    for (int i = 0; i < 11; i++) {
+    _tabController = TabController(length: 12, vsync: this);
+    for (int i = 0; i < 12; i++) {
       _horizontalControllers.add(ScrollController());
     }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
+        _managerReportVm.resetData();
         await _managerReportVm.loadInitialData();
 
         setState(() {
@@ -180,7 +181,9 @@ class _ReportWidgetState extends State<ManagerReport>
                                 color: AppColors.onPrimary,
                               ),
                               buttonText: Text(
-                                _selectedHotels.isEmpty ? "Select" : "View Hotels",
+                                _selectedHotels.isEmpty
+                                    ? "Select"
+                                    : "View Hotels",
                                 style: TextStyle(
                                   color: AppColors.onPrimary,
                                   fontSize: 14,
@@ -258,7 +261,9 @@ class _ReportWidgetState extends State<ManagerReport>
                               child: Text(
                                 _selectedDate == null
                                     ? 'Pick a date'
-                                    : '${_selectedDate!.toLocal()}'.split(' ')[0],
+                                    : '${_selectedDate!.toLocal()}'.split(
+                                        ' ',
+                                      )[0],
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
@@ -304,19 +309,19 @@ class _ReportWidgetState extends State<ManagerReport>
                               },
                               items: _currencyList
                                   .map<DropdownMenuItem<CurrencyItem>>((
-                                        CurrencyItem value,
-                                      ) {
-                                        return DropdownMenuItem<CurrencyItem>(
-                                          value: value,
-                                          child: Text(
-                                            value.code,
-                                            style: TextStyle(
-                                              color: AppColors.darkgrey,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        );
-                                      })
+                                    CurrencyItem value,
+                                  ) {
+                                    return DropdownMenuItem<CurrencyItem>(
+                                      value: value,
+                                      child: Text(
+                                        value.code,
+                                        style: TextStyle(
+                                          color: AppColors.darkgrey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    );
+                                  })
                                   .toList(),
                               onChanged: (CurrencyItem? currency) {
                                 setState(() {
@@ -356,7 +361,9 @@ class _ReportWidgetState extends State<ManagerReport>
                                 color: AppColors.onPrimary,
                               ),
                               buttonText: Text(
-                                _selectedViewIndices.isEmpty ? "Select" : "View Hotels",
+                                _selectedViewIndices.isEmpty
+                                    ? "Select"
+                                    : "View Hotels",
                                 style: TextStyle(
                                   color: AppColors.onPrimary,
                                   fontSize: 14,
@@ -438,6 +445,7 @@ class _ReportWidgetState extends State<ManagerReport>
                 Tab(text: 'POS Revenue Payment'),
                 Tab(text: 'City Ledger'),
                 Tab(text: 'Room Summary'),
+                Tab(text: 'Statistics'),
               ],
             ),
           ),
@@ -457,6 +465,10 @@ class _ReportWidgetState extends State<ManagerReport>
                     },
                   ),
                 ),
+              );
+            } else if (_managerReportVm.roomChargeData.isEmpty) {
+              return const Expanded(
+                child: Center(child: Text('Please generate the report')),
               );
             } else {
               return Expanded(
@@ -838,12 +850,14 @@ class _ReportWidgetState extends State<ManagerReport>
 
                                     _rightCell(
                                       formatCurrency(
-                                        _managerReportVm.payoutDataTotals["ptd"],
+                                        _managerReportVm
+                                            .payoutDataTotals["ptd"],
                                       ).toString(),
                                     ),
                                     _rightCell(
                                       formatCurrency(
-                                        _managerReportVm.payoutDataTotals["ytd"],
+                                        _managerReportVm
+                                            .payoutDataTotals["ytd"],
                                       ).toString(),
                                     ),
                                   ],
@@ -968,12 +982,14 @@ class _ReportWidgetState extends State<ManagerReport>
 
                                     _rightCell(
                                       formatCurrency(
-                                        _managerReportVm.paymentDataTotals["ptd"],
+                                        _managerReportVm
+                                            .paymentDataTotals["ptd"],
                                       ).toString(),
                                     ),
                                     _rightCell(
                                       formatCurrency(
-                                        _managerReportVm.paymentDataTotals["ytd"],
+                                        _managerReportVm
+                                            .paymentDataTotals["ytd"],
                                       ).toString(),
                                     ),
                                   ],
@@ -1178,6 +1194,49 @@ class _ReportWidgetState extends State<ManagerReport>
                                     ),
                                   ],
                                 ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SingleChildScrollView(
+                      child: Scrollbar(
+                        controller: _horizontalControllers[10],
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          controller: _horizontalControllers[10],
+                          scrollDirection: Axis.horizontal,
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: DataTable(
+                              columns: cols.map((col) {
+                                if (['description'].contains(col['field'])) {
+                                  return _leftColAlign(col['header']!);
+                                } else {
+                                  return _rightColAlign(col['header']!);
+                                }
+                              }).toList(),
+                              rows: [
+                                ..._managerReportVm.statisticRecordsData.map((
+                                  item,
+                                ) {
+                                  return DataRow(
+                                    cells: cols.map((col) {
+                                      if ([
+                                        'description',
+                                      ].contains(col['field'])) {
+                                        final value = item[col['field']];
+                                        return _leftCell(value.toString());
+                                      } else {
+                                        final value = item[col['field']];
+                                        final formatted = formatCurrency(value);
+                                        return _rightCell(formatted.toString());
+                                      }
+                                    }).toList(),
+                                  );
+                                }).toList(),
                               ],
                             ),
                           ),

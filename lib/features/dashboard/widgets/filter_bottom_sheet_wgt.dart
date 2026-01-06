@@ -147,10 +147,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     final DateTime systemDate = DateTime.parse(todaySystemWorkingDate);
 
     // 👇 allow any past date
-    final DateTime minDate = DateTime(1900);
+    final DateTime minDate = DateTime(
+      systemDate.year - 20,
+      systemDate.month,
+      systemDate.day,
+    );
 
     // 👇 limit future selection (optional)
-    final DateTime maxDate = systemDate.add(const Duration(days: 6));
+    final DateTime maxDate = DateTime(
+      systemDate.year + 20,
+      systemDate.month,
+      systemDate.day,
+    );
 
     final DateTime initialDate = isStart
         ? (startDate ?? systemDate)
@@ -199,12 +207,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // Scrollable content (drag handle + filters)
           ListView(
             controller: widget.scrollController,
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              0,
-              16,
-              80,
-            ), 
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
             children: [
               // Drag handle (centered at top)
               const SizedBox(height: 8),

@@ -192,7 +192,6 @@ class _ReportWidgetState extends State<ManagerReport>
                               ),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.white),
                               ),
                               dialogHeight: 400,
                               itemsTextStyle: const TextStyle(fontSize: 14),
@@ -372,7 +371,6 @@ class _ReportWidgetState extends State<ManagerReport>
                               ),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: Colors.white),
                               ),
                               dialogHeight: 400,
                               itemsTextStyle: const TextStyle(fontSize: 14),

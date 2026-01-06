@@ -1056,9 +1056,10 @@ class _ReportWidgetState extends State<NightAuditReport>
                                     cells: [
                                       DataCell(Text('Total'.toString())),
                                       _rightCell(
-                                        _nightAuditReportVm
-                                            .receiptSummaryPayTotals["amount"]
-                                            .toString(),
+                                        formatCurrency(
+                                          _nightAuditReportVm
+                                              .receiptSummaryPayTotals["amount"],
+                                        ).toString(),
                                       ),
                                     ],
                                   ),
