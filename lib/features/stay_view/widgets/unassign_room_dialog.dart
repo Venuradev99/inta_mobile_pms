@@ -8,7 +8,7 @@ class UnassignRoomDialog extends StatefulWidget {
   final List<UnassignBookingItem> unassignBookingList;
   final Function(UnassignBookingItem item) onViewReservation;
   final Function(UnassignBookingItem item, AvailableRooms? selectedRoom)
-      onAssignRoom;
+  onAssignRoom;
 
   const UnassignRoomDialog({
     super.key,
@@ -53,7 +53,7 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
         children: [
           const Expanded(
             child: Text(
-              'Unassigned Rooms',
+              'ASSIGN ROOM',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
@@ -111,7 +111,7 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          dayFormat.format(checkIn),
+                          monthFormat.format(checkIn),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -119,10 +119,10 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                           ),
                         ),
                         Text(
-                          monthFormat.format(checkIn),
+                          dayFormat.format(checkIn),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 16,
                             color: AppColors.darkgrey,
                           ),
                         ),
@@ -131,7 +131,7 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                     const Column(
                       children: [
                         SizedBox(height: 4),
-                        Divider(height: 1, thickness: 1),
+                        Divider(height: 1, thickness: 2),
                         SizedBox(height: 4),
                       ],
                     ),
@@ -139,7 +139,7 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          dayFormat.format(checkOut),
+                          monthFormat.format(checkOut),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -147,10 +147,10 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                           ),
                         ),
                         Text(
-                          monthFormat.format(checkOut),
+                          dayFormat.format(checkOut),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 16,
                             color: AppColors.darkgrey,
                           ),
                         ),
@@ -170,26 +170,31 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _infoRow(Icons.person, item.bookingRoomOwnerName),
+                    _infoRowHeader('Room Type'),
                     _infoRow(Icons.hotel, '${item.roomTypeName}'),
-                    _infoRow(Icons.schedule,
-                        '${timeFormat.format(checkIn)} - ${timeFormat.format(checkOut)}'),
+                    _infoRowHeader('Room'),
+                    // _infoRow(
+                    //   Icons.schedule,
+                    //   '${timeFormat.format(checkIn)} - ${timeFormat.format(checkOut)}',
+                    // ),
                     const SizedBox(height: 8),
-
-                    /// ROOM DROPDOWN
                     DropdownButtonFormField<AvailableRooms>(
                       value: selectedRooms[item.bookingRoomId],
                       hint: Text(
                         'Select Room',
                         style: const TextStyle(fontSize: 12), // smaller hint
                       ),
-                      items: item.availableRooms
-                              ?.map((room) => DropdownMenuItem(
-                                    value: room,
-                                    child: Text(
-                                      room.name,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                  ))
+                      items:
+                          item.availableRooms
+                              ?.map(
+                                (room) => DropdownMenuItem(
+                                  value: room,
+                                  child: Text(
+                                    room.name,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                              )
                               .toList() ??
                           [],
                       onChanged: (val) {
@@ -202,7 +207,9 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                       ),
                     ),
 
@@ -217,7 +224,9 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                             backgroundColor: AppColors.primary,
                             foregroundColor: AppColors.onPrimary,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             textStyle: const TextStyle(fontSize: 12),
                           ),
                           onPressed: () => widget.onViewReservation(item),
@@ -229,17 +238,21 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
                             backgroundColor: AppColors.green,
                             foregroundColor: AppColors.onPrimary,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             textStyle: const TextStyle(fontSize: 12),
                           ),
                           onPressed: selectedRooms[item.bookingRoomId] != null
                               ? () => widget.onAssignRoom(
-                                  item, selectedRooms[item.bookingRoomId])
+                                  item,
+                                  selectedRooms[item.bookingRoomId],
+                                )
                               : null,
                           child: const Text('Assign Room'),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -250,7 +263,7 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
     );
   }
 
-  Widget _infoRow(IconData icon, String text) {
+  Widget _infoRow(IconData? icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -260,9 +273,24 @@ class _UnassignRoomDialogState extends State<UnassignRoomDialog> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color:  Colors.grey.shade600 
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRowHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
         ],
       ),
     );

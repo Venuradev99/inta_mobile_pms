@@ -793,14 +793,14 @@ class _HouseStatusState extends State<HouseStatus> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildIndicatorInfoItem(
-                      context,
-                      'Eye Icon',
-                      'Room has special attention or maintenance issues',
-                      Icons.visibility,
-                      Colors.black,
-                    ),
-                    const SizedBox(height: 8),
+                    // _buildIndicatorInfoItem(
+                    //   context,
+                    //   'Eye Icon',
+                    //   'Room has special attention or maintenance issues',
+                    //   Icons.visibility,
+                    //   Colors.black,
+                    // ),
+                    // const SizedBox(height: 8),
                     _buildIndicatorInfoItem(
                       context,
                       'Color Dots',

@@ -249,9 +249,9 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Maintenance Block',
-        onSearchChanged: (value) {
-          _maintenanceBlockVm.filteredMaintenanceBlocks(value);
-        },
+        // onSearchChanged: (value) {
+        //   _maintenanceBlockVm.filteredMaintenanceBlocks(value);
+        // },
         onFilterTap: _showFilterBottomSheet,
         onRefreshTap: () async {
           await _maintenanceBlockVm.loadAllMaintenanceBlocks();

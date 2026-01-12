@@ -80,9 +80,9 @@ class _LoginPageState extends State<LoginPage>
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     await _userApiService.login(
-      _usernameController.text.trim(),
-      _passwordController.text.trim(),
-      _hotelIdController.text.trim(),
+      _usernameController.text,
+      _passwordController.text,
+      _hotelIdController.text,
     );
     setState(() => _isLoading = false);
   }
