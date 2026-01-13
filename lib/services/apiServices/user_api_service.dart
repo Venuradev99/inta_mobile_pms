@@ -12,7 +12,7 @@ class UserApiService {
   late String baseUrl;
   late String appIconPath;
 
-  UserApiService(this.version,this.baseUrl, this.appIconPath);
+  UserApiService(this.version, this.baseUrl, this.appIconPath);
 
   get getVersion => version;
   get getIconPath => appIconPath;
@@ -75,7 +75,7 @@ class UserApiService {
           if (hotelInfo["isSuccessful"]) {
             await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
           }
-          
+
           NavigationService().go(AppRoutes.dashboard);
           MessageService().success("Login successful");
         } else {
@@ -97,7 +97,7 @@ class UserApiService {
       final hotelId = await LocalStorageManager.getHotelId();
       final url = AppResources.getSystemWorkingDate;
       if (token.isEmpty) throw Exception('Session key not available');
-   
+
       final headers = {
         'Authorization': token,
         'Content-Type': 'application/json',
@@ -188,6 +188,41 @@ class UserApiService {
       }
     } catch (e) {
       String msg = 'Error loading hotel information: $e';
+      MessageService().error(msg);
+      throw Exception(msg);
+    }
+  }
+
+  Future<void> changeProperty(int hotelId) async {
+    try {
+      await LocalStorageManager.setHotelId(hotelId.toString());
+
+      final systemInfoResponse = await Future.wait([
+        loadSystemInformation(),
+        loadBaseCurrency(),
+        loadHotelInfo(),
+      ]);
+
+      final systemInfo = systemInfoResponse[0];
+      final baseCurrency = systemInfoResponse[1];
+      final hotelInfo = systemInfoResponse[2];
+
+      if (systemInfo["isSuccessful"]) {
+        await LocalStorageManager.setSystemDate(
+          systemInfo["result"]["systemDate"],
+        );
+      }
+
+      if (baseCurrency["isSuccessful"]) {
+        await LocalStorageManager.setBaseCurrencyData(baseCurrency["result"]);
+      }
+
+      if (hotelInfo["isSuccessful"]) {
+        await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
+      }
+
+    } catch (e) {
+      String msg = 'Error change property: $e';
       MessageService().error(msg);
       throw Exception(msg);
     }

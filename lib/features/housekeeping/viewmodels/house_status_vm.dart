@@ -16,6 +16,7 @@ class HouseStatusVm extends GetxController {
   final houseKeepingStatusList = [].obs;
   final houseKeepersList = <HouseKeeper>[];
   final isLoading = true.obs;
+  final isUpdatingRemark = false.obs;
 
   HouseStatusVm(this._houseKeepingServices);
 
@@ -91,6 +92,8 @@ class HouseStatusVm extends GetxController {
             roomType: item["roomTypeName"] ?? '',
             hasIssue: item["isDirty"] ?? false,
             remark: item["houseKeepingRemark"] ?? '',
+            houseKeepingRemark: item["houseKeepingRemark"] ?? '',
+            fdRemark: item["fdRemark"] ?? '',
             isRoom: item["isRoom"] ?? true,
           );
           roomList.add(data);
@@ -108,8 +111,11 @@ class HouseStatusVm extends GetxController {
       isLoading.value = false;
     }
   }
-  
-  Future<void> updateRoomHousekeeper(RoomItem room, HouseKeeper houseKeeper) async {
+
+  Future<void> updateRoomHousekeeper(
+    RoomItem room,
+    HouseKeeper houseKeeper,
+  ) async {
     try {
       final payload = UpdateHouseStatusPayload(
         id: room.id!,
@@ -142,6 +148,7 @@ class HouseStatusVm extends GetxController {
 
   Future<void> updateRemark(RoomItem room, String remark) async {
     try {
+      isUpdatingRemark.value = true;
       final payload = UpdateHouseStatusPayload(
         id: room.id!,
         houseKeeper: room.houseKeeper!,
@@ -168,6 +175,8 @@ class HouseStatusVm extends GetxController {
     } catch (e) {
       MessageService().error('Error updating remark: $e');
       throw Exception('Error updating remark: $e');
+    }finally{
+      isUpdatingRemark.value = false;
     }
   }
 

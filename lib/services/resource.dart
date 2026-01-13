@@ -45,6 +45,8 @@ class AppResources {
       '$booking/GetAllLockReservations';
   static const String lockBooking = '$booking/lock';
   static const String getStatistics = '$dashboard/GetMobileQuickOverviewStatistics';
+  static const String getAllHotels = '$hotel/GetAllByUserAndMenu';
+  
 
   //reservation
   static const String searchReservationList = '$booking/SearchReservationList';
@@ -114,6 +116,8 @@ class AppResources {
       '$maintenanceblock/UnblockDateRange';
   static const String updateHouseStatus = '$rooms/UpdateHouseStatus';
   static const String getAllHouseKeepingAuditTrail = '$auditTrial/getAuditTrial';
+  static const String getMaintenanceBlockById = '$maintenanceblock/GetById';
+  static const String unblockMaintenanceBLock = '$maintenanceblock/Unblock';
 
   ////Stay View
   static const String getBookingDetailsByDate =

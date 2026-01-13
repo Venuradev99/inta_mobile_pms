@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.dart';
+import 'package:inta_mobile_pms/features/reservations/models/audit_trail_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/business_source_category_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_charges_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/folio_payment_response.dart';
@@ -30,6 +31,9 @@ class ReservationVm extends GetxController {
   final isAllGuestDataLoading = false.obs;
   final isFolioDataLoading = false.obs;
   final isTaxDetailsLoading = false.obs;
+
+  var auditTrailList = <AuditTrailResponse>[].obs;
+  var isAuditTrailsLoading = true.obs;
 
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
@@ -600,6 +604,50 @@ class ReservationVm extends GetxController {
     } catch (e) {
       throw Exception('Error loading folios: $e');
     } finally {}
+  }
+
+  Future<List<AuditTrailResponse>> loadAllAuditTrails(
+    GuestItem guestItem,
+  ) async {
+    try {
+      isAuditTrailsLoading.value = true;
+      final response = await _reservationService.getAuditTrial(
+        guestItem.bookingId!,
+        int.tryParse(guestItem.bookingRoomId.toString())!,
+        guestItem.masterFolioBookingTransId!,
+        guestItem.roomId!,
+      );
+
+      if (response["isSuccessful"] == true) {
+        final result = response["result"] as List;
+        auditTrailList.value = result
+            .map(
+              (item) => AuditTrailResponse(
+                bookingId: item["bookingId"] ?? 0,
+                description: item["description"] ?? '',
+                folioId: item["folioId"] ?? 0,
+                roomId: item["roomId"] ?? 0,
+                sysDateCreated: item["sys_DateCreated"] ?? '',
+                transactionLog: item["transactionLog"] ?? '',
+                transactionType: item["transactionType"] ?? 0,
+                userId: item["userId"] ?? 0,
+                userName: item["userName"] ?? '',
+                transactionTypeName: item["transactionTypeName"] ?? '',
+                hotelId: item["hotelId"] ?? 0,
+              ),
+            )
+            .toList();
+        return auditTrailList;
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Audit Trails!';
+        MessageService().error(msg);
+        return [];
+      }
+    } catch (e) {
+      throw Exception('Error loading Audit Trails: $e');
+    } finally {
+      isAuditTrailsLoading.value = false;
+    }
   }
 
   Future<void> getAllGuestData(String bookingRoomId) async {

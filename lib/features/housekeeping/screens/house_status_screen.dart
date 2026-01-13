@@ -438,7 +438,6 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _bulkEditHousekeeper() {
     if (selectedRooms.isEmpty) return;
-    // Implement bulk edit housekeeper logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Edit housekeeper for ${selectedRooms.length} rooms'),
@@ -449,7 +448,6 @@ class _HouseStatusState extends State<HouseStatus> {
 
   void _bulkClearStatus() {
     if (selectedRooms.isEmpty) return;
-    // Implement bulk clear status logic
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Clear status for ${selectedRooms.length} rooms')),
     );

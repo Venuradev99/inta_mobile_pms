@@ -11,6 +11,8 @@ class RoomItem {
   final bool hasIssue;
   final bool? isRoom;
   final String? remark;
+  final String? fdRemark;
+  final String? houseKeepingRemark;
 
   RoomItem({
     this.id,
@@ -24,10 +26,12 @@ class RoomItem {
     required this.roomType,
     this.hasIssue = false,
     this.remark,
+    this.houseKeepingRemark,
+    this.fdRemark,
     this.isRoom,
   });
 
-   @override
+  @override
   String toString() {
     return 'RoomItem('
         'id: $id, '
@@ -42,6 +46,8 @@ class RoomItem {
         'hasIssue: $hasIssue, '
         'isRoom: $isRoom, '
         'remark: $remark'
+        'houseKeepingRemark: $houseKeepingRemark'
+        'fdRemark: $fdRemark'
         ')';
   }
 }

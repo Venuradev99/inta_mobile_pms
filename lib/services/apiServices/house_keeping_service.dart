@@ -108,6 +108,28 @@ class HouseKeepingService {
     }
   }
 
+   Future<Map<String, dynamic>> getMaintenanceBlockById(int id) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getMaintenanceBlockById}/${id}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+   Future<Map<String, dynamic>> unblockMaintenanceBlock(int maintenanceBlockId, int currentUserId) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.unblockMaintenanceBLock}/${maintenanceBlockId}?CurrentUserId=${currentUserId}';
+      final response = await _dataAccess.put({},url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getReasons() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getReasons}';

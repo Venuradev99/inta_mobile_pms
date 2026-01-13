@@ -105,7 +105,12 @@ void main() async {
     EditGuestDetailsVm(Get.find<ReservationService>()),
   );
   Get.put<StayViewVm>(
-    StayViewVm(Get.find<StayViewService>(), Get.find<ReservationService>()),
+    StayViewVm(
+      Get.find<StayViewService>(),
+      Get.find<ReservationService>(),
+      Get.find<UserApiService>(),
+      Get.find<HouseKeepingService>(),
+    ),
   );
   Get.put<QuickReservationVm>(
     QuickReservationVm(Get.find<QuickReservationService>()),

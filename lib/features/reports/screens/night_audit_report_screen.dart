@@ -139,6 +139,7 @@ class _ReportWidgetState extends State<NightAuditReport>
     {"field": "extraCharges", "header": "Extra Charges"},
     {"field": "roomTax", "header": "Room Tax"},
     {"field": "extraTax", "header": "Extra Tax"},
+    {"field": "roundOffAmount", "header": "Auto Adjustment"},
     {"field": "discount", "header": "Discount"},
     // {"field": "adjustment", "header": "Adjustment"}, // commented as in original
     {"field": "totalSales", "header": "Total Sales"},
@@ -235,6 +236,26 @@ class _ReportWidgetState extends State<NightAuditReport>
 
   DataCell _rightCell(dynamic value) => DataCell(
     Align(alignment: Alignment.centerRight, child: Text(value.toString())),
+  );
+
+  DataCell _leftBoldCell(dynamic value) => DataCell(
+    Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        value.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+
+  DataCell _rightBoldCell(dynamic value) => DataCell(
+    Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        value.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
   );
 
   @override
@@ -443,7 +464,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                 Tab(text: 'Daily Sales'),
                 Tab(text: 'Receipt Detail'),
                 Tab(text: 'Receipt Summary'),
-                Tab(text: 'Msc. Charges'),
+                Tab(text: 'Misc. Charges'),
                 Tab(text: 'Room Status'),
                 Tab(text: 'Pax Status'),
                 Tab(text: 'Pax Analysis'),
@@ -517,55 +538,56 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["nrmlTariff"],
-                                    ).toString(),
-                                  ),
+                              if (_nightAuditReportVm.roomCharges.isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["nrmlTariff"],
+                                      ).toString(),
+                                    ),
 
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["ofrdTariff"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["discountAmount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["totalTax"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["totalRent"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .roomChargesTotals["varPercentage"],
-                                    ).toString(),
-                                  ),
-                                  DataCell(Text('')),
-                                ],
-                              ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["ofrdTariff"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["discountAmount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["totalTax"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["totalRent"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .roomChargesTotals["varPercentage"],
+                                      ).toString(),
+                                    ),
+                                    DataCell(Text('')),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -618,55 +640,58 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["nrmlTariff"],
-                                    ).toString(),
-                                  ),
+                              if (_nightAuditReportVm
+                                  .complimentaryRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["nrmlTariff"],
+                                      ).toString(),
+                                    ),
 
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["ofrdTariff"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["discountAmount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["totalTax"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["totalRent"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .complementaryTotals["varPercentage"],
-                                    ).toString(),
-                                  ),
-                                  DataCell(Text('')),
-                                ],
-                              ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["ofrdTariff"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["discountAmount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["totalTax"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["totalRent"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .complementaryTotals["varPercentage"],
+                                      ).toString(),
+                                    ),
+                                    DataCell(Text('')),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -720,57 +745,60 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  DataCell(Text('')),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["roomCharge"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["extraCharges"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["discount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["taxAmount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["adjust"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["receivedAmount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .checkedOutTotals["balanceAmount"],
-                                    ).toString(),
-                                  ),
-                                ],
-                              ),
+                              if (_nightAuditReportVm
+                                  .checkedOutRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    DataCell(Text('')),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["roomCharge"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["extraCharges"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["discount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["taxAmount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["adjust"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["receivedAmount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .checkedOutTotals["balanceAmount"],
+                                      ).toString(),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -811,47 +839,56 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total')),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["roomCharges"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["extraCharges"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["roomTax"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["extraTax"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["discount"],
-                                    ).toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm
-                                          .dailySalesTotals["totalSales"],
-                                    ).toString(),
-                                  ),
-                                ],
-                              ),
+                              if (_nightAuditReportVm
+                                  .dailySalesRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["roomCharges"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["extraCharges"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["roomTax"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["extraTax"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["discount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["roundOffAmount"],
+                                      ).toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .dailySalesTotals["totalSales"],
+                                      ).toString(),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -913,29 +950,32 @@ class _ReportWidgetState extends State<NightAuditReport>
                                       }
                                     }).toList(),
                                   ),
-                                DataRow(
-                                  cells: [
-                                    DataCell(Text('Sub Total'.toString())),
-                                    DataCell(Text(''.toString())),
-                                    DataCell(Text(''.toString())),
-                                    _rightCell(
-                                      formatCurrency(
-                                        item["subTotalAmount"],
-                                      ).toString(),
-                                    ),
-                                    DataCell(Text(''.toString())),
-                                    DataCell(Text(''.toString())),
-                                    DataCell(Text(''.toString())),
-                                  ],
-                                ),
+                                if (_nightAuditReportVm
+                                    .arrangedReceptDetailsRecodes
+                                    .isNotEmpty)
+                                  DataRow(
+                                    cells: [
+                                      _leftBoldCell('Total'),
+                                      DataCell(Text(''.toString())),
+                                      DataCell(Text(''.toString())),
+                                      _rightBoldCell(
+                                        formatCurrency(
+                                          item["subTotalAmount"],
+                                        ).toString(),
+                                      ),
+                                      DataCell(Text(''.toString())),
+                                      DataCell(Text(''.toString())),
+                                      DataCell(Text(''.toString())),
+                                    ],
+                                  ),
                               ],
 
                               DataRow(
                                 cells: [
-                                  DataCell(Text('Grand Total'.toString())),
+                                  _leftBoldCell('Grand Total'),
                                   DataCell(Text(''.toString())),
                                   DataCell(Text(''.toString())),
-                                  _rightCell(
+                                  _rightBoldCell(
                                     formatCurrency(
                                       _nightAuditReportVm
                                           .receiptDetailsTotals["amount"],
@@ -1003,8 +1043,8 @@ class _ReportWidgetState extends State<NightAuditReport>
                                       .toList(),
                                   DataRow(
                                     cells: [
-                                      DataCell(Text('Total'.toString())),
-                                      _rightCell(
+                                      _leftBoldCell('Total'),
+                                      _rightBoldCell(
                                         formatCurrency(
                                           _nightAuditReportVm
                                               .receiptSummaryUserTotals["amount"],
@@ -1052,17 +1092,20 @@ class _ReportWidgetState extends State<NightAuditReport>
                                         );
                                       })
                                       .toList(),
-                                  DataRow(
-                                    cells: [
-                                      DataCell(Text('Total'.toString())),
-                                      _rightCell(
-                                        formatCurrency(
-                                          _nightAuditReportVm
-                                              .receiptSummaryPayTotals["amount"],
-                                        ).toString(),
-                                      ),
-                                    ],
-                                  ),
+                                  if (_nightAuditReportVm
+                                      .receiptSummaryPayModeWiseRecodes
+                                      .isNotEmpty)
+                                    DataRow(
+                                      cells: [
+                                        _leftBoldCell('Total'),
+                                        _rightBoldCell(
+                                          formatCurrency(
+                                            _nightAuditReportVm
+                                                .receiptSummaryPayTotals["amount"],
+                                          ).toString(),
+                                        ),
+                                      ],
+                                    ),
                                 ],
                               ),
                             ],
@@ -1111,26 +1154,30 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total'.toString())),
-                                  DataCell(Text(''.toString())),
-                                  DataCell(Text(''.toString())),
-                                  DataCell(Text(''.toString())),
-                                  DataCell(Text(''.toString())),
-                                  _rightCell(
-                                    _nightAuditReportVm.miscTotals["quantity"]
-                                        .toString(),
-                                  ),
-                                  _rightCell(
-                                    formatCurrency(
-                                      _nightAuditReportVm.miscTotals["amount"],
-                                    ).toString(),
-                                  ),
-                                  DataCell(Text(''.toString())),
-                                  DataCell(Text(''.toString())),
-                                ],
-                              ),
+                              if (_nightAuditReportVm
+                                  .miscellaneousRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    DataCell(Text(''.toString())),
+                                    DataCell(Text(''.toString())),
+                                    DataCell(Text(''.toString())),
+                                    DataCell(Text(''.toString())),
+                                    _rightBoldCell(
+                                      _nightAuditReportVm.miscTotals["quantity"]
+                                          .toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      formatCurrency(
+                                        _nightAuditReportVm
+                                            .miscTotals["amount"],
+                                      ).toString(),
+                                    ),
+                                    DataCell(Text(''.toString())),
+                                    DataCell(Text(''.toString())),
+                                  ],
+                                ),
                             ],
                           ),
                         ),
@@ -1209,21 +1256,25 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total'.toString())),
-                                  DataCell(Text(''.toString())),
-                                  _rightCell(
-                                    _nightAuditReportVm.paxStatusTotals["adult"]
-                                        .toString(),
-                                  ),
-                                  _rightCell(
-                                    _nightAuditReportVm
-                                        .paxStatusTotals["children"]
-                                        .toString(),
-                                  ),
-                                ],
-                              ),
+                              if (_nightAuditReportVm
+                                  .paxStatusRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    DataCell(Text(''.toString())),
+                                    _rightBoldCell(
+                                      _nightAuditReportVm
+                                          .paxStatusTotals["adult"]
+                                          .toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      _nightAuditReportVm
+                                          .paxStatusTotals["children"]
+                                          .toString(),
+                                    ),
+                                  ],
+                                ),
                             ].toList(),
                           ),
                         ),
@@ -1263,21 +1314,24 @@ class _ReportWidgetState extends State<NightAuditReport>
                                   }).toList(),
                                 );
                               }).toList(),
-                              DataRow(
-                                cells: [
-                                  DataCell(Text('Total'.toString())),
-                                  _rightCell(
-                                    _nightAuditReportVm
-                                        .paxAnalysisTotals["adult"]
-                                        .toString(),
-                                  ),
-                                  _rightCell(
-                                    _nightAuditReportVm
-                                        .paxAnalysisTotals["children"]
-                                        .toString(),
-                                  ),
-                                ],
-                              ),
+                              if (_nightAuditReportVm
+                                  .paxAnalysisRecodes
+                                  .isNotEmpty)
+                                DataRow(
+                                  cells: [
+                                    _leftBoldCell('Total'),
+                                    _rightBoldCell(
+                                      _nightAuditReportVm
+                                          .paxAnalysisTotals["adult"]
+                                          .toString(),
+                                    ),
+                                    _rightBoldCell(
+                                      _nightAuditReportVm
+                                          .paxAnalysisTotals["children"]
+                                          .toString(),
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
                         ),

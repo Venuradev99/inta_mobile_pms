@@ -32,6 +32,7 @@ class NightAuditReportVm extends GetxController {
   var miscTotals = {"amount": 0.0, "quantity": 0}.obs;
   var dailySalesTotals = {
     "adjustment": 0.0,
+    "roundOffAmount": 0.0,
     "discount": 0.0,
     "extraCharges": 0.0,
     "extraServiceCharges": 0.0,
@@ -234,6 +235,7 @@ class NightAuditReportVm extends GetxController {
     final Map<String, double> totals = {
       "adjustment": 0.0,
       "discount": 0.0,
+       "roundOffAmount": 0.0,
       "extraCharges": 0.0,
       "extraServiceCharges": 0.0,
       "extraTax": 0.0,
@@ -252,6 +254,8 @@ class NightAuditReportVm extends GetxController {
     for (final element in dailySalesRecodes) {
       totals["adjustment"] =
           totals["adjustment"]! + (element["adjustment"] as num? ?? 0);
+      totals["roundOffAmount"] =
+          totals["roundOffAmount"]! + (element["roundOffAmount"] as num? ?? 0);
       totals["discount"] =
           totals["discount"]! + (element["discount"] as num? ?? 0);
       totals["extraCharges"] =
@@ -283,10 +287,9 @@ class NightAuditReportVm extends GetxController {
           totalAmount += (e["amount"] as num).toDouble();
           totalQuantity += (e["quantity"] as num).toInt();
 
-           final map = Map<String, dynamic>.from(e);
+          final map = Map<String, dynamic>.from(e);
           map["enteredOn"] = formatIsoDateTime(map["enteredOn"]);
           return map;
-
         }).toList() ??
         [];
     miscTotals["amount"] = totalAmount;
@@ -357,7 +360,7 @@ class NightAuditReportVm extends GetxController {
             ?.map((e) => Map<String, dynamic>.from(e))
             .toList() ??
         [];
-
+    receiptSummaryPayTotals["amount"] = 0;
     receiptSummaryPayModeWiseRecodes.forEach((element) {
       receiptSummaryPayTotals["amount"] =
           (receiptSummaryPayTotals["amount"] ?? 0) +
@@ -371,7 +374,7 @@ class NightAuditReportVm extends GetxController {
             ?.map((e) => Map<String, dynamic>.from(e))
             .toList() ??
         [];
-
+    receiptSummaryUserTotals["amount"] = 0;
     receiptSummaryUserWiseRecodes.forEach((element) {
       receiptSummaryUserTotals["amount"] =
           (receiptSummaryUserTotals["amount"] ?? 0) +
@@ -423,7 +426,7 @@ class NightAuditReportVm extends GetxController {
       totals["adjust"] = totals["adjust"]! + (element["adjust"] as num? ?? 0);
       totals["balanceAmount"] =
           totals["balanceAmount"]! + (element["balanceAmount"] as num? ?? 0);
-      
+
       totals["extraCharges"] =
           totals["extraCharges"]! + (element["extraCharges"] as num? ?? 0);
       totals["receivedAmount"] =

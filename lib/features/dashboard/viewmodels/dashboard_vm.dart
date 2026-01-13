@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/booking_static_data.dart';
+import 'package:inta_mobile_pms/features/dashboard/models/hotel_data_response.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/occupancy_data.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/property_statics_data.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
@@ -19,6 +20,7 @@ class DashboardVm extends GetxController {
   final baseCurrency = ''.obs;
   final isSearching = false.obs;
   final currentWorkingDate = ''.obs;
+  final hotelId = ''.obs;
 
   final arrivalData = Rx<BookingStaticData?>(null);
   final departureData = Rx<BookingStaticData?>(null);
@@ -50,6 +52,9 @@ class DashboardVm extends GetxController {
 
   final isLoading = true.obs;
 
+  final hotelList = <HotelDataResponse>[].obs;
+  final isHotelsLoading = true.obs;
+
   DashboardVm(
     this._dashboardService,
     this._userApiService,
@@ -58,12 +63,55 @@ class DashboardVm extends GetxController {
 
   void refreshDashboard() {
     loadBookingStaticData();
+    getInitialData();
+  }
+
+  Future<void> changeProperty(HotelDataResponse hotel) async {
+    try {
+      final response = await _userApiService.changeProperty(hotel.hotelId);
+      refreshDashboard();
+    } catch (e) {
+      throw Exception('Error in GetUserName: $e');
+    }
+  }
+
+  Future<void> getAllHotels() async {
+    try {
+      isHotelsLoading.value = true;
+
+      final response = await _dashboardService.getAllHotels();
+
+      if (response['isSuccessful'] == true) {
+        final List<HotelDataResponse> hotelListTemp = [];
+
+        final result = response['result'];
+
+        if (result != null && result is List) {
+          for (final item in result) {
+            hotelListTemp.add(HotelDataResponse.fromJson(item));
+          }
+        }
+
+        hotelList.value = hotelListTemp;
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error while searching reservations!',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error while Searching!');
+    } finally {
+      isHotelsLoading.value = false;
+    }
   }
 
   Future<void> getInitialData() async {
     try {
       final name = await LocalStorageManager.getUserName();
       userName.value = name;
+
+      final _hotelId = await LocalStorageManager.getHotelId();
+      hotelId.value = _hotelId;
 
       final hotelInfo = await LocalStorageManager.getHotelInfoData();
       hotelName.value = hotelInfo.hotelName ?? '';
@@ -73,7 +121,6 @@ class DashboardVm extends GetxController {
 
       final workingDate = await LocalStorageManager.getSystemDate();
       currentWorkingDate.value = workingDate;
-      
     } catch (e) {
       throw Exception('Error in GetUserName: $e');
     }

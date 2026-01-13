@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/hotel_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,6 +55,18 @@ class _DashboardState extends State<Dashboard> {
         );
 
     return '${_dashboardVm.baseCurrency} ${formatted}';
+  }
+
+  _onChangeProperty() async {
+    await _dashboardVm.getAllHotels();
+    showDialog(
+      context: context,
+      builder: (_) => HotelListDialog(
+        onHotelSelected: (hotel) async {
+          await _dashboardVm.changeProperty(hotel);
+        },
+      ),
+    );
   }
 
   @override
@@ -109,6 +122,10 @@ class _DashboardState extends State<Dashboard> {
           //     context.push(AppRoutes.notifications);
           //   },
           // ),
+          IconButton(
+            icon: const Icon(Icons.swap_vert, color: AppColors.black),
+            onPressed: () => _onChangeProperty(),
+          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),
             onPressed: () => _dashboardVm.refreshDashboard(),
@@ -886,11 +903,11 @@ class _DashboardState extends State<Dashboard> {
             ),
             child: Obx(
               () => Text(
-               'Working Date: ${_dashboardVm.currentWorkingDate.value}',
+                'Working Date: ${_dashboardVm.currentWorkingDate.value}',
                 style: textTheme.bodySmall?.copyWith(
                   color: AppColors.primary.withOpacity(0.6),
                   fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
-                  fontWeight: FontWeight.w500
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

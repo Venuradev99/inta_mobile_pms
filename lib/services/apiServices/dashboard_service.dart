@@ -57,4 +57,14 @@ class DashboardService {
       return {"error": error.toString()};
     }
   }
+
+    Future<Map<String, dynamic>> getAllHotels() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllHotels}/0';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
 }

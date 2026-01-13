@@ -41,13 +41,14 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
   }
 
   Widget _buildHeader() {
+    final date = widget.dayUseList[0].checkInDate;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
-              'Day Use Reservations',
+              'Day Use List (${dayFormat.format(date)} ${monthFormat.format(date)})',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
           ),
@@ -104,7 +105,7 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          dayFormat.format(checkIn),
+                          monthFormat.format(checkIn),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -112,10 +113,10 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                           ),
                         ),
                         Text(
-                          monthFormat.format(checkIn),
+                          dayFormat.format(checkIn),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 16,
                             color: AppColors.darkgrey,
                           ),
                         ),
@@ -124,7 +125,7 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                     const Column(
                       children: [
                         SizedBox(height: 4),
-                        Divider(height: 1, thickness: 1),
+                        Divider(height: 1, thickness: 2),
                         SizedBox(height: 4),
                       ],
                     ),
@@ -132,7 +133,7 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          dayFormat.format(checkOut),
+                          monthFormat.format(checkOut),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -140,10 +141,10 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                           ),
                         ),
                         Text(
-                          monthFormat.format(checkOut),
+                          dayFormat.format(checkOut),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 16,
                             color: AppColors.darkgrey,
                           ),
                         ),
@@ -162,14 +163,11 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _infoRow(
-                      Icons.person,
-                      item.bookingRoomOwnerName,
-                    ),
-                    _infoRow(
-                      Icons.hotel,
-                      '${item.roomTypeName} • ${item.roomName}',
-                    ),
+                    _infoRow(Icons.person, item.bookingRoomOwnerName),
+                    _infoRowHeader('Room Type'),
+                    _infoRow(Icons.hotel, '${item.roomTypeName}'),
+                    _infoRowHeader('Room'),
+                    _infoRow(Icons.hotel, '${item.roomName}'),
                     _infoRow(
                       Icons.schedule,
                       '${timeFormat.format(checkIn)} - ${timeFormat.format(checkOut)}',
@@ -180,7 +178,7 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: AppColors.onPrimary
+                          foregroundColor: AppColors.onPrimary,
                         ),
                         onPressed: () => widget.onViewReservation(item),
                         child: const Text('View Reservation'),
@@ -196,7 +194,7 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
     );
   }
 
-  Widget _infoRow(IconData icon, String text) {
+  Widget _infoRow(IconData? icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -206,9 +204,24 @@ class _DayUseListDialogState extends State<DayUseListDialog> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: Colors.grey.shade600,
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoRowHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 12))),
         ],
       ),
     );

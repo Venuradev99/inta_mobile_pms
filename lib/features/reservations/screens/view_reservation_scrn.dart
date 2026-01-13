@@ -3,11 +3,13 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/reservations/models/audit_trail_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/folio_charge_details_dialog_wgt.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ViewReservation extends StatefulWidget {
   final GuestItem? item;
@@ -29,9 +31,10 @@ class _ViewReservation extends State<ViewReservation>
     item = widget.item;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
-      if (bookingRoomId != null) {
-        await _reservationVm.loadAllFolios(bookingRoomId);
+      if (item != null) {
+        int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
+        await _reservationVm.loadAllFolios(bookingRoomId!);
+        await _reservationVm.loadAllAuditTrails(item!);
         if (!mounted) return;
         setState(() {});
       }
@@ -132,7 +135,7 @@ class _ViewReservation extends State<ViewReservation>
     }
 
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: CustomAppBar(title: 'Reservation Details'),
@@ -174,6 +177,7 @@ class _ViewReservation extends State<ViewReservation>
                   Tab(text: 'Room Charges'),
                   Tab(text: 'Folio Details'),
                   Tab(text: 'Remarks'),
+                  Tab(text: 'Audit Trail'),
                 ],
               ),
             ),
@@ -186,6 +190,7 @@ class _ViewReservation extends State<ViewReservation>
                   _buildRoomChargesTab(),
                   _buildFolioDetailsTab(),
                   _buildRemarksTab(),
+                  _buildAuditTrailTab(),
                 ],
               ),
             ),
@@ -1293,6 +1298,131 @@ class _ViewReservation extends State<ViewReservation>
         ),
       ),
     );
+  }
+
+  Widget _buildAuditTrailShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(12),
+      itemCount: 6,
+      itemBuilder: (_, __) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(height: 14, width: 120, color: Colors.white),
+                const SizedBox(height: 6),
+                Container(height: 16, width: 180, color: Colors.white),
+                const SizedBox(height: 6),
+                Container(
+                  height: 14,
+                  width: double.infinity,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 6),
+                Container(height: 12, width: 80, color: Colors.white),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAuditTrailTab() {
+    return Obx(() {
+      if (_reservationVm.isAuditTrailsLoading.value) {
+        return _buildAuditTrailShimmer();
+      }
+
+      if (_reservationVm.auditTrailList.isEmpty) {
+        return const Center(
+          child: Text(
+            'No audit trails available',
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: _reservationVm.auditTrailList.length,
+        separatorBuilder: (_, __) => const Divider(height: 24),
+        itemBuilder: (context, index) {
+          final AuditTrailResponse item = _reservationVm.auditTrailList[index];
+
+          final dateTime = DateTime.tryParse(item.sysDateCreated);
+          final date = dateTime != null
+              ? DateFormat('dd/MM/yyyy').format(dateTime)
+              : '';
+          final time = dateTime != null
+              ? DateFormat('hh:mm a').format(dateTime)
+              : '';
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date & Time
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    time,
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 6),
+
+              // Transaction Type
+              Text(
+                item.transactionTypeName,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Description
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  children: [
+                    const TextSpan(
+                      text: 'Description : ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: item.description),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // User
+              Text(
+                item.userName,
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 
   Widget _buildModernCard({required Widget child, VoidCallback? onTap}) {

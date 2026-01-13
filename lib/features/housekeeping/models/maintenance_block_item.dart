@@ -1,16 +1,4 @@
-
 class MaintenanceBlockItem {
-  // final String id;
-  // final String title;
-  // final String description;
-  // final String status;
-  // final String priority;
-  // final DateTime createdDate;
-  // final DateTime? scheduledDate;
-  // final String assignedTo;
-  // final String category;
-  // final double? estimatedCost;
-  // final List<String> tags;
   final int maintenanceBlockId;
   final int roomId;
   final int roomTypeId;
@@ -26,18 +14,7 @@ class MaintenanceBlockItem {
   final int hotelId;
 
   MaintenanceBlockItem({
-    // required this.id,
-    // required this.title,
-    // required this.description,
-    // required this.status,
-    // required this.priority,
-    // required this.createdDate,
-    // this.scheduledDate,
-    // required this.assignedTo,
-    // required this.category,
-    // this.estimatedCost,
-    // this.tags = const [],
-      required this.maintenanceBlockId,
+    required this.maintenanceBlockId,
     required this.roomId,
     required this.roomTypeId,
     required this.roomName,
@@ -52,7 +29,45 @@ class MaintenanceBlockItem {
     required this.hotelId,
   });
 
-   @override
+  /// ✅ From JSON
+  factory MaintenanceBlockItem.fromJson(Map<String, dynamic> json) {
+    return MaintenanceBlockItem(
+      maintenanceBlockId: json['maintenanceBlockId'] ?? 0,
+      roomId: json['roomId'] ?? 0,
+      roomTypeId: json['roomTypeId'] ?? 0,
+      roomName: json['roomName'] ?? '',
+      roomTypeName: json['roomTypeName'] ?? '',
+      fromDate: json['fromDate'] ?? '',
+      toDate: json['toDate'] ?? '',
+      reasonId: json['reasonId'] ?? 0,
+      reasonName: json['reasonName'] ?? '',
+      blockedBy: json['blockedBy'] ?? '',
+      blockedOn: json['blockedOn'] ?? '',
+      status: json['status'] ?? 0,
+      hotelId: json['hotelId'] ?? 0,
+    );
+  }
+
+  /// ✅ To JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'maintenanceBlockId': maintenanceBlockId,
+      'roomId': roomId,
+      'roomTypeId': roomTypeId,
+      'roomName': roomName,
+      'roomTypeName': roomTypeName,
+      'fromDate': fromDate,
+      'toDate': toDate,
+      'reasonId': reasonId,
+      'reasonName': reasonName,
+      'blockedBy': blockedBy,
+      'blockedOn': blockedOn,
+      'status': status,
+      'hotelId': hotelId,
+    };
+  }
+
+  @override
   String toString() {
     return 'MaintenanceBlockItem('
         'maintenanceBlockId: $maintenanceBlockId, '

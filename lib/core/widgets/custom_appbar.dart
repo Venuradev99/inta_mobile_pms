@@ -8,6 +8,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback? onInfoTap;
   final VoidCallback? onFilterTap;
   final VoidCallback? onRefreshTap;
+  final VoidCallback? onChangeProperty;
   final ValueChanged<String>? onSearchChanged;
 
   const CustomAppBar({
@@ -16,6 +17,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.onInfoTap,
     this.onFilterTap,
     this.onRefreshTap,
+    this.onChangeProperty,
     this.onSearchChanged,
   });
 
@@ -65,17 +67,20 @@ class _CustomAppBarState extends State<CustomAppBar> {
                 decoration: InputDecoration(
                   hintText: 'Search...',
                   hintStyle: const TextStyle(color: AppColors.darkgrey),
-                  prefixIcon:
-                      const Icon(Icons.search, color: AppColors.darkgrey),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.darkgrey,
+                  ),
                   suffixIcon: IconButton(
-                    icon:
-                        const Icon(Icons.close, color: AppColors.darkgrey),
+                    icon: const Icon(Icons.close, color: AppColors.darkgrey),
                     onPressed: _closeSearch,
                   ),
                   filled: true,
                   fillColor: AppColors.onPrimary,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 8,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -86,9 +91,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
           : Text(
               widget.title,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppColors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: AppColors.black,
+                fontWeight: FontWeight.w600,
+              ),
             ),
       actions: [
         // 🔍 Search icon ONLY if callback exists
@@ -110,10 +115,16 @@ class _CustomAppBarState extends State<CustomAppBar> {
 
         if (widget.onFilterTap != null)
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.black), //changed the icon to search icon
+            icon: const Icon(
+              Icons.search,
+              color: AppColors.black,
+            ), //changed the icon to search icon
             onPressed: widget.onFilterTap,
           ),
-
+        IconButton(
+          icon: const Icon(Icons.swap_vert, color: AppColors.black),
+          onPressed: widget.onChangeProperty,
+        ),
         if (widget.onRefreshTap != null)
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.black),

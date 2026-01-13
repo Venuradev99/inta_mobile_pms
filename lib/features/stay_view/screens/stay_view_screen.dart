@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
+import 'package:inta_mobile_pms/features/dashboard/widgets/hotel_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/widgets/maintenanceblock_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/stay_view/widgets/unassign_room_dialog.dart';
 import 'package:inta_mobile_pms/features/stay_view/widgets/day_use_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
@@ -22,6 +25,7 @@ class StayViewScreen extends StatefulWidget {
 
 class _StayViewScreenState extends State<StayViewScreen> {
   final _stayViewVm = Get.find<StayViewVm>();
+  final _dashboardVm = Get.find<DashboardVm>();
   final _reservationVm = Get.find<ReservationVm>();
   DateTime _centerDate = DateTime.now();
   double? _rowHeight = 30;
@@ -251,6 +255,23 @@ class _StayViewScreenState extends State<StayViewScreen> {
       appBar: CustomAppBar(
         title: 'Stay View',
         onInfoTap: _showInfoDialog,
+        onChangeProperty: () async {
+          await _dashboardVm.getAllHotels();
+          showDialog(
+            context: context,
+            builder: (_) => HotelListDialog(
+              onHotelSelected: (hotel) async {
+                await _stayViewVm.changeProperty(hotel, _centerDate);
+                await _dashboardVm.changeProperty(hotel);
+
+                setState(
+                  () => _centerDate = _stayViewVm.today.value ?? DateTime.now(),
+                );
+                // _stayViewVm.refreshStayView(_centerDate);
+              },
+            ),
+          );
+        },
         onRefreshTap: () => _stayViewVm.refreshStayView(_centerDate),
       ),
       body: Stack(
@@ -528,6 +549,7 @@ class _StayViewScreenState extends State<StayViewScreen> {
                       () => _centerDate =
                           _stayViewVm.today.value ?? DateTime.now(),
                     );
+                    _stayViewVm.loadInitialData(_centerDate);
                   },
                 )
               // 🖥 Desktop/Tablet: full button
@@ -537,6 +559,7 @@ class _StayViewScreenState extends State<StayViewScreen> {
                       () => _centerDate =
                           _stayViewVm.today.value ?? DateTime.now(),
                     );
+                    _stayViewVm.loadInitialData(_centerDate);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
@@ -1014,12 +1037,15 @@ class _StayViewScreenState extends State<StayViewScreen> {
               child: InkWell(
                 onTap: () {
                   if (guestName == 'BLOCKED') {
+                    _handleMaintenanceBlockTap(item, days, section, checkIn, i);
                     return;
                   }
                   if (colorCode == "#fdf51c") {
                     _handleDayUseTap(item, days, section, checkIn, i);
+                    return;
                   } else {
                     _handleGuestTap(item, days, section, checkIn, i);
+                    return;
                   }
                 },
                 child: Container(
@@ -1136,6 +1162,30 @@ class _StayViewScreenState extends State<StayViewScreen> {
     await _reservationVm.getAllGuestData(bookingRoomId.toString());
     final guestItem = _reservationVm.allGuestDetails.value;
     context.push(AppRoutes.viewReservation, extra: guestItem);
+  }
+
+  void _handleMaintenanceBlockTap(
+    Map<String, dynamic> item,
+    List<DateTime> days,
+    Map<String, dynamic> section,
+    Map<String, dynamic> checkIn,
+    int startIndex,
+  ) async {
+    final String guestName = checkIn['guestName'];
+    final maintenanceBlockId = checkIn['maintenanceBlockId'];
+
+    await _stayViewVm.loadMaintenanceBlockData(maintenanceBlockId);
+    print(_stayViewVm.maintenanceBlockData.value);
+
+    showDialog(
+      context: context,
+      builder: (_) => MaintenanceBlockDialog(
+        blockItem: _stayViewVm.maintenanceBlockData.value!,
+        onUnblock: () async {
+          await _stayViewVm.unblockBlock(maintenanceBlockId);
+        },
+      ),
+    );
   }
 
   void _handleDayUseTap(

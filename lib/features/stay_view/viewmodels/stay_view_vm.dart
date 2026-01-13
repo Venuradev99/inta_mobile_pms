@@ -2,13 +2,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:inta_mobile_pms/features/dashboard/models/hotel_data_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/dayuse_response.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/unassign_booking_item.dart';
+import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/apiServices/stay_view_service.dart';
+import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
@@ -16,12 +20,16 @@ import 'package:inta_mobile_pms/services/navigation_service.dart';
 class StayViewVm extends GetxController {
   final StayViewService _stayViewService;
   final ReservationService _reservationService;
+  final UserApiService _userApiService;
+  final HouseKeepingService _housekeepingService;
 
   final statusList = <StayViewStatusColor>[].obs;
 
   final isLoading = Rx<bool>(true);
   final isAvailableRoomLoading = Rx<bool>(false);
   final isLoadingDayUseList = Rx<bool>(false);
+  final isLoadingMaintenanceBlock = Rx<bool>(false);
+  final isUnblockingMaintenanceBlock = Rx<bool>(false);
 
   final isRecordsEmpty = Rx<bool>(false);
   final today = Rxn<DateTime>();
@@ -30,13 +38,32 @@ class StayViewVm extends GetxController {
   final allGuestDetails = Rx<GuestItem?>(null);
   var datUseList = <DayUseResponse>[].obs;
   var unassignBookingList = <UnassignBookingItem>[].obs;
+  var maintenanceBlockData = Rx<MaintenanceBlockItem?>(null);
 
   DateTime centerDate = DateTime.now();
 
-  StayViewVm(this._stayViewService, this._reservationService);
+  StayViewVm(
+    this._stayViewService,
+    this._reservationService,
+    this._userApiService,
+    this._housekeepingService,
+  );
 
   void refreshStayView(DateTime centerDate) {
     loadInitialData(centerDate);
+  }
+
+  Future<void> changeProperty(
+    HotelDataResponse hotel,
+    DateTime centerDate,
+  ) async {
+    try {
+      await _userApiService.changeProperty(hotel.hotelId);
+      await loadToday();
+      loadInitialData(today.value ?? centerDate);
+    } catch (e) {
+      throw Exception('Error in GetUserName: $e');
+    }
   }
 
   String yesterday(String today) {
@@ -153,6 +180,55 @@ class StayViewVm extends GetxController {
       throw Exception('Error loading day use list: $e');
     } finally {
       isLoadingDayUseList.value = false;
+    }
+  }
+
+  Future<void> loadMaintenanceBlockData(int maintenanceBlockId) async {
+    try {
+      isLoadingMaintenanceBlock.value = true;
+
+      final response = await _housekeepingService.getMaintenanceBlockById(
+        maintenanceBlockId,
+      );
+      maintenanceBlockData.value = null;
+      if (response['isSuccessful'] == true) {
+        maintenanceBlockData.value = MaintenanceBlockItem.fromJson(
+          Map<String, dynamic>.from(response['result']),
+        );
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading day use list: $e');
+    } finally {
+      isLoadingMaintenanceBlock.value = false;
+    }
+  }
+
+  Future<void> unblockBlock(int maintenanceBlockId) async {
+    try {
+      isUnblockingMaintenanceBlock.value = true;
+      final masterData = await LocalStorageManager.getMasterData();
+      final userId = int.tryParse(masterData.userId);
+      final response = await _housekeepingService.unblockMaintenanceBlock(
+        maintenanceBlockId,
+        userId!,
+      );
+      if (response['isSuccessful'] == true) {
+        MessageService().success(
+          response["message"] ?? 'Unblocked Successfully!',
+        );
+        refreshStayView(centerDate);
+        NavigationService().back();
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Available Rooms!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading day use list: $e');
+    } finally {
+      isUnblockingMaintenanceBlock.value = false;
     }
   }
 
