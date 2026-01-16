@@ -43,17 +43,16 @@ class ReservationService {
     }
   }
 
-
-    Future<Map<String, dynamic>> getAllBusinessCategory() async {
+  Future<Map<String, dynamic>> getAllBusinessCategory() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllBusinessCategory}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllBusinessCategory}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
     }
   }
-
 
   Future<Map<String, dynamic>> getAvailableRooms(
     Map<String, dynamic> body,
@@ -204,7 +203,7 @@ class ReservationService {
     }
   }
 
-    Future<Map<String, dynamic>> getFolioChargeTaxes(int folioChargeId) async {
+  Future<Map<String, dynamic>> getFolioChargeTaxes(int folioChargeId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getFolioChargeTaxes}/$folioChargeId';
@@ -324,6 +323,16 @@ class ReservationService {
     }
   }
 
+   Future<Map<String, dynamic>> getAllBookingRemarks(int bookingRoomId) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllBookingRemarks}=${bookingRoomId}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getInhousedata(Map<String, dynamic> body) async {
     try {
       final config = await rootBundle.loadString('assets/config.json');
@@ -333,4 +342,5 @@ class ReservationService {
       return {"error": error.toString()};
     }
   }
+
 }

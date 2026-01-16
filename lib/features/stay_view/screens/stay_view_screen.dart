@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/hotel_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/CheckIn_data.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:inta_mobile_pms/features/stay_view/widgets/maintenanceblock_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/stay_view/widgets/unassign_room_dialog.dart';
@@ -1036,6 +1037,9 @@ class _StayViewScreenState extends State<StayViewScreen> {
               top: (_rowHeight! - _barHeight!) / 2,
               child: InkWell(
                 onTap: () {
+                  _stayViewVm.saveCheckinData(
+                    CheckinData.fromJson(checkIn)
+                  );
                   if (guestName == 'BLOCKED') {
                     _handleMaintenanceBlockTap(item, days, section, checkIn, i);
                     return;

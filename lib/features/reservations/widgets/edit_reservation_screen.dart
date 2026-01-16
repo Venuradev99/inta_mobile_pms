@@ -17,7 +17,7 @@ class _EditReservationScreenState extends State<EditReservationScreen> with Sing
   bool _isLoading = true;
   DateTime checkInDate = DateTime.now();
   DateTime checkOutDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // ~1 PM as per screenshot
+  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); 
   TimeOfDay checkOutTime = const TimeOfDay(hour: 13, minute: 0);
   int nights = 1;
   String? selectedBusinessSource;

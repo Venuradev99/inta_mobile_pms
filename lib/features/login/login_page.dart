@@ -17,6 +17,7 @@ class _LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   String _version = '0.0.0.0';
+  String _logo = '';
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _hotelIdController = TextEditingController();
@@ -37,8 +38,10 @@ class _LoginPageState extends State<LoginPage>
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final v = await _userApiService.getVersion;
+      final logo = await _userApiService.getIconPath;
       setState(() {
         _version = v;
+        _logo = logo;
       });
     });
   }
@@ -182,7 +185,7 @@ class _LoginPageState extends State<LoginPage>
       children: [
         // App Logo (just the image)
         Image.asset(
-          _userApiService.appIconPath, // path to your image
+          _logo, // path to your image
           height: ResponsiveConfig.scaleHeight(context, 120),
           width: ResponsiveConfig.scaleWidth(context, 120),
           fit: BoxFit.contain,

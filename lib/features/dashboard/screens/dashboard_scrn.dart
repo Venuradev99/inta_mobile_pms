@@ -1461,7 +1461,7 @@ class _DashboardState extends State<Dashboard> {
                 '${averageDailyRateData?.percentage} %',
                 (averageDailyRateData?.percentage ?? 0) > 0,
                 AppColors.primary,
-                Icons.show_chart,
+                Icons.trending_up,
               ),
               _buildStatCard(
                 context,

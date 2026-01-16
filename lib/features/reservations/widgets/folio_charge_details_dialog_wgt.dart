@@ -17,16 +17,16 @@ class FolioChargeDetailsDialog extends StatefulWidget {
   });
 
   @override
-  State<FolioChargeDetailsDialog> createState() => _FolioChargeDetailsDialogState();
+  State<FolioChargeDetailsDialog> createState() =>
+      _FolioChargeDetailsDialogState();
 }
 
 class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
   final DateFormat dateFormat = DateFormat('dd MMM yyyy');
-  final NumberFormat currencyFormat = NumberFormat.currency(symbol: '', decimalDigits: 2);
 
   double get totalTax => widget.taxes.fold(0.0, (sum, tax) => sum + tax.amount);
 
-   String formatCurrency(double? value) {
+  String formatCurrency(double? value) {
     final symbol = widget.baseCurrencySymbol;
     if (value == null) return '$symbol 0.00';
 
@@ -51,11 +51,10 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
             const Divider(height: 1),
-            Flexible(child: _buildContent()),
+            Expanded(child: _buildContent()),
           ],
         ),
       ),
@@ -87,30 +86,84 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
   }
 
   Widget _buildContent() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow('Gross Amount', formatCurrency(widget.charge.grossAmount)),
+          _buildInfoRow(
+            'Gross Amount',
+            formatCurrency(widget.charge.grossAmount),
+          ),
           _buildInfoRow('Discount', formatCurrency(widget.charge.discount)),
-          _buildInfoRow('Line Adjustment', formatCurrency(widget.charge.lineDiscount)),
-          _buildInfoRow('Auto Adjustment', formatCurrency(widget.charge.roundOffAmount)),
+          _buildInfoRow(
+            'Line Discount',
+            formatCurrency(widget.charge.lineDiscount),
+          ),
+          _buildInfoRow(
+            'Auto Adjustment',
+            formatCurrency(widget.charge.roundOffAmount),
+          ),
           _buildInfoRow('Tax Amount', formatCurrency(totalTax)),
           const SizedBox(height: 12),
-          if(widget.taxes.isNotEmpty)
-          Text(
-            'Tax Breakdown',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+
+          if (widget.taxes.isNotEmpty && widget.charge.chargeTypeId != 3)
+            Text(
+              'Tax Breakdown',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
             ),
-          ),
+
           const SizedBox(height: 8),
           ...widget.taxes.map((tax) => _buildTaxRow(tax)),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 8),
+
+          if (widget.charge.chargeTypeId == 3 &&
+              widget.charge.transferedToFolioId == 0) ...[
+            Text(
+              'Source',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildTransferRow(
+              'Folio',
+              widget.charge.transferedFromFolioName ?? '',
+            ),
+            _buildTransferRow('Room', widget.charge.transferedFromRoomNo ?? ''),
+            _buildTransferRow(
+              'Reservation No',
+              widget.charge.transferedFromReservationNo ?? '',
+            ),
+          ],
+          if (widget.charge.chargeTypeId == 3 &&
+              widget.charge.transferedToFolioId > 0) ...[
+            Text(
+              'Destination',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildTransferRow(
+              'Folio',
+              widget.charge.transferedToFolioName ?? '',
+            ),
+            _buildTransferRow('Room', widget.charge.transferedToRoomNo ?? ''),
+            _buildTransferRow(
+              'Reservation No',
+              widget.charge.transferedToReservationNo ?? '',
+            ),
+          ],
         ],
       ),
     );
@@ -120,7 +173,6 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             flex: 2,
@@ -152,17 +204,35 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              tax.taxName,
-              style: const TextStyle(fontSize: 14),
-            ),
+            child: Text(tax.taxName, style: const TextStyle(fontSize: 14)),
           ),
           SizedBox(
             width: 100,
             child: Text(
-            formatCurrency(tax.amount),
+              formatCurrency(tax.amount),
               style: const TextStyle(fontSize: 14),
               textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransferRow(String name, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(name, style: const TextStyle(fontSize: 14))),
+          SizedBox(
+            width: 150,
+            child: Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 14),
             ),
           ),
         ],

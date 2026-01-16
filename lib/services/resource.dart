@@ -32,6 +32,7 @@ class AppResources {
   static const String report = 'report';
   static const String common = 'common';
   static const String transportMode = 'transportMode';
+  static const String bookingRemarks = 'bookingRemarks';
 
   //authentication
   static const String authentication = 'authentication';
@@ -89,6 +90,7 @@ class AppResources {
   static const String getAllBusinessCategory = '$common/GetAllBusinessCategory';
   static const String transportationModes =
       '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
+      static const String getAllBookingRemarks = '$bookingRemarks/GetAll?BookingRoomId';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';

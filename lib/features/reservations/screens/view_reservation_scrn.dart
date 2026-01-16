@@ -8,6 +8,8 @@ import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/folio_charge_details_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/booking_remark.dart';
+import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -20,7 +22,9 @@ class ViewReservation extends StatefulWidget {
 
 class _ViewReservation extends State<ViewReservation>
     with TickerProviderStateMixin {
-  final ReservationVm _reservationVm = Get.find<ReservationVm>();
+  final _reservationVm = Get.find<ReservationVm>();
+  final _stayViewVm = Get.find<StayViewVm>();
+  late int? _bookingRoomId;
   late final TabController _tabController;
   GuestItem? item;
 
@@ -35,8 +39,11 @@ class _ViewReservation extends State<ViewReservation>
         int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
         await _reservationVm.loadAllFolios(bookingRoomId!);
         await _reservationVm.loadAllAuditTrails(item!);
+        await _reservationVm.loadAllRemarks(bookingRoomId);
         if (!mounted) return;
-        setState(() {});
+        setState(() {
+          _bookingRoomId = bookingRoomId;
+        });
       }
     });
   }
@@ -908,11 +915,7 @@ class _ViewReservation extends State<ViewReservation>
                     _buildCardHeader('Charge Details', Icons.receipt_long),
                     const SizedBox(height: 16),
                     _buildChargeRow('Room Charge', roomCharge.grossAmount),
-                    _buildChargeRow(
-                      'Discount',
-                      -(roomCharge.discount),
-                      isDiscount: true,
-                    ),
+                    _buildChargeRow('Discount', (roomCharge.discount)),
                     _buildChargeRow('Tax Amount', roomCharge.taxAmount),
                     _buildChargeRow(
                       'Auto Adjustment',
@@ -1062,6 +1065,7 @@ class _ViewReservation extends State<ViewReservation>
                                 await _reservationVm.loadTaxDetails(
                                   charge.folioChargeId,
                                 );
+
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -1266,40 +1270,6 @@ class _ViewReservation extends State<ViewReservation>
     );
   }
 
-  Widget _buildRemarksTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: _buildModernCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCardHeader('Remarks', Icons.note_alt),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Text(
-                item!.remarks ?? 'No remarks available.',
-                style: TextStyle(
-                  fontSize: 15,
-                  height: 1.6,
-                  color: item!.remarks != null
-                      ? Colors.black87
-                      : Colors.grey.shade500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildAuditTrailShimmer() {
     return ListView.builder(
       padding: const EdgeInsets.all(12),
@@ -1416,6 +1386,112 @@ class _ViewReservation extends State<ViewReservation>
               // User
               Text(
                 item.userName,
+                style: const TextStyle(fontSize: 13, color: Colors.black54),
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildRemarksTab() {
+    return Obx(() {
+      if (_reservationVm.isBookingRemarksLoading.value) {
+        return _buildAuditTrailShimmer(); // reuse shimmer
+      }
+
+      if (_reservationVm.bookingRemarksList.isEmpty) {
+        return const Center(
+          child: Text(
+            'No remarks available',
+            style: TextStyle(color: Colors.grey),
+          ),
+        );
+      }
+
+      return ListView.separated(
+        padding: const EdgeInsets.all(12),
+        itemCount: _reservationVm.bookingRemarksList.length,
+        separatorBuilder: (_, __) => const Divider(height: 24),
+        itemBuilder: (context, index) {
+          final BookingRemark remark = _reservationVm.bookingRemarksList[index];
+
+          final dateTime = DateTime.tryParse(
+            remark.sysDateCreated.toIso8601String(),
+          );
+          final date = dateTime != null
+              ? DateFormat('dd/MM/yyyy').format(dateTime)
+              : '';
+          final time = dateTime != null
+              ? DateFormat('hh:mm a').format(dateTime)
+              : '';
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date & Time
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    time,
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 6),
+
+              // Remark Name
+              Text(
+                remark.remarkName,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+
+              const SizedBox(height: 4),
+
+              Text(
+                remark.remarkTypeName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Description
+              RichText(
+                text: TextSpan(
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  children: [
+                    const TextSpan(
+                      text: 'Description: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: remark.description),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              // Created By
+              Text(
+                remark.createdByUserName,
                 style: const TextStyle(fontSize: 13, color: Colors.black54),
               ),
             ],

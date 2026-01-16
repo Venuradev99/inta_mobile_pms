@@ -16,6 +16,7 @@ import 'package:inta_mobile_pms/features/reservations/models/reservation_search_
 import 'package:inta_mobile_pms/features/reservations/models/room_charges.dart';
 import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/models/transportation_modes_response.dart';
+import 'package:inta_mobile_pms/features/stay_view/models/booking_remark.dart';
 import 'package:inta_mobile_pms/services/apiServices/reservation_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
@@ -34,6 +35,9 @@ class ReservationVm extends GetxController {
 
   var auditTrailList = <AuditTrailResponse>[].obs;
   var isAuditTrailsLoading = true.obs;
+
+  var bookingRemarksList = <BookingRemark>[].obs;
+  var isBookingRemarksLoading = true.obs;
 
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
@@ -647,6 +651,29 @@ class ReservationVm extends GetxController {
       throw Exception('Error loading Audit Trails: $e');
     } finally {
       isAuditTrailsLoading.value = false;
+    }
+  }
+
+  Future<void> loadAllRemarks(int bookingRoomId) async {
+    try {
+      isBookingRemarksLoading.value = true;
+      final response = await _reservationService.getAllBookingRemarks(
+        int.tryParse(bookingRoomId.toString())!,
+      );
+
+      if (response["isSuccessful"] == true) {
+        final result = response["result"] as List;
+        bookingRemarksList.value = result
+            .map((item) => BookingRemark.fromJson(item))
+            .toList();
+      } else {
+        final msg = response["errors"][0] ?? 'Error Loading Remarks!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error loading Remarks: $e');
+    } finally {
+      isBookingRemarksLoading.value = false;
     }
   }
 
