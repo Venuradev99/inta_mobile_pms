@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/features/reports/models/currency_item.dart';
 import 'package:inta_mobile_pms/features/reports/models/hotel_item.dart';
@@ -136,6 +137,26 @@ class _ReportWidgetState extends State<ManagerReport>
     Align(alignment: Alignment.centerRight, child: Text(value.toString())),
   );
 
+  DataCell _leftBoldCell(dynamic value) => DataCell(
+    Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        value.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+
+  DataCell _rightBoldCell(dynamic value) => DataCell(
+    Align(
+      alignment: Alignment.centerRight,
+      child: Text(
+        value.toString(),
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -201,6 +222,9 @@ class _ReportWidgetState extends State<ManagerReport>
                               onConfirm: (values) {
                                 setState(() {
                                   _selectedHotels = values;
+                                  if (_selectedHotels.length > 1) {
+                                    _isMultipleHotel = true;
+                                  }
                                 });
                               },
                               chipDisplay: MultiSelectChipDisplay.none(),
@@ -208,33 +232,6 @@ class _ReportWidgetState extends State<ManagerReport>
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      if (_selectedHotels.length > 1)
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Is Multiple Hotel',
-                                style: TextStyle(
-                                  color: AppColors.onPrimary,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Checkbox(
-                                value: _isMultipleHotel,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    _isMultipleHotel = value ?? false;
-                                  });
-                                },
-                                activeColor: Colors.white,
-                                checkColor: AppColors.primary,
-                              ),
-                            ],
-                          ),
-                        ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Column(
@@ -301,7 +298,7 @@ class _ReportWidgetState extends State<ManagerReport>
                                     item.code,
                                     style: TextStyle(
                                       color: AppColors.onPrimary,
-                                      fontSize: 14, // match other texts
+                                      fontSize: 14,
                                     ),
                                   );
                                 }).toList();
@@ -337,57 +334,85 @@ class _ReportWidgetState extends State<ManagerReport>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Obx(() {
-                        if (!_managerReportVm.isShowHotelDropdown.value ||
-                            _isMultipleHotel) {
-                          return const Spacer();
-                        } else {
-                          return Expanded(
-                            child: MultiSelectDialogField<int>(
-                              items: _managerReportVm.receivedHotels
-                                  .map(
-                                    (hotel) => MultiSelectItem<int>(
-                                      hotel["index"],
-                                      hotel["hotelName"],
-                                    ),
-                                  )
-                                  .toList(),
-                              title: const Text("Select Hotels"),
-                              searchable: true,
-                              initialValue: _selectedViewIndices,
-                              buttonIcon: Icon(
-                                Icons.arrow_drop_down,
-                                color: AppColors.onPrimary,
-                              ),
-                              buttonText: Text(
-                                _selectedViewIndices.isEmpty
-                                    ? "Select"
-                                    : "View Hotels",
+                      if (_selectedHotels.length > 1)
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Is Multiple Hotel',
                                 style: TextStyle(
                                   color: AppColors.onPrimary,
                                   fontSize: 14,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
+                              const SizedBox(height: 4),
+                              IgnorePointer(
+                                ignoring: true,
+                                child: Checkbox(
+                                  value: _isMultipleHotel,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _isMultipleHotel = value ?? false;
+                                    });
+                                  },
+                                  activeColor: Colors.white,
+                                  checkColor: AppColors.primary,
+                                ),
                               ),
-                              dialogHeight: 400,
-                              itemsTextStyle: const TextStyle(fontSize: 14),
-                              selectedItemsTextStyle: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              onConfirm: (values) {
-                                setState(() {
-                                  _selectedViewIndices = values;
-                                });
-                                // TODO: Bind to VM, e.g., _managerReportVm.loadTablesAccordingToHotels(values);
-                              },
-                              chipDisplay: MultiSelectChipDisplay.none(),
-                            ),
-                          );
-                        }
-                      }),
+                            ],
+                          ),
+                        ),
+                      // Obx(() {
+                      //   if (!_managerReportVm.isShowHotelDropdown.value ||
+                      //       _isMultipleHotel) {
+                      //     return const Spacer();
+                      //   } else {
+                      //     return Expanded(
+                      //       child: MultiSelectDialogField<int>(
+                      //         items: _managerReportVm.receivedHotels
+                      //             .map(
+                      //               (hotel) => MultiSelectItem<int>(
+                      //                 hotel["index"],
+                      //                 hotel["hotelName"],
+                      //               ),
+                      //             )
+                      //             .toList(),
+                      //         title: const Text("Select Hotels"),
+                      //         searchable: true,
+                      //         initialValue: _selectedViewIndices,
+                      //         buttonIcon: Icon(
+                      //           Icons.arrow_drop_down,
+                      //           color: AppColors.onPrimary,
+                      //         ),
+                      //         buttonText: Text(
+                      //           _selectedViewIndices.isEmpty
+                      //               ? "Select"
+                      //               : "View Hotels",
+                      //           style: TextStyle(
+                      //             color: AppColors.onPrimary,
+                      //             fontSize: 14,
+                      //           ),
+                      //           overflow: TextOverflow.ellipsis,
+                      //         ),
+                      //         decoration: BoxDecoration(
+                      //           borderRadius: BorderRadius.circular(6),
+                      //         ),
+                      //         dialogHeight: 400,
+                      //         itemsTextStyle: const TextStyle(fontSize: 14),
+                      //         selectedItemsTextStyle: const TextStyle(
+                      //           fontWeight: FontWeight.w600,
+                      //         ),
+                      //         onConfirm: (values) {
+                      //           setState(() {
+                      //             _selectedViewIndices = values;
+                      //           });
+                      //         },
+                      //         chipDisplay: MultiSelectChipDisplay.none(),
+                      //       ),
+                      //     );
+                      //   }
+                      // }),
                       const SizedBox(width: 12),
                       Obx(
                         () => ElevatedButton(
@@ -448,7 +473,7 @@ class _ReportWidgetState extends State<ManagerReport>
             ),
           ),
           Obx(() {
-            if (_managerReportVm.isLoading.value) {
+            if (_managerReportVm.isReportLoading.value) {
               return Expanded(
                 child: Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
@@ -510,22 +535,21 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
-
-                                    _rightCell(
+                                  _leftBoldCell('Total'),
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .roomChargeDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .roomChargeDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .roomChargeDataTotals["ytd"],
@@ -576,22 +600,21 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
-
-                                    _rightCell(
+                                   _leftBoldCell('Total'),
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .extraChargeDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .extraChargeDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .extraChargeDataTotals["ytd"],
@@ -642,22 +665,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                     _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .adjustmentDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .adjustmentDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .adjustmentDataTotals["ytd"],
@@ -708,20 +731,20 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                     _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm.taxDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm.taxDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm.taxDataTotals["ytd"],
                                       ).toString(),
@@ -771,22 +794,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                     _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .discountDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .discountDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .discountDataTotals["ytd"],
@@ -837,22 +860,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                   _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .payoutDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .payoutDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .payoutDataTotals["ytd"],
@@ -903,22 +926,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                     _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenueDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenueDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenueDataTotals["ytd"],
@@ -969,22 +992,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                   _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .paymentDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .paymentDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .paymentDataTotals["ytd"],
@@ -1037,22 +1060,22 @@ class _ReportWidgetState extends State<ManagerReport>
                                 }).toList(),
                                 DataRow(
                                   cells: [
-                                    DataCell(Text('Total')),
+                                   _leftBoldCell('Total'),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenuePaymentDataTotals["today"],
                                       ).toString(),
                                     ),
 
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenuePaymentDataTotals["ptd"],
                                       ).toString(),
                                     ),
-                                    _rightCell(
+                                    _rightBoldCell(
                                       formatCurrency(
                                         _managerReportVm
                                             .posRevenuePaymentDataTotals["ytd"],
@@ -1101,31 +1124,31 @@ class _ReportWidgetState extends State<ManagerReport>
                                     }).toList(),
                                   );
                                 }).toList(),
-                                DataRow(
-                                  cells: [
-                                    DataCell(Text('Total')),
+                                // DataRow(
+                                //   cells: [
+                                //       _leftBoldCell('Total'),
 
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .cityLedgerDataTotals["today"],
-                                      ).toString(),
-                                    ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .cityLedgerDataTotals["today"],
+                                //       ).toString(),
+                                //     ),
 
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .cityLedgerDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .cityLedgerDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .cityLedgerDataTotals["ptd"],
+                                //       ).toString(),
+                                //     ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .cityLedgerDataTotals["ytd"],
+                                //       ).toString(),
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),
@@ -1167,31 +1190,31 @@ class _ReportWidgetState extends State<ManagerReport>
                                     }).toList(),
                                   );
                                 }).toList(),
-                                DataRow(
-                                  cells: [
-                                    DataCell(Text('Total')),
+                                // DataRow(
+                                //   cells: [
+                                //      _leftBoldCell('Total'),
 
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomSummaryDataTotals["today"],
-                                      ).toString(),
-                                    ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .roomSummaryDataTotals["today"],
+                                //       ).toString(),
+                                //     ),
 
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomSummaryDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomSummaryDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .roomSummaryDataTotals["ptd"],
+                                //       ).toString(),
+                                //     ),
+                                //     _rightBoldCell(
+                                //       formatCurrency(
+                                //         _managerReportVm
+                                //             .roomSummaryDataTotals["ytd"],
+                                //       ).toString(),
+                                //     ),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),

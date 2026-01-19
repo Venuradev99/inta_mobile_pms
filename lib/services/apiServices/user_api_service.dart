@@ -49,20 +49,19 @@ class UserApiService {
             responseData["refresh_token"],
           );
           await LocalStorageManager.setHotelId(hotelId);
-
-          final systemInfoResponse = await Future.wait([
-            loadSystemInformation(),
+          final responses = await Future.wait([
+            loadSystemWorkingDate(),
             loadBaseCurrency(),
             loadHotelInfo(),
           ]);
 
-          final systemInfo = systemInfoResponse[0];
-          final baseCurrency = systemInfoResponse[1];
-          final hotelInfo = systemInfoResponse[2];
+          final systemWorkingDate = responses[0];
+          final baseCurrency = responses[1];
+          final hotelInfo = responses[2];
 
-          if (systemInfo["isSuccessful"]) {
+          if (systemWorkingDate["isSuccessful"]) {
             await LocalStorageManager.setSystemDate(
-              systemInfo["result"]["systemDate"],
+              systemWorkingDate["result"]["systemDate"],
             );
           }
 
@@ -91,7 +90,7 @@ class UserApiService {
     }
   }
 
-  Future<Map<String, dynamic>> loadSystemInformation() async {
+  Future<Map<String, dynamic>> loadSystemWorkingDate() async {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
@@ -198,18 +197,18 @@ class UserApiService {
       await LocalStorageManager.setHotelId(hotelId.toString());
 
       final systemInfoResponse = await Future.wait([
-        loadSystemInformation(),
+        loadSystemWorkingDate(),
         loadBaseCurrency(),
         loadHotelInfo(),
       ]);
 
-      final systemInfo = systemInfoResponse[0];
+      final systemWorkingDate = systemInfoResponse[0];
       final baseCurrency = systemInfoResponse[1];
       final hotelInfo = systemInfoResponse[2];
 
-      if (systemInfo["isSuccessful"]) {
+      if (systemWorkingDate["isSuccessful"]) {
         await LocalStorageManager.setSystemDate(
-          systemInfo["result"]["systemDate"],
+          systemWorkingDate["result"]["systemDate"],
         );
       }
 
@@ -220,7 +219,6 @@ class UserApiService {
       if (hotelInfo["isSuccessful"]) {
         await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
       }
-
     } catch (e) {
       String msg = 'Error change property: $e';
       MessageService().error(msg);

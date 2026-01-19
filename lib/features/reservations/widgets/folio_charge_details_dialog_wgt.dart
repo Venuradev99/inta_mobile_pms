@@ -125,7 +125,7 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
           if (widget.charge.chargeTypeId == 3 &&
               widget.charge.transferedToFolioId == 0) ...[
             Text(
-              'Source',
+              'Source Information',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -146,7 +146,7 @@ class _FolioChargeDetailsDialogState extends State<FolioChargeDetailsDialog> {
           if (widget.charge.chargeTypeId == 3 &&
               widget.charge.transferedToFolioId > 0) ...[
             Text(
-              'Destination',
+              'Destination Information',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

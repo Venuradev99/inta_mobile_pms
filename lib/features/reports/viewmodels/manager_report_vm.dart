@@ -138,6 +138,8 @@ class ManagerReportVm extends GetxController {
   }
 
   loadTablesAccordingToHotel() {
+    resetData();
+
     final selectedHotelId = isMultipleHotelCheckbox.value == true
         ? multipleHotelIndex
         : selectedHotel.value;
@@ -157,7 +159,6 @@ class ManagerReportVm extends GetxController {
       };
     }).toList();
 
-    
     final cityLedgerDataResult = List<Map<String, dynamic>>.from(
       data[selectedHotelId]["cityLedgerRecodes"],
     );

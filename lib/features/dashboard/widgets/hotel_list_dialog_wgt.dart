@@ -198,7 +198,7 @@ class HotelListDialog extends StatelessWidget {
     final isSelected = hotel.hotelId == currentHotelId;
 
     return Card(
-      elevation: isSelected ? 4 : 2, // higher elevation for selected
+      elevation: isSelected ? 4 : 2, 
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: isSelected
@@ -233,7 +233,7 @@ class HotelListDialog extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: isSelected ? AppColors.primary : AppColors.black,
           ),
-          maxLines: 1,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(

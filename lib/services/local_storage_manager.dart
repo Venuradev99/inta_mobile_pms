@@ -32,7 +32,7 @@ class LocalStorageManager {
     String jsonString = prefs.getString('masterData') ?? "";
     if (jsonString.isNotEmpty) {
       final json = jsonDecode(jsonString);
-      final masterData =  MasterData.fromJson(json);
+      final masterData = MasterData.fromJson(json);
       return masterData.userId;
     } else {
       return '';
@@ -44,7 +44,7 @@ class LocalStorageManager {
     String jsonString = prefs.getString('masterData') ?? "";
     if (jsonString.isNotEmpty) {
       final json = jsonDecode(jsonString);
-      final masterData =  MasterData.fromJson(json);
+      final masterData = MasterData.fromJson(json);
       return masterData.userName;
     } else {
       return '';
@@ -91,6 +91,19 @@ class LocalStorageManager {
   static Future<void> clearUserData() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+  }
+
+  static Future<void> setSystemInfo(Map<String, dynamic> sysInfo) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(sysInfo);
+    await prefs.setString('system_info', jsonString);
+  }
+
+  static Future<Map<String, dynamic>> getSystemInfo() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString('system_info') ?? '{}';
+    final Map<String, dynamic> data = jsonDecode(jsonString);
+    return data;
   }
 
   static Future<void> setSystemDate(String systemDate) async {

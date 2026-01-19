@@ -38,16 +38,17 @@ class AppResources {
   static const String authentication = 'authentication';
   static const String getSystemWorkingDate = '$system/GetSystemWorkingDate';
   static const String getBaseCurrency = '$currency/Base';
+  static const String getSystemInformation = '$common/GetSystemInformation';
 
   //dashboard
   static const String getBookingStats = '$dashboard/GetBookingStatic';
-  static const String getInventoryStats = '$calenderBooking/GetQuickOverview'; 
+  static const String getInventoryStats = '$calenderBooking/GetQuickOverview';
   static const String getAllLockReservations =
       '$booking/GetAllLockReservations';
   static const String lockBooking = '$booking/lock';
-  static const String getStatistics = '$dashboard/GetMobileQuickOverviewStatistics';
+  static const String getStatistics =
+      '$dashboard/GetMobileQuickOverviewStatistics';
   static const String getAllHotels = '$hotel/GetAllByUserAndMenu';
-  
 
   //reservation
   static const String searchReservationList = '$booking/SearchReservationList';
@@ -90,7 +91,8 @@ class AppResources {
   static const String getAllBusinessCategory = '$common/GetAllBusinessCategory';
   static const String transportationModes =
       '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
-      static const String getAllBookingRemarks = '$bookingRemarks/GetAll?BookingRoomId';
+  static const String getAllBookingRemarks =
+      '$bookingRemarks/GetAll?BookingRoomId';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';
@@ -117,7 +119,8 @@ class AppResources {
   static const String unblockMaintenanceblock =
       '$maintenanceblock/UnblockDateRange';
   static const String updateHouseStatus = '$rooms/UpdateHouseStatus';
-  static const String getAllHouseKeepingAuditTrail = '$auditTrial/getAuditTrial';
+  static const String getAllHouseKeepingAuditTrail =
+      '$auditTrial/getAuditTrial';
   static const String getMaintenanceBlockById = '$maintenanceblock/GetById';
   static const String unblockMaintenanceBLock = '$maintenanceblock/Unblock';
 
