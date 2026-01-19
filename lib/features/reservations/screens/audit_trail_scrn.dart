@@ -42,7 +42,7 @@ class _AuditTrailState extends State<AuditTrail> {
         ),
         title: Text(
           'Audit Trail',
-          style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+          style: TextTheme.of(context).titleMedium?.copyWith(
             color: AppColors.black,
             fontWeight: FontWeight.w600,
           ),
@@ -106,7 +106,7 @@ class _AuditTrailState extends State<AuditTrail> {
                   Expanded(
                     child: Text(
                       item.transactionTypeName ?? '',
-                      style: AppTextTheme.lightTextTheme.titleMedium
+                      style:  TextTheme.of(context).titleMedium
                           ?.copyWith(color: AppColors.black),
                     ),
                   ),
@@ -119,7 +119,7 @@ class _AuditTrailState extends State<AuditTrail> {
               const SizedBox(height: 8),
               Text(
                 item.description ?? '',
-                style: AppTextTheme.lightTextTheme.bodyMedium
+                style:  TextTheme.of(context).bodyMedium
                     ?.copyWith(color: AppColors.darkgrey),
               ),
               const SizedBox(height: 16),
@@ -133,7 +133,7 @@ class _AuditTrailState extends State<AuditTrail> {
                   const SizedBox(width: 8),
                   Text(
                     item.userName ?? '',
-                    style: AppTextTheme.lightTextTheme.bodySmall
+                    style:  TextTheme.of(context).bodySmall
                         ?.copyWith(color: AppColors.black),
                   ),
                   const SizedBox(width: 16),

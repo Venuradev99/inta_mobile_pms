@@ -319,7 +319,10 @@ class _DashboardState extends State<Dashboard> {
             highlightColor: Colors.grey[100]!,
             child: Container(
               width: ResponsiveConfig.scaleWidth(context, 200),
-              height: textTheme.headlineSmall?.fontSize ?? 20,
+              height: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.headlineSmall?.fontSize ?? 20,
+              ),
               color: Colors.white,
             ),
           ),
@@ -369,7 +372,10 @@ class _DashboardState extends State<Dashboard> {
             highlightColor: Colors.grey[100]!,
             child: Container(
               width: ResponsiveConfig.scaleWidth(context, 200),
-              height: textTheme.headlineSmall?.fontSize ?? 20,
+              height: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.headlineSmall?.fontSize ?? 20,
+              ),
               color: Colors.white,
             ),
           ),
@@ -416,7 +422,10 @@ class _DashboardState extends State<Dashboard> {
                                     context,
                                     100,
                                   ),
-                                  height: 16,
+                                  height: ResponsiveConfig.responsiveFont(
+                                    context,
+                                    16,
+                                  ),
                                   color: Colors.white,
                                 ),
                               ),
@@ -428,7 +437,10 @@ class _DashboardState extends State<Dashboard> {
                                     context,
                                     50,
                                   ),
-                                  height: 16,
+                                  height: ResponsiveConfig.responsiveFont(
+                                    context,
+                                    16,
+                                  ),
                                   color: Colors.white,
                                 ),
                               ),
@@ -442,7 +454,10 @@ class _DashboardState extends State<Dashboard> {
                             highlightColor: Colors.grey[100]!,
                             child: Container(
                               width: double.infinity,
-                              height: 8,
+                              height: ResponsiveConfig.responsiveFont(
+                                context,
+                                8,
+                              ),
                               color: Colors.white,
                             ),
                           ),
@@ -479,7 +494,10 @@ class _DashboardState extends State<Dashboard> {
             highlightColor: Colors.grey[100]!,
             child: Container(
               width: ResponsiveConfig.scaleWidth(context, 200),
-              height: textTheme.headlineSmall?.fontSize ?? 20,
+              height: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.headlineSmall?.fontSize ?? 20,
+              ),
               color: Colors.white,
             ),
           ),
@@ -526,7 +544,10 @@ class _DashboardState extends State<Dashboard> {
                                     context,
                                     100,
                                   ),
-                                  height: 16,
+                                  height: ResponsiveConfig.responsiveFont(
+                                    context,
+                                    16,
+                                  ),
                                   color: Colors.white,
                                 ),
                               ),
@@ -538,7 +559,10 @@ class _DashboardState extends State<Dashboard> {
                                     context,
                                     50,
                                   ),
-                                  height: 16,
+                                  height: ResponsiveConfig.responsiveFont(
+                                    context,
+                                    16,
+                                  ),
                                   color: Colors.white,
                                 ),
                               ),
@@ -552,7 +576,10 @@ class _DashboardState extends State<Dashboard> {
                             highlightColor: Colors.grey[100]!,
                             child: Container(
                               width: double.infinity,
-                              height: 8,
+                              height: ResponsiveConfig.responsiveFont(
+                                context,
+                                8,
+                              ),
                               color: Colors.white,
                             ),
                           ),
@@ -665,10 +692,33 @@ class _DashboardState extends State<Dashboard> {
                                     color: AppColors.onPrimary,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 0.5,
-                                    fontSize:
-                                        (textTheme.titleLarge?.fontSize ?? 22) *
-                                        fontScale,
+                                    fontSize: ResponsiveConfig.responsiveFont(
+                                      context,
+                                      textTheme.titleLarge?.fontSize ?? 22,
+                                    ),
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                );
+                              }),
+                              const SizedBox(height: 4),
+                              // Hotel name below username
+                              Obx(() {
+                                return Text(
+                                  _dashboardVm.hotelName.value,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.onPrimary.withOpacity(
+                                      0.95,
+                                    ),
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.3,
+                                    fontSize: ResponsiveConfig.responsiveFont(
+                                      context,
+                                      textTheme.bodyMedium?.fontSize ?? 14,
+                                    ),
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 );
                               }),
                             ],
@@ -676,20 +726,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ],
                     ),
-                    const Spacer(),
-                    Obx(() {
-                      return Text(
-                        _dashboardVm.hotelName.value,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: AppColors.onPrimary.withOpacity(0.95),
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0.3,
-                          fontSize:
-                              (textTheme.bodyMedium?.fontSize ?? 14) *
-                              fontScale,
-                        ),
-                      );
-                    }),
                   ],
                 ),
               ),
@@ -785,8 +821,10 @@ class _DashboardState extends State<Dashboard> {
                     'Reports',
                     style: textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize:
-                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize: ResponsiveConfig.responsiveFont(
+                        context,
+                        textTheme.bodyMedium?.fontSize ?? 14,
+                      ),
                       color: AppColors.onSurface.withOpacity(0.7),
                     ),
                   ),
@@ -906,7 +944,10 @@ class _DashboardState extends State<Dashboard> {
                 'Working Date: ${_dashboardVm.currentWorkingDate.value}',
                 style: textTheme.bodySmall?.copyWith(
                   color: AppColors.primary.withOpacity(0.6),
-                  fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                  fontSize: ResponsiveConfig.responsiveFont(
+                    context,
+                    textTheme.bodySmall?.fontSize ?? 12,
+                  ),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -932,7 +973,10 @@ class _DashboardState extends State<Dashboard> {
                 style: textTheme.bodyMedium?.copyWith(
                   color: AppColors.error,
                   fontWeight: FontWeight.w500,
-                  fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                  fontSize: ResponsiveConfig.responsiveFont(
+                    context,
+                    textTheme.bodyMedium?.fontSize ?? 14,
+                  ),
                 ),
               ),
               trailing: Icon(
@@ -972,7 +1016,10 @@ class _DashboardState extends State<Dashboard> {
           color: AppColors.primary,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
-          fontSize: (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+          fontSize: ResponsiveConfig.responsiveFont(
+            context,
+            textTheme.titleSmall?.fontSize ?? 16,
+          ),
         ),
       ),
     );
@@ -1018,7 +1065,10 @@ class _DashboardState extends State<Dashboard> {
               ? AppColors.black
               : AppColors.onSurface.withOpacity(0.7),
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-          fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+          fontSize: ResponsiveConfig.responsiveFont(
+            context,
+            textTheme.bodyMedium?.fontSize ?? 14,
+          ),
         ),
       ),
       trailing: isActive
@@ -1090,7 +1140,10 @@ class _DashboardState extends State<Dashboard> {
               ? AppColors.black
               : AppColors.onSurface.withOpacity(0.7),
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-          fontSize: (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+          fontSize: ResponsiveConfig.responsiveFont(
+            context,
+            textTheme.bodyMedium?.fontSize ?? 14,
+          ),
         ),
       ),
       trailing: badgeCount != null
@@ -1133,7 +1186,7 @@ class _DashboardState extends State<Dashboard> {
         count > 99 ? '99+' : '$count',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 10,
+          fontSize: ResponsiveConfig.responsiveFont(context, 10),
           fontWeight: FontWeight.bold,
         ),
         textAlign: TextAlign.center,
@@ -1323,8 +1376,10 @@ class _DashboardState extends State<Dashboard> {
                     color: AppColors.black.withOpacity(0.8),
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.titleSmall?.fontSize ?? 16,
+                    ),
                   ),
                 ),
                 Container(
@@ -1354,8 +1409,10 @@ class _DashboardState extends State<Dashboard> {
                 color: accentColor,
                 fontWeight: FontWeight.bold,
                 height: 0.9,
-                fontSize:
-                    (textTheme.headlineLarge?.fontSize ?? 32) * fontScale * 0.8,
+                fontSize: ResponsiveConfig.responsiveFont(
+                  context,
+                  (textTheme.headlineLarge?.fontSize ?? 32) * 0.8,
+                ),
               ),
             ),
             SizedBox(height: ResponsiveConfig.scaleHeight(context, 10)),
@@ -1377,7 +1434,10 @@ class _DashboardState extends State<Dashboard> {
                   color: AppColors.black.withOpacity(0.7),
                   height: 1.3,
                   fontWeight: FontWeight.w500,
-                  fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                  fontSize: ResponsiveConfig.responsiveFont(
+                    context,
+                    textTheme.bodySmall?.fontSize ?? 12,
+                  ),
                 ),
               ),
             ),
@@ -1412,11 +1472,10 @@ class _DashboardState extends State<Dashboard> {
             ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Property Statistics',
-              style: textTheme.headlineSmall?.copyWith(
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.black,
                 letterSpacing: 0.2,
-                fontSize: (textTheme.headlineSmall?.fontSize ?? 20) * fontScale,
               ),
             ),
           ),
@@ -1549,8 +1608,10 @@ class _DashboardState extends State<Dashboard> {
                     color: AppColors.black.withOpacity(0.7),
                     fontWeight: FontWeight.w600,
                     height: 1.2,
-                    fontSize:
-                        (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.bodyMedium?.fontSize ?? 14,
+                    ),
                   ),
                 ),
               ),
@@ -1573,17 +1634,19 @@ class _DashboardState extends State<Dashboard> {
             yesterday,
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.black.withOpacity(0.5),
-              fontSize: (textTheme.bodySmall?.fontSize ?? 11) * fontScale,
+              fontSize: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.bodySmall?.fontSize ?? 11,
+              ),
             ),
           ),
           SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
           Text(
             value,
-            style: textTheme.titleMedium?.copyWith(
+            style: textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: accentColor,
               height: 1.1,
-              fontSize: (textTheme.titleMedium?.fontSize ?? 18) * fontScale,
             ),
           ),
           SizedBox(height: ResponsiveConfig.scaleHeight(context, 12)),
@@ -1616,7 +1679,10 @@ class _DashboardState extends State<Dashboard> {
                         ? Colors.green.shade600
                         : Colors.red.shade600,
                     fontWeight: FontWeight.w600,
-                    fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.bodySmall?.fontSize ?? 12,
+                    ),
                   ),
                 ),
               ],
@@ -1672,8 +1738,10 @@ class _DashboardState extends State<Dashboard> {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.titleSmall?.fontSize ?? 16,
+                    ),
                   ),
                 ),
                 Container(
@@ -1740,7 +1808,10 @@ class _DashboardState extends State<Dashboard> {
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.black.withOpacity(0.7),
               fontWeight: FontWeight.w500,
-              fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+              fontSize: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.bodySmall?.fontSize ?? 12,
+              ),
             ),
           ),
           const Spacer(),
@@ -1763,7 +1834,10 @@ class _DashboardState extends State<Dashboard> {
                   style: textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
-                    fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.bodySmall?.fontSize ?? 12,
+                    ),
                   ),
                 ),
               ),
@@ -1772,7 +1846,10 @@ class _DashboardState extends State<Dashboard> {
                 yday,
                 style: textTheme.bodySmall?.copyWith(
                   color: AppColors.black.withOpacity(0.5),
-                  fontSize: (textTheme.bodySmall?.fontSize ?? 10) * fontScale,
+                  fontSize: ResponsiveConfig.responsiveFont(
+                    context,
+                    textTheme.bodySmall?.fontSize ?? 10,
+                  ),
                 ),
               ),
             ],
@@ -1827,8 +1904,10 @@ class _DashboardState extends State<Dashboard> {
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
-                    fontSize:
-                        (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                    fontSize: ResponsiveConfig.responsiveFont(
+                      context,
+                      textTheme.titleSmall?.fontSize ?? 16,
+                    ),
                   ),
                 ),
                 Container(
@@ -1902,7 +1981,10 @@ class _DashboardState extends State<Dashboard> {
             style: textTheme.bodySmall?.copyWith(
               color: AppColors.black.withOpacity(0.7),
               fontWeight: FontWeight.w500,
-              fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+              fontSize: ResponsiveConfig.responsiveFont(
+                context,
+                textTheme.bodySmall?.fontSize ?? 12,
+              ),
             ),
           ),
           Container(
@@ -1921,7 +2003,10 @@ class _DashboardState extends State<Dashboard> {
               style: textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
-                fontSize: (textTheme.bodySmall?.fontSize ?? 12) * fontScale,
+                fontSize: ResponsiveConfig.responsiveFont(
+                  context,
+                  textTheme.bodySmall?.fontSize ?? 12,
+                ),
               ),
             ),
           ),
@@ -1957,11 +2042,10 @@ class _DashboardState extends State<Dashboard> {
             ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Inventory Statistics',
-              style: textTheme.headlineSmall?.copyWith(
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.black,
                 letterSpacing: 0.2,
-                fontSize: (textTheme.headlineSmall?.fontSize ?? 20) * fontScale,
               ),
             ),
           ),
@@ -2088,8 +2172,10 @@ class _DashboardState extends State<Dashboard> {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize:
-                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize: ResponsiveConfig.responsiveFont(
+                        context,
+                        textTheme.bodyMedium?.fontSize ?? 14,
+                      ),
                     ),
                   ),
                   Container(
@@ -2108,8 +2194,10 @@ class _DashboardState extends State<Dashboard> {
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize:
-                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize: ResponsiveConfig.responsiveFont(
+                          context,
+                          textTheme.titleSmall?.fontSize ?? 16,
+                        ),
                       ),
                     ),
                   ),
@@ -2173,11 +2261,10 @@ class _DashboardState extends State<Dashboard> {
             ).copyWith(bottom: ResponsiveConfig.scaleHeight(context, 4)),
             child: Text(
               'Occupancy Statistics',
-              style: textTheme.headlineSmall?.copyWith(
+              style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.black,
                 letterSpacing: 0.2,
-                fontSize: (textTheme.headlineSmall?.fontSize ?? 20) * fontScale,
               ),
             ),
           ),
@@ -2265,8 +2352,10 @@ class _DashboardState extends State<Dashboard> {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.black.withOpacity(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize:
-                          (textTheme.bodyMedium?.fontSize ?? 14) * fontScale,
+                      fontSize: ResponsiveConfig.responsiveFont(
+                        context,
+                        textTheme.bodyMedium?.fontSize ?? 14,
+                      ),
                     ),
                   ),
                   Container(
@@ -2285,8 +2374,10 @@ class _DashboardState extends State<Dashboard> {
                       style: textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: progressColor,
-                        fontSize:
-                            (textTheme.titleSmall?.fontSize ?? 16) * fontScale,
+                        fontSize: ResponsiveConfig.responsiveFont(
+                          context,
+                          textTheme.titleSmall?.fontSize ?? 16,
+                        ),
                       ),
                     ),
                   ),

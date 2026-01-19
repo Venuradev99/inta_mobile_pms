@@ -230,7 +230,7 @@ class _StayViewScreenState extends State<StayViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = AppTextTheme.lightTextTheme;
+    final textTheme = AppTextTheme.lightTextTheme(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final horizontalPadding = ResponsiveConfig.horizontalPadding(context);
     final availableWidth =
@@ -1037,9 +1037,6 @@ class _StayViewScreenState extends State<StayViewScreen> {
               top: (_rowHeight! - _barHeight!) / 2,
               child: InkWell(
                 onTap: () {
-                  _stayViewVm.saveCheckinData(
-                    CheckinData.fromJson(checkIn)
-                  );
                   if (guestName == 'BLOCKED') {
                     _handleMaintenanceBlockTap(item, days, section, checkIn, i);
                     return;

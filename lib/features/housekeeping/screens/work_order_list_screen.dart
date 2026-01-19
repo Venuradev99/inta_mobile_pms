@@ -124,6 +124,11 @@ class _WorkOrderListState extends State<WorkOrderList> {
     Color statusColor = _getStatusColor(workOrder.status);
     Color priorityColor = _getPriorityColor(workOrder.priority);
 
+    String formatDate(DateTime? date) {
+      if (date == null) return '-';
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -142,7 +147,7 @@ class _WorkOrderListState extends State<WorkOrderList> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row
+            // Header Row: Order No & Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -177,27 +182,10 @@ class _WorkOrderListState extends State<WorkOrderList> {
             ),
 
             const SizedBox(height: 8),
+
+            // Priority Chip
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    workOrder.category,
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -221,32 +209,64 @@ class _WorkOrderListState extends State<WorkOrderList> {
 
             const SizedBox(height: 12),
 
-            // Details Grid
+            // Grid: Two fields per row
             Row(
               children: [
                 Expanded(
-                  child: _buildDetailItem('Unit/Room', workOrder.unitRoom),
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.meeting_room_outlined,
+                    title: 'Unit/Room',
+                    value: workOrder.unitRoom.isNotEmpty
+                        ? workOrder.unitRoom
+                        : workOrder.roomName,
+                  ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildDetailItem(
-                    'Block',
-                    '${workOrder.blockFrom.day}/${workOrder.blockFrom.month}/${workOrder.blockFrom.year} → ${workOrder.blockTo.day}/${workOrder.blockTo.month}/${workOrder.blockTo.year}',
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.category_outlined,
+                    title: 'Category',
+                    value: workOrder.category,
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
-
             Row(
               children: [
                 Expanded(
-                  child: _buildDetailItem('Assigned to', workOrder.assignedTo),
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.calendar_today_outlined,
+                    title: 'Deadline',
+                    value: formatDate(workOrder.dueDate),
+                  ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _buildDetailItem(
-                    'Due Date',
-                    '${workOrder.dueDate.day}/${workOrder.dueDate.month}/${workOrder.dueDate.year}',
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.person_outline,
+                    title: 'Assigned To',
+                    value: workOrder.assignedTo,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.edit_calendar_outlined,
+                    title: 'Entered On',
+                    value: formatDate(workOrder.enteredOn),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDetailItemWithIcon(
+                    icon: Icons.update_outlined,
+                    title: 'Updated On',
+                    value: formatDate(workOrder.updatedOn),
                   ),
                 ),
               ],
@@ -254,27 +274,82 @@ class _WorkOrderListState extends State<WorkOrderList> {
 
             const SizedBox(height: 12),
 
-            // Description
-            Text(
-              'Description:',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.lightgrey,
+            // Description with bordered background
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              workOrder.description,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: AppColors.darkgrey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Description',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkgrey,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    workOrder.description.isNotEmpty
+                        ? workOrder.description
+                        : '-',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.darkgrey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // Helper widget for a detail with an icon
+  Widget _buildDetailItemWithIcon({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey.shade600),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkgrey,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value.isNotEmpty ? value : '-',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.darkgrey,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -374,31 +449,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
         _shimmerBox(width: 80, height: 12),
         const SizedBox(height: 6),
         _shimmerBox(width: double.infinity, height: 14),
-      ],
-    );
-  }
-
-  Widget _buildDetailItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: AppColors.lightgrey,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: AppColors.darkgrey,
-          ),
-        ),
       ],
     );
   }

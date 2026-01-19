@@ -63,7 +63,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
       ),
       title: Text(
         'Room Move',
-        style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+        style:  TextTheme.of(context).titleMedium?.copyWith(
           color: AppColors.black,
           fontWeight: FontWeight.w600,
         ),
@@ -132,7 +132,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
           children: [
             Text(
               'Is Override Rate',
-              style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+              style:  TextTheme.of(context).bodySmall?.copyWith(
                 color: AppColors.darkgrey,
                 fontWeight: FontWeight.w500,
               ),
@@ -182,7 +182,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               const SizedBox(width: 6),
               Text(
                 'Rate',
-                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                style:  TextTheme.of(context).bodySmall?.copyWith(
                   color: AppColors.darkgrey,
                   fontWeight: FontWeight.w500,
                 ),
@@ -200,7 +200,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
                 const SizedBox(width: 6),
                 Text(
                   'Tax Inclusive',
-                  style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                  style:  TextTheme.of(context).bodySmall?.copyWith(
                     color: AppColors.darkgrey,
                     fontWeight: FontWeight.w500,
                   ),
@@ -241,7 +241,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               const SizedBox(width: 8),
               Text(
                 currencyCode,
-                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                style:  TextTheme.of(context).bodySmall?.copyWith(
                   color: AppColors.darkgrey,
                   fontWeight: FontWeight.w500,
                 ),
@@ -360,7 +360,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
             ),
             child: Text(
               label,
-              style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+              style:  TextTheme.of(context).bodySmall?.copyWith(
                 color: AppColors.darkgrey,
                 fontWeight: FontWeight.w500,
               ),
@@ -379,7 +379,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
                 Expanded(
                   child: Text(
                     selectedName ?? 'Selected Type',
-                    style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                    style:  TextTheme.of(context).bodyMedium?.copyWith(
                       color: enabled ? AppColors.black : AppColors.lightgrey,
                       fontWeight: FontWeight.w500,
                     ),
@@ -405,7 +405,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Text(
                             item["name"],
-                            style: AppTextTheme.lightTextTheme.bodyMedium
+                            style:  TextTheme.of(context).bodyMedium
                                 ?.copyWith(
                                   color: AppColors.black,
                                   fontWeight: FontWeight.w400,
@@ -432,7 +432,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
         children: [
           Text(
             label,
-            style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+            style:  TextTheme.of(context).bodyMedium?.copyWith(
               color: AppColors.darkgrey,
               fontWeight: FontWeight.w500,
             ),
@@ -440,7 +440,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
           Flexible(
             child: Text(
               value,
-              style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+              style:  TextTheme.of(context).bodyMedium?.copyWith(
                 color: AppColors.black,
                 fontWeight: FontWeight.w500,
               ),
@@ -493,7 +493,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               ),
               child: Text(
                 'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.lightgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -518,7 +518,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               ),
               child: Text(
                 'Save',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style: TextTheme.of(context).bodyMedium?.copyWith(
                   color: canSave ? AppColors.onPrimary : Colors.grey.shade600,
                   fontWeight: FontWeight.w600,
                 ),
@@ -556,7 +556,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
           ),
           title: Text(
             'Confirm Room Move',
-            style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+            style:  TextTheme.of(context).titleMedium?.copyWith(
               color: AppColors.black,
               fontWeight: FontWeight.w600,
             ),
@@ -567,21 +567,21 @@ class _RoomMovePageState extends State<RoomMovePage> {
             children: [
               Text(
                 'Are you sure you want to move the guest to:',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.darkgrey,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Room Type: $selectedRoomType',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.black,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 'Room: ${selectedRoom!}',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.black,
                   fontWeight: FontWeight.w600,
                 ),
@@ -593,7 +593,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               onPressed: () => context.pop(),
               child: Text(
                 'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.lightgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -634,7 +634,7 @@ class _RoomMovePageState extends State<RoomMovePage> {
               ),
               child: Text(
                 'Confirm',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.onPrimary,
                   fontWeight: FontWeight.w600,
                 ),

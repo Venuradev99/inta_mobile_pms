@@ -523,6 +523,7 @@ class _AddWorkOrderDialogState extends State<AddWorkOrderDialog> {
         orderNo: _orderNoController.text,
         category: _selectedCategory,
         unitRoom: _selectUnitRoom,
+        roomName: _selectUnitRoom,
         blockFrom: _getStandardDate(_fromDateController.text),
         blockTo: _getStandardDate(_toDateController.text),
         priority: _selectedPriority,

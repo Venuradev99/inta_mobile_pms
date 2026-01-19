@@ -136,7 +136,7 @@ class _LoginPageState extends State<LoginPage>
                     // Logo Section
                     if (!isKeyboardVisible) ...[
                       SizedBox(
-                        height: ResponsiveConfig.scaleHeight(context, 60),
+                        height: ResponsiveConfig.scaleHeight(context, 30),
                       ),
                       FadeTransition(
                         opacity: _fadeAnimation,
@@ -144,12 +144,13 @@ class _LoginPageState extends State<LoginPage>
                       ),
                     ],
 
-                    SizedBox(
-                      height: ResponsiveConfig.scaleHeight(
-                        context,
-                        isKeyboardVisible ? 40 : 80,
-                      ),
-                    ),
+                    // SizedBox(
+                    //   height: ResponsiveConfig.scaleHeight(
+                    //     context,
+                    //     isKeyboardVisible ? 40 : 50,
+                    //   ),
+                    // ),
+                    SizedBox(height: ResponsiveConfig.scaleHeight(context, 10)),
 
                     // Login Form
                     SlideTransition(
@@ -183,16 +184,12 @@ class _LoginPageState extends State<LoginPage>
   Widget _buildLogoSection(BuildContext context) {
     return Column(
       children: [
-        // App Logo (just the image)
         Image.asset(
-          _logo, // path to your image
+          _logo,
           height: ResponsiveConfig.scaleHeight(context, 120),
           width: ResponsiveConfig.scaleWidth(context, 120),
           fit: BoxFit.contain,
         ),
-        SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-
-        // Welcome Text
         Text(
           'Welcome to Inta PMS Mobile',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -203,17 +200,17 @@ class _LoginPageState extends State<LoginPage>
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
-        Text(
-          'Welcome back! Please sign in to continue.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.lightgrey,
-            fontSize:
-                ResponsiveConfig.scaleWidth(context, 14) *
-                ResponsiveConfig.fontScale(context),
-          ),
-          textAlign: TextAlign.center,
-        ),
+        // SizedBox(height: ResponsiveConfig.scaleHeight(context, 8)),
+        // Text(
+        //   'Welcome back! Please sign in to continue.',
+        //   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        //     color: AppColors.lightgrey,
+        //     fontSize:
+        //         ResponsiveConfig.scaleWidth(context, 14) *
+        //         ResponsiveConfig.fontScale(context),
+        //   ),
+        //   textAlign: TextAlign.center,
+        // ),
       ],
     );
   }

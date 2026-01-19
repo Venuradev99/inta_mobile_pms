@@ -258,16 +258,14 @@ class _EditGuestDetailsState extends State<EditGuestDetails>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).brightness == Brightness.light
-        ? AppTextTheme.lightTextTheme
-        : AppTextTheme.darkTextTheme;
+    final textTheme =  TextTheme.of(context);
     final padding = ResponsiveConfig.horizontalPadding(context);
     final verticalSpacing = ResponsiveConfig.listItemSpacing(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Edit Guest Details', style: textTheme.titleLarge),
+        title: Text('Edit Guest Details', style:  textTheme.titleLarge),
         centerTitle: true,
         leading: const SizedBox.shrink(),
         actions: [

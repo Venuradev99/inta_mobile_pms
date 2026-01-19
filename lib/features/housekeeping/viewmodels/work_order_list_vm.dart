@@ -77,9 +77,12 @@ class WorkOrderListVm extends GetxController {
           final data = WorkOrder(
             orderNo: item["workOrderNumber"],
             category: item["categoryName"],
-            unitRoom: item["roomName"],
+            unitRoom: item["unitName"],
+            roomName: item["roomName"],
             blockFrom: getDateForDDMMYYYY(item["from"]),
             blockTo: getDateForDDMMYYYY(item["to"]),
+            enteredOn: getDateFromIsoString(item["entered"]),
+            updatedOn: getDateFromIsoString(item["updated"]),
             priority: item["priorityName"],
             assignedTo: item["assingToName"],
             status: getStatus(item["status"]),
@@ -153,9 +156,9 @@ class WorkOrderListVm extends GetxController {
         for (final item in houseKeepers["result"]) {
           houseKeeperList.add(
             DropdownData(
-              id:  item["userId"],
-               description: "${item["firstName"]} ${item["lastName"]}",
-               )
+              id: item["userId"],
+              description: "${item["firstName"]} ${item["lastName"]}",
+            ),
           );
         }
       } else {
@@ -166,11 +169,8 @@ class WorkOrderListVm extends GetxController {
       if (unitRooms["isSuccessful"] == true) {
         for (final item in unitRooms["result"]["recordSet"]) {
           unitRoomList.add(
-              DropdownData(
-                id: item["id"],
-                description: item["name"],
-              ),
-            );
+            DropdownData(id: item["id"], description: item["name"]),
+          );
         }
       } else {
         MessageService().error(
@@ -180,12 +180,8 @@ class WorkOrderListVm extends GetxController {
       if (reasons["isSuccessful"] == true) {
         for (final item in reasons["result"]) {
           reasonList.add(
-              DropdownData(
-                id: item["reasonId"],
-                description: item["name"],
-              ),
-            
-            );
+            DropdownData(id: item["reasonId"], description: item["name"]),
+          );
         }
       } else {
         MessageService().error(
@@ -216,6 +212,14 @@ class WorkOrderListVm extends GetxController {
       return DateFormat('dd/MM/yyyy').parse(date);
     } catch (e) {
       throw Exception('error parsing date for format dd/mm/yyyy: $e');
+    }
+  }
+
+  DateTime getDateFromIsoString(String isoString) {
+    try {
+      return DateTime.parse(isoString);
+    } catch (e) {
+      throw Exception('Error parsing ISO date string: $e');
     }
   }
 
@@ -298,32 +302,25 @@ class WorkOrderListVm extends GetxController {
                   ) ||
                   workOrder.blockTo.toString().toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.blockFrom.toString().toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.reason.toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.description.toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.dueDate.toString().toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.assignedTo.toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.status.toLowerCase().contains(
                     searchQuery.toLowerCase(),
-                  )
-                  ||
+                  ) ||
                   workOrder.description.toLowerCase().contains(
                     searchQuery.toLowerCase(),
                   ),
@@ -383,9 +380,11 @@ class WorkOrderListVm extends GetxController {
             .where(
               (item) =>
                   item.category ==
-                  categoryList.firstWhere(
-                    (element) => element.id == filterCategoryId.value,
-                  ).description,
+                  categoryList
+                      .firstWhere(
+                        (element) => element.id == filterCategoryId.value,
+                      )
+                      .description,
             )
             .toList();
       }
@@ -394,9 +393,11 @@ class WorkOrderListVm extends GetxController {
             .where(
               (item) =>
                   item.priority ==
-                  priorityList.firstWhere(
-                    (element) => element.id == filterPriorityId.value,
-                  ).description,
+                  priorityList
+                      .firstWhere(
+                        (element) => element.id == filterPriorityId.value,
+                      )
+                      .description,
             )
             .toList();
       }
@@ -405,9 +406,9 @@ class WorkOrderListVm extends GetxController {
             .where(
               (item) =>
                   item.unitRoom ==
-                  unitRoomList.firstWhere(
-                    (element) => element.id == filterRoomId.value,
-                  ).description,
+                  unitRoomList
+                      .firstWhere((element) => element.id == filterRoomId.value)
+                      .description,
             )
             .toList();
       }
@@ -416,9 +417,11 @@ class WorkOrderListVm extends GetxController {
             .where(
               (item) =>
                   item.status ==
-                  statusList.firstWhere(
-                    (element) => element.id == filterStatusId.value,
-                  ).description,
+                  statusList
+                      .firstWhere(
+                        (element) => element.id == filterStatusId.value,
+                      )
+                      .description,
             )
             .toList();
       }
@@ -427,20 +430,23 @@ class WorkOrderListVm extends GetxController {
             .where(
               (item) =>
                   item.assignedTo ==
-                  houseKeeperList.firstWhere(
-                    (element) => element.id == filterAssignToId.value,
-                  ).description,
+                  houseKeeperList
+                      .firstWhere(
+                        (element) => element.id == filterAssignToId.value,
+                      )
+                      .description,
             )
             .toList();
       }
       if (filterIsCompleted.value == true) {
         listToFilter = listToFilter
             .where(
-              (item) => item.status.toLowerCase() == statusList
-                  .firstWhere((element) =>
-                      element.id == 2)
-                  .description
-                  .toLowerCase(),
+              (item) =>
+                  item.status.toLowerCase() ==
+                  statusList
+                      .firstWhere((element) => element.id == 2)
+                      .description
+                      .toLowerCase(),
             )
             .toList();
       }

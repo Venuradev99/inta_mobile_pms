@@ -186,7 +186,7 @@ class _AmendStayState extends State<AmendStay> {
       ),
       title: Text(
         'Amend Stay',
-        style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+        style:  TextTheme.of(context).titleMedium?.copyWith(
           color: AppColors.black,
           fontWeight: FontWeight.w600,
         ),
@@ -222,7 +222,7 @@ class _AmendStayState extends State<AmendStay> {
           children: [
             Text(
               'Is Override Rate',
-              style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+              style:  TextTheme.of(context).bodySmall?.copyWith(
                 color: AppColors.darkgrey,
                 fontWeight: FontWeight.w500,
               ),
@@ -266,7 +266,7 @@ class _AmendStayState extends State<AmendStay> {
           children: [
             Text(
               'Apply To All',
-              style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+              style:  TextTheme.of(context).bodySmall?.copyWith(
                 color: AppColors.darkgrey,
                 fontWeight: FontWeight.w500,
               ),
@@ -316,7 +316,7 @@ class _AmendStayState extends State<AmendStay> {
               const SizedBox(width: 6),
               Text(
                 'Rate',
-                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                style:  TextTheme.of(context).bodySmall?.copyWith(
                   color: AppColors.darkgrey,
                   fontWeight: FontWeight.w500,
                 ),
@@ -334,7 +334,7 @@ class _AmendStayState extends State<AmendStay> {
                 const SizedBox(width: 6),
                 Text(
                   'Tax Inclusive',
-                  style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                  style:  TextTheme.of(context).bodySmall?.copyWith(
                     color: AppColors.darkgrey,
                     fontWeight: FontWeight.w500,
                   ),
@@ -374,7 +374,7 @@ class _AmendStayState extends State<AmendStay> {
               const SizedBox(width: 8),
               Text(
                 currencyCode,
-                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                style:  TextTheme.of(context).bodySmall?.copyWith(
                   color: AppColors.darkgrey,
                   fontWeight: FontWeight.w500,
                 ),
@@ -528,7 +528,7 @@ class _AmendStayState extends State<AmendStay> {
         children: [
           Text(
             label,
-            style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+            style:  TextTheme.of(context).bodyMedium?.copyWith(
               color: AppColors.darkgrey,
               fontWeight: FontWeight.w500,
             ),
@@ -536,7 +536,7 @@ class _AmendStayState extends State<AmendStay> {
           Flexible(
             child: Text(
               value,
-              style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+              style:  TextTheme.of(context).bodyMedium?.copyWith(
                 color: AppColors.black,
                 fontWeight: FontWeight.w500,
               ),
@@ -564,7 +564,7 @@ class _AmendStayState extends State<AmendStay> {
       children: [
         Text(
           label,
-          style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+          style: TextTheme.of(context).bodyMedium?.copyWith(
             color: AppColors.darkgrey,
             fontWeight: FontWeight.w500,
           ),
@@ -669,7 +669,7 @@ class _AmendStayState extends State<AmendStay> {
               ),
               child: Text(
                 'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style: TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.lightgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -692,7 +692,7 @@ class _AmendStayState extends State<AmendStay> {
               ),
               child: Text(
                 'Save',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.onPrimary,
                   fontWeight: FontWeight.w600,
                 ),

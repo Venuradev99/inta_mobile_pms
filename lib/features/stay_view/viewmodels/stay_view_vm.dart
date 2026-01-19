@@ -41,8 +41,6 @@ class StayViewVm extends GetxController {
   var unassignBookingList = <UnassignBookingItem>[].obs;
   var maintenanceBlockData = Rx<MaintenanceBlockItem?>(null);
 
-  var checkinData = Rx<CheckinData?>(null);
-
   DateTime centerDate = DateTime.now();
 
   StayViewVm(
@@ -313,13 +311,6 @@ class StayViewVm extends GetxController {
     }
   }
 
-  void saveCheckinData(CheckinData data) {
-    try {
-      checkinData.value = data;
-    } catch (e) {
-      throw Exception('Error saving checkin data: $e');
-    }
-  }
 
   Color hexToColor(String hexCode) {
     if (hexCode == '' || hexCode.isEmpty) {

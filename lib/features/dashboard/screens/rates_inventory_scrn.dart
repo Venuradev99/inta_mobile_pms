@@ -149,7 +149,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                   children: [
                     Text(
                       title,
-                      style: AppTextTheme.lightTextTheme.headlineSmall?.copyWith(
+                      style:  TextTheme.of(context).headlineSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: AppColors.onSurface,
                       ),
@@ -173,7 +173,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                           child: Text(
                             entry.key,
-                            style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+                            style:  TextTheme.of(context).titleMedium?.copyWith(
                               fontWeight: FontWeight.w500,
                               color: AppColors.primary,
                             ),
@@ -224,7 +224,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
           children: [
             Text(
               option,
-              style: AppTextTheme.lightTextTheme.bodyLarge?.copyWith(
+              style:  TextTheme.of(context).bodyLarge?.copyWith(
                 color: isSelected ? AppColors.primary : AppColors.onSurface,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
               ),
@@ -256,7 +256,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
               children: [
                 Text(
                   'Edit $label',
-                  style: AppTextTheme.lightTextTheme.headlineSmall?.copyWith(
+                  style:  TextTheme.of(context).headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -379,7 +379,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                 children: [
                   Text(
                     label,
-                    style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
+                    style: TextTheme.of(context).bodySmall?.copyWith(
                       color: AppColors.darkgrey,
                       fontWeight: FontWeight.w500,
                     ),
@@ -387,7 +387,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: AppTextTheme.lightTextTheme.bodyLarge?.copyWith(
+                    style:  TextTheme.of(context).bodyLarge?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -403,7 +403,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = AppTextTheme.lightTextTheme;
+    final textTheme =  TextTheme.of(context);
     final padding = ResponsiveConfig.defaultPadding(context);
 
     return Scaffold(
@@ -477,7 +477,7 @@ class _RatesInventoryState extends State<RatesInventory> with TickerProviderStat
                       Expanded(
                         child: Text(
                           'Rates Inclusive Tax',
-                          style: textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+                          style:  TextTheme.of(context).bodyLarge?.copyWith(fontWeight: FontWeight.w500),
                         ),
                       ),
                       Switch(

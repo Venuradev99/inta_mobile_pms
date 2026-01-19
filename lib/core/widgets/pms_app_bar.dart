@@ -67,9 +67,7 @@ class _PmsAppBarState extends State<PmsAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).brightness == Brightness.dark
-        ? AppTextTheme.darkTextTheme
-        : AppTextTheme.lightTextTheme;
+    final textTheme =  TextTheme.of(context);
 
     if (widget.alwaysVisibleSearch) {
       // Always visible search bar, filling the title area between leading and actions

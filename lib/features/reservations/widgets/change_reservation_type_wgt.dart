@@ -1,10 +1,7 @@
-// lib/features/reservations/pages/change_reservation_type.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/change_reservation_type_vm.dart';
 
@@ -17,16 +14,14 @@ class ChangeReservationType extends StatefulWidget {
   _ChangeReservationTypeDialogState createState() =>
       _ChangeReservationTypeDialogState();
 
-  // Static method to show the dialog
   static Future<String?> showChangeReservationTypeDialog(
     BuildContext context, {
     GuestItem? guestItem,
-  }) async {
-    return await showDialog<String>(
+  }) {
+    return showDialog<String>(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext dialogContext) =>
-          _ChangeReservationTypeDialog(guestItem: guestItem),
+      builder: (_) => _ChangeReservationTypeDialog(guestItem: guestItem),
     );
   }
 }
@@ -43,30 +38,26 @@ class _ChangeReservationTypeDialog extends StatefulWidget {
 
 class _ChangeReservationTypeDialogState
     extends State<_ChangeReservationTypeDialog> {
-  final _changeReservationTypeVm = Get.find<ChangeReservationTypeVm>();
+  final _vm = Get.find<ChangeReservationTypeVm>();
 
-  String? _selectedReservationType;
-  String? _currentReservationType;
-  int? _selectedReservationTypeId;
+  String? _selectedType;
+  String? _currentType;
+  int? _selectedTypeId;
 
   @override
   void initState() {
     super.initState();
-    _currentReservationType = _determineCurrentReservationType();
+    _currentType = widget.guestItem?.reservationType ?? '';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) {
-        await _changeReservationTypeVm.loadAllReservationTypes();
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _vm.loadAllReservationTypes();
     });
-  }
-
-  String _determineCurrentReservationType() {
-    return widget.guestItem?.reservationType ?? '';
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -77,10 +68,9 @@ class _ChangeReservationTypeDialogState
           maxHeight: MediaQuery.of(context).size.height * 0.8,
         ),
         decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(
-            ResponsiveConfig.cardRadius(context),
-          ),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius:
+              BorderRadius.circular(ResponsiveConfig.cardRadius(context)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -92,23 +82,23 @@ class _ChangeReservationTypeDialogState
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildHeader(context),
-            _buildCurrentTypeInfo(context),
-            Flexible(child: _buildReservationTypesList(context)),
-            _buildActions(context),
+            _buildHeader(context, textTheme),
+            _buildCurrentTypeInfo(context, textTheme),
+            Flexible(child: _buildReservationList(context, textTheme)),
+            _buildActions(context, textTheme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  // ───────────────── HEADER ─────────────────
+
+  Widget _buildHeader(BuildContext context, TextTheme textTheme) {
     return Container(
       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
         children: [
@@ -121,61 +111,58 @@ class _ChangeReservationTypeDialogState
           Expanded(
             child: Text(
               'Change Reservation Type',
-              style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
-                color: AppColors.black,
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, color: AppColors.lightgrey),
-            iconSize: ResponsiveConfig.iconSize(context),
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCurrentTypeInfo(BuildContext context) {
+  // ───────────────── CURRENT TYPE INFO ─────────────────
+
+  Widget _buildCurrentTypeInfo(BuildContext context, TextTheme textTheme) {
     if (widget.guestItem == null) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
       margin: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
+      padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2), width: 1),
+        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Guest: ${widget.guestItem!.guestName}',
-            style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-              color: AppColors.black,
+            style: textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Res #: ${widget.guestItem!.resId}',
-            style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
-              color: AppColors.darkgrey,
-            ),
+            style: textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.info_outline, color: AppColors.primary, size: 16),
+              const Icon(Icons.info_outline, size: 16),
               const SizedBox(width: 4),
               Text(
-                'Current: $_currentReservationType',
-                style: AppTextTheme.lightTextTheme.bodySmall?.copyWith(
-                  color: AppColors.primary,
+                'Current: $_currentType',
+                style: textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
                 ),
               ),
             ],
@@ -185,219 +172,109 @@ class _ChangeReservationTypeDialogState
     );
   }
 
-  Widget _buildReservationTypesList(BuildContext context) {
+  // ───────────────── LIST ─────────────────
+
+  Widget _buildReservationList(BuildContext context, TextTheme textTheme) {
     return Obx(() {
-      final reservationTypes = _changeReservationTypeVm.reservationTypes;
-      return Container(
+      final items = _vm.reservationTypes;
+
+      return ListView.separated(
         padding: EdgeInsets.symmetric(
           horizontal: ResponsiveConfig.defaultPadding(context),
         ),
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: reservationTypes.length,
-          separatorBuilder: (context, index) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final reservationType = reservationTypes[index];
-            final isSelected = _selectedReservationType == reservationType.type;
-            final isCurrent = _currentReservationType == reservationType.type;
+        itemCount: items.length,
+        separatorBuilder: (_, __) => const Divider(height: 1),
+        itemBuilder: (_, index) {
+          final item = items[index];
+          final isCurrent = item.type == _currentType;
+          final isSelected = item.type == _selectedType;
 
-            return Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: isCurrent
-                    ? null
-                    : () {
-                        setState(() {
-                          _selectedReservationType = reservationType.type;
-                          _selectedReservationTypeId = reservationType.id ?? 0;
-                        });
-                      },
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: ResponsiveConfig.defaultPadding(context),
-                    horizontal: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      // Icon
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: reservationType.color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          reservationType.icon,
-                          color: reservationType.color,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Content
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    reservationType.type,
-                                    style: AppTextTheme
-                                        .lightTextTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: isCurrent
-                                              ? AppColors.lightgrey
-                                              : AppColors.black,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                  ),
-                                ),
-                                if (isCurrent)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: AppColors.primary.withOpacity(
-                                          0.3,
-                                        ),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Current',
-                                      style: AppTextTheme
-                                          .lightTextTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: AppColors.primary,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              reservationType.description,
-                              style: AppTextTheme.lightTextTheme.bodySmall
-                                  ?.copyWith(
-                                    color: isCurrent
-                                        ? AppColors.lightgrey
-                                        : AppColors.darkgrey,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Radio button
-                      if (!isCurrent)
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.grey.shade400,
-                              width: isSelected ? 6 : 2,
-                            ),
-                            color: isSelected
-                                ? AppColors.primary
-                                : Colors.transparent,
-                          ),
-                        )
-                      else
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey.shade300,
-                          ),
-                          child: Icon(
-                            Icons.check,
-                            size: 12,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+          return InkWell(
+            onTap: isCurrent
+                ? null
+                : () {
+                    setState(() {
+                      _selectedType = item.type;
+                      _selectedTypeId = item.id;
+                    });
+                  },
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: ResponsiveConfig.defaultPadding(context),
               ),
-            );
-          },
-        ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: item.color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(item.icon, color: item.color),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.type,
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isCurrent
+                                ? Colors.grey
+                                : textTheme.bodyMedium?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.description,
+                          style: textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isCurrent)
+                    Icon(
+                      isSelected
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
+                      color:
+                          isSelected ? AppColors.primary : Colors.grey.shade400,
+                    )
+                  else
+                    const Icon(Icons.check, color: Colors.grey),
+                ],
+              ),
+            ),
+          );
+        },
       );
     });
   }
 
-  Widget _buildActions(BuildContext context) {
-    final bool canSave =
-        _selectedReservationType != null &&
-        _selectedReservationType != _currentReservationType;
+  // ───────────────── ACTIONS ─────────────────
 
-    return Container(
+  Widget _buildActions(BuildContext context, TextTheme textTheme) {
+    final canSave =
+        _selectedType != null && _selectedType != _currentType;
+
+    return Padding(
       padding: EdgeInsets.all(ResponsiveConfig.defaultPadding(context)),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Colors.grey.shade200, width: 1)),
-      ),
       child: Row(
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () =>  Navigator.of(context).pop(),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.lightgrey),
-                padding: EdgeInsets.symmetric(
-                  vertical: ResponsiveConfig.defaultPadding(context),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                  color: AppColors.lightgrey,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: textTheme.labelLarge),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
               onPressed: canSave ? _handleSave : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: canSave
-                    ? AppColors.primary
-                    : Colors.grey.shade300,
-                padding: EdgeInsets.symmetric(
-                  vertical: ResponsiveConfig.defaultPadding(context),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                'Change Type',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
-                  color: canSave ? AppColors.onPrimary : Colors.grey.shade600,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              child: Text('Change Type', style: textTheme.labelLarge),
             ),
           ),
         ],
@@ -405,18 +282,15 @@ class _ChangeReservationTypeDialogState
     );
   }
 
-  void _handleSave() async {
-    if (_selectedReservationType != null) {
-     
-      await _changeReservationTypeVm.saveChangeReservationType(
-        _selectedReservationTypeId!,
-        widget.guestItem!,
-      );
-      if (!mounted) return;
-      
-    }
+  Future<void> _handleSave() async {
+    await _vm.saveChangeReservationType(
+      _selectedTypeId!,
+      widget.guestItem!,
+    );
+    if (mounted) Navigator.pop(context);
   }
 }
+
 
 // Model class for reservation type items
 class ReservationTypeItem {

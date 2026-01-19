@@ -50,7 +50,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
       ),
       title: Text(
         'Stop Room Move',
-        style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+        style: TextTheme.of(context).titleLarge?.copyWith(
           color: AppColors.black,
           fontWeight: FontWeight.w600,
         ),
@@ -87,7 +87,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
         ),
         label: Text(
           'Add New Reason',
-          style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+          style:  TextTheme.of(context).bodyMedium?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.w600,
           ),
@@ -145,7 +145,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               ),
               child: Text(
                 'Select Reason',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.darkgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -187,7 +187,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
             Expanded(
               child: Text(
                 reason,
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.black,
                   fontWeight: FontWeight.w400,
                 ),
@@ -243,7 +243,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               ),
               child: Text(
                 'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.lightgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -268,7 +268,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               ),
               child: Text(
                 'Save',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: _selectedReason != null
                       ? AppColors.onPrimary
                       : Colors.grey.shade600,
@@ -298,7 +298,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
           ),
           title: Text(
             'Add New Reason',
-            style: AppTextTheme.lightTextTheme.titleMedium?.copyWith(
+            style:  TextTheme.of(context).titleMedium?.copyWith(
               color: AppColors.black,
               fontWeight: FontWeight.w600,
             ),
@@ -323,7 +323,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
                   ),
                   contentPadding: const EdgeInsets.all(12),
                 ),
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.black,
                 ),
               ),
@@ -334,7 +334,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               onPressed: () => context.pop(),
               child: Text(
                 'Cancel',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.lightgrey,
                   fontWeight: FontWeight.w600,
                 ),
@@ -357,7 +357,7 @@ class _StopRoomMoveScreenState extends State<StopRoomMoveScreen> {
               ),
               child: Text(
                 'Add',
-                style: AppTextTheme.lightTextTheme.bodyMedium?.copyWith(
+                style:  TextTheme.of(context).bodyMedium?.copyWith(
                   color: AppColors.onPrimary,
                   fontWeight: FontWeight.w600,
                 ),

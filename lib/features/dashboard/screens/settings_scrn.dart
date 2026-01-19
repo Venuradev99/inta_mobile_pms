@@ -4,8 +4,6 @@ import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/theme/app_text_theme.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
-
-
 class Settings extends StatefulWidget {
   const Settings({super.key});
 
@@ -21,9 +19,7 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).brightness == Brightness.dark 
-        ? AppTextTheme.darkTextTheme 
-        : AppTextTheme.lightTextTheme;
+    final textTheme = TextTheme.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -39,10 +35,7 @@ class _SettingsState extends State<Settings> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: AppColors.onSurface,
-          ),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
           onPressed: () => context.pop(),
         ),
       ),
@@ -53,14 +46,12 @@ class _SettingsState extends State<Settings> {
           children: [
             // Notification Settings Section
             // _buildNotificationSettingsSection(textTheme),
-            
             const SizedBox(height: 24),
-            
+
             // Placeholder for future sections
             // _buildPlaceholderSection('Account Settings', textTheme),
             // _buildPlaceholderSection('Privacy & Security', textTheme),
             // _buildPlaceholderSection('Help & Support', textTheme),
-            
             const SizedBox(height: 32),
           ],
         ),
@@ -106,7 +97,7 @@ class _SettingsState extends State<Settings> {
               ],
             ),
           ),
-          
+
           // Divider
           Divider(
             height: 1,
@@ -114,7 +105,7 @@ class _SettingsState extends State<Settings> {
             indent: 20,
             endIndent: 20,
           ),
-          
+
           // Settings Items
           _buildNotificationToggle(
             title: 'New Booking',
@@ -125,13 +116,15 @@ class _SettingsState extends State<Settings> {
               setState(() {
                 _newBookingNotifications = value;
               });
-              _showSnackBar('New booking notifications ${value ? 'enabled' : 'disabled'}');
+              _showSnackBar(
+                'New booking notifications ${value ? 'enabled' : 'disabled'}',
+              );
             },
             textTheme: textTheme,
           ),
-          
+
           _buildDivider(),
-          
+
           _buildNotificationToggle(
             title: 'Booking Cancellation',
             subtitle: 'Get notified when bookings are cancelled',
@@ -141,13 +134,15 @@ class _SettingsState extends State<Settings> {
               setState(() {
                 _bookingCancellationNotifications = value;
               });
-              _showSnackBar('Cancellation notifications ${value ? 'enabled' : 'disabled'}');
+              _showSnackBar(
+                'Cancellation notifications ${value ? 'enabled' : 'disabled'}',
+              );
             },
             textTheme: textTheme,
           ),
-          
+
           _buildDivider(),
-          
+
           _buildNotificationToggle(
             title: 'Booking Modification',
             subtitle: 'Get notified when bookings are modified',
@@ -157,11 +152,13 @@ class _SettingsState extends State<Settings> {
               setState(() {
                 _bookingModificationNotifications = value;
               });
-              _showSnackBar('Modification notifications ${value ? 'enabled' : 'disabled'}');
+              _showSnackBar(
+                'Modification notifications ${value ? 'enabled' : 'disabled'}',
+              );
             },
             textTheme: textTheme,
           ),
-          
+
           const SizedBox(height: 8),
         ],
       ),
@@ -193,15 +190,11 @@ class _SettingsState extends State<Settings> {
                   color: AppColors.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Text Content
               Expanded(
                 child: Column(
@@ -224,9 +217,9 @@ class _SettingsState extends State<Settings> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Toggle Switch
               Switch.adaptive(
                 value: value,
@@ -270,11 +263,7 @@ class _SettingsState extends State<Settings> {
         padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            Icon(
-              Icons.settings_outlined,
-              color: AppColors.lightgrey,
-              size: 24,
-            ),
+            Icon(Icons.settings_outlined, color: AppColors.lightgrey, size: 24),
             const SizedBox(width: 12),
             Text(
               title,
@@ -308,9 +297,7 @@ class _SettingsState extends State<Settings> {
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

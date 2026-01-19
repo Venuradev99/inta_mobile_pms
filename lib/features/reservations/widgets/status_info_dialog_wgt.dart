@@ -60,28 +60,6 @@ class StatusInfoDialog extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Got it',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.onPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -120,14 +98,14 @@ class StatusInfoDialog extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                item.description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                  height: 1.3,
-                ),
-              ),
+              // const SizedBox(height: 4),
+              // Text(
+              //   item.description,
+              //   style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              //     color: Colors.grey[600],
+              //     height: 1.3,
+              //   ),
+              // ),
             ],
           ),
         ),
