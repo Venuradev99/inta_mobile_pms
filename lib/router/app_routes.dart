@@ -11,6 +11,7 @@ class AppRoutes {
   static const String netLock = '/netlock';
   static const String notifications = '/notifications';
   static const String workOrderList = '/workorderlist';
+  static const String viewWorkOrder = '/view-work-order';
   static const String managerReport = '/managerreport';
   static const String maintenanceBlock = '/maintenanceblock';
   static const String settings = '/settings';
@@ -27,12 +28,12 @@ class AppRoutes {
   static const String noShowReservation = '/no-show-reservation';
   static const String blockRoomSelection = '/block-room-selection';
   static const String blockRoomDetails = '/block-room-details';
-   static const String blockRoomAuditTrail = '/block-room-audit-trail';
+  static const String blockRoomAuditTrail = '/block-room-audit-trail';
+  static const String workOrderAuditTrail = '/work-order-audit-trail';
+  static const String postNote = '/post-note';
   static const String assignRooms = '/assign-rooms';
   static const String editGuestDetails = '/edit-guest-details';
-    static const String editBlockRoomPage = '/edit-block-room';
-    static const String editReservationScreen = '/edit-reservation-screen';
-    static const String nightAuditReport = '/night-audit-report';
-  
-  
+  static const String editBlockRoomPage = '/edit-block-room';
+  static const String editReservationScreen = '/edit-reservation-screen';
+  static const String nightAuditReport = '/night-audit-report';
 }

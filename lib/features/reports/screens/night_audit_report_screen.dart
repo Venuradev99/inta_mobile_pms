@@ -271,9 +271,11 @@ class _ReportWidgetState extends State<NightAuditReport>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
+                  Wrap(
+                    spacing: 24,
+                    runSpacing: 16,
+                    alignment: WrapAlignment.spaceBetween,
+                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -418,7 +420,156 @@ class _ReportWidgetState extends State<NightAuditReport>
                         ],
                       ),
                     ],
-                  ),
+                 ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(
+                  //           'Select Date',
+                  //           style: TextStyle(
+                  //             color: AppColors.onPrimary,
+                  //             fontSize: 14,
+                  //           ),
+                  //         ),
+                  //         ElevatedButton(
+                  //           style: ElevatedButton.styleFrom(
+                  //             foregroundColor: AppColors.onPrimary,
+                  //             backgroundColor: AppColors.primary,
+                  //             padding: const EdgeInsets.symmetric(
+                  //               horizontal: 12,
+                  //               vertical: 8,
+                  //             ),
+                  //           ),
+                  //           onPressed: () => _selectDate(context),
+                  //           child: Text(
+                  //             _selectedDate == null
+                  //                 ? 'Pick a date'
+                  //                 : '${_selectedDate!.toLocal()}'.split(' ')[0],
+                  //             style: TextStyle(fontSize: 14),
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(
+                  //           'Currency',
+                  //           style: TextStyle(
+                  //             color: AppColors.onPrimary,
+                  //             fontSize: 14,
+                  //           ),
+                  //         ),
+                  //         DropdownButton<CurrencyItem>(
+                  //           value: _selectedCurrency,
+                  //           hint: Text(
+                  //             "select",
+                  //             style: TextStyle(
+                  //               color: AppColors.onPrimary,
+                  //               fontSize: 14,
+                  //             ),
+                  //           ),
+                  //           dropdownColor: Colors.white,
+                  //           underline: Container(),
+                  //           iconEnabledColor: AppColors.onPrimary,
+                  //           selectedItemBuilder: (BuildContext context) {
+                  //             return _currencyList.map<Widget>((
+                  //               CurrencyItem item,
+                  //             ) {
+                  //               return Text(
+                  //                 item.code,
+                  //                 style: TextStyle(
+                  //                   color: AppColors.onPrimary,
+                  //                   fontSize: 14, // match other texts
+                  //                 ),
+                  //               );
+                  //             }).toList();
+                  //           },
+                  //           items: _currencyList
+                  //               .map<DropdownMenuItem<CurrencyItem>>((
+                  //                 CurrencyItem value,
+                  //               ) {
+                  //                 return DropdownMenuItem<CurrencyItem>(
+                  //                   value: value,
+                  //                   child: Text(
+                  //                     value.code,
+                  //                     style: TextStyle(
+                  //                       color: AppColors.darkgrey,
+                  //                       fontSize: 14,
+                  //                     ),
+                  //                   ),
+                  //                 );
+                  //               })
+                  //               .toList(),
+                  //           onChanged: (CurrencyItem? currency) {
+                  //             setState(() {
+                  //               _selectedCurrency = currency!;
+                  //             });
+                  //           },
+                  //         ),
+                  //       ],
+                  //     ),
+                  //     Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         Text(
+                  //           'Hotel',
+                  //           style: TextStyle(
+                  //             color: AppColors.onPrimary,
+                  //             fontSize: 14,
+                  //           ),
+                  //         ),
+                  //         DropdownButton<HotelItem>(
+                  //           value: _selectedHotel,
+                  //           hint: Text(
+                  //             "Select",
+                  //             style: TextStyle(
+                  //               color: AppColors.onPrimary,
+                  //               fontSize: 14,
+                  //             ),
+                  //           ),
+                  //           dropdownColor: Colors.white,
+                  //           underline: Container(),
+                  //           iconEnabledColor: AppColors.onPrimary,
+                  //           selectedItemBuilder: (BuildContext context) {
+                  //             return _hotelList.map<Widget>((HotelItem item) {
+                  //               return Text(
+                  //                 item.hotelName,
+                  //                 style: TextStyle(
+                  //                   color: AppColors.onPrimary,
+                  //                   fontSize: 14,
+                  //                 ),
+                  //               );
+                  //             }).toList();
+                  //           },
+                  //           items: _hotelList.map<DropdownMenuItem<HotelItem>>((
+                  //             HotelItem value,
+                  //           ) {
+                  //             return DropdownMenuItem<HotelItem>(
+                  //               value: value,
+                  //               child: Text(
+                  //                 value.hotelName,
+                  //                 style: TextStyle(
+                  //                   color: AppColors.darkgrey,
+                  //                   fontSize: 14,
+                  //                 ),
+                  //               ),
+                  //             );
+                  //           }).toList(),
+                  //           onChanged: (HotelItem? hotel) {
+                  //             setState(() {
+                  //               _selectedHotel = hotel!;
+                  //             });
+                  //           },
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ],
+                 
+                  // ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -445,6 +596,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                       ),
                     ],
                   ),
+              
                 ],
               ),
             ),

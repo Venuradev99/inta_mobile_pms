@@ -62,6 +62,7 @@ class GuestItem {
   final double? roomCharges;
   final double? discount;
   final double? tax;
+  final double? conversionRate;
   final double? extraCharge;
   final double? unpostedInclusionRate;
   final double? balanceTransfer;
@@ -192,6 +193,7 @@ class GuestItem {
     this.roomCharges,
     this.discount,
     this.tax,
+    this.conversionRate,
     this.extraCharge,
     this.unpostedInclusionRate,
     this.balanceTransfer,
@@ -322,6 +324,7 @@ class GuestItem {
       roomCharges: (json['roomCharges'] ?? 0.0).toDouble(),
       discount: (json['discount'] ?? 0.0).toDouble(),
       tax: (json['tax'] ?? 0.0).toDouble(),
+      conversionRate: (json['conversionRate'] ?? 0.0).toDouble(),
       extraCharge: (json['extraCharge'] ?? 0.0).toDouble(),
       unpostedInclusionRate: (json['unpostedInclusionRate'] ?? 0.0).toDouble(),
       balanceTransfer: (json['balanceTransfer'] ?? 0.0).toDouble(),
@@ -464,6 +467,7 @@ class GuestItem {
       'roomCharges': roomCharges,
       'discount': discount,
       'tax': tax,
+      'conversionRate': conversionRate,
       'extraCharge': extraCharge,
       'unpostedInclusionRate': unpostedInclusionRate,
       'balanceTransfer': balanceTransfer,
@@ -593,6 +597,7 @@ class GuestItem {
         'roomCharges: $roomCharges, '
         'discount: $discount, '
         'tax: $tax, '
+        'conversionRate: $conversionRate, '
         'extraCharge: $extraCharge, '
         'unpostedInclusionRate: $unpostedInclusionRate, '
         'balanceTransfer: $balanceTransfer, '

@@ -85,11 +85,15 @@ class HouseKeepingService {
     }
   }
 
-   Future<Map<String, dynamic>> getAllHouseKeepingAuditTrail(
-    int id,int type, bool isRoom, DateTime date
+  Future<Map<String, dynamic>> getAllHouseKeepingAuditTrail(
+    int id,
+    int type,
+    bool isRoom,
+    DateTime date,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllHouseKeepingAuditTrail}/${id}?type=${type}&isRoom=${isRoom}&date=${date}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllHouseKeepingAuditTrail}/${id}?type=${type}&isRoom=${isRoom}&date=${date}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -108,7 +112,7 @@ class HouseKeepingService {
     }
   }
 
-   Future<Map<String, dynamic>> getMaintenanceBlockById(int id) async {
+  Future<Map<String, dynamic>> getMaintenanceBlockById(int id) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getMaintenanceBlockById}/${id}';
@@ -119,11 +123,14 @@ class HouseKeepingService {
     }
   }
 
-   Future<Map<String, dynamic>> unblockMaintenanceBlock(int maintenanceBlockId, int currentUserId) async {
+  Future<Map<String, dynamic>> unblockMaintenanceBlock(
+    int maintenanceBlockId,
+    int currentUserId,
+  ) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.unblockMaintenanceBLock}/${maintenanceBlockId}?CurrentUserId=${currentUserId}';
-      final response = await _dataAccess.put({},url);
+      final response = await _dataAccess.put({}, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
@@ -228,6 +235,20 @@ class HouseKeepingService {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllMaintenanceblock}';
       final response = await _dataAccess.post(body, url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updatePostNote(
+    Map<String, dynamic> body,
+    int workOrderId,
+  ) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.updatePostNote}/${workOrderId}';
+      final response = await _dataAccess.put(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};

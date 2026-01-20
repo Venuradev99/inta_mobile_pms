@@ -141,8 +141,11 @@ class PMSApp extends StatelessWidget {
       scaffoldMessengerKey: _messageService.messengerKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
+      
       theme: AppTheme.light(context),
-      darkTheme: AppTheme.dark(context),
+      
+
+      // darkTheme: AppTheme.dark(context),
       routerConfig: appRouter,
     );
   }

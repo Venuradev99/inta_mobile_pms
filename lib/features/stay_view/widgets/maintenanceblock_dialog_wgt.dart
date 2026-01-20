@@ -57,20 +57,18 @@ class MaintenanceBlockDialog extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Cancel Button
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey[700],
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                    child: const Text("Cancel"),
-                  ),
-                  const SizedBox(width: 12),
-                  // Unblock Button
+                  // TextButton(
+                  //   onPressed: () => Navigator.of(context).pop(),
+                  //   style: TextButton.styleFrom(
+                  //     foregroundColor: Colors.grey[700],
+                  //     padding: const EdgeInsets.symmetric(
+                  //       horizontal: 24,
+                  //       vertical: 12,
+                  //     ),
+                  //   ),
+                  //   child: const Text("Cancel"),
+                  // ),
+                  // const SizedBox(width: 12),
                   ElevatedButton(
                     onPressed: () {
                       onUnblock();

@@ -1,4 +1,5 @@
 class WorkOrder {
+  final int? workOrderId;
   final String orderNo;
   final String category;
   final String unitRoom;
@@ -12,9 +13,17 @@ class WorkOrder {
   final DateTime? enteredOn;
   final DateTime? updatedOn;
   final String description;
+  final String? postNote;
   final String reason;
+  final bool? isRoom;
+  final int? roomId;
+  final int? unitId;
+  final int? priorityId;
+  final int? assingToId;
+  final int? statusId;
 
   WorkOrder({
+    this.workOrderId,
     required this.orderNo,
     required this.category,
     required this.unitRoom,
@@ -28,11 +37,19 @@ class WorkOrder {
     required this.status,
     required this.dueDate,
     required this.description,
+    this.postNote,
     required this.reason,
+    this.isRoom,
+    this.unitId,
+    this.roomId,
+    this.assingToId,
+    this.priorityId,
+    this.statusId,
   });
 
   factory WorkOrder.fromJson(Map<String, dynamic> json) {
     return WorkOrder(
+      workOrderId: json['workOrderId'] ?? 0,
       orderNo: json['orderNo'] ?? '',
       category: json['category'] ?? '',
       unitRoom: json['unitRoom'] ?? '',
@@ -46,11 +63,19 @@ class WorkOrder {
       status: json['status'] ?? '',
       dueDate: DateTime.tryParse(json['dueDate'] ?? '') ?? DateTime.now(),
       description: json['description'] ?? '',
+      postNote: json['postNote'] ?? '',
       reason: json['reason'] ?? '',
+      isRoom: json['isRoom'] ?? true,
+      unitId: json['unitId'] ?? 0,
+      roomId: json['roomId'] ?? 0,
+      assingToId: json['assingToId'] ?? 0,
+      priorityId: json['priorityId'] ?? 0,
+      statusId: json['statusId'] ?? 0,
     );
   }
   Map<String, dynamic> toJson() {
     return {
+      'workOrderId': workOrderId,
       'orderNo': orderNo,
       'category': category,
       'unitRoom': unitRoom,
@@ -64,15 +89,14 @@ class WorkOrder {
       'status': status,
       'dueDate': dueDate.toIso8601String(),
       'description': description,
+      'postNote': postNote,
       'reason': reason,
+      'isRoom': isRoom,
+      'unitId': unitId,
+      'roomId': roomId,
+      'assingToId': assingToId,
+      'priorityId': priorityId,
+      'statusId': statusId,
     };
-  }
-
-  @override
-  String toString() {
-    return 'WorkOrder(orderNo: $orderNo, category: $category, unitRoom: $unitRoom,'
-        'blockFrom: $blockFrom, blockTo: $blockTo, priority: $priority, '
-        'assignedTo: $assignedTo, status: $status, dueDate: $dueDate,'
-        'description: $description) ,reason: $reason)';
   }
 }

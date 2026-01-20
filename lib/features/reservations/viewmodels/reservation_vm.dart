@@ -24,6 +24,7 @@ import 'package:inta_mobile_pms/services/message_service.dart';
 class ReservationVm extends GetxController {
   final ReservationService _reservationService;
 
+  final baseCurrencyCode = ''.obs;
   final reservationList = Rx<Map<String, List<GuestItem>>?>(null);
   final filteredList = Rx<Map<String, List<GuestItem>>?>(null);
   final receivedFilters = Rx<Map<String, dynamic>?>(null);
@@ -619,28 +620,37 @@ class ReservationVm extends GetxController {
         guestItem.bookingId!,
         int.tryParse(guestItem.bookingRoomId.toString())!,
         guestItem.masterFolioBookingTransId!,
-        guestItem.roomId!,
+        // guestItem.roomId!,
+        0,
       );
 
       if (response["isSuccessful"] == true) {
         final result = response["result"] as List;
-        auditTrailList.value = result
-            .map(
-              (item) => AuditTrailResponse(
-                bookingId: item["bookingId"] ?? 0,
-                description: item["description"] ?? '',
-                folioId: item["folioId"] ?? 0,
-                roomId: item["roomId"] ?? 0,
-                sysDateCreated: item["sys_DateCreated"] ?? '',
-                transactionLog: item["transactionLog"] ?? '',
-                transactionType: item["transactionType"] ?? 0,
-                userId: item["userId"] ?? 0,
-                userName: item["userName"] ?? '',
-                transactionTypeName: item["transactionTypeName"] ?? '',
-                hotelId: item["hotelId"] ?? 0,
-              ),
-            )
-            .toList();
+        auditTrailList.value =
+            result
+                .map(
+                  (item) => AuditTrailResponse(
+                    bookingId: item["bookingId"] ?? 0,
+                    description: item["description"] ?? '',
+                    folioId: item["folioId"] ?? 0,
+                    roomId: item["roomId"] ?? 0,
+                    sysDateCreated: item["sys_DateCreated"] ?? '',
+                    transactionLog: item["transactionLog"] ?? '',
+                    transactionType: item["transactionType"] ?? 0,
+                    userId: item["userId"] ?? 0,
+                    userName: item["userName"] ?? '',
+                    transactionTypeName: item["transactionTypeName"] ?? '',
+                    hotelId: item["hotelId"] ?? 0,
+                  ),
+                )
+                .toList()
+              ..sort((a, b) {
+                DateTime dateA =
+                    DateTime.tryParse(a.sysDateCreated) ?? DateTime(0);
+                DateTime dateB =
+                    DateTime.tryParse(b.sysDateCreated) ?? DateTime(0);
+                return dateB.compareTo(dateA); 
+              });
         return auditTrailList;
       } else {
         final msg = response["errors"][0] ?? 'Error Loading Audit Trails!';
@@ -681,6 +691,7 @@ class ReservationVm extends GetxController {
     try {
       isAllGuestDataLoading.value = true;
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
+      baseCurrencyCode.value = baseCurrencyData.code;
       await loadDataForGuest();
       final bookingResponse = await _reservationService.getByBookingRoomId(
         int.parse(bookingRoomId),
@@ -761,6 +772,7 @@ class ReservationVm extends GetxController {
           titleId: result["guest"]["titleId"] ?? 0,
           resId: result["bookingRoom"]["reservatioNumber"].toString(),
           folioId: result["bookingRoom"]["folioId"].toString(),
+          conversionRate:  result["bookingRoom"]["conversionRate"] ?? 0,
           folioNumber: result["bookingRoom"]["folioNumber"].toString(),
           startDate: getFirstTenCharacters(
             result["bookingRoom"]["arrivalDate"],
@@ -1102,4 +1114,18 @@ class ReservationVm extends GetxController {
     bool isUnAssignRoom = !isAssign && status != 2 && status != 3;
     return isUnAssignRoom;
   }
+
+String getPickupDropOffModeName(int modeId){
+   try {
+      
+      if(modeId == 0){
+        return '-';
+      }else{
+        final mode = transportationModes.toList().firstWhere((mode) => mode.transportationModeId == modeId);
+        return mode.name;
+      }
+    } catch (e) {
+      throw Exception('Error Getting transportation mode name: $e');
+    }
+}
 }

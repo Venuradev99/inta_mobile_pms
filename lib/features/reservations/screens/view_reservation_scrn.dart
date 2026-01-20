@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
-import 'package:inta_mobile_pms/features/reservations/models/audit_trail_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/reservation_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/folio_charge_details_dialog_wgt.dart';
-import 'package:inta_mobile_pms/features/stay_view/models/booking_remark.dart';
 import 'package:inta_mobile_pms/features/stay_view/viewmodels/stay_view_vm.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -27,6 +24,7 @@ class _ViewReservation extends State<ViewReservation>
   final _stayViewVm = Get.find<StayViewVm>();
   late int? _bookingRoomId;
   late final TabController _tabController;
+  late String _baseCurrencyCode = '';
   GuestItem? item;
 
   @override
@@ -44,6 +42,7 @@ class _ViewReservation extends State<ViewReservation>
         if (!mounted) return;
         setState(() {
           _bookingRoomId = bookingRoomId;
+          _baseCurrencyCode = _reservationVm.baseCurrencyCode.value;
         });
       }
     });
@@ -55,8 +54,8 @@ class _ViewReservation extends State<ViewReservation>
     super.dispose();
   }
 
-  String formatCurrency(double? value) {
-    if (value == null) return '${item?.visibleCurrencyCode} 0.00';
+  String formatCurrency(double? value, String? currencyCode) {
+    if (value == null) return '${currencyCode} 0.00';
 
     final formatted = value
         .toStringAsFixed(2)
@@ -65,7 +64,7 @@ class _ViewReservation extends State<ViewReservation>
           (Match m) => '${m[1]},',
         );
 
-    return '${item?.visibleCurrencyCode} ${formatted}';
+    return '${currencyCode} ${formatted}';
   }
 
   String formatDateTime(String dateTimeStr) {
@@ -501,12 +500,14 @@ class _ViewReservation extends State<ViewReservation>
                 const SizedBox(height: 16),
                 _buildFinancialRow(
                   context,
+                  item!.visibleCurrencyCode!,
                   'Total Charges',
                   item!.totalAmount!,
                   isPositive: false,
                 ),
                 _buildFinancialRow(
                   context,
+                  item!.visibleCurrencyCode!,
                   'Payments',
                   item!.totalCredits ?? 0,
                   isPositive: true,
@@ -514,6 +515,7 @@ class _ViewReservation extends State<ViewReservation>
                 const Divider(height: 24, thickness: 1.5),
                 _buildFinancialRow(
                   context,
+                  item!.visibleCurrencyCode!,
                   'Balance Due',
                   item!.balanceAmount!,
                   isBalance: true,
@@ -541,25 +543,87 @@ class _ViewReservation extends State<ViewReservation>
 
                   return Column(
                     children: [
-                      _buildFinancialRow(context,'Room Charges', item.roomCharges),
-                      _buildFinancialRow(context,'Extra Charges', item.extraCharges),
-                      _buildFinancialRow(context,'Gross Amount', item.grossAmount),
-                      _buildFinancialRow(context,'Full Discount', item.discountAmount),
                       _buildFinancialRow(
                         context,
-                        'Line Discount',
-                        item.lineDiscountAmount,
+                        item.visibleCurrencyCode,
+                        'Room Charges',
+                        item.conversionRate > 0
+                            ? item.roomCharges / item.conversionRate
+                            : 0,
                       ),
-                      _buildFinancialRow(context,'Tax Amount', item.taxAmount),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Extra Charges',
+                        item.conversionRate > 0
+                            ? item.extraCharges / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Gross Amount',
+                        item.conversionRate > 0
+                            ? item.grossAmount / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Full Discount',
+                        item.conversionRate > 0
+                            ? item.discountAmount / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Line Discount',
+                        item.conversionRate > 0
+                            ? item.lineDiscountAmount / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Tax Amount',
+                        item.conversionRate > 0
+                            ? item.taxAmount / item.conversionRate
+                            : 0,
+                      ),
                       if (item.roundOffAmount != 0)
                         _buildFinancialRow(
                           context,
+                          item.visibleCurrencyCode,
                           'Auto Adjustment',
-                          item.roundOffAmount,
+                          item.conversionRate > 0
+                              ? item.roundOffAmount / item.conversionRate
+                              : 0,
                         ),
-                      _buildFinancialRow(context,'Total Amount', item.totalAmount),
-                      _buildFinancialRow(context,'Paid Amount', item.paidAmount),
-                      _buildFinancialRow(context,'Balance Amount', item.balanceAmount),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Total Amount',
+                        item.conversionRate > 0
+                            ? item.totalAmount / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Paid Amount',
+                        item.conversionRate > 0
+                            ? item.paidAmount / item.conversionRate
+                            : 0,
+                      ),
+                      _buildFinancialRow(
+                        context,
+                        item.visibleCurrencyCode,
+                        'Balance Amount',
+                        item.conversionRate > 0
+                            ? item.balanceAmount / item.conversionRate
+                            : 0,
+                      ),
                     ],
                   );
                 }),
@@ -633,7 +697,7 @@ class _ViewReservation extends State<ViewReservation>
         const SizedBox(width: 8),
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.bold,
           ),
@@ -643,7 +707,8 @@ class _ViewReservation extends State<ViewReservation>
   }
 
   Widget _buildSharerInfoCard(SharerInfo sharer) {
-    final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
+    final dateFormat = DateFormat('dd MMM yyyy');
+    final timeFormat = DateFormat('hh:mm a');
     return Card(
       elevation: 4,
       shadowColor: Colors.grey.withOpacity(0.1),
@@ -653,7 +718,7 @@ class _ViewReservation extends State<ViewReservation>
         leading: Icon(Icons.person, color: AppColors.primary),
         title: Text(
           sharer.fullNameWithTitle,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: AppColors.primary,
             fontWeight: FontWeight.bold,
           ),
@@ -665,72 +730,138 @@ class _ViewReservation extends State<ViewReservation>
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('Guest Information', Icons.info_outline),
-          const SizedBox(height: 12),
-          _buildInfoRowSharer('Name', sharer.fullNameWithTitle, Icons.person),
-          _buildInfoRowSharer(
-            'Gender',
-            sharer.gender == 'M' ? 'Male' : 'Female',
-            sharer.gender == 'M' ? Icons.male : Icons.female,
+          Container(
+            decoration: _backgroundCardDecoration(),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('Guest Information', Icons.info_outline),
+                const SizedBox(height: 12),
+
+                _buildInfoRowSharer(
+                  'Name',
+                  sharer.fullNameWithTitle,
+                  Icons.person,
+                ),
+                _buildInfoRowSharer(
+                  'Gender',
+                  sharer.gender == 'M' ? 'Male' : 'Female',
+                  sharer.gender == 'M' ? Icons.male : Icons.female,
+                ),
+                _buildInfoRowSharer('Mobile', sharer.mobile, Icons.phone),
+                _buildInfoRowSharer('Email', sharer.email, Icons.email),
+              ],
+            ),
           ),
-          _buildInfoRowSharer('Mobile', sharer.mobile, Icons.phone),
-          _buildInfoRowSharer('Email', sharer.email, Icons.email),
-          const Divider(height: 32, thickness: 1),
+          const SizedBox(height: 24),
           _buildSectionTitle('Transport Information', Icons.directions),
           const SizedBox(height: 12),
-          Text(
-            'Pickup:',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
+
+          Container(
+            decoration: _backgroundCardDecoration(),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Pickup',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
+                  _buildInfoRowSharer(
+                    'Date',
+                    dateFormat.format(
+                      sharer.pickUpDropOffDataModel.pickUpDateTime!,
+                    ),
+                    Icons.calendar_today,
+                  ),
+                if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
+                  _buildInfoRowSharer(
+                    'Time',
+                    timeFormat.format(
+                      sharer.pickUpDropOffDataModel.pickUpDateTime!,
+                    ),
+                    Icons.alarm,
+                  ),
+                _buildInfoRowSharer(
+                  'Mode',
+                  _reservationVm.getPickupDropOffModeName(
+                    sharer.pickUpDropOffDataModel.pickUpModeId,
+                  ),
+                  Icons.directions_car,
+                ),
+                _buildInfoRowSharer(
+                  'Vehicle No',
+                  sharer.pickUpDropOffDataModel.pickUpVehicleNo,
+                  Icons.local_taxi,
+                ),
+              ],
             ),
           ),
 
-          const SizedBox(height: 8),
-          if (sharer.pickUpDropOffDataModel.pickUpDateTime != null)
-            _buildInfoRowSharer(
-              'Date',
-              dateFormat.format(sharer.pickUpDropOffDataModel.pickUpDateTime!),
-              Icons.calendar_today,
-            ),
-          _buildInfoRowSharer(
-            'Mode',
-            sharer.pickUpDropOffDataModel.pickUpModeId.toString(),
-            Icons.directions_car,
-          ),
-          _buildInfoRowSharer(
-            'Vehicle No',
-            sharer.pickUpDropOffDataModel.pickUpVehicleNo,
-            Icons.local_taxi,
-          ),
           const SizedBox(height: 16),
-          Text(
-            'Dropoff:',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Container(
+            decoration: _backgroundCardDecoration(),
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dropoff',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
 
-          const SizedBox(height: 8),
-          if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
-            _buildInfoRowSharer(
-              'Date',
-              dateFormat.format(sharer.pickUpDropOffDataModel.dropOffDateTime!),
-              Icons.calendar_today,
+                if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
+                  _buildInfoRowSharer(
+                    'Date',
+                    dateFormat.format(
+                      sharer.pickUpDropOffDataModel.dropOffDateTime!,
+                    ),
+                    Icons.calendar_today,
+                  ),
+                if (sharer.pickUpDropOffDataModel.dropOffDateTime != null)
+                  _buildInfoRowSharer(
+                    'Time',
+                    timeFormat.format(
+                      sharer.pickUpDropOffDataModel.dropOffDateTime!,
+                    ),
+                    Icons.alarm,
+                  ),
+                _buildInfoRowSharer(
+                  'Mode',
+                  _reservationVm.getPickupDropOffModeName(
+                    sharer.pickUpDropOffDataModel.dropOffModeId,
+                  ),
+                  Icons.directions_car,
+                ),
+                _buildInfoRowSharer(
+                  'Vehicle No',
+                  sharer.pickUpDropOffDataModel.dropOffVehicleNo,
+                  Icons.local_taxi,
+                ),
+              ],
             ),
-          _buildInfoRowSharer(
-            'Mode',
-            sharer.pickUpDropOffDataModel.dropOffModeId.toString(),
-            Icons.directions_car,
-          ),
-          _buildInfoRowSharer(
-            'Vehicle No',
-            sharer.pickUpDropOffDataModel.dropOffVehicleNo,
-            Icons.local_taxi,
           ),
         ],
       ),
+    );
+  }
+
+  BoxDecoration _backgroundCardDecoration() {
+    return BoxDecoration(
+      color: AppColors.primary.withOpacity(0.08),
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: AppColors.primary.withOpacity(0.25), width: 1),
     );
   }
 
@@ -746,7 +877,7 @@ class _ViewReservation extends State<ViewReservation>
             flex: 2,
             child: Text(
               '$label:',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey.shade700,
                 fontWeight: FontWeight.w500,
               ),
@@ -755,10 +886,8 @@ class _ViewReservation extends State<ViewReservation>
           Expanded(
             flex: 3,
             child: Text(
-              value.isEmpty ? 'N/A' : value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 14, // optional if you want to override base size
-              ),
+              value.isEmpty ? '-' : value,
+              style: Theme.of(context).textTheme.bodySmall,
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
             ),
@@ -972,17 +1101,41 @@ class _ViewReservation extends State<ViewReservation>
                       Icons.receipt_long,
                     ),
                     const SizedBox(height: 16),
-                    _buildChargeRow('Room Charge', roomCharge.grossAmount),
-                    _buildChargeRow('Discount', (roomCharge.discount)),
-                    _buildChargeRow('Tax Amount', roomCharge.taxAmount),
+                    _buildChargeRow(
+                      'Room Charge',
+                      item!.visibleCurrencyCode!,
+                      item!.conversionRate! > 0
+                          ? roomCharge.grossAmount / item!.conversionRate!
+                          : 0,
+                    ),
+                    _buildChargeRow(
+                      'Discount',
+                      item!.visibleCurrencyCode!,
+                      item!.conversionRate! > 0
+                          ? roomCharge.discount / item!.conversionRate!
+                          : 0,
+                    ),
+                    _buildChargeRow(
+                      'Tax Amount',
+                      item!.visibleCurrencyCode!,
+                      item!.conversionRate! > 0
+                          ? roomCharge.taxAmount / item!.conversionRate!
+                          : 0,
+                    ),
                     _buildChargeRow(
                       'Auto Adjustment',
-                      roomCharge.roundOffAmount,
+                      item!.visibleCurrencyCode!,
+                      item!.conversionRate! > 0
+                          ? roomCharge.roundOffAmount / item!.conversionRate!
+                          : 0,
                     ),
                     const Divider(height: 24, thickness: 1.5),
                     _buildChargeRow(
                       'Net Amount',
-                      roomCharge.totalAmount,
+                      item!.visibleCurrencyCode!,
+                      item!.conversionRate! > 0
+                          ? roomCharge.totalAmount / item!.conversionRate!
+                          : 0,
                       isTotal: true,
                     ),
                     const Divider(height: 24, thickness: 1.5),
@@ -1167,7 +1320,10 @@ class _ViewReservation extends State<ViewReservation>
                                             ),
                                           ),
                                           Text(
-                                            formatCurrency(charge.amount),
+                                            formatCurrency(
+                                              charge.amount,
+                                              item?.visibleCurrencyCode,
+                                            ),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .titleMedium
@@ -1276,7 +1432,10 @@ class _ViewReservation extends State<ViewReservation>
                                             ),
                                           ),
                                           Text(
-                                            formatCurrency(payment.totalAmount),
+                                            formatCurrency(
+                                              payment.totalAmount,
+                                              item?.visibleCurrencyCode,
+                                            ),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyLarge
@@ -1686,7 +1845,7 @@ class _ViewReservation extends State<ViewReservation>
         const SizedBox(width: 12),
         Text(
           title,
-          style: textTheme.titleLarge?.copyWith(
+          style: textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Colors.black87,
             letterSpacing: 0.2,
@@ -1721,7 +1880,7 @@ class _ViewReservation extends State<ViewReservation>
           ),
           Flexible(
             child: Text(
-              value.isEmpty ? 'N/A' : value,
+              value.isEmpty ? '-' : value,
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
@@ -1790,6 +1949,7 @@ class _ViewReservation extends State<ViewReservation>
 
   Widget _buildFinancialRow(
     BuildContext context,
+    String currencyCode,
     String label,
     double amount, {
     bool isBalance = false,
@@ -1804,29 +1964,19 @@ class _ViewReservation extends State<ViewReservation>
         children: [
           Text(
             label,
-            style: (isBalance ? textTheme.titleMedium : textTheme.bodyLarge)
-                ?.copyWith(
-                  fontWeight: isBalance ? FontWeight.bold : FontWeight.w500,
-                  color: isBalance ? Colors.black87 : Colors.grey.shade700,
-                  fontSize: isBalance
-                      ? ResponsiveConfig.responsiveFont(context, 16)
-                      : ResponsiveConfig.responsiveFont(context, 15),
-                ),
+            style: (textTheme.bodyMedium)?.copyWith(
+              fontWeight: isBalance ? FontWeight.bold : FontWeight.w500,
+              color: isBalance ? Colors.black87 : Colors.grey.shade700,
+            ),
           ),
           Text(
-            formatCurrency(amount),
-            style: (isBalance ? textTheme.titleMedium : textTheme.bodyLarge)
-                ?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: isBalance
-                      ? (isPositive
-                            ? Colors.green.shade600
-                            : Colors.red.shade600)
-                      : Colors.black87,
-                  fontSize: isBalance
-                      ? ResponsiveConfig.responsiveFont(context, 18)
-                      : ResponsiveConfig.responsiveFont(context, 15),
-                ),
+            formatCurrency(amount, currencyCode),
+            style: (textTheme.bodyMedium)?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: isBalance
+                  ? (isPositive ? Colors.green.shade600 : Colors.red.shade600)
+                  : Colors.black87,
+            ),
           ),
         ],
       ),
@@ -1835,6 +1985,7 @@ class _ViewReservation extends State<ViewReservation>
 
   Widget _buildChargeRow(
     String label,
+    String currencyCode,
     double amount, {
     bool isDiscount = false,
     bool isTax = false,
@@ -1847,16 +1998,14 @@ class _ViewReservation extends State<ViewReservation>
         children: [
           Text(
             label,
-            style: TextStyle(
-              fontSize: isTotal ? 16 : 15,
+            style: TextTheme.of(context).bodyMedium?.copyWith(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w500,
               color: isTotal ? Colors.black87 : Colors.grey.shade700,
             ),
           ),
           Text(
-            '${amount < 0 ? '-' : ''}${formatCurrency(amount.abs())}',
-            style: TextStyle(
-              fontSize: isTotal ? 18 : 15,
+            '${amount < 0 ? '-' : ''}${formatCurrency(amount.abs(), currencyCode)}',
+            style: TextTheme.of(context).bodyMedium?.copyWith(
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
               color: isTotal
                   ? AppColors.primary
@@ -1884,7 +2033,7 @@ class _ViewReservation extends State<ViewReservation>
             ),
           ),
           Text(
-            text.isEmpty ? 'N/A' : text,
+            text.isEmpty ? '-' : text,
             style: textTheme.bodyMedium?.copyWith(
               color: Colors.grey.shade700,
               fontWeight: FontWeight.w600,

@@ -47,9 +47,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Work Orders',
-        // onSearchChanged: (value) {
-        //   _workOrderListVm.searchWorkOrders(value);
-        // },
         onRefreshTap: () async {
           await _workOrderListVm.loadWorkOrders();
           await _workOrderListVm.loadDataForAddWorkOrder();
@@ -62,7 +59,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
         final isLoading = _workOrderListVm.isLoading;
         return Column(
           children: [
-            // Header with count
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -91,7 +87,6 @@ class _WorkOrderListState extends State<WorkOrderList> {
               ),
             ),
 
-            // Work Order List
             Expanded(
               child: isLoading.value
                   ? ListView.builder(
@@ -129,192 +124,196 @@ class _WorkOrderListState extends State<WorkOrderList> {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     }
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Row: Order No & Status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  workOrder.orderNo,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor, width: 1),
-                  ),
-                  child: Text(
-                    workOrder.status,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+    return InkWell(
+      borderRadius: BorderRadius.circular(12), // same as card border
+      onTap: () {
+        _showWorkOrderBottomSheet(context, workOrder);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-
-            const SizedBox(height: 8),
-
-            // Priority Chip
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    workOrder.priority,
-                    style: TextStyle(
-                      color: priorityColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Grid: Two fields per row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.meeting_room_outlined,
-                    title: 'Unit/Room',
-                    value: workOrder.unitRoom.isNotEmpty
-                        ? workOrder.unitRoom
-                        : workOrder.roomName,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.category_outlined,
-                    title: 'Category',
-                    value: workOrder.category,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.calendar_today_outlined,
-                    title: 'Deadline',
-                    value: formatDate(workOrder.dueDate),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.person_outline,
-                    title: 'Assigned To',
-                    value: workOrder.assignedTo,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.edit_calendar_outlined,
-                    title: 'Entered On',
-                    value: formatDate(workOrder.enteredOn),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildDetailItemWithIcon(
-                    icon: Icons.update_outlined,
-                    title: 'Updated On',
-                    value: formatDate(workOrder.updatedOn),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-
-            // Description with bordered background
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Description',
+                    workOrder.orderNo,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.darkgrey,
-                      fontSize: 13,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    workOrder.description.isNotEmpty
-                        ? workOrder.description
-                        : '-',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.darkgrey,
-                      fontSize: 14,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: statusColor, width: 1),
+                    ),
+                    child: Text(
+                      workOrder.status,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: priorityColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      workOrder.priority,
+                      style: TextStyle(
+                        color: priorityColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.meeting_room_outlined,
+                      title: 'Unit/Room',
+                      value: workOrder.unitRoom.isNotEmpty
+                          ? workOrder.unitRoom
+                          : workOrder.roomName,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.category_outlined,
+                      title: 'Category',
+                      value: workOrder.category,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.calendar_today_outlined,
+                      title: 'Deadline',
+                      value: formatDate(workOrder.dueDate),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.person_outline,
+                      title: 'Assigned To',
+                      value: workOrder.assignedTo,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.edit_calendar_outlined,
+                      title: 'Entered On',
+                      value: formatDate(workOrder.enteredOn),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDetailItemWithIcon(
+                      icon: Icons.update_outlined,
+                      title: 'Updated On',
+                      value: formatDate(workOrder.updatedOn),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Description',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkgrey,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      workOrder.description.isNotEmpty
+                          ? workOrder.description
+                          : '-',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.darkgrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Helper widget for a detail with an icon
+  void _showWorkOrderBottomSheet(BuildContext context, WorkOrder workOrder) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _WorkORderActionsSheet(workOrder: workOrder),
+    );
+  }
+
   Widget _buildDetailItemWithIcon({
     required IconData icon,
     required String title,
@@ -859,6 +858,108 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
         );
       },
+    );
+  }
+}
+
+class _WorkORderActionsSheet extends StatelessWidget {
+  final WorkOrder workOrder;
+  const _WorkORderActionsSheet({required this.workOrder});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(
+              workOrder.orderNo,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            const Divider(height: 1),
+            // Actions list
+            ListView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                _buildActionTile(
+                  context,
+                  icon: Icons.remove_red_eye,
+                  title: 'View Work Order',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.viewWorkOrder, extra: workOrder);
+                  },
+                ),
+                _buildActionTile(
+                  context,
+                  icon: Icons.note,
+                  title: 'Post Note',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(AppRoutes.postNote, extra: workOrder);
+                  },
+                ),
+                const Divider(height: 1, indent: 64, endIndent: 16),
+                _buildActionTile(
+                  context,
+                  icon: Icons.history,
+                  title: 'Audit Trail',
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push(
+                      AppRoutes.workOrderAuditTrail,
+                      extra: workOrder,
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red[700] : AppColors.darkgrey;
+    return ListTile(
+      leading: Icon(icon, color: color, size: 24),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

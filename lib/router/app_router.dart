@@ -1,8 +1,13 @@
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/work_order_audit_trail_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/post_note.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/view_work_order.dart';
+import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
 import 'package:inta_mobile_pms/features/login/login_page.dart';
 import 'package:inta_mobile_pms/features/reports/screens/night_audit_report_screen.dart';
@@ -39,7 +44,7 @@ import '../features/housekeeping/screens/block_room_selection_details.dart';
 
 final appRouter = GoRouter(
   initialLocation: AppRoutes.login,
-   navigatorKey: NavigationService().navigatorKey,
+  navigatorKey: NavigationService().navigatorKey,
   routes: [
     GoRoute(
       path: AppRoutes.dashboard,
@@ -148,9 +153,30 @@ final appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.blockRoomAuditTrail,
       builder: (context, state) {
-         final block = state.extra as MaintenanceBlockItem;
-         return  BlockRoomAuditTrail(block: block);
-      }
+        final block = state.extra as MaintenanceBlockItem;
+        return BlockRoomAuditTrail(block: block);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.workOrderAuditTrail,
+      builder: (context, state) {
+        final workOrder = state.extra as WorkOrder;
+        return WorkOrderAuditTrail(workOrder: workOrder);
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.postNote,
+      builder: (context, state) {
+        final workOrder = state.extra as WorkOrder;
+        return PostNote(workOrder: workOrder);
+      },
+    ),
+     GoRoute(
+      path: AppRoutes.viewWorkOrder,
+      builder: (context, state) {
+        final workOrder = state.extra as WorkOrder;
+        return ViewWorkOrder(workOrder: workOrder);
+      },
     ),
     GoRoute(
       path: AppRoutes.blockRoomDetails,
@@ -169,14 +195,15 @@ final appRouter = GoRouter(
       builder: (context, state) =>
           EditGuestDetails(guestItem: state.extra as GuestItem?),
     ),
-     GoRoute(
+    GoRoute(
       path: AppRoutes.editBlockRoomPage,
       builder: (context, state) =>
-          EditBlockRoomPage(block: state.extra as MaintenanceBlockItem)
+          EditBlockRoomPage(block: state.extra as MaintenanceBlockItem),
     ),
     GoRoute(
       path: AppRoutes.editReservationScreen,
-       builder: (context, state) =>  EditReservationScreen(guestItem: state.extra as GuestItem?),
+      builder: (context, state) =>
+          EditReservationScreen(guestItem: state.extra as GuestItem?),
     ),
     GoRoute(
       path: AppRoutes.nightAuditReport,
@@ -184,4 +211,3 @@ final appRouter = GoRouter(
     ),
   ],
 );
-

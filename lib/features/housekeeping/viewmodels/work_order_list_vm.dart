@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/dropdown_data.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/post_note_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/save_work_order_request.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
+import 'package:inta_mobile_pms/features/housekeeping/models/work_order_audit_trail_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_orders_search_request.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
@@ -18,7 +20,10 @@ class WorkOrderListVm extends GetxController {
   final houseKeeperList = <DropdownData>[].obs;
   final unitRoomList = <DropdownData>[].obs;
   final reasonList = <DropdownData>[].obs;
+  final audiTrailList = <WorkOrderAuditTrailItem>[].obs;
   final isLoading = true.obs;
+  final isWorkOrderLoading = true.obs;
+  final isPostNoteDataLoading = true.obs;
 
   final filterStartDate = Rxn<DateTime>();
   final filterEndDate = Rxn<DateTime>();
@@ -56,6 +61,7 @@ class WorkOrderListVm extends GetxController {
           .getWorkOrderStatus();
 
       if (workOrderStatusResponse["isSuccessful"] == true) {
+        statusList.clear();
         for (final item in workOrderStatusResponse["result"]) {
           statusList.add(
             DropdownData(
@@ -75,6 +81,7 @@ class WorkOrderListVm extends GetxController {
         final result = response["result"]["recordSet"];
         for (final item in result) {
           final data = WorkOrder(
+            workOrderId: item["workOrderId"],
             orderNo: item["workOrderNumber"],
             category: item["categoryName"],
             unitRoom: item["unitName"],
@@ -85,10 +92,17 @@ class WorkOrderListVm extends GetxController {
             updatedOn: getDateFromIsoString(item["updated"]),
             priority: item["priorityName"],
             assignedTo: item["assingToName"],
+            assingToId: item["assingTo"],
+            statusId: item["status"],
             status: getStatus(item["status"]),
             dueDate: getDate(item["deadLineDate"]),
             description: item["description"],
+            postNote: item["postNote"],
             reason: '',
+            isRoom: item["isRoom"],
+            unitId: item["unitId"],
+            roomId: item["roomId"],
+            priorityId: item["priority"],
           );
           workOrders.add(data);
           workOrdersFiltered.add(data);
@@ -103,6 +117,98 @@ class WorkOrderListVm extends GetxController {
       throw Exception('Work order loading error: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadAuditTrails(WorkOrder workOrder) async {
+    try {
+      isWorkOrderLoading.value = true;
+
+      final id = workOrder.workOrderId;
+      final type = 3;
+      final isRoom = workOrder.isRoom;
+      final date = DateTime.now();
+
+      final response = await _houseKeepingServices.getAllHouseKeepingAuditTrail(
+        id!,
+        type,
+        isRoom!,
+        date,
+      );
+
+      if (response["isSuccessful"] == true) {
+        final result = (response["result"] as List?) ?? [];
+        audiTrailList.value = result
+            .map((item) => WorkOrderAuditTrailItem.fromJson(item))
+            .toList();
+        workOrdersFiltered.value = workOrders;
+      } else {
+        MessageService().error(
+          response["errors"][0] ?? 'Error getting Work Order audit trails!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Error in loading Work Order audit trails: $e');
+      throw Exception('Error in loading Work Order audit trails: $e');
+    } finally {
+      isWorkOrderLoading.value = false;
+    }
+  }
+
+  Future<void> loadPostNoteData(WorkOrder workOrder) async {
+    try {
+      isPostNoteDataLoading.value = true;
+      final response = await Future.wait([
+        _houseKeepingServices.getHouseKeepers(),
+      ]);
+
+      final houseKeepers = response[0];
+
+      if (houseKeepers["isSuccessful"] == true) {
+        houseKeeperList.clear();
+        for (final item in houseKeepers["result"]) {
+          houseKeeperList.add(
+            DropdownData(
+              id: item["userId"],
+              description: "${item["firstName"]} ${item["lastName"]}",
+            ),
+          );
+        }
+      } else {
+        MessageService().error(
+          houseKeepers["errors"][0] ?? 'Error getting House Keepers!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Post Note data loading error: $e');
+      throw Exception('Post Note data loading error: $e');
+    } finally {
+      isPostNoteDataLoading.value = false;
+    }
+  }
+
+  Future<void> updatePostNote(PostNotePayload payload) async {
+    try {
+      final response = await _houseKeepingServices.updatePostNote(
+        payload.toJson(),
+        payload.workOrderId,
+      );
+
+      if (response["isSuccessful"] == true) {
+        NavigationService().back();
+        loadWorkOrders();
+        MessageService().success(response["message"] ?? 'Successful!');
+      } else {
+        NavigationService().back();
+        MessageService().error(
+          response["errors"][0] ?? 'Error updating Post Note!',
+        );
+      }
+    } catch (e) {
+      MessageService().error('Post Note data loading error: $e');
+      throw Exception('Post Note data loading error: $e');
+    } finally {
+      isPostNoteDataLoading.value = false;
     }
   }
 
@@ -123,6 +229,7 @@ class WorkOrderListVm extends GetxController {
       final reasons = response[4];
 
       if (priorityResponse["isSuccessful"] == true) {
+        priorityList.clear();
         for (final item in priorityResponse["result"]) {
           priorityList.add(
             DropdownData(
@@ -138,6 +245,7 @@ class WorkOrderListVm extends GetxController {
       }
 
       if (workOrderCategories["isSuccessful"] == true) {
+        categoryList.clear();
         for (final item in workOrderCategories["result"]) {
           categoryList.add(
             DropdownData(
@@ -153,6 +261,7 @@ class WorkOrderListVm extends GetxController {
       }
 
       if (houseKeepers["isSuccessful"] == true) {
+        houseKeeperList.clear();
         for (final item in houseKeepers["result"]) {
           houseKeeperList.add(
             DropdownData(
@@ -167,6 +276,7 @@ class WorkOrderListVm extends GetxController {
         );
       }
       if (unitRooms["isSuccessful"] == true) {
+        unitRoomList.clear();
         for (final item in unitRooms["result"]["recordSet"]) {
           unitRoomList.add(
             DropdownData(id: item["id"], description: item["name"]),
@@ -178,6 +288,7 @@ class WorkOrderListVm extends GetxController {
         );
       }
       if (reasons["isSuccessful"] == true) {
+        reasonList.clear();
         for (final item in reasons["result"]) {
           reasonList.add(
             DropdownData(id: item["reasonId"], description: item["name"]),

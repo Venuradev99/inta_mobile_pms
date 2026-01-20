@@ -123,6 +123,7 @@ class AppResources {
       '$auditTrial/getAuditTrial';
   static const String getMaintenanceBlockById = '$maintenanceblock/GetById';
   static const String unblockMaintenanceBLock = '$maintenanceblock/Unblock';
+  static const String updatePostNote = '$workorder/PostNote';
 
   ////Stay View
   static const String getBookingDetailsByDate =

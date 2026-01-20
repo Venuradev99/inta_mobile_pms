@@ -14,7 +14,6 @@ import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialo
 import 'package:inta_mobile_pms/features/reservations/widgets/edit_reservation_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
-import 'package:inta_mobile_pms/features/dashboard/widgets/tabbed_list_view_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
 class ReservationList extends StatefulWidget {
@@ -47,7 +46,7 @@ class _ReservationListState extends State<ReservationList> {
         title: 'Reservation List',
         // onSearchChanged: (query) => _reservationVm.search(query),
         onRefreshTap: () async {
-           await _reservationVm.getReservationsMap(1);
+          await _reservationVm.getReservationsMap(1);
         },
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
@@ -63,8 +62,7 @@ class _ReservationListState extends State<ReservationList> {
                 return FilterBottomSheet(
                   type: 'reservation',
                   roomTypes: _reservationVm.roomTypes.toList(),
-                  reservationTypes: _reservationVm.reservationTypes
-                      .toList(),
+                  reservationTypes: _reservationVm.reservationTypes.toList(),
                   statuses: _reservationVm.statuses.toList(),
                   businessSources: _reservationVm.businessSources.toList(),
                   filteredData: _reservationVm.receivedFilters.value ?? {},
@@ -78,7 +76,8 @@ class _ReservationListState extends State<ReservationList> {
       ),
 
       body: Obx(() {
-        GuestItem guestItem = GuestItem(
+        final isLoading = _reservationVm.isLoading.value;
+        final dummyGuestItem = GuestItem(
           bookingRoomId: '',
           guestName: '',
           resId: '',
@@ -91,26 +90,17 @@ class _ReservationListState extends State<ReservationList> {
           balanceAmount: 0,
         );
 
+        final dataMap = isLoading
+            ? {
+                'today': List.generate(3, (_) => dummyGuestItem),
+                'tomorrow': List.generate(3, (_) => dummyGuestItem),
+                'thisweek': List.generate(3, (_) => dummyGuestItem),
+              }
+            : (_reservationVm.filteredList.value ?? {});
+
         return Stack(
           children: [
-            if (_reservationVm.isLoading.value == true)
-              TabbedListView<GuestItem>(
-                tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-                dataMap: {
-                  'today': List.generate(3, (_) => guestItem),
-                  'tomorrow': List.generate(3, (_) => guestItem),
-                  'thisweek': List.generate(3, (_) => guestItem),
-                },
-                itemBuilder: (item) => _buildReservationCardShimmer(),
-                emptySubMessage: (period) => 'No reservations for this period',
-              ),
-            if (_reservationVm.isLoading.value == false)
-              TabbedListView<GuestItem>(
-                tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-                dataMap: _reservationVm.filteredList.value ?? {},
-                itemBuilder: (item) => _buildReservationCard(item),
-                emptySubMessage: (period) => 'No reservations for this period',
-              ),
+            _buildCombinedList(isLoading, dataMap),
             if (_reservationVm.isAllGuestDataLoading.value)
               Container(
                 color: Colors.black.withOpacity(0.2),
@@ -125,6 +115,52 @@ class _ReservationListState extends State<ReservationList> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildCombinedList(
+    bool isLoading,
+    Map<String, List<GuestItem>> dataMap,
+  ) {
+    final List<Widget> widgets = [];
+    const sections = [
+      {'title': 'Today', 'key': 'today'},
+      {'title': 'Tomorrow', 'key': 'tomorrow'},
+      {'title': 'This Week', 'key': 'thisweek'},
+    ];
+
+    for (final section in sections) {
+      final title = section['title'] as String;
+      final key = section['key'] as String;
+      final items = dataMap[key] ?? [];
+
+      if (items.isEmpty && !isLoading) {
+        widgets.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'No reservations for this period',
+              style: TextStyle(color: AppColors.darkgrey),
+            ),
+          ),
+        );
+      } else {
+        for (final item in items) {
+          widgets.add(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: isLoading
+                  ? _buildReservationCardShimmer()
+                  : _buildReservationCard(item),
+            ),
+          );
+        }
+      }
+    }
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      children: widgets,
     );
   }
 
