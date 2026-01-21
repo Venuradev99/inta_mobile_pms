@@ -110,213 +110,220 @@ class _NetLockState extends State<NetLock> {
                 ),
               ),
             ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () async {
-              await _netLockVm.loadInitialData();
-              // _filteredReservations = List.from(_allReservations);
-              setState(() {});
-            },
-          ),
         ],
       ),
-      body: Column(
-        children: [
-          // Search Header
-          Container(
-            color: AppColors.surface,
-            padding: ResponsiveConfig.horizontalPadding(
-              context,
-            ).add(ResponsiveConfig.verticalPadding(context)),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: ResponsiveConfig.isMobile(context) ? 40 : 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.cardRadius(context) - 4,
-                      ),
-                      border: Border.all(
-                        color: AppColors.lightgrey.withOpacity(0.3),
-                      ),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (value) {
-                        _netLockVm.filterReservations(value);
-                        _selectedRows.clear();
-                        _selectAll = false;
-                      },
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        hintStyle: Theme.of(context).textTheme.bodyMedium
-                            ?.copyWith(color: AppColors.lightgrey),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          size: ResponsiveConfig.iconSize(context),
-                          color: AppColors.lightgrey,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _netLockVm.loadInitialData();
+          // _filteredReservations = List.from(_allReservations);
+          setState(() {});
+        },
+        child: Column(
+          children: [
+            // Search Header
+            Container(
+              color: AppColors.surface,
+              padding: ResponsiveConfig.horizontalPadding(
+                context,
+              ).add(ResponsiveConfig.verticalPadding(context)),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: ResponsiveConfig.isMobile(context) ? 40 : 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveConfig.cardRadius(context) - 4,
                         ),
-                        suffixIcon: _searchController.text.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(
-                                  Icons.clear,
-                                  size: ResponsiveConfig.iconSize(context),
-                                  color: AppColors.lightgrey,
-                                ),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _netLockVm.filterReservations('');
-                                  _selectedRows.clear();
-                                  _selectAll = false;
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
+                        border: Border.all(
+                          color: AppColors.lightgrey.withOpacity(0.3),
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          _netLockVm.filterReservations(value);
+                          _selectedRows.clear();
+                          _selectAll = false;
+                        },
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        decoration: InputDecoration(
+                          hintText: 'Search',
+                          hintStyle: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.lightgrey),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            size: ResponsiveConfig.iconSize(context),
+                            color: AppColors.lightgrey,
+                          ),
+                          suffixIcon: _searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(
+                                    Icons.clear,
+                                    size: ResponsiveConfig.iconSize(context),
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    _netLockVm.filterReservations('');
+                                    _selectedRows.clear();
+                                    _selectAll = false;
+                                  },
+                                )
+                              : null,
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Table Content
-          Expanded(
-            child: Container(
-              margin: ResponsiveConfig.horizontalPadding(context),
-              child: Card(
-                elevation: 2,
-                shadowColor: AppColors.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.cardRadius(context),
+            // Table Content
+            Expanded(
+              child: Container(
+                margin: ResponsiveConfig.horizontalPadding(context),
+                child: Card(
+                  elevation: 2,
+                  shadowColor: AppColors.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.cardRadius(context),
+                    ),
                   ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    ResponsiveConfig.cardRadius(context),
-                  ),
-                  child: Column(
-                    children: [
-                      // Table Header
-                      Container(
-                        color: AppColors.primary,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveConfig.defaultPadding(context),
-                          vertical: ResponsiveConfig.isMobile(context)
-                              ? 12
-                              : 16,
-                        ),
-                        child: Row(
-                          children: [
-                            // Select All Checkbox
-                            SizedBox(
-                              width: ResponsiveConfig.isMobile(context)
-                                  ? 40
-                                  : 50,
-                              child: Checkbox(
-                                value: _selectAll,
-                                onChanged: _toggleSelectAll,
-                                activeColor: AppColors.primary,
-                                checkColor: Colors.white,
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                              ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      ResponsiveConfig.cardRadius(context),
+                    ),
+                    child: Column(
+                      children: [
+                        // Table Header
+                        Container(
+                          color: AppColors.primary,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: ResponsiveConfig.defaultPadding(
+                              context,
                             ),
-                            // Headers
-                            Expanded(
-                              flex: ResponsiveConfig.isMobile(context) ? 3 : 4,
-                              child: Text(
-                                'Details',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      color: AppColors.surface,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize:
-                                          ResponsiveConfig.isMobile(context)
-                                          ? 14
-                                          : 16,
-                                    ),
+                            vertical: ResponsiveConfig.isMobile(context)
+                                ? 12
+                                : 16,
+                          ),
+                          child: Row(
+                            children: [
+                              // Select All Checkbox
+                              SizedBox(
+                                width: ResponsiveConfig.isMobile(context)
+                                    ? 40
+                                    : 50,
+                                child: Checkbox(
+                                  value: _selectAll,
+                                  onChanged: _toggleSelectAll,
+                                  activeColor: AppColors.primary,
+                                  checkColor: Colors.white,
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
                               ),
-                            ),
-                            if (!ResponsiveConfig.isMobile(context))
+                              // Headers
                               Expanded(
-                                flex: 2,
+                                flex: ResponsiveConfig.isMobile(context)
+                                    ? 3
+                                    : 4,
                                 child: Text(
-                                  'User',
+                                  'Details',
                                   style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
-                                        color: AppColors.primary,
+                                        color: AppColors.surface,
                                         fontWeight: FontWeight.w600,
+                                        fontSize:
+                                            ResponsiveConfig.isMobile(context)
+                                            ? 14
+                                            : 16,
                                       ),
                                 ),
                               ),
-                            Expanded(
-                              flex: ResponsiveConfig.isMobile(context) ? 2 : 2,
-                              child: Text(
-                                'Reservation No',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      color: AppColors.surface,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize:
-                                          ResponsiveConfig.isMobile(context)
-                                          ? 14
-                                          : 16,
-                                    ),
-                                textAlign: TextAlign.end,
+                              if (!ResponsiveConfig.isMobile(context))
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    'User',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                              Expanded(
+                                flex: ResponsiveConfig.isMobile(context)
+                                    ? 2
+                                    : 2,
+                                child: Text(
+                                  'Reservation No',
+                                  style: Theme.of(context).textTheme.titleSmall
+                                      ?.copyWith(
+                                        color: AppColors.surface,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize:
+                                            ResponsiveConfig.isMobile(context)
+                                            ? 14
+                                            : 16,
+                                      ),
+                                  textAlign: TextAlign.end,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      // Table Body
-                      Expanded(
-                        child: Obx(() {
-                          if (_netLockVm.isLoading.value) {
+                        // Table Body
+                        Expanded(
+                          child: Obx(() {
+                            if (_netLockVm.isLoading.value) {
+                              return ListView.separated(
+                                padding: const EdgeInsets.all(8),
+                                itemCount: 10,
+                                separatorBuilder: (context, index) => Divider(
+                                  height: 1,
+                                  color: AppColors.lightgrey.withOpacity(0.2),
+                                ),
+                                itemBuilder: (context, index) =>
+                                    _buildTableRowShimmer(context),
+                              );
+                            }
+
+                            if (_netLockVm.netlockDataFiltered.isEmpty) {
+                              return _buildEmptyState();
+                            }
+
                             return ListView.separated(
-                              padding: const EdgeInsets.all(8),
-                              itemCount: 10,
+                              itemCount: _netLockVm.netlockDataFiltered.length,
                               separatorBuilder: (context, index) => Divider(
                                 height: 1,
                                 color: AppColors.lightgrey.withOpacity(0.2),
                               ),
-                              itemBuilder: (context, index) =>
-                                  _buildTableRowShimmer(context),
+                              itemBuilder: (context, index) {
+                                final item =
+                                    _netLockVm.netlockDataFiltered[index];
+                                return _buildTableRow(item, index);
+                              },
                             );
-                          }
-
-                          if (_netLockVm.netlockDataFiltered.isEmpty) {
-                            return _buildEmptyState();
-                          }
-
-                          return ListView.separated(
-                            itemCount: _netLockVm.netlockDataFiltered.length,
-                            separatorBuilder: (context, index) => Divider(
-                              height: 1,
-                              color: AppColors.lightgrey.withOpacity(0.2),
-                            ),
-                            itemBuilder: (context, index) {
-                              final item =
-                                  _netLockVm.netlockDataFiltered[index];
-                              return _buildTableRow(item, index);
-                            },
-                          );
-                        }),
-                      ),
-                    ],
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: ResponsiveConfig.defaultPadding(context)),
-        ],
+            SizedBox(height: ResponsiveConfig.defaultPadding(context)),
+          ],
+        ),
       ),
     );
   }

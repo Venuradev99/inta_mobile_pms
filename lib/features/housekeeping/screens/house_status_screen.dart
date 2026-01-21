@@ -44,105 +44,101 @@ class _HouseStatusState extends State<HouseStatus> {
       appBar: CustomAppBar(
         title: 'House Status',
         onInfoTap: () => _showStatusInfoDialog(context),
-        onRefreshTap: () async {
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async {
           await _houseStatusVm.loadRooms();
           rooms = _houseStatusVm.roomList;
-
-          // setState(() {
-          //   if (isEditMode) {
-          //     isEditMode = false;
-          //     selectedRooms.clear();
-          //   } else {
-          //     isEditMode = true;
-          //   }
-          // });
         },
-      ),
-      body: Obx(() {
-        final groupedRooms = _houseStatusVm.groupedRooms;
-        final isLoading = _houseStatusVm.isLoading;
+        child: Obx(() {
+          final groupedRooms = _houseStatusVm.groupedRooms;
+          final isLoading = _houseStatusVm.isLoading;
 
-        return Column(
-          children: [
-            if (isEditMode) _buildActionButtons(),
-            Expanded(
-              child: isLoading.value
-                  ? ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: 10,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 20,
-                              width: 150,
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...List.generate(
-                              3,
-                              (i) => Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _buildRoomCardShimmer(),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                          ],
-                        );
-                      },
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: groupedRooms.keys.length,
-                      itemBuilder: (context, index) {
-                        final section = groupedRooms.keys.elementAt(index);
-                        final sectionRooms = groupedRooms[section]!;
-                        expandedSections.putIfAbsent(section, () => true);
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (index > 0) const SizedBox(height: 24),
-                            ExpansionTile(
-                              title: _buildSectionHeader(section, sectionRooms),
-                              tilePadding: EdgeInsets.zero,
-                              childrenPadding: EdgeInsets.zero,
-                              expandedCrossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              initiallyExpanded: expandedSections[section]!,
-                              onExpansionChanged: (expanded) {
-                                setState(() {
-                                  expandedSections[section] = expanded!;
-                                });
-                              },
-                              shape: const RoundedRectangleBorder(
-                                side: BorderSide.none,
-                              ),
-                              collapsedShape: const RoundedRectangleBorder(
-                                side: BorderSide.none,
-                              ),
-                              children: [
-                                const SizedBox(height: 12),
-                                ...sectionRooms.map(
-                                  (room) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: _buildRoomCard(room),
-                                  ),
+          return Column(
+            children: [
+              if (isEditMode) _buildActionButtons(),
+              Expanded(
+                child: isLoading.value
+                    ? ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: 10,
+                        itemBuilder: (context, index) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 20,
+                                width: 150,
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-            ),
-          ],
-        );
-      }),
+                              ),
+                              const SizedBox(height: 8),
+                              ...List.generate(
+                                3,
+                                (i) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: _buildRoomCardShimmer(),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
+                          );
+                        },
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: groupedRooms.keys.length,
+                        itemBuilder: (context, index) {
+                          final section = groupedRooms.keys.elementAt(index);
+                          final sectionRooms = groupedRooms[section]!;
+                          expandedSections.putIfAbsent(section, () => true);
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (index > 0) const SizedBox(height: 24),
+                              ExpansionTile(
+                                title: _buildSectionHeader(
+                                  section,
+                                  sectionRooms,
+                                ),
+                                tilePadding: EdgeInsets.zero,
+                                childrenPadding: EdgeInsets.zero,
+                                expandedCrossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                initiallyExpanded: expandedSections[section]!,
+                                onExpansionChanged: (expanded) {
+                                  setState(() {
+                                    expandedSections[section] = expanded!;
+                                  });
+                                },
+                                shape: const RoundedRectangleBorder(
+                                  side: BorderSide.none,
+                                ),
+                                collapsedShape: const RoundedRectangleBorder(
+                                  side: BorderSide.none,
+                                ),
+                                children: [
+                                  const SizedBox(height: 12),
+                                  ...sectionRooms.map(
+                                    (room) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: _buildRoomCard(room),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        }),
+      ),
     );
   }
 

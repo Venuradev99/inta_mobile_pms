@@ -47,66 +47,69 @@ class _WorkOrderListState extends State<WorkOrderList> {
       backgroundColor: AppColors.background,
       appBar: CustomAppBar(
         title: 'Work Orders',
-        onRefreshTap: () async {
-          await _workOrderListVm.loadWorkOrders();
-          await _workOrderListVm.loadDataForAddWorkOrder();
-        },
         onFilterTap: _showFilterBottomSheet,
       ),
 
-      body: Obx(() {
-        final workOrders = _workOrderListVm.workOrdersFiltered.toList();
-        final isLoading = _workOrderListVm.isLoading;
-        return Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total Work Orders: ${workOrders.length}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _workOrderListVm.loadWorkOrders();
+          await _workOrderListVm.loadDataForAddWorkOrder();
+        },
+        child: Obx(() {
+          final workOrders = _workOrderListVm.workOrdersFiltered.toList();
+          final isLoading = _workOrderListVm.isLoading;
+          return Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: AppColors.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Total Work Orders: ${workOrders.length}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            Expanded(
-              child: isLoading.value
-                  ? ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: 10,
-                      itemBuilder: (context, index) =>
-                          _buildWorkOrderCardShimmer(),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: workOrders.length,
-                      itemBuilder: (context, index) {
-                        final workOrder = workOrders[index];
-                        return _buildWorkOrderCard(workOrder);
-                      },
-                    ),
-            ),
-          ],
-        );
-      }),
+              Expanded(
+                child: isLoading.value
+                    ? ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: 10,
+                        itemBuilder: (context, index) =>
+                            _buildWorkOrderCardShimmer(),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: workOrders.length,
+                        itemBuilder: (context, index) {
+                          final workOrder = workOrders[index];
+                          return _buildWorkOrderCard(workOrder);
+                        },
+                      ),
+              ),
+            ],
+          );
+        }),
+      ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddWorkOrderDialog(context),
         backgroundColor: AppColors.primary,

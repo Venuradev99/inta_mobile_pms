@@ -273,7 +273,6 @@ class _StayViewScreenState extends State<StayViewScreen> {
             ),
           );
         },
-        onRefreshTap: () => _stayViewVm.refreshStayView(_centerDate),
       ),
       body: Stack(
         children: [
@@ -293,7 +292,7 @@ class _StayViewScreenState extends State<StayViewScreen> {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {
-                    await Future.delayed(const Duration(seconds: 1));
+                    _stayViewVm.refreshStayView(_centerDate);
                   },
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),

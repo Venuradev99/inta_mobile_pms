@@ -253,58 +253,60 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
         //   _maintenanceBlockVm.filteredMaintenanceBlocks(value);
         // },
         onFilterTap: _showFilterBottomSheet,
-        onRefreshTap: () async {
-          await _maintenanceBlockVm.loadAllMaintenanceBlocks();
-        },
       ),
 
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() {
-              if (_maintenanceBlockVm.isLoading.value) {
-                return ListView.builder(
-                  padding: ResponsiveConfig.horizontalPadding(
-                    context,
-                  ).add(const EdgeInsets.symmetric(vertical: 8)),
-                  itemCount: 8,
-                  itemBuilder: (context, index) =>
-                      const MaintenanceBlockCardShimmer(),
-                );
-              }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _maintenanceBlockVm.loadAllMaintenanceBlocks();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (_maintenanceBlockVm.isLoading.value) {
+                  return ListView.builder(
+                    padding: ResponsiveConfig.horizontalPadding(
+                      context,
+                    ).add(const EdgeInsets.symmetric(vertical: 8)),
+                    itemCount: 8,
+                    itemBuilder: (context, index) =>
+                        const MaintenanceBlockCardShimmer(),
+                  );
+                }
 
-              if (_maintenanceBlockVm.maintenanceBlockListFiltered.isEmpty) {
-                return const EmptyStateWgt(
-                  title: 'No Maintenance Blocks',
-                  subMessage: 'No in-house guests at the moment',
-                );
-              }
+                if (_maintenanceBlockVm.maintenanceBlockListFiltered.isEmpty) {
+                  return const EmptyStateWgt(
+                    title: 'No Maintenance Blocks',
+                    subMessage: 'No in-house guests at the moment',
+                  );
+                }
 
-              return RefreshIndicator(
-                onRefresh: () async {
-                  await _maintenanceBlockVm.loadAllMaintenanceBlocks();
-                },
-                child: ListView.builder(
-                  padding: ResponsiveConfig.horizontalPadding(
-                    context,
-                  ).add(const EdgeInsets.symmetric(vertical: 8)),
-                  itemCount:
-                      _maintenanceBlockVm.maintenanceBlockListFiltered.length,
-                  itemBuilder: (context, index) {
-                    final block =
-                        _maintenanceBlockVm.maintenanceBlockListFiltered[index];
-                    return MaintenanceBlockCardWgt(
-                      block: block,
-                      onTap: () {
-                        _showActionsBottomSheet(block);
-                      },
-                    );
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await _maintenanceBlockVm.loadAllMaintenanceBlocks();
                   },
-                ),
-              );
-            }),
-          ),
-        ],
+                  child: ListView.builder(
+                    padding: ResponsiveConfig.horizontalPadding(
+                      context,
+                    ).add(const EdgeInsets.symmetric(vertical: 8)),
+                    itemCount:
+                        _maintenanceBlockVm.maintenanceBlockListFiltered.length,
+                    itemBuilder: (context, index) {
+                      final block = _maintenanceBlockVm
+                          .maintenanceBlockListFiltered[index];
+                      return MaintenanceBlockCardWgt(
+                        block: block,
+                        onTap: () {
+                          _showActionsBottomSheet(block);
+                        },
+                      );
+                    },
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

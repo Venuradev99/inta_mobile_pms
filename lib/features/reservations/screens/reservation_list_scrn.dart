@@ -45,9 +45,6 @@ class _ReservationListState extends State<ReservationList> {
       appBar: CustomAppBar(
         title: 'Reservation List',
         // onSearchChanged: (query) => _reservationVm.search(query),
-        onRefreshTap: () async {
-          await _reservationVm.getReservationsMap(1);
-        },
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -75,46 +72,51 @@ class _ReservationListState extends State<ReservationList> {
         },
       ),
 
-      body: Obx(() {
-        final isLoading = _reservationVm.isLoading.value;
-        final dummyGuestItem = GuestItem(
-          bookingRoomId: '',
-          guestName: '',
-          resId: '',
-          folioId: '',
-          startDate: '',
-          endDate: '',
-          nights: 0,
-          adults: 0,
-          totalAmount: 0,
-          balanceAmount: 0,
-        );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _reservationVm.getReservationsMap(1);
+        },
+        child: Obx(() {
+          final isLoading = _reservationVm.isLoading.value;
+          final dummyGuestItem = GuestItem(
+            bookingRoomId: '',
+            guestName: '',
+            resId: '',
+            folioId: '',
+            startDate: '',
+            endDate: '',
+            nights: 0,
+            adults: 0,
+            totalAmount: 0,
+            balanceAmount: 0,
+          );
 
-        final dataMap = isLoading
-            ? {
-                'today': List.generate(3, (_) => dummyGuestItem),
-                'tomorrow': List.generate(3, (_) => dummyGuestItem),
-                'thisweek': List.generate(3, (_) => dummyGuestItem),
-              }
-            : (_reservationVm.filteredList.value ?? {});
+          final dataMap = isLoading
+              ? {
+                  'today': List.generate(3, (_) => dummyGuestItem),
+                  'tomorrow': List.generate(3, (_) => dummyGuestItem),
+                  'thisweek': List.generate(3, (_) => dummyGuestItem),
+                }
+              : (_reservationVm.filteredList.value ?? {});
 
-        return Stack(
-          children: [
-            _buildCombinedList(isLoading, dataMap),
-            if (_reservationVm.isAllGuestDataLoading.value)
-              Container(
-                color: Colors.black.withOpacity(0.2),
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.lightgrey,
+          return Stack(
+            children: [
+              _buildCombinedList(isLoading, dataMap),
+              if (_reservationVm.isAllGuestDataLoading.value)
+                Container(
+                  color: Colors.black.withOpacity(0.2),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.lightgrey,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        );
-      }),
+            ],
+          );
+        }),
+      ),
     );
   }
 
@@ -134,27 +136,15 @@ class _ReservationListState extends State<ReservationList> {
       final key = section['key'] as String;
       final items = dataMap[key] ?? [];
 
-      if (items.isEmpty && !isLoading) {
+      for (final item in items) {
         widgets.add(
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'No reservations for this period',
-              style: TextStyle(color: AppColors.darkgrey),
-            ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: isLoading
+                ? _buildReservationCardShimmer()
+                : _buildReservationCard(item),
           ),
         );
-      } else {
-        for (final item in items) {
-          widgets.add(
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: isLoading
-                  ? _buildReservationCardShimmer()
-                  : _buildReservationCard(item),
-            ),
-          );
-        }
       }
     }
 

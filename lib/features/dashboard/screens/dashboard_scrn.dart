@@ -126,100 +126,102 @@ class _DashboardState extends State<Dashboard> {
             icon: const Icon(Icons.swap_vert, color: AppColors.black),
             onPressed: () => _onChangeProperty(),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.black),
-            onPressed: () => _dashboardVm.refreshDashboard(),
-          ),
         ],
       ),
       drawer: _buildDrawer(context, textTheme, config),
-      body: Obx(() {
-        if (_dashboardVm.isLoading.value) {
-          return ListView(
-            padding: EdgeInsets.all(padding),
-            children: [
-              _buildShimmerOccupancyCards(
-                context,
-                textTheme,
-                config,
-                isMobile,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildShimmerPropertyStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildShimmerInventoryStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildShimmerOccupancyStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-            ],
-          );
-        } else {
-          return ListView(
-            padding: EdgeInsets.all(padding),
-            children: [
-              _buildOccupancyCards(
-                context,
-                textTheme,
-                config,
-                isMobile,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildPropertyStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildInventoryStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-              SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
-              _buildOccupancyStatistics(
-                context,
-                textTheme,
-                config,
-                cardRadius,
-                iconSize,
-                fontScale,
-              ),
-            ],
-          );
-        }
-      }),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _dashboardVm.refreshDashboard();
+        },
+        child: Obx(() {
+          if (_dashboardVm.isLoading.value) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(padding),
+              children: [
+                _buildShimmerOccupancyCards(
+                  context,
+                  textTheme,
+                  config,
+                  isMobile,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildShimmerPropertyStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildShimmerInventoryStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildShimmerOccupancyStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+              ],
+            );
+          } else {
+            return ListView(
+              padding: EdgeInsets.all(padding),
+              children: [
+                _buildOccupancyCards(
+                  context,
+                  textTheme,
+                  config,
+                  isMobile,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildPropertyStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildInventoryStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+                SizedBox(height: ResponsiveConfig.scaleHeight(context, 24)),
+                _buildOccupancyStatistics(
+                  context,
+                  textTheme,
+                  config,
+                  cardRadius,
+                  iconSize,
+                  fontScale,
+                ),
+              ],
+            );
+          }
+        }),
+      ),
     );
   }
 
@@ -630,7 +632,6 @@ class _DashboardState extends State<Dashboard> {
       elevation: 8,
       child: Column(
         children: [
-          // Drawer Header
           Container(
             height: ResponsiveConfig.scaleHeight(context, 150),
             width: double.infinity,
@@ -666,7 +667,6 @@ class _DashboardState extends State<Dashboard> {
                   children: [
                     Row(
                       children: [
-                        // Avatar
                         CircleAvatar(
                           radius: avatarRadius,
                           backgroundColor: AppColors.onPrimary.withOpacity(
@@ -702,7 +702,6 @@ class _DashboardState extends State<Dashboard> {
                                 );
                               }),
                               const SizedBox(height: 4),
-                              // Hotel name below username
                               Obx(() {
                                 return Text(
                                   _dashboardVm.hotelName.value,
@@ -731,12 +730,10 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
           ),
-          // Scrollable Menu
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                // Main Navigation Section
                 _buildSectionHeader(
                   context,
                   textTheme,

@@ -500,27 +500,58 @@ class _ViewReservation extends State<ViewReservation>
                 const SizedBox(height: 16),
                 _buildFinancialRow(
                   context,
-                  item!.visibleCurrencyCode!,
+                  _baseCurrencyCode,
                   'Total Charges',
                   item!.totalAmount!,
                   isPositive: false,
                 ),
+                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                  _buildFinancialRow(
+                    context,
+                    item!.visibleCurrencyCode!,
+                    '',
+                    item!.conversionRate != 0
+                        ? item!.totalAmount! / item!.conversionRate!
+                        : 0,
+                    isPositive: false,
+                  ),
                 _buildFinancialRow(
                   context,
-                  item!.visibleCurrencyCode!,
+                  _baseCurrencyCode,
                   'Payments',
                   item!.totalCredits ?? 0,
                   isPositive: true,
                 ),
+                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                  _buildFinancialRow(
+                    context,
+                    item!.visibleCurrencyCode!,
+                    '',
+                    item!.conversionRate != 0
+                        ? item!.totalCredits! / item!.conversionRate!
+                        : 0,
+                    isPositive: true,
+                  ),
                 const Divider(height: 24, thickness: 1.5),
                 _buildFinancialRow(
                   context,
-                  item!.visibleCurrencyCode!,
+                  _baseCurrencyCode,
                   'Balance Due',
                   item!.balanceAmount!,
                   isBalance: true,
                   isPositive: item!.balanceAmount! <= 0,
                 ),
+                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                  _buildFinancialRow(
+                    context,
+                    item!.visibleCurrencyCode!,
+                    '',
+                    item!.conversionRate != 0
+                        ? item!.balanceAmount! / item!.conversionRate!
+                        : 0,
+                    isBalance: true,
+                    isPositive: item!.balanceAmount! <= 0,
+                  ),
               ],
             ),
           ),
@@ -1322,7 +1353,7 @@ class _ViewReservation extends State<ViewReservation>
                                           Text(
                                             formatCurrency(
                                               charge.amount,
-                                              item?.visibleCurrencyCode,
+                                              _baseCurrencyCode,
                                             ),
                                             style: Theme.of(context)
                                                 .textTheme
@@ -1434,7 +1465,7 @@ class _ViewReservation extends State<ViewReservation>
                                           Text(
                                             formatCurrency(
                                               payment.totalAmount,
-                                              item?.visibleCurrencyCode,
+                                              _baseCurrencyCode,
                                             ),
                                             style: Theme.of(context)
                                                 .textTheme

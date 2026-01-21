@@ -45,9 +45,7 @@ class _DepartureListState extends State<DepartureList> {
       appBar: CustomAppBar(
         title: 'Departure List',
         // onSearchChanged: (query) => _reservationVm.search(query),
-        onRefreshTap: () async {
-          await _reservationVm.getReservationsMap(1);
-        },
+        onRefreshTap: () async {},
         onInfoTap: () => _showInfoDialog(context),
         onFilterTap: () {
           showModalBottomSheet(
@@ -74,53 +72,58 @@ class _DepartureListState extends State<DepartureList> {
           );
         },
       ),
-      body: Obx(() {
-        GuestItem guestItem = GuestItem(
-          bookingRoomId: '',
-          guestName: '',
-          resId: '',
-          folioId: '',
-          startDate: '',
-          endDate: '',
-          nights: 0,
-          adults: 0,
-          totalAmount: 0,
-          balanceAmount: 0,
-        );
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _reservationVm.getReservationsMap(2);
+        },
+        child: Obx(() {
+          GuestItem guestItem = GuestItem(
+            bookingRoomId: '',
+            guestName: '',
+            resId: '',
+            folioId: '',
+            startDate: '',
+            endDate: '',
+            nights: 0,
+            adults: 0,
+            totalAmount: 0,
+            balanceAmount: 0,
+          );
 
-        final isBottomSheetDataLoading =
-            _reservationVm.isAllGuestDataLoading.value;
-        return Stack(
-          children: [
-            TabbedListView<GuestItem>(
-              tabLabels: const ['Today', 'Tomorrow', 'This Week'],
-              dataMap: _reservationVm.isLoading.value
-                  ? {
-                      'today': List.generate(3, (_) => guestItem),
-                      'tomorrow': List.generate(3, (_) => guestItem),
-                      'thisweek': List.generate(3, (_) => guestItem),
-                    }
-                  : _reservationVm.filteredList.value ?? {},
-              itemBuilder: (item) => _reservationVm.isLoading.value
-                  ? _buildArrivalCardShimmer()
-                  : _buildDepartureCard(item),
-              emptySubMessage: (period) =>
-                  'No arrivals scheduled for this period',
-            ),
-            if (isBottomSheetDataLoading == true)
-              Container(
-                color: Colors.black.withOpacity(0.2), // slight dim effect
-                child: const Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      AppColors.lightgrey,
+          final isBottomSheetDataLoading =
+              _reservationVm.isAllGuestDataLoading.value;
+          return Stack(
+            children: [
+              TabbedListView<GuestItem>(
+                tabLabels: const ['Today', 'Tomorrow', 'This Week'],
+                dataMap: _reservationVm.isLoading.value
+                    ? {
+                        'today': List.generate(3, (_) => guestItem),
+                        'tomorrow': List.generate(3, (_) => guestItem),
+                        'thisweek': List.generate(3, (_) => guestItem),
+                      }
+                    : _reservationVm.filteredList.value ?? {},
+                itemBuilder: (item) => _reservationVm.isLoading.value
+                    ? _buildArrivalCardShimmer()
+                    : _buildDepartureCard(item),
+                emptySubMessage: (period) =>
+                    'No arrivals scheduled for this period',
+              ),
+              if (isBottomSheetDataLoading == true)
+                Container(
+                  color: Colors.black.withOpacity(0.2), // slight dim effect
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.lightgrey,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        );
-      }),
+            ],
+          );
+        }),
+      ),
     );
   }
 
