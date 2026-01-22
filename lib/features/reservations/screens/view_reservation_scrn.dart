@@ -36,9 +36,7 @@ class _ViewReservation extends State<ViewReservation>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (item != null) {
         int? bookingRoomId = int.tryParse(widget.item?.bookingRoomId ?? '');
-        await _reservationVm.loadAllFolios(bookingRoomId!);
         await _reservationVm.loadAllAuditTrails(item!);
-        await _reservationVm.loadAllRemarks(bookingRoomId);
         if (!mounted) return;
         setState(() {
           _bookingRoomId = bookingRoomId;
@@ -492,67 +490,81 @@ class _ViewReservation extends State<ViewReservation>
 
           const SizedBox(height: 16),
 
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader(context, 'Folio Summary', Icons.receipt_long),
-                const SizedBox(height: 16),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Total Charges',
-                  item!.totalAmount!,
-                  isPositive: false,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+          Obx(
+            () => _buildModernCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildCardHeader(
+                    context,
+                    'Folio Summary',
+                    Icons.receipt_long,
+                  ),
+                  const SizedBox(height: 16),
                   _buildFinancialRow(
                     context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.totalAmount! / item!.conversionRate!
-                        : 0,
+                    _baseCurrencyCode,
+                    'Total Charges',
+                    _reservationVm.paymentSummary.value!.totalPrice,
                     isPositive: false,
                   ),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Payments',
-                  item!.totalCredits ?? 0,
-                  isPositive: true,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm.paymentSummary.value!.totalPrice /
+                                item!.conversionRate!
+                          : 0,
+                      isPositive: false,
+                    ),
                   _buildFinancialRow(
                     context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.totalCredits! / item!.conversionRate!
-                        : 0,
+                    _baseCurrencyCode,
+                    'Payments',
+                    _reservationVm.paymentSummary.value!.totalGrossAmount,
                     isPositive: true,
                   ),
-                const Divider(height: 24, thickness: 1.5),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Balance Due',
-                  item!.balanceAmount!,
-                  isBalance: true,
-                  isPositive: item!.balanceAmount! <= 0,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm
+                                    .paymentSummary
+                                    .value!
+                                    .totalGrossAmount /
+                                item!.conversionRate!
+                          : 0,
+                      isPositive: true,
+                    ),
+                  const Divider(height: 24, thickness: 1.5),
                   _buildFinancialRow(
                     context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.balanceAmount! / item!.conversionRate!
-                        : 0,
+                    _baseCurrencyCode,
+                    'Balance Due',
+                    _reservationVm.paymentSummary.value!.balance,
                     isBalance: true,
-                    isPositive: item!.balanceAmount! <= 0,
+                    isPositive:
+                        _reservationVm.paymentSummary.value!.balance <= 0,
                   ),
-              ],
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm.paymentSummary.value!.balance /
+                                item!.conversionRate!
+                          : 0,
+                      isBalance: true,
+                      isPositive:
+                          _reservationVm.paymentSummary.value!.balance <= 0,
+                    ),
+                ],
+              ),
             ),
           ),
 

@@ -9,6 +9,7 @@ class GuestItem {
   final String? statusName;
   final String? bookingRoomId;
   final String? guestName;
+  final bool? isGroupOwner;
   final String? fullNameWithTitle;
   final String? nationalityName;
   final int? guestId;
@@ -138,6 +139,7 @@ class GuestItem {
     this.bookingId,
     this.bookingRoomId,
     this.guestName,
+    this.isGroupOwner,
     this.fullNameWithTitle,
     this.statusName,
     this.nationalityName,
@@ -272,6 +274,7 @@ class GuestItem {
       baseCurrencySymbol: json['baseCurrencySymbol'] ?? '',
       bookingRoomId: json['bookingRoomId'] ?? '',
       guestName: json['guestName'] ?? '',
+      isGroupOwner: json['isGroupOwner'] ?? false,
       fullNameWithTitle: json['fullNameWithTitle'] ?? '',
       nationalityName: json['nationalityName'] ?? '',
       guestId: json['guestId'] ?? 0,
@@ -415,6 +418,7 @@ class GuestItem {
       'bookingRoomId': bookingRoomId,
       'baseCurrencySymbol': baseCurrencySymbol,
       'guestName': guestName,
+      'isGroupOwner': isGroupOwner,
       'fullNameWithTitle': fullNameWithTitle,
       'nationalityName': nationalityName,
       'guestId': guestId,
@@ -547,6 +551,7 @@ class GuestItem {
         'statusName: $statusName, '
         'bookingRoomId: $bookingRoomId, '
         'guestName: $guestName, '
+        'isGroupOwner: $isGroupOwner, '
         'fullNameWithTitle: $fullNameWithTitle, '
         'naitonalityName: $nationalityName, '
         'workPlace: $workPlace, '

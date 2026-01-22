@@ -66,6 +66,9 @@ class DashboardVm extends GetxController {
     getInitialData();
   }
 
+
+  
+
   Future<void> changeProperty(HotelDataResponse hotel) async {
     try {
       final response = await _userApiService.changePropertyApi(hotel.hotelId);

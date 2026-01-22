@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/Get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/dashboard/viewmodels/quick_reservation_vm.dart';
 
 class QuickReservation extends StatefulWidget {
   const QuickReservation({super.key});
@@ -10,12 +13,15 @@ class QuickReservation extends StatefulWidget {
   State<QuickReservation> createState() => _QuickReservationState();
 }
 
-class _QuickReservationState extends State<QuickReservation> with SingleTickerProviderStateMixin {
+class _QuickReservationState extends State<QuickReservation>
+    with SingleTickerProviderStateMixin {
+  final QuickReservationVm _quickReservationVm = Get.find<QuickReservationVm>();
   late AnimationController _shimmerController;
   bool _isLoading = true;
+
   DateTime checkInDate = DateTime.now();
   DateTime checkOutDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0); // ~1 PM as per screenshot
+  TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0);
   TimeOfDay checkOutTime = const TimeOfDay(hour: 13, minute: 0);
   int nights = 1;
   String? selectedBusinessSource;
@@ -41,7 +47,6 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
   TextEditingController emailController = TextEditingController();
   TextEditingController voucherController = TextEditingController();
 
-  // Dynamic totals
   double roomCharges = 0.0;
   double tax = 0.0;
   double total = 0.0;
@@ -53,12 +58,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     'Executive Room': 250.00,
   };
 
-  final List<String> otas = [
-    'Booking.com',
-    'Expedia',
-    'Agoda',
-    'Hotels.com',
-  ];
+  final List<String> otas = ['Booking.com', 'Expedia', 'Agoda', 'Hotels.com'];
 
   final List<String> travelAgents = [
     'Agent A',
@@ -81,11 +81,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     'Corporate',
   ];
 
-  final List<String> reservationTypes = [
-    'Confirm',
-    'Tentative',
-    'Waitlist',
-  ];
+  final List<String> reservationTypes = ['Confirm', 'Tentative', 'Waitlist'];
 
   final List<String> roomTypes = [
     'Standard Room',
@@ -101,12 +97,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     'Package Rate',
   ];
 
-  final List<String> rooms = [
-    'Room 101',
-    'Room 102',
-    'Room 201',
-    'Room 202',
-  ];
+  final List<String> rooms = ['Room 101', 'Room 102', 'Room 201', 'Room 202'];
 
   @override
   void initState() {
@@ -116,13 +107,32 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
       duration: const Duration(milliseconds: 1500),
     )..repeat();
 
-    // Initialize per-room lists
     _initializeRoomLists();
 
-    // Simulate loading (replace with real async data fetch, e.g., API call)
-    Future.delayed(const Duration(seconds: 2), () {
+    // Future.delayed(const Duration(seconds: 2), () {
+    //   if (mounted) {
+    //     setState(() => _isLoading = false);
+    //   }
+    // });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      await _quickReservationVm.loadInitialData();
+
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          DateTime now = DateTime.now();
+          TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
+          _isLoading = _quickReservationVm.isInitialDataLoading.value;
+          checkInDate = _quickReservationVm.checkInDate.value ?? now;
+          checkOutDate =
+              _quickReservationVm.checkOutDate.value ??
+              now.add(Duration(days: 1));
+          checkInTime = _quickReservationVm.checkinTime.value ?? currentTime;
+          checkOutTime = _quickReservationVm.checkOutTime.value ?? currentTime;
+        });
       }
     });
 
@@ -244,16 +254,23 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     if (reservationType.isEmpty || roomCount < 1) {
       return false;
     }
-    if (selectedBusinessSource == 'Online Travel Agent' && selectedOta == null) return false;
-    if (selectedBusinessSource == 'Travel Agent' && (selectedTravelAgent == null || voucherController.text.isEmpty)) return false;
-    if (selectedBusinessSource == 'Corporate' && selectedCompany == null) return false;
+    if (selectedBusinessSource == 'Online Travel Agent' && selectedOta == null)
+      return false;
+    if (selectedBusinessSource == 'Travel Agent' &&
+        (selectedTravelAgent == null || voucherController.text.isEmpty))
+      return false;
+    if (selectedBusinessSource == 'Corporate' && selectedCompany == null)
+      return false;
     for (int i = 0; i < roomCount; i++) {
       if (adultCounts[i] < 1) return false;
       if (differentRoomTypes) {
-        if (selectedRoomTypes[i] == null || selectedRateTypes[i] == null) return false;
+        if (selectedRoomTypes[i] == null || selectedRateTypes[i] == null)
+          return false;
       }
     }
-    if (!differentRoomTypes && (selectedRoomType == null || selectedRateType == null)) return false;
+    if (!differentRoomTypes &&
+        (selectedRoomType == null || selectedRateType == null))
+      return false;
     return true;
   }
 
@@ -269,14 +286,21 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     final fontScale = ResponsiveConfig.fontScale(context);
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(fontScale)),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: TextScaler.linear(fontScale)),
       child: Scaffold(
         backgroundColor: AppColors.background,
-        appBar: CustomAppBar(
-          title: 'Quick Reservation',
-          onRefreshTap: () {},
-        ),
-        bottomNavigationBar: _isLoading ? null : _buildBottomBar(theme, fontScale, defaultPadding, cardRadius, isMobile),
+        appBar: CustomAppBar(title: 'Quick Reservation', onRefreshTap: () {}),
+        bottomNavigationBar: _isLoading
+            ? null
+            : _buildBottomBar(
+                theme,
+                fontScale,
+                defaultPadding,
+                cardRadius,
+                isMobile,
+              ),
         body: SingleChildScrollView(
           padding: horizontalPadding,
           child: AnimatedSwitcher(
@@ -333,7 +357,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                           value: selectedOta,
                           hint: 'Select OTA',
                           items: otas,
-                          onChanged: (value) => setState(() => selectedOta = value),
+                          onChanged: (value) =>
+                              setState(() => selectedOta = value),
                           theme: theme,
                           fontScale: fontScale,
                           cardRadius: cardRadius,
@@ -347,7 +372,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                               value: selectedTravelAgent,
                               hint: 'Select Travel Agent',
                               items: travelAgents,
-                              onChanged: (value) => setState(() => selectedTravelAgent = value),
+                              onChanged: (value) =>
+                                  setState(() => selectedTravelAgent = value),
                               theme: theme,
                               fontScale: fontScale,
                               cardRadius: cardRadius,
@@ -369,12 +395,15 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                           value: selectedCompany,
                           hint: 'Select Company',
                           items: companies,
-                          onChanged: (value) => setState(() => selectedCompany = value),
+                          onChanged: (value) =>
+                              setState(() => selectedCompany = value),
                           theme: theme,
                           fontScale: fontScale,
                           cardRadius: cardRadius,
                         ),
-                      if (selectedBusinessSource != null && selectedBusinessSource != 'Web') SizedBox(height: listItemSpacing),
+                      if (selectedBusinessSource != null &&
+                          selectedBusinessSource != 'Web')
+                        SizedBox(height: listItemSpacing),
 
                       // Reservation Type and Rooms
                       if (isMobile)
@@ -385,7 +414,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                               value: reservationType,
                               hint: 'Select Type',
                               items: reservationTypes,
-                              onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
+                              onChanged: (value) => setState(
+                                () => reservationType = value ?? 'Confirm',
+                              ),
                               theme: theme,
                               fontScale: fontScale,
                               cardRadius: cardRadius,
@@ -440,7 +471,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                 value: reservationType,
                                 hint: 'Select Type',
                                 items: reservationTypes,
-                                onChanged: (value) => setState(() => reservationType = value ?? 'Confirm'),
+                                onChanged: (value) => setState(
+                                  () => reservationType = value ?? 'Confirm',
+                                ),
                                 theme: theme,
                                 fontScale: fontScale,
                                 cardRadius: cardRadius,
@@ -523,7 +556,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       // Room Details Card
                       Card(
                         color: AppColors.surface,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(cardRadius),
+                        ),
                         elevation: 2,
                         child: Padding(
                           padding: EdgeInsets.all(defaultPadding),
@@ -555,7 +590,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                         value: selectedRateType,
                                         hint: 'Select Rate Type',
                                         items: rateTypes,
-                                        onChanged: (value) => setState(() => selectedRateType = value),
+                                        onChanged: (value) => setState(
+                                          () => selectedRateType = value,
+                                        ),
                                         theme: theme,
                                         fontScale: fontScale,
                                         cardRadius: cardRadius,
@@ -589,7 +626,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                           value: selectedRateType,
                                           hint: 'Select Rate Type',
                                           items: rateTypes,
-                                          onChanged: (value) => setState(() => selectedRateType = value),
+                                          onChanged: (value) => setState(
+                                            () => selectedRateType = value,
+                                          ),
                                           theme: theme,
                                           fontScale: fontScale,
                                           cardRadius: cardRadius,
@@ -597,18 +636,21 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                       ),
                                     ],
                                   ),
-                              if (!differentRoomTypes) SizedBox(height: listItemSpacing),
+                              if (!differentRoomTypes)
+                                SizedBox(height: listItemSpacing),
                               Tooltip(
                                 message: 'Override the default rate',
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Rate Override',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        fontSize: 14 * fontScale,
-                                        color: AppColors.lightgrey,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontSize: 14 * fontScale,
+                                            color: AppColors.lightgrey,
+                                          ),
                                     ),
                                     Switch(
                                       value: rateOverride,
@@ -646,7 +688,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       // Guest Information Card
                       Card(
                         color: AppColors.surface,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(cardRadius),
+                        ),
                         elevation: 2,
                         child: Padding(
                           padding: EdgeInsets.all(defaultPadding),
@@ -654,15 +698,17 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Guest Information',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontSize: 18 * fontScale,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.darkgrey,
-                                    ),
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                          fontSize: 18 * fontScale,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.darkgrey,
+                                        ),
                                   ),
                                   Tooltip(
                                     message: 'Mark if guest has stayed before',
@@ -670,17 +716,21 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                       children: [
                                         Text(
                                           'Returning Guest',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            fontSize: 14 * fontScale,
-                                            color: AppColors.lightgrey,
-                                          ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                fontSize: 14 * fontScale,
+                                                color: AppColors.lightgrey,
+                                              ),
                                         ),
                                         SizedBox(width: 8),
                                         Switch(
                                           value: returningGuest,
-                                          onChanged: (value) => setState(() => returningGuest = value),
+                                          onChanged: (value) => setState(
+                                            () => returningGuest = value,
+                                          ),
                                           activeColor: AppColors.primary,
-                                          inactiveThumbColor: AppColors.lightgrey,
+                                          inactiveThumbColor:
+                                              AppColors.lightgrey,
                                         ),
                                       ],
                                     ),
@@ -690,15 +740,19 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                               SizedBox(height: listItemSpacing * 1.5),
                               if (isMobile) ...[
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Expanded(
                                       flex: 1,
                                       child: _buildDropdownField(
-                                        label: 'Salutation',
+                                        label: '',
                                         value: selectedSalutation,
                                         hint: 'Select',
                                         items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
-                                        onChanged: (value) => setState(() => selectedSalutation = value),
+                                        onChanged: (value) => setState(
+                                          () => selectedSalutation = value,
+                                        ),
                                         theme: theme,
                                         fontScale: fontScale,
                                         cardRadius: cardRadius,
@@ -718,13 +772,21 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                           hintText: 'Guest Name',
                                           hintStyle: TextStyle(
                                             fontSize: 14 * fontScale,
-                                            color: AppColors.lightgrey.withOpacity(0.6),
+                                            color: AppColors.lightgrey
+                                                .withOpacity(0.6),
                                           ),
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: AppColors.lightgrey,
+                                            ),
                                           ),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
                                           filled: true,
                                           fillColor: AppColors.surface,
                                         ),
@@ -745,13 +807,20 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                     hintText: 'Mobile Number',
                                     hintStyle: TextStyle(
                                       fontSize: 14 * fontScale,
-                                      color: AppColors.lightgrey.withOpacity(0.6),
+                                      color: AppColors.lightgrey.withOpacity(
+                                        0.6,
+                                      ),
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: AppColors.lightgrey),
+                                      borderSide: BorderSide(
+                                        color: AppColors.lightgrey,
+                                      ),
                                     ),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     filled: true,
                                     fillColor: AppColors.surface,
                                   ),
@@ -769,13 +838,20 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                     hintText: 'Email ID',
                                     hintStyle: TextStyle(
                                       fontSize: 14 * fontScale,
-                                      color: AppColors.lightgrey.withOpacity(0.6),
+                                      color: AppColors.lightgrey.withOpacity(
+                                        0.6,
+                                      ),
                                     ),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide(color: AppColors.lightgrey),
+                                      borderSide: BorderSide(
+                                        color: AppColors.lightgrey,
+                                      ),
                                     ),
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
                                     filled: true,
                                     fillColor: AppColors.surface,
                                   ),
@@ -786,11 +862,13 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                     Expanded(
                                       flex: 1,
                                       child: _buildDropdownField(
-                                        label: 'Salutation',
+                                        label: '',
                                         value: selectedSalutation,
                                         hint: 'Select',
                                         items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
-                                        onChanged: (value) => setState(() => selectedSalutation = value),
+                                        onChanged: (value) => setState(
+                                          () => selectedSalutation = value,
+                                        ),
                                         theme: theme,
                                         fontScale: fontScale,
                                         cardRadius: cardRadius,
@@ -809,10 +887,17 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                           ),
                                           hintText: 'Guest Name',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: AppColors.lightgrey,
+                                            ),
                                           ),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
                                           filled: true,
                                           fillColor: AppColors.surface,
                                         ),
@@ -835,10 +920,17 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                           ),
                                           hintText: 'Mobile Number',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: AppColors.lightgrey,
+                                            ),
                                           ),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
                                           filled: true,
                                           fillColor: AppColors.surface,
                                         ),
@@ -848,7 +940,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                     Expanded(
                                       child: TextFormField(
                                         controller: emailController,
-                                        keyboardType: TextInputType.emailAddress,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
                                         decoration: InputDecoration(
                                           labelText: 'Email ID',
                                           labelStyle: TextStyle(
@@ -857,10 +950,17 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                                           ),
                                           hintText: 'Email ID',
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                            borderSide: BorderSide(color: AppColors.lightgrey),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            borderSide: BorderSide(
+                                              color: AppColors.lightgrey,
+                                            ),
                                           ),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
                                           filled: true,
                                           fillColor: AppColors.surface,
                                         ),
@@ -882,7 +982,13 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     );
   }
 
-  Widget _buildBottomBar(ThemeData theme, double fontScale, double defaultPadding, double cardRadius, bool isMobile) {
+  Widget _buildBottomBar(
+    ThemeData theme,
+    double fontScale,
+    double defaultPadding,
+    double cardRadius,
+    bool isMobile,
+  ) {
     return Container(
       padding: EdgeInsets.all(defaultPadding),
       decoration: BoxDecoration(
@@ -1152,10 +1258,11 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
             ),
           ),
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -1167,15 +1274,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
             fillColor: AppColors.surface,
           ),
           icon: Icon(Icons.arrow_drop_down, color: AppColors.lightgrey),
-          style: TextStyle(
-            fontSize: 14 * fontScale,
-            color: AppColors.darkgrey,
-          ),
+          style: TextStyle(fontSize: 14 * fontScale, color: AppColors.darkgrey),
           items: items.map((String item) {
-            return DropdownMenuItem<String>(
-              value: item,
-              child: Text(item),
-            );
+            return DropdownMenuItem<String>(value: item, child: Text(item));
           }).toList(),
           onChanged: onChanged,
         ),
@@ -1214,7 +1315,12 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
           child: Row(
             children: [
               IconButton(
-                icon: Icon(Icons.remove, color: value > minValue ? AppColors.primary : AppColors.lightgrey),
+                icon: Icon(
+                  Icons.remove,
+                  color: value > minValue
+                      ? AppColors.primary
+                      : AppColors.lightgrey,
+                ),
                 onPressed: value > minValue ? () => onChanged(value - 1) : null,
               ),
               Expanded(
@@ -1230,7 +1336,12 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.add, color: value < maxValue ? AppColors.primary : AppColors.lightgrey),
+                icon: Icon(
+                  Icons.add,
+                  color: value < maxValue
+                      ? AppColors.primary
+                      : AppColors.lightgrey,
+                ),
                 onPressed: value < maxValue ? () => onChanged(value + 1) : null,
               ),
             ],
@@ -1268,10 +1379,11 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
             setState(() {});
           },
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
             ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -1294,7 +1406,12 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
     );
   }
 
-  Widget _buildRateSummaryItem(String label, String amount, ThemeData theme, double fontScale) {
+  Widget _buildRateSummaryItem(
+    String label,
+    String amount,
+    ThemeData theme,
+    double fontScale,
+  ) {
     return Column(
       children: [
         Text(
@@ -1354,10 +1471,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
             filled: true,
             fillColor: AppColors.surface,
           ),
-          style: TextStyle(
-            fontSize: 14 * fontScale,
-            color: AppColors.darkgrey,
-          ),
+          style: TextStyle(fontSize: 14 * fontScale, color: AppColors.darkgrey),
         ),
       ],
     );
@@ -1389,7 +1503,10 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: defaultPadding, vertical: defaultPadding / 2),
+            padding: EdgeInsets.symmetric(
+              horizontal: defaultPadding,
+              vertical: defaultPadding / 2,
+            ),
             decoration: BoxDecoration(
               color: Colors.blueGrey[700],
               borderRadius: BorderRadius.only(
@@ -1446,7 +1563,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                           value: selectedRateTypes[index],
                           hint: 'Select Rate Type',
                           items: rateTypes,
-                          onChanged: (value) => setState(() => selectedRateTypes[index] = value),
+                          onChanged: (value) =>
+                              setState(() => selectedRateTypes[index] = value),
                           theme: theme,
                           fontScale: fontScale,
                           cardRadius: cardRadius,
@@ -1482,7 +1600,9 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                             value: selectedRateTypes[index],
                             hint: 'Select Rate Type',
                             items: rateTypes,
-                            onChanged: (value) => setState(() => selectedRateTypes[index] = value),
+                            onChanged: (value) => setState(
+                              () => selectedRateTypes[index] = value,
+                            ),
                             theme: theme,
                             fontScale: fontScale,
                             cardRadius: cardRadius,
@@ -1495,7 +1615,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                   value: selectedRooms[index],
                   hint: 'Select Room',
                   items: rooms,
-                  onChanged: (value) => setState(() => selectedRooms[index] = value),
+                  onChanged: (value) =>
+                      setState(() => selectedRooms[index] = value),
                   theme: theme,
                   fontScale: fontScale,
                   cardRadius: cardRadius,
@@ -1507,7 +1628,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       _buildStepperField(
                         label: 'Adult *',
                         value: adultCounts[index],
-                        onChanged: (value) => setState(() => adultCounts[index] = value),
+                        onChanged: (value) =>
+                            setState(() => adultCounts[index] = value),
                         theme: theme,
                         fontScale: fontScale,
                         cardRadius: cardRadius,
@@ -1517,7 +1639,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                       _buildStepperField(
                         label: 'Child *',
                         value: childCounts[index],
-                        onChanged: (value) => setState(() => childCounts[index] = value),
+                        onChanged: (value) =>
+                            setState(() => childCounts[index] = value),
                         theme: theme,
                         fontScale: fontScale,
                         cardRadius: cardRadius,
@@ -1538,7 +1661,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                         child: _buildStepperField(
                           label: 'Adult *',
                           value: adultCounts[index],
-                          onChanged: (value) => setState(() => adultCounts[index] = value),
+                          onChanged: (value) =>
+                              setState(() => adultCounts[index] = value),
                           theme: theme,
                           fontScale: fontScale,
                           cardRadius: cardRadius,
@@ -1550,7 +1674,8 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                         child: _buildStepperField(
                           label: 'Child *',
                           value: childCounts[index],
-                          onChanged: (value) => setState(() => childCounts[index] = value),
+                          onChanged: (value) =>
+                              setState(() => childCounts[index] = value),
                           theme: theme,
                           fontScale: fontScale,
                           cardRadius: cardRadius,
@@ -1577,9 +1702,24 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildRateSummaryItem('Room Charges', '\$${(rates[index] * nights).toStringAsFixed(2)}', theme, fontScale),
-                      _buildRateSummaryItem('Tax', '\$${(rates[index] * nights * 0.1).toStringAsFixed(2)}', theme, fontScale),
-                      _buildRateSummaryItem('Total Rate', '\$${(rates[index] * nights * 1.1).toStringAsFixed(2)}', theme, fontScale),
+                      _buildRateSummaryItem(
+                        'Room Charges',
+                        '\$${(rates[index] * nights).toStringAsFixed(2)}',
+                        theme,
+                        fontScale,
+                      ),
+                      _buildRateSummaryItem(
+                        'Tax',
+                        '\$${(rates[index] * nights * 0.1).toStringAsFixed(2)}',
+                        theme,
+                        fontScale,
+                      ),
+                      _buildRateSummaryItem(
+                        'Total Rate',
+                        '\$${(rates[index] * nights * 1.1).toStringAsFixed(2)}',
+                        theme,
+                        fontScale,
+                      ),
                     ],
                   ),
                 ),
@@ -1607,11 +1747,21 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(child: _buildShimmerContainer(height: 100, width: double.infinity)),
+            Expanded(
+              child: _buildShimmerContainer(
+                height: 100,
+                width: double.infinity,
+              ),
+            ),
             SizedBox(width: listItemSpacing),
             _buildShimmerContainer(height: 50, width: 60),
             SizedBox(width: listItemSpacing),
-            Expanded(child: _buildShimmerContainer(height: 100, width: double.infinity)),
+            Expanded(
+              child: _buildShimmerContainer(
+                height: 100,
+                width: double.infinity,
+              ),
+            ),
           ],
         ),
         SizedBox(height: listItemSpacing * 1.25),
@@ -1629,9 +1779,19 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
         else
           Row(
             children: [
-              Expanded(child: _buildShimmerContainer(height: 60, width: double.infinity)),
+              Expanded(
+                child: _buildShimmerContainer(
+                  height: 60,
+                  width: double.infinity,
+                ),
+              ),
               SizedBox(width: defaultPadding),
-              Expanded(child: _buildShimmerContainer(height: 60, width: double.infinity)),
+              Expanded(
+                child: _buildShimmerContainer(
+                  height: 60,
+                  width: double.infinity,
+                ),
+              ),
             ],
           ),
         SizedBox(height: listItemSpacing * 1.5),
@@ -1649,32 +1809,50 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
               SizedBox(height: listItemSpacing),
               if (isMobile)
                 Column(
-                  children: List.generate(5, (_) => Padding(
-                    padding: EdgeInsets.only(bottom: listItemSpacing),
-                    child: _buildShimmerContainer(height: 60, width: double.infinity),
-                  )),
+                  children: List.generate(
+                    5,
+                    (_) => Padding(
+                      padding: EdgeInsets.only(bottom: listItemSpacing),
+                      child: _buildShimmerContainer(
+                        height: 60,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ),
                 )
               else
                 Column(
                   children: [
                     Row(
-                      children: List.generate(2, (_) => Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: defaultPadding),
-                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                      children: List.generate(
+                        2,
+                        (_) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: defaultPadding),
+                            child: _buildShimmerContainer(
+                              height: 60,
+                              width: double.infinity,
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                     ),
                     SizedBox(height: listItemSpacing),
                     _buildShimmerContainer(height: 60, width: double.infinity),
                     SizedBox(height: listItemSpacing),
                     Row(
-                      children: List.generate(3, (_) => Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: defaultPadding),
-                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                      children: List.generate(
+                        3,
+                        (_) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: defaultPadding),
+                            child: _buildShimmerContainer(
+                              height: 60,
+                              width: double.infinity,
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                     ),
                   ],
                 ),
@@ -1700,29 +1878,53 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
               SizedBox(height: listItemSpacing * 1.5),
               if (isMobile)
                 Column(
-                  children: List.generate(4, (_) => Padding(
-                    padding: EdgeInsets.only(bottom: listItemSpacing),
-                    child: _buildShimmerContainer(height: 60, width: double.infinity),
-                  )),
+                  children: List.generate(
+                    4,
+                    (_) => Padding(
+                      padding: EdgeInsets.only(bottom: listItemSpacing),
+                      child: _buildShimmerContainer(
+                        height: 60,
+                        width: double.infinity,
+                      ),
+                    ),
+                  ),
                 )
               else
                 Column(
                   children: [
                     Row(
                       children: [
-                        Expanded(flex: 1, child: _buildShimmerContainer(height: 60, width: double.infinity)),
+                        Expanded(
+                          flex: 1,
+                          child: _buildShimmerContainer(
+                            height: 60,
+                            width: double.infinity,
+                          ),
+                        ),
                         SizedBox(width: defaultPadding),
-                        Expanded(flex: 2, child: _buildShimmerContainer(height: 60, width: double.infinity)),
+                        Expanded(
+                          flex: 2,
+                          child: _buildShimmerContainer(
+                            height: 60,
+                            width: double.infinity,
+                          ),
+                        ),
                       ],
                     ),
                     SizedBox(height: listItemSpacing),
                     Row(
-                      children: List.generate(2, (_) => Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(right: defaultPadding),
-                          child: _buildShimmerContainer(height: 60, width: double.infinity),
+                      children: List.generate(
+                        2,
+                        (_) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(right: defaultPadding),
+                            child: _buildShimmerContainer(
+                              height: 60,
+                              width: double.infinity,
+                            ),
+                          ),
                         ),
-                      )),
+                      ),
                     ),
                   ],
                 ),
@@ -1743,12 +1945,11 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
   }) {
     return Card(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(cardRadius)),
-      elevation: 2,
-      child: Padding(
-        padding: EdgeInsets.all(defaultPadding),
-        child: child,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(cardRadius),
       ),
+      elevation: 2,
+      child: Padding(padding: EdgeInsets.all(defaultPadding), child: child),
     );
   }
 
@@ -1782,9 +1983,7 @@ class _QuickReservationState extends State<QuickReservation> with SingleTickerPr
               ).createShader(bounds);
             },
             blendMode: BlendMode.srcATop,
-            child: Container(
-              color: Colors.grey[300],
-            ),
+            child: Container(color: Colors.grey[300]),
           ),
         );
       },

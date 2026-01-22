@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:inta_mobile_pms/data/models/Base_currency_model.dart';
+import 'package:inta_mobile_pms/data/models/checkin_checkout_data_model.dart';
 import 'package:inta_mobile_pms/data/models/hotel_information_model.dart';
 import 'package:inta_mobile_pms/data/models/master_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,42 +14,24 @@ class LocalStorageManager {
   static Future<MasterData> getMasterData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonString = prefs.getString('masterData') ?? "";
-    if (jsonString.isNotEmpty) {
-      final json = jsonDecode(jsonString);
-      return MasterData.fromJson(json);
-    } else {
-      return MasterData(
-        userName: '',
-        userId: '',
-        clientId: '',
-        menus: '',
-        privileges: '',
-      );
-    }
+    final json = jsonDecode(jsonString);
+    return MasterData.fromJson(json);
   }
 
   static Future<String> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonString = prefs.getString('masterData') ?? "";
-    if (jsonString.isNotEmpty) {
-      final json = jsonDecode(jsonString);
-      final masterData = MasterData.fromJson(json);
-      return masterData.userId;
-    } else {
-      return '';
-    }
+    final json = jsonDecode(jsonString);
+    final masterData = MasterData.fromJson(json);
+    return masterData.userId;
   }
 
   static Future<String> getUserName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonString = prefs.getString('masterData') ?? "";
-    if (jsonString.isNotEmpty) {
-      final json = jsonDecode(jsonString);
-      final masterData = MasterData.fromJson(json);
-      return masterData.userName;
-    } else {
-      return '';
-    }
+    final json = jsonDecode(jsonString);
+    final masterData = MasterData.fromJson(json);
+    return masterData.userName;
   }
 
   static Future<void> setHotelInfoData(
@@ -61,12 +44,27 @@ class LocalStorageManager {
   static Future<HotelInformationModel> getHotelInfoData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonString = prefs.getString('hotelInformation') ?? "";
-    if (jsonString.isNotEmpty) {
-      final json = jsonDecode(jsonString);
-      return HotelInformationModel.fromJson(json);
-    } else {
-      return HotelInformationModel.empty();
-    }
+    final json = jsonDecode(jsonString);
+    return HotelInformationModel.fromJson(json);
+  }
+
+  static Future<void> setCheckinCheckoutData(
+    List<Map<String, dynamic>> checkinCheckoutData,
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'checkinCheckoutData',
+      jsonEncode(checkinCheckoutData),
+    );
+  }
+
+  static Future<List<CheckinCheckoutDataModel>> getCheckinCheckoutData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('checkinCheckoutData') ?? "[]";
+    final List<dynamic> jsonList = jsonDecode(jsonString);
+    return jsonList
+        .map((jsonItem) => CheckinCheckoutDataModel.fromJson(jsonItem))
+        .toList();
   }
 
   static Future<void> setBaseCurrencyData(
@@ -79,13 +77,8 @@ class LocalStorageManager {
   static Future<BaseCurrency> getBaseCurrencyData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String jsonString = prefs.getString('baseCurrency') ?? "";
-    if (jsonString.isNotEmpty) {
-      final json = jsonDecode(jsonString);
-
-      return BaseCurrency.fromJson(json);
-    } else {
-      return BaseCurrency.empty();
-    }
+    final json = jsonDecode(jsonString);
+    return BaseCurrency.fromJson(json);
   }
 
   static Future<void> clearUserData() async {

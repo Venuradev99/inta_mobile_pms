@@ -67,7 +67,7 @@ class MaintenanceBlockCardWgt extends StatelessWidget {
                         Text(
                           'From ${block.fromDate} To ${block.toDate}',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.lightgrey),
+                              ?.copyWith(color: AppColors.darkgrey),
                         ),
                       ],
                     ),
@@ -79,7 +79,7 @@ class MaintenanceBlockCardWgt extends StatelessWidget {
 
               // Reason text
               Text(
-                block.reasonName,
+                'Reason: ${block.reasonName}',
                 style: Theme.of(context).textTheme.bodyMedium,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -88,25 +88,47 @@ class MaintenanceBlockCardWgt extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Footer Row (aligned to bottom right)
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.person_outline,
-                      color: AppColors.lightgrey,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${block.blockedBy} on ${block.blockedOn.substring(0,10)}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // LEFT: User
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.person_outline,
                         color: AppColors.lightgrey,
+                        size: 16,
                       ),
-                    ),
-                  ],
-                ),
+                      const SizedBox(width: 4),
+                      Text(
+                        block.blockedBy,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.lightgrey,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // RIGHT: Date
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        color: AppColors.lightgrey,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        block.blockedOn.substring(0, 10),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.lightgrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

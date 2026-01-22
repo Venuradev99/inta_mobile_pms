@@ -17,7 +17,11 @@ class UserApiService {
   get getVersion => version;
   get getIconPath => appIconPath;
 
-  Future<void> loginApi(String username, String password, String hotelId) async {
+  Future<void> loginApi(
+    String username,
+    String password,
+    String hotelId,
+  ) async {
     try {
       final loginUrl = '$baseUrl${AppResources.authentication}';
       final response = await http.post(
@@ -53,11 +57,13 @@ class UserApiService {
             loadSystemWorkingDateApi(),
             loadBaseCurrencyApi(),
             loadHotelInfoApi(),
+            loadCheckingCheckoutSettingsApi(),
           ]);
 
           final systemWorkingDate = responses[0];
           final baseCurrency = responses[1];
           final hotelInfo = responses[2];
+          final checkinCheckoutInfo = responses[3];
 
           if (systemWorkingDate["isSuccessful"]) {
             await LocalStorageManager.setSystemDate(
@@ -73,6 +79,10 @@ class UserApiService {
 
           if (hotelInfo["isSuccessful"]) {
             await LocalStorageManager.setHotelInfoData(hotelInfo["result"]);
+          }
+
+          if (checkinCheckoutInfo["isSuccessful"]) {
+            // await LocalStorageManager.setCheckinCheckoutData(checkinCheckoutInfo["result"]);
           }
 
           NavigationService().go(AppRoutes.dashboard);
@@ -187,6 +197,39 @@ class UserApiService {
       }
     } catch (e) {
       String msg = 'Error loading hotel information: $e';
+      MessageService().error(msg);
+      throw Exception(msg);
+    }
+  }
+
+  Future<Map<String, dynamic>> loadCheckingCheckoutSettingsApi() async {
+    try {
+      final token = await LocalStorageManager.getAccessToken();
+      final hotelId = await LocalStorageManager.getHotelId();
+      final url = AppResources.getReservationSettings;
+
+      if (token.isEmpty) throw Exception('Session key not available');
+      final headers = {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+        "hotelid": hotelId,
+        'requestedhotelid': (-1).toString(),
+      };
+
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        String msg = 'Failed to load checkin checkout information';
+        MessageService().error(msg);
+        throw Exception(msg);
+      }
+    } catch (e) {
+      String msg = 'Error loading checkin checkout information: $e';
       MessageService().error(msg);
       throw Exception(msg);
     }

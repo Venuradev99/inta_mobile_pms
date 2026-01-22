@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/Get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
@@ -20,7 +20,7 @@ class BlockRoomAuditTrail extends StatefulWidget {
 class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
   final _maintenanceBlockVm = Get.find<MaintenanceBlockVm>();
   bool isLoading = true;
-  List<MaintenanceBlockAuditTrail> blocks = [];
+  List<MaintenanceBlockAuditTrail> auditTrails = [];
 
   @override
   void initState() {
@@ -30,15 +30,14 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
       if (mounted) {
         await _maintenanceBlockVm.loadAuditTrails(widget.block!);
         setState(() {
-          blocks = _maintenanceBlockVm.audiTrailList.toList();
-          if (_maintenanceBlockVm.isBlockAuditTrailLoading.value == false) {
-            isLoading = false;
-          }
+          auditTrails = _maintenanceBlockVm.audiTrailList.toList();
+          isLoading =
+              _maintenanceBlockVm.isBlockAuditTrailLoading.value == true;
         });
       }
     });
   }
-  
+
   Widget _buildShimmerCard() {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
@@ -53,7 +52,7 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: 16, width: 100, color: Colors.grey),
+            Container(height: 16, width: 120, color: Colors.grey),
             const SizedBox(height: 8),
             Container(height: 14, width: double.infinity, color: Colors.grey),
             const SizedBox(height: 8),
@@ -64,8 +63,6 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
                 Container(height: 14, width: 60, color: Colors.grey),
               ],
             ),
-            const SizedBox(height: 8),
-            Container(height: 12, width: 120, color: Colors.grey),
           ],
         ),
       ),
@@ -77,11 +74,11 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Block Room',
+          'Block Room - Audit Trail',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.black,
-            fontWeight: FontWeight.w600,
-          ),
+                color: AppColors.black,
+                fontWeight: FontWeight.w600,
+              ),
         ),
         backgroundColor: AppColors.surface,
         elevation: 0,
@@ -94,13 +91,14 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
         padding: const EdgeInsets.all(16),
         child: isLoading
             ? ListView.builder(
-                itemCount: 4, // number of shimmer cards
-                itemBuilder: (context, index) => _buildShimmerCard(),
+                itemCount: 4,
+                itemBuilder: (_, __) => _buildShimmerCard(),
               )
             : ListView.builder(
-                itemCount: blocks.length,
+                itemCount: auditTrails.length,
                 itemBuilder: (context, index) {
-                  final block = blocks[index];
+                  final auditTrail = auditTrails[index];
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
@@ -119,51 +117,68 @@ class _BlockRoomAuditTrailState extends State<BlockRoomAuditTrail> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          /// Title (Transaction Type)
                           Text(
-                            block.name,
-                            style: Theme.of(context).textTheme.titleMedium
+                            auditTrail.transactionTypeName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
+
                           const SizedBox(height: 8),
+
+                          /// Description
                           Text(
-                            block.description,
+                            auditTrail.description.isNotEmpty
+                                ? auditTrail.description
+                                : '-',
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
+
                           const SizedBox(height: 8),
+
+                          /// User + Date Row
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(
-                                Icons.calendar_today,
-                                size: 14,
-                                color: Colors.grey,
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    auditTrail.userName,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                DateFormat(
-                                  'yyyy-MM-dd – kk:mm',
-                                ).format(block.sysDateCreated),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Icon(Icons.person, size: 14, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text(
-                                block.userName,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 14,
-                                ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.calendar_today,
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    DateFormat(
+                                      'yyyy-MM-dd - kk:mm a',
+                                    ).format(auditTrail.sysDateCreated),
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Transaction: ${block.transactionTypeName}',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[700]),
                           ),
                         ],
                       ),

@@ -176,6 +176,7 @@ class _DepartureListState extends State<DepartureList> {
               children: item.children!,
               totalAmount: item.totalAmount!,
               balanceAmount: item.balanceAmount!,
+              isGroupOwner: item.isGroupOwner,
               baseCurrencySymbol: item.baseCurrencySymbol,
               actionButton: SizedBox(
                 height: 32,

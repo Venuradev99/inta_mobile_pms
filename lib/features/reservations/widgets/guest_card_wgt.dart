@@ -23,6 +23,7 @@ class GuestCard extends StatelessWidget {
   final String? roomType;
   final String? room;
   final String? statusName;
+  final bool? isGroupOwner;
 
   const GuestCard({
     super.key,
@@ -45,6 +46,7 @@ class GuestCard extends StatelessWidget {
     this.roomType,
     this.baseCurrencySymbol,
     this.statusName,
+    this.isGroupOwner,
   });
 
   String formatCurrency(double? value) {
@@ -216,14 +218,26 @@ class GuestCard extends StatelessWidget {
                           Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  guestName,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.darkgrey,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      guestName,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.darkgrey,
+                                          ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    if (isGroupOwner ?? false)
+                                      Icon(
+                                        Icons.workspace_premium_rounded,
+                                        size: 20,
+                                        color: AppColors.darkgrey,
+                                      ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -250,7 +264,7 @@ class GuestCard extends StatelessWidget {
                               ),
                               const Spacer(),
                               Icon(
-                                Icons.brightness_2,
+                                Icons.brightness_3,
                                 size: 16,
                                 color: AppColors.darkgrey,
                               ),

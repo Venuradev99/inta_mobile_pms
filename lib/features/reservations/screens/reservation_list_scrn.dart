@@ -201,6 +201,7 @@ class _ReservationListState extends State<ReservationList> {
       totalAmount: item.totalAmount!,
       balanceAmount: item.balanceAmount!,
       baseCurrencySymbol: item.baseCurrencySymbol,
+      isGroupOwner: item.isGroupOwner,
       onTap: () => _showActions(context, item),
     );
   }

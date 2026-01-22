@@ -225,6 +225,17 @@ class ReservationService {
     }
   }
 
+   Future<Map<String, dynamic>> getTotalBalanceByBookingRoomIdApi(int bookingRoomId) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getTotalBalanceByBookingRoomId}/$bookingRoomId';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getFolioChargesApi(int folioId) async {
     try {
       final url =

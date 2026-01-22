@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
+import 'package:inta_mobile_pms/enums/wellknown_menu.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/hotel_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:inta_mobile_pms/services/user_menu_service.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -22,13 +24,36 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   final _dashboardVm = Get.find<DashboardVm>();
 
+  bool _showHouseKeeping = false;
+  bool _showReports = false;
+  bool _showReservations = false;
+
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      await _dashboardVm.loadBookingStaticData();
+      await _dashboardVm.getInitialData();
+
+      final houseKeepingAccess = await UserMenuService.checkMenuPrivilege(
+        WellknownMenuId.houseKeeping.id,
+      );
+      final reportsAccess = await UserMenuService.checkMenuPrivilege(
+        WellknownMenuId.reports.id,
+      );
+      final reservationsAccess = await UserMenuService.checkMenuPrivilege(
+        WellknownMenuId.newReservation.id,
+      );
+
       if (mounted) {
-        await _dashboardVm.loadBookingStaticData();
-        await _dashboardVm.getInitialData();
+        setState(() {
+          _showHouseKeeping = houseKeepingAccess;
+          _showReports = reportsAccess;
+          _showReservations = reservationsAccess;
+        });
       }
     });
   }
@@ -738,7 +763,7 @@ class _DashboardState extends State<Dashboard> {
                   context,
                   textTheme,
                   config,
-                  'Main Navigation',
+                  'Main Menu',
                 ),
                 _buildMenuTile(
                   context,
@@ -765,30 +790,32 @@ class _DashboardState extends State<Dashboard> {
                   () => context.push(AppRoutes.quickReservation),
                   config,
                 ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.calendar_month,
-                  'Reservation List',
-                  () => context.push(AppRoutes.reservationList),
-                  config,
-                ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.airplanemode_on,
-                  'Arrival List',
-                  () => context.push(AppRoutes.arrivalList),
-                  config,
-                ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.emoji_transportation_rounded,
-                  'Departure List',
-                  () => context.push(AppRoutes.departureList),
-                  config,
-                ),
+                if (_showReservations) ...[
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.calendar_month,
+                    'Reservation List',
+                    () => context.push(AppRoutes.reservationList),
+                    config,
+                  ),
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.airplanemode_on,
+                    'Arrival List',
+                    () => context.push(AppRoutes.arrivalList),
+                    config,
+                  ),
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.emoji_transportation_rounded,
+                    'Departure List',
+                    () => context.push(AppRoutes.departureList),
+                    config,
+                  ),
+                ],
                 // _buildMenuTile(
                 //   context,
                 //   textTheme,
@@ -797,107 +824,113 @@ class _DashboardState extends State<Dashboard> {
                 //   () => context.push(AppRoutes.ratesInventory),
                 //   config,
                 // ),
-                ExpansionTile(
-                  leading: Container(
-                    padding: EdgeInsets.all(
-                      ResponsiveConfig.scaleWidth(context, 8),
+                if (_showReports) ...[
+                  ExpansionTile(
+                    leading: Container(
+                      padding: EdgeInsets.all(
+                        ResponsiveConfig.scaleWidth(context, 8),
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(
+                          ResponsiveConfig.cardRadius(context) * 0.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.assessment,
+                        size: iconSize * 0.8,
+                        color: AppColors.primary.withOpacity(0.6),
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
+                    title: Text(
+                      'Reports',
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: ResponsiveConfig.responsiveFont(
+                          context,
+                          textTheme.bodyMedium?.fontSize ?? 14,
+                        ),
+                        color: AppColors.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    tilePadding: EdgeInsets.symmetric(
+                      horizontal: ResponsiveConfig.defaultPadding(context),
+                      vertical: ResponsiveConfig.scaleHeight(context, 2),
+                    ),
+                    childrenPadding: EdgeInsets.zero,
+                    backgroundColor: AppColors.primary.withOpacity(0.05),
+                    collapsedBackgroundColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
-                        ResponsiveConfig.cardRadius(context) * 0.5,
+                        ResponsiveConfig.cardRadius(context),
+                      ),
+                      side: BorderSide(
+                        color: AppColors.primary.withOpacity(0.2),
                       ),
                     ),
-                    child: Icon(
-                      Icons.assessment,
-                      size: iconSize * 0.8,
-                      color: AppColors.primary.withOpacity(0.6),
-                    ),
-                  ),
-                  title: Text(
-                    'Reports',
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: ResponsiveConfig.responsiveFont(
+                    initiallyExpanded: false,
+                    children: [
+                      _buildSubMenuTile(
                         context,
-                        textTheme.bodyMedium?.fontSize ?? 14,
+                        textTheme,
+                        Icons.nights_stay,
+                        'Night Audit Report',
+                        () => context.push(AppRoutes.nightAuditReport),
+                        config,
+                        // isActive: GoRouterState.of(context).location.contains(AppRoutes.nightAuditReport),
                       ),
-                      color: AppColors.onSurface.withOpacity(0.7),
-                    ),
+                      _buildSubMenuTile(
+                        context,
+                        textTheme,
+                        Icons.bar_chart,
+                        'Manager Report',
+                        () => context.push(AppRoutes.managerReport),
+                        config,
+                        // isActive: GoRouterState.of(context).location.contains(AppRoutes.managerReport),
+                      ),
+                    ],
                   ),
-                  tilePadding: EdgeInsets.symmetric(
-                    horizontal: ResponsiveConfig.defaultPadding(context),
-                    vertical: ResponsiveConfig.scaleHeight(context, 2),
+                ],
+                if (_showHouseKeeping) ...[
+                  _buildSectionHeader(
+                    context,
+                    textTheme,
+                    config,
+                    'Housekeeping',
                   ),
-                  childrenPadding: EdgeInsets.zero,
-                  backgroundColor: AppColors.primary.withOpacity(0.05),
-                  collapsedBackgroundColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(
-                      ResponsiveConfig.cardRadius(context),
-                    ),
-                    side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.tire_repair_sharp,
+                    'Maintenance Block',
+                    () => context.push(AppRoutes.maintenanceBlock),
+                    config,
                   ),
-                  initiallyExpanded: false,
-                  children: [
-                    _buildSubMenuTile(
-                      context,
-                      textTheme,
-                      Icons.nights_stay,
-                      'Night Audit Report',
-                      () => context.push(AppRoutes.nightAuditReport),
-                      config,
-                      // isActive: GoRouterState.of(context).location.contains(AppRoutes.nightAuditReport),
-                    ),
-                    _buildSubMenuTile(
-                      context,
-                      textTheme,
-                      Icons.bar_chart,
-                      'Manager Report',
-                      () => context.push(AppRoutes.managerReport),
-                      config,
-                      // isActive: GoRouterState.of(context).location.contains(AppRoutes.managerReport),
-                    ),
-                  ],
-                ),
-                Divider(
-                  height: 1,
-                  color: AppColors.onSurface,
-                  indent: ResponsiveConfig.defaultPadding(context),
-                  endIndent: ResponsiveConfig.defaultPadding(context),
-                ),
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.checklist,
+                    'Work Order List',
+                    () => context.push(AppRoutes.workOrderList),
+                    config,
+                  ),
+                  _buildMenuTile(
+                    context,
+                    textTheme,
+                    Icons.house,
+                    'House Status',
+                    () => context.push(AppRoutes.houseStatus),
+                    config,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: AppColors.onSurface,
+                    indent: ResponsiveConfig.defaultPadding(context),
+                    endIndent: ResponsiveConfig.defaultPadding(context),
+                  ),
+                ],
                 // Maintenance Section
-                _buildSectionHeader(context, textTheme, config, 'Housekeeping'),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.tire_repair_sharp,
-                  'Maintenance Block',
-                  () => context.push(AppRoutes.maintenanceBlock),
-                  config,
-                ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.checklist,
-                  'Work Order List',
-                  () => context.push(AppRoutes.workOrderList),
-                  config,
-                ),
-                _buildMenuTile(
-                  context,
-                  textTheme,
-                  Icons.house,
-                  'House Status',
-                  () => context.push(AppRoutes.houseStatus),
-                  config,
-                ),
-                Divider(
-                  height: 1,
-                  color: AppColors.onSurface,
-                  indent: ResponsiveConfig.defaultPadding(context),
-                  endIndent: ResponsiveConfig.defaultPadding(context),
-                ),
+
                 // Settings Section
                 _buildSectionHeader(context, textTheme, config, 'Settings'),
                 _buildMenuTile(

@@ -181,6 +181,7 @@ class _ArrivalListState extends State<ArrivalList> {
       totalAmount: item.totalAmount!,
       balanceAmount: item.balanceAmount!,
       baseCurrencySymbol: item.baseCurrencySymbol,
+      isGroupOwner: item.isGroupOwner,
       actionButton: const SizedBox(height: 32),
       onTap: () => _showActions(context, item),
     );

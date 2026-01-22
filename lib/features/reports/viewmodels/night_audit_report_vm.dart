@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 class NightAuditReportVm extends GetxController {
   final ReportsService _reportsService;
   var isLoading = true.obs;
+  var isReportLoading = false.obs;
   final hotelList = <HotelItem>[].obs;
   final currencyList = <CurrencyItem>[].obs;
   final systemWorkingDate = DateTime.now().obs;
@@ -137,7 +138,7 @@ class NightAuditReportVm extends GetxController {
     int currency,
   ) async {
     try {
-      isLoading.value = true;
+      isReportLoading.value = true;
       final payload = {
         "Currency": currency,
         "ReportId": 163,
@@ -172,7 +173,7 @@ class NightAuditReportVm extends GetxController {
       MessageService().error('Error gettings night audit report data $e');
       throw Exception('Error gettings night audit report data');
     } finally {
-      isLoading.value = false;
+      isReportLoading.value = false;
     }
   }
 
@@ -192,6 +193,22 @@ class NightAuditReportVm extends GetxController {
     } catch (e) {
       return isoString;
     }
+  }
+
+  resetTableData() {
+    checkedOutRecodes.clear();
+    complimentaryRecodes.clear();
+    roomStatusRecodes.clear();
+    dailySalesRecodes.clear();
+    miscellaneousRecodes.clear();
+    paxAnalysisRecodes.clear();
+    paxStatusRecodes.clear();
+    receiptDetailsRecodes.clear();
+    arrangedReceptDetailsRecodes.clear();
+    receiptSummaryPayModeWiseRecodes.clear();
+    receiptSummaryUserWiseRecodes.clear();
+    roomCharges.clear();
+    arrangedSummaryRecodes.clear();
   }
 
   arrangeComplimentaryRecodes(List<dynamic> data) {
@@ -235,7 +252,7 @@ class NightAuditReportVm extends GetxController {
     final Map<String, double> totals = {
       "adjustment": 0.0,
       "discount": 0.0,
-       "roundOffAmount": 0.0,
+      "roundOffAmount": 0.0,
       "extraCharges": 0.0,
       "extraServiceCharges": 0.0,
       "extraTax": 0.0,

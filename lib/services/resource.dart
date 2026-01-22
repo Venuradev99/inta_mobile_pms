@@ -93,6 +93,8 @@ class AppResources {
       '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllBookingRemarks =
       '$bookingRemarks/GetAll?BookingRoomId';
+      static const String getTotalBalanceByBookingRoomId = '$payment/GetTotalBalanceByBookingRoomId';
+      static const String getReservationSettings = 'reservationSettings';
 
   //Housekeeping
   static const String getAllWorkOrders = '$workorder/Search';

@@ -12,6 +12,7 @@ import 'package:inta_mobile_pms/features/reservations/models/folio_tax_item.dart
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/identity_type_response..dart';
 import 'package:inta_mobile_pms/features/reservations/models/nationality_response.dart';
+import 'package:inta_mobile_pms/features/reservations/models/payment_summary.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_search_request_model.dart';
 import 'package:inta_mobile_pms/features/reservations/models/room_charges.dart';
 import 'package:inta_mobile_pms/features/reservations/models/sharer_info.dart';
@@ -39,6 +40,8 @@ class ReservationVm extends GetxController {
 
   var bookingRemarksList = <BookingRemark>[].obs;
   var isBookingRemarksLoading = true.obs;
+
+  var paymentSummary = Rxn<PaymentSummary>();
 
   final statusList = [].obs;
   final allGuestDetails = Rx<GuestItem?>(null);
@@ -214,6 +217,7 @@ class ReservationVm extends GetxController {
             totalAmount: (item['totalAmount'] ?? 0).toDouble(),
             balanceAmount: (item['balance'] ?? 0).toDouble(),
             room: item['roomName'] ?? '',
+            isGroupOwner: item['isGroupOwner'] ?? false,
             colorCode: getReservationColorCode(item['status']),
             statusName: getStatusName(item['status']),
             baseCurrencySymbol: baseCurrencyData.code,
@@ -587,7 +591,9 @@ class ReservationVm extends GetxController {
 
   Future<void> loadAllFolios(int bookingRoomId) async {
     try {
-      final foliosResponse = await _reservationService.getFoliosApi(bookingRoomId);
+      final foliosResponse = await _reservationService.getFoliosApi(
+        bookingRoomId,
+      );
 
       if (foliosResponse["isSuccessful"] == true) {
         final result = foliosResponse["result"];
@@ -608,6 +614,25 @@ class ReservationVm extends GetxController {
       }
     } catch (e) {
       throw Exception('Error loading folios: $e');
+    } finally {}
+  }
+
+  Future<void> getTotalBalance(int bookingRoomId) async {
+    try {
+      final paymentResponse = await _reservationService
+          .getTotalBalanceByBookingRoomIdApi(bookingRoomId);
+
+      if (paymentResponse["isSuccessful"] == true) {
+        final result = paymentResponse["result"];
+        paymentSummary.value = PaymentSummary.fromJson(result);
+
+      } else {
+        final msg =
+            paymentResponse["errors"][0] ?? 'Error Loading Payment Summary!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error Loading Payment Summary: $e');
     } finally {}
   }
 
@@ -649,7 +674,7 @@ class ReservationVm extends GetxController {
                     DateTime.tryParse(a.sysDateCreated) ?? DateTime(0);
                 DateTime dateB =
                     DateTime.tryParse(b.sysDateCreated) ?? DateTime(0);
-                return dateB.compareTo(dateA); 
+                return dateB.compareTo(dateA);
               });
         return auditTrailList;
       } else {
@@ -687,14 +712,30 @@ class ReservationVm extends GetxController {
     }
   }
 
-  Future<void> getAllGuestData(String bookingRoomId) async {
+  Future<void> getAllGuestData(String _bookingRoomId) async {
     try {
+      final bookingRoomId = int.parse(_bookingRoomId);
       isAllGuestDataLoading.value = true;
+      await loadDataForGuest();
+      await loadBookingData(bookingRoomId);
+      await loadAllFolios(bookingRoomId);
+      await loadAllRemarks(bookingRoomId);
+      await getTotalBalance(bookingRoomId);
+    } catch (e) {
+      MessageService().error('Error getting all Guest data: $e');
+      throw Exception('Error getting all Guest data: $e');
+    } finally {
+      isAllGuestDataLoading.value = false;
+    }
+  }
+
+  Future<void> loadBookingData(int bookingRoomId) async {
+    try {
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       baseCurrencyCode.value = baseCurrencyData.code;
-      await loadDataForGuest();
+
       final bookingResponse = await _reservationService.getByBookingRoomIdApi(
-        int.parse(bookingRoomId),
+        bookingRoomId,
       );
       if (bookingResponse["isSuccessful"] == true) {
         final result = bookingResponse["result"];
@@ -772,7 +813,7 @@ class ReservationVm extends GetxController {
           titleId: result["guest"]["titleId"] ?? 0,
           resId: result["bookingRoom"]["reservatioNumber"].toString(),
           folioId: result["bookingRoom"]["folioId"].toString(),
-          conversionRate:  result["bookingRoom"]["conversionRate"] ?? 0,
+          conversionRate: result["bookingRoom"]["conversionRate"] ?? 0,
           folioNumber: result["bookingRoom"]["folioNumber"].toString(),
           startDate: getFirstTenCharacters(
             result["bookingRoom"]["arrivalDate"],
@@ -904,10 +945,7 @@ class ReservationVm extends GetxController {
         );
       }
     } catch (e) {
-      MessageService().error('Error getting all Guest data: $e');
-      throw Exception('Error getting all Guest data: $e');
-    } finally {
-      isAllGuestDataLoading.value = false;
+      throw Exception('Error in loading booking Data: $e');
     }
   }
 
@@ -1115,17 +1153,18 @@ class ReservationVm extends GetxController {
     return isUnAssignRoom;
   }
 
-String getPickupDropOffModeName(int modeId){
-   try {
-      
-      if(modeId == 0){
+  String getPickupDropOffModeName(int modeId) {
+    try {
+      if (modeId == 0) {
         return '-';
-      }else{
-        final mode = transportationModes.toList().firstWhere((mode) => mode.transportationModeId == modeId);
+      } else {
+        final mode = transportationModes.toList().firstWhere(
+          (mode) => mode.transportationModeId == modeId,
+        );
         return mode.name;
       }
     } catch (e) {
       throw Exception('Error Getting transportation mode name: $e');
     }
-}
+  }
 }

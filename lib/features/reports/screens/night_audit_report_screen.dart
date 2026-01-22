@@ -54,6 +54,7 @@ class _ReportWidgetState extends State<NightAuditReport>
   @override
   void dispose() {
     _tabController.dispose();
+    _nightAuditReportVm.resetTableData();
     for (var controller in _horizontalControllers) {
       controller.dispose();
     }
@@ -275,7 +276,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                     spacing: 24,
                     runSpacing: 16,
                     alignment: WrapAlignment.spaceBetween,
-                     children: [
+                    children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -331,11 +332,15 @@ class _ReportWidgetState extends State<NightAuditReport>
                               return _currencyList.map<Widget>((
                                 CurrencyItem item,
                               ) {
-                                return Text(
-                                  item.code,
-                                  style: TextStyle(
-                                    color: AppColors.onPrimary,
-                                    fontSize: 14, // match other texts
+                                return Align(
+                                  alignment: Alignment
+                                      .centerLeft, // or center if you want
+                                  child: Text(
+                                    item.code,
+                                    style: TextStyle(
+                                      color: AppColors.onPrimary,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 );
                               }).toList();
@@ -388,11 +393,15 @@ class _ReportWidgetState extends State<NightAuditReport>
                             iconEnabledColor: AppColors.onPrimary,
                             selectedItemBuilder: (BuildContext context) {
                               return _hotelList.map<Widget>((HotelItem item) {
-                                return Text(
-                                  item.hotelName,
-                                  style: TextStyle(
-                                    color: AppColors.onPrimary,
-                                    fontSize: 14,
+                                return Align(
+                                  alignment: Alignment
+                                      .centerLeft, // or center if you want
+                                  child: Text(
+                                    item.hotelName,
+                                    style: TextStyle(
+                                      color: AppColors.onPrimary,
+                                      fontSize: 14,
+                                    ),
                                   ),
                                 );
                               }).toList();
@@ -420,7 +429,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                         ],
                       ),
                     ],
-                 ),
+                  ),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   //   children: [
@@ -568,7 +577,7 @@ class _ReportWidgetState extends State<NightAuditReport>
                   //       ],
                   //     ),
                   //   ],
-                 
+
                   // ),
                   const SizedBox(height: 16),
                   Row(
@@ -596,7 +605,6 @@ class _ReportWidgetState extends State<NightAuditReport>
                       ),
                     ],
                   ),
-              
                 ],
               ),
             ),
@@ -624,7 +632,7 @@ class _ReportWidgetState extends State<NightAuditReport>
             ),
           ),
           Obx(() {
-            if (_nightAuditReportVm.isLoading.value) {
+            if (_nightAuditReportVm.isReportLoading.value) {
               return Expanded(
                 child: Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,

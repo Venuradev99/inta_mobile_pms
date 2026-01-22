@@ -3,11 +3,8 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_audit_trail.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order_audit_trail_item.dart';
-import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
@@ -122,15 +119,12 @@ class WorkOrderAuditTrailState extends State<WorkOrderAuditTrail> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Name
                           Text(
-                            autitTrail.name,
+                           autitTrail.transactionTypeName,
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 8),
-
-                          // Description
                           Text(
                             autitTrail.description.isNotEmpty
                                 ? autitTrail.description
@@ -138,22 +132,19 @@ class WorkOrderAuditTrailState extends State<WorkOrderAuditTrail> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
 
-                          const SizedBox(height: 16),
+                          // const SizedBox(height: 16),
 
-                          // Transaction type above bottom row
-                          Text(
-                            'Transaction: ${autitTrail.transactionTypeName}',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: Colors.grey[700]),
-                          ),
+                          // Text(
+                          //   'Transaction: ${autitTrail.transactionTypeName}',
+                          //   style: Theme.of(context).textTheme.bodySmall
+                          //       ?.copyWith(color: Colors.grey[700]),
+                          // ),
 
                           const SizedBox(height: 8),
 
-                          // Bottom Row: User left, Date right
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              // User
                               Row(
                                 children: [
                                   Icon(
@@ -171,8 +162,6 @@ class WorkOrderAuditTrailState extends State<WorkOrderAuditTrail> {
                                   ),
                                 ],
                               ),
-
-                              // Date
                               Row(
                                 children: [
                                   Icon(
@@ -183,7 +172,7 @@ class WorkOrderAuditTrailState extends State<WorkOrderAuditTrail> {
                                   const SizedBox(width: 4),
                                   Text(
                                     DateFormat(
-                                      'yyyy-MM-dd – kk:mm',
+                                      'yyyy-MM-dd - kk:mm a',
                                     ).format(autitTrail.sysDateCreated),
                                     style: TextStyle(
                                       color: Colors.grey[600],
