@@ -22,7 +22,7 @@ class NoShowReservationVm extends GetxController {
         "NewBookingOwnerBookingRoomId": 0,
         "transactionType": 7,
       };
-      final response = await _reservationListService.updateBooking(request);
+      final response = await _reservationListService.updateBookingApi(request);
       if (response["isSuccessful"] == true) {
         final msg = response["message"].isNotEmpty
             ? response["message"]

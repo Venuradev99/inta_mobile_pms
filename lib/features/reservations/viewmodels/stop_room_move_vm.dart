@@ -12,7 +12,7 @@ class StopRoomMoveVm extends GetxController {
 
   Future<void> loadInitialData() async {
     try {
-      final response = await _reservationService.getStopRoomMoveReasons();
+      final response = await _reservationService.getStopRoomMoveReasonsApi();
       if (response["isSuccessful"] == true) {
         final result = List<Map<String, dynamic>>.from(
           response["result"] as List,
@@ -43,7 +43,7 @@ class StopRoomMoveVm extends GetxController {
         "reasonId": 0,
         "shortCode": "",
       };
-      final response = await _reservationService.saveReason(requestBody);
+      final response = await _reservationService.saveReasonApi(requestBody);
       if (response["isSuccessful"] == true) {
          NavigationService().back();
         String msg = response["message"] ?? 'Stop room move successfully!';
@@ -69,7 +69,7 @@ class StopRoomMoveVm extends GetxController {
         ],
         "IsStopRoomMove": true,
       };
-      final response = await _reservationService.updateBooking(requestBody);
+      final response = await _reservationService.updateBookingApi(requestBody);
       return response;
     } catch (e) {
       throw Exception("Error while stop moving room: $e");

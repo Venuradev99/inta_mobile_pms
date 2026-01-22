@@ -23,12 +23,12 @@ class AmendStayVm extends GetxController {
   ) async {
     try {
       final response = await Future.wait([
-        _reservationListService.getAmendStayData(
+        _reservationListService.getAmendStayDataApi(
           roomId,
           bookingRoomId,
           amendCheckinDate,
         ),
-        _reservationListService.getFolioPayments(folioId),
+        _reservationListService.getFolioPaymentsApi(folioId),
       ]);
       final amendStayResponse = response[0];
       final folioDetailsResponse = response[1];
@@ -119,7 +119,7 @@ class AmendStayVm extends GetxController {
         "currentUserId": int.tryParse(userId)!,
         "isAmendStay": true,
       };
-      final response = await _reservationListService.updateBooking(payload);
+      final response = await _reservationListService.updateBookingApi(payload);
      if (response["isSuccessful"] == true) {
        MessageService().success(response["message"] ?? 'Amend stayed Successfully!');
     } else {

@@ -10,6 +10,7 @@ import 'package:inta_mobile_pms/features/dashboard/viewmodels/quick_reservation_
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/house_status_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/maintenance_block_vm.dart';
 import 'package:inta_mobile_pms/features/housekeeping/viewmodels/work_order_list_vm.dart';
+import 'package:inta_mobile_pms/features/login/viewmodels/login_vm.dart';
 import 'package:inta_mobile_pms/features/reports/viewmodels/manager_report_vm.dart';
 import 'package:inta_mobile_pms/features/reports/viewmodels/night_audit_report_vm.dart';
 import 'package:inta_mobile_pms/features/reservations/viewmodels/amend_stay_vm.dart';
@@ -88,6 +89,7 @@ void main() async {
       Get.find<ReservationService>(),
     ),
   );
+  Get.put<LoginVm>(LoginVm(Get.find<UserApiService>()));
   Get.put<ReservationVm>(ReservationVm(Get.find<ReservationService>()));
   Get.put<VoidReservationVm>(VoidReservationVm(Get.find<ReservationService>()));
   Get.put<StopRoomMoveVm>(StopRoomMoveVm(Get.find<ReservationService>()));

@@ -36,11 +36,11 @@ class EditGuestDetailsVm extends GetxController {
   Future<void> loadGuestDetails(GuestItem guestItem) async {
     try {
       final response = await Future.wait([
-        _reservationListService.getAllNationality(),
-        _reservationListService.getAllCountries(),
-        _reservationListService.getAllTitle(),
-        _reservationListService.getAllIdentityTypes(),
-        _reservationListService.getAllVipStatus(),
+        _reservationListService.getAllNationalityApi(),
+        _reservationListService.getAllCountriesApi(),
+        _reservationListService.getAllTitleApi(),
+        _reservationListService.getAllIdentityTypesApi(),
+        _reservationListService.getAllVipStatusApi(),
       ]);
 
       final nationalityResponse = response[0];
@@ -206,7 +206,7 @@ class EditGuestDetailsVm extends GetxController {
   Future<void> updateGuestDetails(UpdateGuestPayload payload) async {
     try {
       final saveData = payload.toJson();
-      final response = await _reservationListService.updateGuests(
+      final response = await _reservationListService.updateGuestsApi(
         saveData,
         payload.guestId!,
       );

@@ -89,8 +89,8 @@ class ManagerReportVm extends GetxController {
       systemWorkingDate.value = DateTime.parse(sysDate);
 
       final response = await Future.wait([
-        _reportsService.getAllHotel(),
-        _reportsService.getCurrencies(),
+        _reportsService.getAllHotelApi(),
+        _reportsService.getCurrenciesApi(),
       ]);
 
       final hotelResponse = response[0];
@@ -438,7 +438,7 @@ class ManagerReportVm extends GetxController {
             .toString(),
       ).toJson();
 
-      final response = await _reportsService.getManagerReport(payload);
+      final response = await _reportsService.getManagerReportApi(payload);
 
       if (response["isSuccessful"] == true) {
         receivedHotels.value = (response["result"]["reportData"] as List)

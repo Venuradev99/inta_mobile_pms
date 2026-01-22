@@ -33,8 +33,8 @@ class HouseStatusVm extends GetxController {
       isLoading.value = true;
       houseKeepingStatusList.clear();
       final responses = await Future.wait([
-        _houseKeepingServices.getAllHouseKeepingStatus(),
-        _houseKeepingServices.getHouseKeepers(),
+        _houseKeepingServices.getAllHouseKeepingStatusApi(),
+        _houseKeepingServices.getHouseKeepersApi(),
       ]);
       final houseKeepingStatus = responses[0];
       final houseKeepingers = responses[1];
@@ -76,7 +76,7 @@ class HouseStatusVm extends GetxController {
 
       roomList.clear();
       final roomResult = await _houseKeepingServices
-          .getAllRoomsForHouseStatus();
+          .getAllRoomsForHouseStatusApi();
       if (roomResult["isSuccessful"] == true) {
         final result = roomResult["result"]["recordSet"];
         for (final item in result) {
@@ -126,7 +126,7 @@ class HouseStatusVm extends GetxController {
         operationType: 7,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         NavigationService().back();
@@ -158,7 +158,7 @@ class HouseStatusVm extends GetxController {
         operationType: 6,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         NavigationService().back();
@@ -191,7 +191,7 @@ class HouseStatusVm extends GetxController {
         operationType: 6,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         MessageService().success('Remark cleared successfully.');
@@ -218,7 +218,7 @@ class HouseStatusVm extends GetxController {
         operationType: 7,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         MessageService().success(
@@ -247,7 +247,7 @@ class HouseStatusVm extends GetxController {
         operationType: 6,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         MessageService().success(
@@ -276,7 +276,7 @@ class HouseStatusVm extends GetxController {
         operationType: 5,
       ).toJson();
 
-      final response = await _houseKeepingServices.updateHouseStatus(payload);
+      final response = await _houseKeepingServices.updateHouseStatusApi(payload);
 
       if (response["isSuccessful"] == true) {
         MessageService().success('Status updated successfully.');

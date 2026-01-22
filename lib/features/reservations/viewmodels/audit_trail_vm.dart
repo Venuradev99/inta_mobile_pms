@@ -15,7 +15,7 @@ class AuditTrailVm extends GetxController {
   Future<List<AuditTrailResponse>> loadAuditTrails(GuestItem guestItem) async {
     try {
       isLoading.value = true;
-      final response = await _reservationListService.getAuditTrial(
+      final response = await _reservationListService.getAuditTrialApi(
         guestItem.bookingId!,
         int.tryParse(guestItem.bookingRoomId.toString())!,
         guestItem.masterFolioBookingTransId!,

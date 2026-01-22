@@ -64,11 +64,11 @@ class MaintenanceBlockVm extends GetxController {
         startIndex: 0,
       ).toJson();
       final response = await Future.wait([
-        _houseKeepingService.getAllMaintenanceblock(payload),
-        _houseKeepingService.getAllRooms(),
-        _houseKeepingService.getAllBlockRoomReasons(),
+        _houseKeepingService.getAllMaintenanceblockApi(payload),
+        _houseKeepingService.getAllRoomsApi(),
+        _houseKeepingService.getAllBlockRoomReasonsApi(),
         _houseKeepingService
-            .getAllRoomTypes(), // Assuming this method exists in your service; implement it similarly to getAllRooms
+            .getAllRoomTypesApi(), // Assuming this method exists in your service; implement it similarly to getAllRooms
       ]);
       final maintenanceblockResponse = response[0];
       final roomResponse = response[1];
@@ -176,7 +176,7 @@ class MaintenanceBlockVm extends GetxController {
       final isRoom = true;
       final date = DateTime.now();
 
-      final response = await _houseKeepingService.getAllHouseKeepingAuditTrail(
+      final response = await _houseKeepingService.getAllHouseKeepingAuditTrailApi(
         id,
         type,
         isRoom,
@@ -238,7 +238,7 @@ class MaintenanceBlockVm extends GetxController {
           ),
         ],
       ).toJson();
-      final response = await _houseKeepingService.unblockRoom(
+      final response = await _houseKeepingService.unblockRoomApi(
         payload,
         block.maintenanceBlockId,
       );
@@ -270,7 +270,7 @@ class MaintenanceBlockVm extends GetxController {
         reason: reason?.reasonId ?? 0,
         roomIdList: roomIdList,
       ).toJson();
-      final response = await _houseKeepingService.saveMaintenanceblock(payload);
+      final response = await _houseKeepingService.saveMaintenanceblockApi(payload);
       return response;
     } catch (e) {
       throw Exception('Error while saving maintenance block: $e');

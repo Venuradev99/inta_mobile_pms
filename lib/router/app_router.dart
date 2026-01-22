@@ -9,7 +9,7 @@ import 'package:inta_mobile_pms/features/housekeeping/screens/post_note.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/view_work_order.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
-import 'package:inta_mobile_pms/features/login/login_page.dart';
+import 'package:inta_mobile_pms/features/login/screens/login_page.dart';
 import 'package:inta_mobile_pms/features/reports/screens/night_audit_report_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';

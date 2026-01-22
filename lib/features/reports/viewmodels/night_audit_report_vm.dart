@@ -84,8 +84,8 @@ class NightAuditReportVm extends GetxController {
       systemWorkingDate.value = DateTime.parse(sysDate);
 
       final response = await Future.wait([
-        _reportsService.getAllHotel(),
-        _reportsService.getCurrencies(),
+        _reportsService.getAllHotelApi(),
+        _reportsService.getCurrenciesApi(),
       ]);
 
       final hotelResponse = response[0];
@@ -144,7 +144,7 @@ class NightAuditReportVm extends GetxController {
         "SelectedDate": DateFormat('yyyy-MM-dd').format(date).toString(),
         "hotelIdsList": hotel.toString(),
       };
-      final response = await _reportsService.getNightAuditReport(payload);
+      final response = await _reportsService.getNightAuditReportApi(payload);
       if (response["isSuccessful"] == true) {
         final result = response["result"]["reportData"];
 

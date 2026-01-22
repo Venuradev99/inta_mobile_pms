@@ -17,7 +17,7 @@ class ChangeReservationTypeVm extends GetxController {
 
   Future<void> loadAllReservationTypes() async {
     try {
-      final response = await _reservationListService.getAllreservationTypes();
+      final response = await _reservationListService.getAllreservationTypesApi();
       if (response["isSuccessful"] == true) {
         final result = List<Map<String, dynamic>>.from(
           response["result"]["recordSet"] as List,
@@ -101,7 +101,7 @@ class ChangeReservationTypeVm extends GetxController {
         },
       };
 
-      final response = await _reservationListService.saveOtherInformation(
+      final response = await _reservationListService.saveOtherInformationApi(
         payload,
       );
        NavigationService().back();

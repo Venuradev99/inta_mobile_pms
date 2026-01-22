@@ -17,7 +17,7 @@ class UserApiService {
   get getVersion => version;
   get getIconPath => appIconPath;
 
-  Future<void> login(String username, String password, String hotelId) async {
+  Future<void> loginApi(String username, String password, String hotelId) async {
     try {
       final loginUrl = '$baseUrl${AppResources.authentication}';
       final response = await http.post(
@@ -50,9 +50,9 @@ class UserApiService {
           );
           await LocalStorageManager.setHotelId(hotelId);
           final responses = await Future.wait([
-            loadSystemWorkingDate(),
-            loadBaseCurrency(),
-            loadHotelInfo(),
+            loadSystemWorkingDateApi(),
+            loadBaseCurrencyApi(),
+            loadHotelInfoApi(),
           ]);
 
           final systemWorkingDate = responses[0];
@@ -90,7 +90,7 @@ class UserApiService {
     }
   }
 
-  Future<Map<String, dynamic>> loadSystemWorkingDate() async {
+  Future<Map<String, dynamic>> loadSystemWorkingDateApi() async {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
@@ -125,7 +125,7 @@ class UserApiService {
     }
   }
 
-  Future<Map<String, dynamic>> loadBaseCurrency() async {
+  Future<Map<String, dynamic>> loadBaseCurrencyApi() async {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
@@ -159,7 +159,7 @@ class UserApiService {
     }
   }
 
-  Future<Map<String, dynamic>> loadHotelInfo() async {
+  Future<Map<String, dynamic>> loadHotelInfoApi() async {
     try {
       final token = await LocalStorageManager.getAccessToken();
       final hotelId = await LocalStorageManager.getHotelId();
@@ -192,14 +192,14 @@ class UserApiService {
     }
   }
 
-  Future<void> changeProperty(int hotelId) async {
+  Future<void> changePropertyApi(int hotelId) async {
     try {
       await LocalStorageManager.setHotelId(hotelId.toString());
 
       final systemInfoResponse = await Future.wait([
-        loadSystemWorkingDate(),
-        loadBaseCurrency(),
-        loadHotelInfo(),
+        loadSystemWorkingDateApi(),
+        loadBaseCurrencyApi(),
+        loadHotelInfoApi(),
       ]);
 
       final systemWorkingDate = systemInfoResponse[0];
@@ -226,7 +226,7 @@ class UserApiService {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logoutApi() async {
     try {
       await LocalStorageManager.clearUserData();
       NavigationService().go(AppRoutes.login);

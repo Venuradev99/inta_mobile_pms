@@ -7,7 +7,7 @@ class HouseKeepingService {
 
   HouseKeepingService(this._dataAccess, this._appResources);
 
-  Future<Map<String, dynamic>> getAllWorkOrders(
+  Future<Map<String, dynamic>> getAllWorkOrdersApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -19,7 +19,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> saveNewWorkOrder(
+  Future<Map<String, dynamic>> saveNewWorkOrderApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -31,7 +31,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getWorkOrderStatus() async {
+  Future<Map<String, dynamic>> getWorkOrderStatusApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getWorkOrderStatus}';
       final response = await _dataAccess.get(url);
@@ -41,7 +41,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getWorkOrderCategories() async {
+  Future<Map<String, dynamic>> getWorkOrderCategoriesApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getWorkOrderCategories}';
@@ -52,7 +52,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getWellKnownPriorities() async {
+  Future<Map<String, dynamic>> getWellKnownPrioritiesApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getWellKnownPriorities}';
@@ -63,7 +63,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getHouseKeepers() async {
+  Future<Map<String, dynamic>> getHouseKeepersApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getHouseKeepers}';
       final response = await _dataAccess.get(url);
@@ -73,7 +73,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> updateHouseStatus(
+  Future<Map<String, dynamic>> updateHouseStatusApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -85,7 +85,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllHouseKeepingAuditTrail(
+  Future<Map<String, dynamic>> getAllHouseKeepingAuditTrailApi(
     int id,
     int type,
     bool isRoom,
@@ -101,7 +101,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomsForHouseStatus() async {
+  Future<Map<String, dynamic>> getAllRoomsForHouseStatusApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllRoomsForHouseStatus}';
@@ -112,7 +112,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getMaintenanceBlockById(int id) async {
+  Future<Map<String, dynamic>> getMaintenanceBlockByIdApi(int id) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getMaintenanceBlockById}/${id}';
@@ -123,7 +123,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> unblockMaintenanceBlock(
+  Future<Map<String, dynamic>> unblockMaintenanceBlockApi(
     int maintenanceBlockId,
     int currentUserId,
   ) async {
@@ -137,7 +137,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getReasons() async {
+  Future<Map<String, dynamic>> getReasonsApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getReasons}';
       final response = await _dataAccess.get(url);
@@ -147,7 +147,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllBlockRoomReasons() async {
+  Future<Map<String, dynamic>> getAllBlockRoomReasonsApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllBlockRoomReasons}';
@@ -158,7 +158,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> saveMaintenanceblock(
+  Future<Map<String, dynamic>> saveMaintenanceblockApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -171,7 +171,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> checkUserPrivilege(
+  Future<Map<String, dynamic>> checkUserPrivilegeApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -183,7 +183,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllHouseKeepingStatus() async {
+  Future<Map<String, dynamic>> getAllHouseKeepingStatusApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllHouseKeepingStatus}';
@@ -194,7 +194,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomTypes() async {
+  Future<Map<String, dynamic>> getAllRoomTypesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
       final response = await _dataAccess.get(url);
@@ -204,7 +204,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRooms() async {
+  Future<Map<String, dynamic>> getAllRoomsApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllRooms}';
       final response = await _dataAccess.get(url);
@@ -214,7 +214,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> unblockRoom(
+  Future<Map<String, dynamic>> unblockRoomApi(
     Map<String, dynamic> body,
     int maintenanceblockRoomId,
   ) async {
@@ -228,7 +228,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllMaintenanceblock(
+  Future<Map<String, dynamic>> getAllMaintenanceblockApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -241,7 +241,7 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> updatePostNote(
+  Future<Map<String, dynamic>> updatePostNoteApi(
     Map<String, dynamic> body,
     int workOrderId,
   ) async {

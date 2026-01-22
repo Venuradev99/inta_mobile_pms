@@ -13,7 +13,7 @@ class AppInitService extends GetxService {
 
   Future<AppInitService> init() async {
     try {
-      final responses = await Future.wait([loadSystemInformation()]);
+      final responses = await Future.wait([loadSystemInformationApi()]);
       final systemInfo = responses[0];
 
       if (systemInfo["isSuccessful"]) {
@@ -27,7 +27,7 @@ class AppInitService extends GetxService {
     return this;
   }
 
-  Future<Map<String, dynamic>> loadSystemInformation() async {
+  Future<Map<String, dynamic>> loadSystemInformationApi() async {
     try {
       // final token = await LocalStorageManager.getAccessToken();
       // final hotelId = await LocalStorageManager.getHotelId();

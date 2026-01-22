@@ -10,7 +10,7 @@ class ReservationService {
 
   ReservationService(this._dataAccess, this._appResources);
 
-  Future<Map<String, dynamic>> getAllReservationList(
+  Future<Map<String, dynamic>> getAllReservationListApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -23,7 +23,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomTypes() async {
+  Future<Map<String, dynamic>> getAllRoomTypesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
       final response = await _dataAccess.get(url);
@@ -33,7 +33,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> transportationModes() async {
+  Future<Map<String, dynamic>> transportationModesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.transportationModes}';
       final response = await _dataAccess.get(url);
@@ -43,7 +43,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllBusinessCategory() async {
+  Future<Map<String, dynamic>> getAllBusinessCategoryApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllBusinessCategory}';
@@ -54,7 +54,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAvailableRooms(
+  Future<Map<String, dynamic>> getAvailableRoomsApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -66,7 +66,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllreservationTypes() async {
+  Future<Map<String, dynamic>> getAllreservationTypesApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllreservationTypes}';
@@ -77,7 +77,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllroomstatus() async {
+  Future<Map<String, dynamic>> getAllroomstatusApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllroomstatus}';
       final response = await _dataAccess.get(url);
@@ -87,7 +87,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllbusinessSources() async {
+  Future<Map<String, dynamic>> getAllbusinessSourcesApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllbusinessSources}';
@@ -98,7 +98,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getByBookingRoomId(int bookingRoomId) async {
+  Future<Map<String, dynamic>> getByBookingRoomIdApi(int bookingRoomId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getByBookingRoomId}/$bookingRoomId';
@@ -109,7 +109,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getCancellationReasons() async {
+  Future<Map<String, dynamic>> getCancellationReasonsApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getCancellationReasons}';
@@ -120,7 +120,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getNoShowReasons() async {
+  Future<Map<String, dynamic>> getNoShowReasonsApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getNoShowReasons}';
       final response = await _dataAccess.get(url);
@@ -130,7 +130,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getVoidReasons() async {
+  Future<Map<String, dynamic>> getVoidReasonsApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getVoidReasons}';
       final response = await _dataAccess.get(url);
@@ -140,7 +140,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getStopRoomMoveReasons() async {
+  Future<Map<String, dynamic>> getStopRoomMoveReasonsApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getStopRoomMoveReasons}';
@@ -151,7 +151,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAuditTrial(
+  Future<Map<String, dynamic>> getAuditTrialApi(
     int bookingId,
     int bookingRoomId,
     int masterFolioBookingTransId,
@@ -167,7 +167,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAmendStayData(
+  Future<Map<String, dynamic>> getAmendStayDataApi(
     int roomId,
     int bookingRoomId,
     String amendCheckinDate,
@@ -182,7 +182,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> updateBooking(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> updateBookingApi(Map<String, dynamic> body) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.updateBooking}';
       final response = await _dataAccess.post(body, url);
@@ -192,7 +192,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getFolios(int bookingId) async {
+  Future<Map<String, dynamic>> getFoliosApi(int bookingId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getFolios}/$bookingId';
@@ -203,7 +203,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getFolioChargeTaxes(int folioChargeId) async {
+  Future<Map<String, dynamic>> getFolioChargeTaxesApi(int folioChargeId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getFolioChargeTaxes}/$folioChargeId';
@@ -214,7 +214,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getFolioPayments(int folioId) async {
+  Future<Map<String, dynamic>> getFolioPaymentsApi(int folioId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getFolioPayments}/$folioId/false';
@@ -225,7 +225,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getFolioCharges(int folioId) async {
+  Future<Map<String, dynamic>> getFolioChargesApi(int folioId) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getFolioCharges}/$folioId/0';
@@ -236,7 +236,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> saveOtherInformation(
+  Future<Map<String, dynamic>> saveOtherInformationApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -249,7 +249,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> saveReason(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> saveReasonApi(Map<String, dynamic> body) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.saveReason}';
       final response = await _dataAccess.post(body, url);
@@ -259,7 +259,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> updateGuests(
+  Future<Map<String, dynamic>> updateGuestsApi(
     Map<String, dynamic> body,
     int guestId,
   ) async {
@@ -273,7 +273,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllNationality() async {
+  Future<Map<String, dynamic>> getAllNationalityApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllNationality}';
       final response = await _dataAccess.get(url);
@@ -283,7 +283,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllIdentityTypes() async {
+  Future<Map<String, dynamic>> getAllIdentityTypesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllIdentityTypes}';
       final response = await _dataAccess.get(url);
@@ -293,7 +293,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllVipStatus() async {
+  Future<Map<String, dynamic>> getAllVipStatusApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllVipStatus}';
       final response = await _dataAccess.get(url);
@@ -303,7 +303,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllCountries() async {
+  Future<Map<String, dynamic>> getAllCountriesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllCountries}';
       final response = await _dataAccess.get(url);
@@ -313,7 +313,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllTitle() async {
+  Future<Map<String, dynamic>> getAllTitleApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllTitle}';
       final response = await _dataAccess.get(url);
@@ -323,7 +323,7 @@ class ReservationService {
     }
   }
 
-   Future<Map<String, dynamic>> getAllBookingRemarks(int bookingRoomId) async {
+   Future<Map<String, dynamic>> getAllBookingRemarksApi(int bookingRoomId) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllBookingRemarks}=${bookingRoomId}';
       final response = await _dataAccess.get(url);
@@ -333,7 +333,7 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getInhousedata(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> getInhousedataApi(Map<String, dynamic> body) async {
     try {
       final config = await rootBundle.loadString('assets/config.json');
       final response = json.decode(config);

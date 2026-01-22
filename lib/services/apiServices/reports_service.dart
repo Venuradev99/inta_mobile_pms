@@ -7,7 +7,7 @@ class ReportsService {
 
   ReportsService(this._dataAccess, this._appResources);
 
-  Future<Map<String, dynamic>> getNightAuditReport(
+  Future<Map<String, dynamic>> getNightAuditReportApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -19,7 +19,7 @@ class ReportsService {
     }
   }
 
-  Future<Map<String, dynamic>> getCurrencies() async {
+  Future<Map<String, dynamic>> getCurrenciesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getCurrencies}';
       final response = await _dataAccess.get(url);
@@ -29,7 +29,7 @@ class ReportsService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllHotel() async {
+  Future<Map<String, dynamic>> getAllHotelApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllHotel}';
       final response = await _dataAccess.get(url);
@@ -39,7 +39,7 @@ class ReportsService {
     }
   }
 
-  Future<Map<String, dynamic>> getManagerReport(
+  Future<Map<String, dynamic>> getManagerReportApi(
     Map<String, dynamic> body,
   ) async {
     try {

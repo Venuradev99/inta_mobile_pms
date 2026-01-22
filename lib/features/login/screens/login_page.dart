@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
+import 'package:inta_mobile_pms/features/login/viewmodels/login_vm.dart';
 import 'package:inta_mobile_pms/services/apiServices/user_api_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage>
   final _passwordController = TextEditingController();
   final _hotelIdController = TextEditingController();
 
-  final UserApiService _userApiService = Get.find<UserApiService>();
+final LoginVm _loginVm = Get.find<LoginVm>();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -37,8 +38,8 @@ class _LoginPageState extends State<LoginPage>
     _initializeAnimations();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final v = await _userApiService.getVersion;
-      final logo = await _userApiService.getIconPath;
+      final v = await _loginVm.getVersion;
+      final logo = await _loginVm.getIconPath;
       setState(() {
         _version = v;
         _logo = logo;
@@ -82,7 +83,7 @@ class _LoginPageState extends State<LoginPage>
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    await _userApiService.login(
+    await _loginVm.login(
       _usernameController.text,
       _passwordController.text,
       _hotelIdController.text,

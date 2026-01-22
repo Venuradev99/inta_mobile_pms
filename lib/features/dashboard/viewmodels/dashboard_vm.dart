@@ -68,7 +68,7 @@ class DashboardVm extends GetxController {
 
   Future<void> changeProperty(HotelDataResponse hotel) async {
     try {
-      final response = await _userApiService.changeProperty(hotel.hotelId);
+      final response = await _userApiService.changePropertyApi(hotel.hotelId);
       refreshDashboard();
     } catch (e) {
       throw Exception('Error in GetUserName: $e');
@@ -79,7 +79,7 @@ class DashboardVm extends GetxController {
     try {
       isHotelsLoading.value = true;
 
-      final response = await _dashboardService.getAllHotels();
+      final response = await _dashboardService.getAllHotelsApi();
 
       if (response['isSuccessful'] == true) {
         final List<HotelDataResponse> hotelListTemp = [];
@@ -130,9 +130,9 @@ class DashboardVm extends GetxController {
     try {
       isLoading.value = true;
       final responses = await Future.wait([
-        _dashboardService.getInventoryStats(),
-        _dashboardService.getBookingStatics(),
-        _dashboardService.getStatistics(),
+        _dashboardService.getInventoryStatsApi(),
+        _dashboardService.getBookingStaticsApi(),
+        _dashboardService.getStatisticsApi(),
       ]);
       final inventoryStaticsResponse = responses[0];
       final bookingResponse = responses[1];
@@ -307,7 +307,7 @@ class DashboardVm extends GetxController {
         "businessCategoryId": 0,
       };
 
-      final response = await _reservationService.getAllReservationList(payload);
+      final response = await _reservationService.getAllReservationListApi(payload);
       if (response['isSuccessful'] == true) {
       } else {
         MessageService().error(
@@ -336,6 +336,6 @@ class DashboardVm extends GetxController {
   }
 
   Future<void> handleLogout() async {
-    await _userApiService.logout();
+    await _userApiService.logoutApi();
   }
 }

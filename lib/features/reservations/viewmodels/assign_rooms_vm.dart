@@ -15,7 +15,7 @@ class AssignRoomsVm extends GetxController {
 
   Future<void> loadInitialData(GuestItem guestItem) async {
     try {
-      final response = await _reservationListService.getAllRoomTypes();
+      final response = await _reservationListService.getAllRoomTypesApi();
 
       if (response["isSuccessful"] == true) {
         final result = List<Map<String, dynamic>>.from(
@@ -53,7 +53,7 @@ class AssignRoomsVm extends GetxController {
         "departureDate": guestItem.endDate,
         "roomType": int.tryParse(roomTypeId),
       };
-      final response = await _reservationListService.getAvailableRooms(request);
+      final response = await _reservationListService.getAvailableRoomsApi(request);
       if (response["isSuccessful"] == true) {
         final availableRoomsData = List<Map<String, dynamic>>.from(
           response["result"]["availableRooms"] as List,
@@ -88,7 +88,7 @@ class AssignRoomsVm extends GetxController {
         ],
         "currentUserId": int.tryParse(userId)!,
       };
-      final response = await _reservationListService.updateBooking(payload);
+      final response = await _reservationListService.updateBookingApi(payload);
       if (response["isSuccessful"] == true) {
         NavigationService().back();
         MessageService().success(response["message"] ?? 'Room assigned successfully!');

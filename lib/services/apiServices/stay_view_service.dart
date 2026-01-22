@@ -7,7 +7,7 @@ class StayViewService {
 
   StayViewService(this._dataAccess, this._appResources);
 
-  Future<Map<String, dynamic>> getBookingStatics(
+  Future<Map<String, dynamic>> getBookingStaticsApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -20,7 +20,7 @@ class StayViewService {
     }
   }
 
-  Future<Map<String, dynamic>> getStatusColorForStayview() async {
+  Future<Map<String, dynamic>> getStatusColorForStayviewApi() async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getStatusColorForStayview}';
@@ -31,7 +31,7 @@ class StayViewService {
     }
   }
 
-  Future<Map<String, dynamic>> getAvailableRooms(
+  Future<Map<String, dynamic>> getAvailableRoomsApi(
     Map<String, dynamic> body,
   ) async {
     try {
@@ -43,7 +43,7 @@ class StayViewService {
     }
   }
 
-    Future<Map<String, dynamic>> getDayUseList(
+    Future<Map<String, dynamic>> getDayUseListApi(
     Map<String, dynamic> body,
   ) async {
     try {

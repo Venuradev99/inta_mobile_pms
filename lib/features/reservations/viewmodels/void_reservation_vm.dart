@@ -20,7 +20,7 @@ class VoidReservationVm extends GetxController {
         ],
         "transactionType": 8,
       };
-      final response = await _reservationListService.updateBooking(request);
+      final response = await _reservationListService.updateBookingApi(request);
       if (response["isSuccessful"] == true) {
         final msg = response["message"].isNotEmpty
             ? response["message"]

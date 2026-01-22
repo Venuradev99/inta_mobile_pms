@@ -103,11 +103,11 @@ class ReservationVm extends GetxController {
       ).toJson();
 
       final response = await Future.wait([
-        _reservationService.getAllroomstatus(),
-        _reservationService.getAllRoomTypes(),
-        _reservationService.getAllreservationTypes(),
-        _reservationService.getAllbusinessSources(),
-        _reservationService.getAllReservationList(body),
+        _reservationService.getAllroomstatusApi(),
+        _reservationService.getAllRoomTypesApi(),
+        _reservationService.getAllreservationTypesApi(),
+        _reservationService.getAllbusinessSourcesApi(),
+        _reservationService.getAllReservationListApi(body),
       ]);
 
       final statusResponse = response[0];
@@ -440,8 +440,8 @@ class ReservationVm extends GetxController {
     try {
       isFolioDataLoading.value = true;
       final responses = await Future.wait([
-        _reservationService.getFolioPayments(folioId),
-        _reservationService.getFolioCharges(folioId),
+        _reservationService.getFolioPaymentsApi(folioId),
+        _reservationService.getFolioChargesApi(folioId),
       ]);
 
       final folioPaymentsResponse = responses[0];
@@ -491,10 +491,10 @@ class ReservationVm extends GetxController {
   Future<void> loadDataForGuest() async {
     try {
       final responses = await Future.wait([
-        _reservationService.getAllIdentityTypes(),
-        _reservationService.getAllNationality(),
-        _reservationService.getAllBusinessCategory(),
-        _reservationService.transportationModes(),
+        _reservationService.getAllIdentityTypesApi(),
+        _reservationService.getAllNationalityApi(),
+        _reservationService.getAllBusinessCategoryApi(),
+        _reservationService.transportationModesApi(),
       ]);
       final identityTypeResponse = responses[0];
       final nationalityResponse = responses[1];
@@ -562,7 +562,7 @@ class ReservationVm extends GetxController {
   Future<void> loadTaxDetails(int folioChargeId) async {
     try {
       isTaxDetailsLoading.value = false;
-      final response = await _reservationService.getFolioChargeTaxes(
+      final response = await _reservationService.getFolioChargeTaxesApi(
         folioChargeId,
       );
       if (response["isSuccessful"] == true) {
@@ -587,7 +587,7 @@ class ReservationVm extends GetxController {
 
   Future<void> loadAllFolios(int bookingRoomId) async {
     try {
-      final foliosResponse = await _reservationService.getFolios(bookingRoomId);
+      final foliosResponse = await _reservationService.getFoliosApi(bookingRoomId);
 
       if (foliosResponse["isSuccessful"] == true) {
         final result = foliosResponse["result"];
@@ -616,7 +616,7 @@ class ReservationVm extends GetxController {
   ) async {
     try {
       isAuditTrailsLoading.value = true;
-      final response = await _reservationService.getAuditTrial(
+      final response = await _reservationService.getAuditTrialApi(
         guestItem.bookingId!,
         int.tryParse(guestItem.bookingRoomId.toString())!,
         guestItem.masterFolioBookingTransId!,
@@ -667,7 +667,7 @@ class ReservationVm extends GetxController {
   Future<void> loadAllRemarks(int bookingRoomId) async {
     try {
       isBookingRemarksLoading.value = true;
-      final response = await _reservationService.getAllBookingRemarks(
+      final response = await _reservationService.getAllBookingRemarksApi(
         int.tryParse(bookingRoomId.toString())!,
       );
 
@@ -693,7 +693,7 @@ class ReservationVm extends GetxController {
       final baseCurrencyData = await LocalStorageManager.getBaseCurrencyData();
       baseCurrencyCode.value = baseCurrencyData.code;
       await loadDataForGuest();
-      final bookingResponse = await _reservationService.getByBookingRoomId(
+      final bookingResponse = await _reservationService.getByBookingRoomIdApi(
         int.parse(bookingRoomId),
       );
       if (bookingResponse["isSuccessful"] == true) {
@@ -1000,7 +1000,7 @@ class ReservationVm extends GetxController {
   Future<Map<String, dynamic>> getCancelReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> guestData = {};
-      final response = await _reservationService.getCancellationReasons();
+      final response = await _reservationService.getCancellationReasonsApi();
       if (response["isSuccessful"] == true) {
         final reasonList = [];
         final result = response["result"];
@@ -1023,7 +1023,7 @@ class ReservationVm extends GetxController {
   Future<Map<String, dynamic>> getNoShowReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> data = {};
-      final response = await _reservationService.getNoShowReasons();
+      final response = await _reservationService.getNoShowReasonsApi();
 
       if (response["isSuccessful"] == true) {
         List<Map<String, dynamic>> reasonList = [];
@@ -1047,7 +1047,7 @@ class ReservationVm extends GetxController {
   Future<Map<String, dynamic>> getVoidReservationData(GuestItem item) async {
     try {
       Map<String, dynamic> guestData = {};
-      final response = await _reservationService.getVoidReasons();
+      final response = await _reservationService.getVoidReasonsApi();
 
       if (response["isSuccessful"] == true) {
         final reasonList = [];
@@ -1092,7 +1092,7 @@ class ReservationVm extends GetxController {
         "IsUnAssignRoom": true,
         "currentUserId": int.tryParse(userId),
       };
-      final response = await _reservationService.updateBooking(request);
+      final response = await _reservationService.updateBookingApi(request);
       if (response["isSuccessful"] == true) {
         final msg = response["message"].isNotEmpty
             ? response["message"]

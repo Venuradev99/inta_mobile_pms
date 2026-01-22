@@ -14,7 +14,7 @@ class NetLockVm extends GetxController {
   Future<void> loadInitialData() async {
     try {
       isLoading.value = true;
-      final response = await _dashboardService.getAllLockReservations();
+      final response = await _dashboardService.getAllLockReservationsApi();
       if (response["isSuccessful"] == true) {
         final result = response["result"] as List;
         netlockData.value = result
@@ -83,7 +83,7 @@ class NetLockVm extends GetxController {
         "Lock": false,
       };
 
-      final response = await _dashboardService.lockBooking(payload);
+      final response = await _dashboardService.lockBookingApi(payload);
       if (response["isSuccessful"] == true) {
         MessageService().success(
           response["message"] ??

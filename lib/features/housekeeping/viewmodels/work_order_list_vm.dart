@@ -56,9 +56,9 @@ class WorkOrderListVm extends GetxController {
         startIndex: 0,
       ).toJson();
 
-      final response = await _houseKeepingServices.getAllWorkOrders(request);
+      final response = await _houseKeepingServices.getAllWorkOrdersApi(request);
       final workOrderStatusResponse = await _houseKeepingServices
-          .getWorkOrderStatus();
+          .getWorkOrderStatusApi();
 
       if (workOrderStatusResponse["isSuccessful"] == true) {
         statusList.clear();
@@ -129,7 +129,7 @@ class WorkOrderListVm extends GetxController {
       final isRoom = workOrder.isRoom;
       final date = DateTime.now();
 
-      final response = await _houseKeepingServices.getAllHouseKeepingAuditTrail(
+      final response = await _houseKeepingServices.getAllHouseKeepingAuditTrailApi(
         id!,
         type,
         isRoom!,
@@ -159,7 +159,7 @@ class WorkOrderListVm extends GetxController {
     try {
       isPostNoteDataLoading.value = true;
       final response = await Future.wait([
-        _houseKeepingServices.getHouseKeepers(),
+        _houseKeepingServices.getHouseKeepersApi(),
       ]);
 
       final houseKeepers = response[0];
@@ -189,7 +189,7 @@ class WorkOrderListVm extends GetxController {
 
   Future<void> updatePostNote(PostNotePayload payload) async {
     try {
-      final response = await _houseKeepingServices.updatePostNote(
+      final response = await _houseKeepingServices.updatePostNoteApi(
         payload.toJson(),
         payload.workOrderId,
       );
@@ -215,11 +215,11 @@ class WorkOrderListVm extends GetxController {
   Future<void> loadDataForAddWorkOrder() async {
     try {
       final response = await Future.wait([
-        _houseKeepingServices.getWellKnownPriorities(),
-        _houseKeepingServices.getWorkOrderCategories(),
-        _houseKeepingServices.getHouseKeepers(),
-        _houseKeepingServices.getAllRoomsForHouseStatus(),
-        _houseKeepingServices.getReasons(),
+        _houseKeepingServices.getWellKnownPrioritiesApi(),
+        _houseKeepingServices.getWorkOrderCategoriesApi(),
+        _houseKeepingServices.getHouseKeepersApi(),
+        _houseKeepingServices.getAllRoomsForHouseStatusApi(),
+        _houseKeepingServices.getReasonsApi(),
       ]);
 
       final priorityResponse = response[0];
@@ -378,7 +378,7 @@ class WorkOrderListVm extends GetxController {
         workOrderId: 0,
         workOrderIdNew: "New",
       ).toJson();
-      final response = await _houseKeepingServices.saveNewWorkOrder(
+      final response = await _houseKeepingServices.saveNewWorkOrderApi(
         saveRequest,
       );
       if (response["isSuccessful"] == true) {

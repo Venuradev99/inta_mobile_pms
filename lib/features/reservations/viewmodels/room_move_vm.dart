@@ -19,8 +19,8 @@ class RoomMoveVm extends GetxController {
   Future<void> loadInitialData(int folioId) async {
     try {
       final response = await Future.wait([
-        _reservationListService.getAllRoomTypes(),
-        _reservationListService.getFolioPayments(folioId),
+        _reservationListService.getAllRoomTypesApi(),
+        _reservationListService.getFolioPaymentsApi(folioId),
       ]);
 
       final roomTypeResponse = response[0];
@@ -84,7 +84,7 @@ class RoomMoveVm extends GetxController {
         "departureDate": "2025-10-24T17:00:00",
         "roomType": int.tryParse(roomTypeId),
       };
-      final response = await _reservationListService.getAvailableRooms(request);
+      final response = await _reservationListService.getAvailableRoomsApi(request);
       if (response["isSuccessful"] == true) {
         final availableRoomsData = List<Map<String, dynamic>>.from(
           response["result"]["availableRooms"] as List,
@@ -123,7 +123,7 @@ class RoomMoveVm extends GetxController {
         ],
         "currentUserId": int.tryParse(userId),
       };
-      final response = await _reservationListService.updateBooking(
+      final response = await _reservationListService.updateBookingApi(
         saveRoomMoveRequest,
       );
       if (response["isSuccessful"] == true) {

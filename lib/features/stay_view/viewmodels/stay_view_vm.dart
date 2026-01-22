@@ -59,7 +59,7 @@ class StayViewVm extends GetxController {
     DateTime centerDate,
   ) async {
     try {
-      await _userApiService.changeProperty(hotel.hotelId);
+      await _userApiService.changePropertyApi(hotel.hotelId);
       await loadToday();
       loadInitialData(today.value ?? centerDate);
     } catch (e) {
@@ -104,7 +104,7 @@ class StayViewVm extends GetxController {
           },
         ],
       };
-      final response = await _reservationService.updateBooking(request);
+      final response = await _reservationService.updateBookingApi(request);
       if (response["isSuccessful"] == true) {
         final msg = response["message"].isNotEmpty
             ? response["message"]
@@ -140,7 +140,7 @@ class StayViewVm extends GetxController {
           "roomType": booking['roomTypeId'],
         };
 
-        final response = await _stayViewService.getAvailableRooms(payload);
+        final response = await _stayViewService.getAvailableRoomsApi(payload);
 
         if (response["isSuccessful"] == true) {
           final result = response["result"] as Map<String, dynamic>;
@@ -165,7 +165,7 @@ class StayViewVm extends GetxController {
       isLoadingDayUseList.value = true;
       datUseList.clear();
 
-      final response = await _stayViewService.getDayUseList(payload);
+      final response = await _stayViewService.getDayUseListApi(payload);
 
       if (response['isSuccessful'] == true) {
         final List<DayUseResponse> dayUseListTemp = (response['result'] as List)
@@ -188,7 +188,7 @@ class StayViewVm extends GetxController {
     try {
       isLoadingMaintenanceBlock.value = true;
 
-      final response = await _housekeepingService.getMaintenanceBlockById(
+      final response = await _housekeepingService.getMaintenanceBlockByIdApi(
         maintenanceBlockId,
       );
       maintenanceBlockData.value = null;
@@ -212,7 +212,7 @@ class StayViewVm extends GetxController {
       isUnblockingMaintenanceBlock.value = true;
       final masterData = await LocalStorageManager.getMasterData();
       final userId = int.tryParse(masterData.userId);
-      final response = await _housekeepingService.unblockMaintenanceBlock(
+      final response = await _housekeepingService.unblockMaintenanceBlockApi(
         maintenanceBlockId,
         userId!,
       );
@@ -243,8 +243,8 @@ class StayViewVm extends GetxController {
         "startDate": yesterday(date.toString()),
       };
       final response = await Future.wait([
-        _stayViewService.getBookingStatics(payload),
-        _stayViewService.getStatusColorForStayview(),
+        _stayViewService.getBookingStaticsApi(payload),
+        _stayViewService.getStatusColorForStayviewApi(),
       ]);
 
       final bookingStatsResponse = response[0];

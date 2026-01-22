@@ -7,7 +7,7 @@ class QuickReservationService {
 
   QuickReservationService(this._dataAccess, this._appResources);
 
- Future<Map<String, dynamic>> getAllTitle() async {
+ Future<Map<String, dynamic>> getAllTitleApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllTitle}';
       final response = await _dataAccess.get(url);
@@ -17,7 +17,7 @@ class QuickReservationService {
     }
   }
 
-   Future<Map<String, dynamic>> getAllRoomTypes() async {
+   Future<Map<String, dynamic>> getAllRoomTypesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
       final response = await _dataAccess.get(url);
@@ -27,7 +27,7 @@ class QuickReservationService {
     }
   }
 
-    Future<Map<String, dynamic>> getAvailableRooms(
+    Future<Map<String, dynamic>> getAvailableRoomsApi(
     Map<String, dynamic> body,
   ) async {
     try {
