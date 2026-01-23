@@ -53,7 +53,7 @@ class AppResources {
   //reservation
   static const String searchReservationList = '$booking/SearchReservationList';
   static const String getAllRoomTypes =
-      '$roomTypes/GetAll?startIndex=0&PageSize=0&withInactive=false&onlyRoomExistType=true';
+      '$roomTypes/GetAll?';
   static const String getAllreservationTypes =
       '$reservationTypes/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllroomstatus =
@@ -89,6 +89,7 @@ class AppResources {
   static const String getAllCountries = '$country/GetAll';
   static const String getAllTitle = '$title/GetAll?startIndex=0&PageSize=0';
   static const String getAllBusinessCategory = '$common/GetAllBusinessCategory';
+  static const String getBusinessSourcesByCategoryId = '$businessSources/GetByCategoryId';
   static const String transportationModes =
       '$transportMode/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllBookingRemarks =

@@ -124,7 +124,7 @@ void main() async {
     ),
   );
   Get.put<QuickReservationVm>(
-    QuickReservationVm(Get.find<QuickReservationService>()),
+    QuickReservationVm(Get.find<QuickReservationService>(), Get.find<ReservationService>()),
   );
   Get.put<NightAuditReportVm>(NightAuditReportVm(Get.find<ReportsService>()));
   Get.put<ManagerReportVm>(ManagerReportVm(Get.find<ReportsService>()));

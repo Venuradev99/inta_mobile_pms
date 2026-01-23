@@ -23,9 +23,9 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomTypesApi() async {
+  Future<Map<String, dynamic>> getAllRoomTypesApi({bool? withInactive = false, bool? onlyRoomExistType = true}) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
+      final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -36,6 +36,20 @@ class ReservationService {
   Future<Map<String, dynamic>> transportationModesApi() async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.transportationModes}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getBusinessSourcesByCategoryIdApi(
+    int categoryId,
+    bool withInactive,
+  ) async {
+    try {
+      final url =
+          '${_appResources.baseUrl}${AppResources.getBusinessSourcesByCategoryId}/${categoryId}?withInactive=${withInactive}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -182,7 +196,9 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> updateBookingApi(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> updateBookingApi(
+    Map<String, dynamic> body,
+  ) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.updateBooking}';
       final response = await _dataAccess.post(body, url);
@@ -225,7 +241,9 @@ class ReservationService {
     }
   }
 
-   Future<Map<String, dynamic>> getTotalBalanceByBookingRoomIdApi(int bookingRoomId) async {
+  Future<Map<String, dynamic>> getTotalBalanceByBookingRoomIdApi(
+    int bookingRoomId,
+  ) async {
     try {
       final url =
           '${_appResources.baseUrl}${AppResources.getTotalBalanceByBookingRoomId}/$bookingRoomId';
@@ -334,9 +352,12 @@ class ReservationService {
     }
   }
 
-   Future<Map<String, dynamic>> getAllBookingRemarksApi(int bookingRoomId) async {
+  Future<Map<String, dynamic>> getAllBookingRemarksApi(
+    int bookingRoomId,
+  ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllBookingRemarks}=${bookingRoomId}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllBookingRemarks}=${bookingRoomId}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -344,7 +365,9 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getInhousedataApi(Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> getInhousedataApi(
+    Map<String, dynamic> body,
+  ) async {
     try {
       final config = await rootBundle.loadString('assets/config.json');
       final response = json.decode(config);
@@ -353,5 +376,4 @@ class ReservationService {
       return {"error": error.toString()};
     }
   }
-
 }

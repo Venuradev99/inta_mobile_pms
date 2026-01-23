@@ -82,7 +82,10 @@ class UserApiService {
           }
 
           if (checkinCheckoutInfo["isSuccessful"]) {
-            // await LocalStorageManager.setCheckinCheckoutData(checkinCheckoutInfo["result"]);
+            final list = (checkinCheckoutInfo["result"] as List)
+                .map((e) => Map<String, dynamic>.from(e))
+                .toList();
+            await LocalStorageManager.setCheckinCheckoutData(list);
           }
 
           NavigationService().go(AppRoutes.dashboard);

@@ -4,6 +4,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/widgets/custom_appbar.dart';
+import 'package:inta_mobile_pms/features/dashboard/models/dropdown_options.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/quick_reservation_vm.dart';
 
 class QuickReservation extends StatefulWidget {
@@ -24,24 +25,25 @@ class _QuickReservationState extends State<QuickReservation>
   TimeOfDay checkInTime = const TimeOfDay(hour: 13, minute: 0);
   TimeOfDay checkOutTime = const TimeOfDay(hour: 13, minute: 0);
   int nights = 1;
-  String? selectedBusinessSource;
-  String? selectedOta;
-  String? selectedTravelAgent;
-  String? selectedCompany;
-  String reservationType = 'Confirm';
+  int? selectedBusinessSource;
+  int? selectedOta;
+  int? selectedBusinessSourceByCategory;
+  int? selectedTravelAgent;
+  int? selectedCompany;
+  int? reservationType;
   int roomCount = 1;
-  String? selectedRoomType;
-  String? selectedRateType;
+  int? selectedRoomType;
+  int? selectedRateType;
   bool differentRoomTypes = false;
-  List<String?> selectedRoomTypes = [];
-  List<String?> selectedRateTypes = [];
-  List<String?> selectedRooms = [];
+  List<int?> selectedRoomTypes = [];
+  List<int?> selectedRateTypes = [];
+  List<int?> selectedRooms = [];
   List<int> adultCounts = [];
   List<int> childCounts = [];
   List<double> rates = [];
   bool rateOverride = false;
   bool returningGuest = false;
-  String? selectedSalutation;
+  int? selectedSalutation;
   TextEditingController guestNameController = TextEditingController();
   TextEditingController mobileNumberController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -51,53 +53,25 @@ class _QuickReservationState extends State<QuickReservation>
   double tax = 0.0;
   double total = 0.0;
 
-  final Map<String, double> defaultRates = {
+  Map<String, double> defaultRates = {
     'Standard Room': 100.00,
     'Deluxe Room': 150.00,
     'Suite': 200.00,
     'Executive Room': 250.00,
   };
 
-  final List<String> otas = ['Booking.com', 'Expedia', 'Agoda', 'Hotels.com'];
-
-  final List<String> travelAgents = [
-    'Agent A',
-    'Agent B',
-    'Corporate Travel Inc.',
-    'Global Agents',
+  List<DropdownOption> otas = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> businessSourcesByCategory = [
+    DropdownOption(id: -1, name: ''),
   ];
-
-  final List<String> companies = [
-    'Company A',
-    'Company B',
-    'Company C',
-    'Enterprise Solutions',
-  ];
-
-  final List<String> businessSources = [
-    'Web',
-    'Online Travel Agent',
-    'Travel Agent',
-    'Corporate',
-  ];
-
-  final List<String> reservationTypes = ['Confirm', 'Tentative', 'Waitlist'];
-
-  final List<String> roomTypes = [
-    'Standard Room',
-    'Deluxe Room',
-    'Suite',
-    'Executive Room',
-  ];
-
-  final List<String> rateTypes = [
-    'Standard Rate',
-    'Corporate Rate',
-    'Group Rate',
-    'Package Rate',
-  ];
-
-  final List<String> rooms = ['Room 101', 'Room 102', 'Room 201', 'Room 202'];
+  List<DropdownOption> travelAgents = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> companies = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> businessSources = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> reservationTypes = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> salutations = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> roomTypes = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> rateTypes = [DropdownOption(id: -1, name: '')];
+  List<DropdownOption> rooms = [DropdownOption(id: -1, name: '')];
 
   @override
   void initState() {
@@ -122,22 +96,48 @@ class _QuickReservationState extends State<QuickReservation>
 
       if (mounted) {
         setState(() {
-          DateTime now = DateTime.now();
-          TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
-
-          _isLoading = _quickReservationVm.isInitialDataLoading.value;
-          checkInDate = _quickReservationVm.checkInDate.value ?? now;
-          checkOutDate =
-              _quickReservationVm.checkOutDate.value ??
-              now.add(Duration(days: 1));
-          checkInTime = _quickReservationVm.checkinTime.value ?? currentTime;
-          checkOutTime = _quickReservationVm.checkOutTime.value ?? currentTime;
+          _loadDataforCheckinCheckoutDateTime();
+          _loadDataForDropdowns();
         });
       }
     });
 
     _calculateNights();
     _updateTotals();
+  }
+
+  _loadDataforCheckinCheckoutDateTime() {
+    DateTime now = DateTime.now();
+    TimeOfDay currentTime = TimeOfDay(hour: now.hour, minute: now.minute);
+
+    _isLoading = _quickReservationVm.isInitialDataLoading.value;
+    checkInDate = _quickReservationVm.checkInDate.value ?? now;
+    checkOutDate =
+        _quickReservationVm.checkOutDate.value ?? now.add(Duration(days: 1));
+    checkInTime = _quickReservationVm.checkinTime.value ?? currentTime;
+    checkOutTime = _quickReservationVm.checkOutTime.value ?? currentTime;
+  }
+
+  _loadDataForDropdowns() {
+    businessSources = _quickReservationVm.businessSourceCategoriesDropDown
+        .toList();
+    salutations = _quickReservationVm.titlesDropDown.toList();
+    reservationTypes = _quickReservationVm.reservationTypesDropDown.toList();
+    roomTypes = _quickReservationVm.roomTypesDropDown.toList();
+    rateTypes = _quickReservationVm.rateTypesDropDown.toList();
+    rooms = _quickReservationVm.roomsDropDown.toList();
+  }
+
+  Future<void> _loadRoomsAndRates(int roomTypeId) async {
+    await _quickReservationVm.loadAvailableRooms(
+      checkInDate,
+      checkOutDate,
+      roomTypeId,
+    );
+    setState(() {
+      rateTypes = _quickReservationVm.rateTypesDropDown.toList();
+      rooms = _quickReservationVm.roomsDropDown.toList();
+    });
   }
 
   void _initializeRoomLists() {
@@ -147,6 +147,25 @@ class _QuickReservationState extends State<QuickReservation>
     adultCounts = List.filled(roomCount, 1, growable: true);
     childCounts = List.filled(roomCount, 0, growable: true);
     rates = List.filled(roomCount, 0.00, growable: true);
+  }
+
+  Future<DropdownOption> _openDropdownBottomSheet(
+    List<DropdownOption> dropdownOptions,
+    String Type,
+  ) async {
+    final DropdownOption? selected = await showModalBottomSheet<DropdownOption>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) =>
+          DropdownOptionBottomSheet(title: Type, options: dropdownOptions),
+    );
+
+    if (selected != null) {
+      return selected;
+    } else {
+      return DropdownOption(id: -1, name: '');
+    }
   }
 
   @override
@@ -160,7 +179,22 @@ class _QuickReservationState extends State<QuickReservation>
   }
 
   void _calculateNights() {
-    nights = checkOutDate.difference(checkInDate).inDays;
+    final checkInDateTime = DateTime(
+      checkInDate.year,
+      checkInDate.month,
+      checkInDate.day,
+      checkInTime.hour,
+      checkInTime.minute,
+    );
+    final checkOutDateTime = DateTime(
+      checkOutDate.year,
+      checkOutDate.month,
+      checkOutDate.day,
+      checkOutTime.hour,
+      checkOutTime.minute,
+    );
+    nights = checkOutDateTime.difference(checkInDateTime).inDays;
+
     if (nights <= 0) nights = 1;
     _updateTotals();
     setState(() {});
@@ -179,7 +213,7 @@ class _QuickReservationState extends State<QuickReservation>
 
   void _setDefaultRates() {
     for (int i = 0; i < roomCount; i++) {
-      String? rt = differentRoomTypes ? selectedRoomTypes[i] : selectedRoomType;
+      int? rt = differentRoomTypes ? selectedRoomTypes[i] : selectedRoomType;
       if (rt != null) {
         rates[i] = defaultRates[rt] ?? 0.0;
       }
@@ -191,7 +225,7 @@ class _QuickReservationState extends State<QuickReservation>
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isCheckIn ? checkInDate : checkOutDate,
-      firstDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (picked != null) {
@@ -251,7 +285,7 @@ class _QuickReservationState extends State<QuickReservation>
 
   bool _validateForm() {
     // Basic validation for required fields
-    if (reservationType.isEmpty || roomCount < 1) {
+    if (reservationType == null || roomCount < 1) {
       return false;
     }
     if (selectedBusinessSource == 'Online Travel Agent' && selectedOta == null)
@@ -329,77 +363,132 @@ class _QuickReservationState extends State<QuickReservation>
                         listItemSpacing: listItemSpacing,
                       ),
                       SizedBox(height: listItemSpacing * 1.25),
-
-                      // Business Source (always shown)
-                      _buildDropdownField(
-                        label: 'Business Source',
-                        value: selectedBusinessSource,
+                      // _buildDropdownField(
+                      //   label: 'Business Source',
+                      //   value: selectedBusinessSource,
+                      //   hint: 'Select Business Source',
+                      //   items: businessSources,
+                      //   onChanged: (value) async {
+                      //     if (value != null) {
+                      //       if ([1, 2, 5].contains(value)) {
+                      //         await _quickReservationVm.getBusinessSources(
+                      //           value,
+                      //         );
+                      //       }
+                      //       setState(() {
+                      //         selectedBusinessSource = value;
+                      //         if ([1, 2, 5].contains(value)) {
+                      //           businessSourcesByCategory = _quickReservationVm
+                      //               .businessSourcesDropDown
+                      //               .toList();
+                      //         }
+                      //         voucherController.clear();
+                      //       });
+                      //     }
+                      //   },
+                      //   theme: theme,
+                      //   fontScale: fontScale,
+                      //   cardRadius: cardRadius,
+                      // ),
+                      _buildSelectTextField(
+                        label: 'Business Source *',
+                        value:
+                            selectedBusinessSource == null ||
+                                selectedBusinessSource == -1
+                            ? null
+                            : businessSources
+                                  .firstWhere(
+                                    (x) => x.id == selectedBusinessSource,
+                                  )
+                                  .name,
                         hint: 'Select Business Source',
-                        items: businessSources,
-                        onChanged: (value) => setState(() {
-                          selectedBusinessSource = value;
-                          selectedOta = null;
-                          selectedTravelAgent = null;
-                          selectedCompany = null;
-                          voucherController.clear();
-                        }),
-                        theme: theme,
+                        theme: Theme.of(context),
                         fontScale: fontScale,
-                        cardRadius: cardRadius,
+                        cardRadius: 8,
+                        onTap: () async {
+                          final bsType = await _openDropdownBottomSheet(
+                            businessSources,
+                            'Select Business Source',
+                          );
+                          if (bsType.id != null) {
+                            if ([1, 2, 5].contains(bsType.id)) {
+                              await _quickReservationVm.getBusinessSources(
+                                bsType.id,
+                              );
+                            }
+                            setState(() {
+                              selectedBusinessSource = bsType.id;
+                              if ([1, 2, 5].contains(bsType.id)) {
+                                businessSourcesByCategory = _quickReservationVm
+                                    .businessSourcesDropDown
+                                    .toList();
+                              }
+                              voucherController.clear();
+                            });
+                          }
+                        },
                       ),
                       SizedBox(height: listItemSpacing),
 
-                      // Conditional Extra Fields based on selected category
-                      if (selectedBusinessSource == 'Online Travel Agent')
-                        _buildDropdownField(
-                          key: const ValueKey('ota'),
-                          label: 'OTA *',
-                          value: selectedOta,
-                          hint: 'Select OTA',
-                          items: otas,
-                          onChanged: (value) =>
-                              setState(() => selectedOta = value),
-                          theme: theme,
+                      if ([1, 2, 5].contains(selectedBusinessSource))
+                        // _buildDropdownField(
+                        //   key: const ValueKey(-1),
+                        //   label: selectedBusinessSource == 1
+                        //       ? 'OTA *'
+                        //       : selectedBusinessSource == 2
+                        //       ? 'Travel Agent *'
+                        //       : selectedBusinessSource == 5
+                        //       ? 'Corporate *'
+                        //       : 'Business Source',
+                        //   value: selectedBusinessSourceByCategory,
+                        //   hint: 'Select',
+                        //   items: businessSourcesByCategory,
+                        //   onChanged: (value) =>
+                        //       setState(() => selectedOta = value),
+                        //   theme: theme,
+                        //   fontScale: fontScale,
+                        //   cardRadius: cardRadius,
+                        // ),
+                        _buildSelectTextField(
+                          label: selectedBusinessSource == 1
+                              ? 'OTA *'
+                              : selectedBusinessSource == 2
+                              ? 'Travel Agent *'
+                              : selectedBusinessSource == 5
+                              ? 'Corporate *'
+                              : 'Business Source',
+                          value:
+                              selectedBusinessSourceByCategory == null ||
+                                  selectedBusinessSourceByCategory == -1
+                              ? null
+                              : reservationTypes
+                                    .firstWhere(
+                                      (x) =>
+                                          x.id ==
+                                          selectedBusinessSourceByCategory,
+                                    )
+                                    .name,
+                          hint: 'Select',
+                          theme: Theme.of(context),
                           fontScale: fontScale,
-                          cardRadius: cardRadius,
-                        )
-                      else if (selectedBusinessSource == 'Travel Agent')
-                        Column(
-                          key: const ValueKey('travel_agent'),
-                          children: [
-                            _buildDropdownField(
-                              label: 'Agent *',
-                              value: selectedTravelAgent,
-                              hint: 'Select Travel Agent',
-                              items: travelAgents,
-                              onChanged: (value) =>
-                                  setState(() => selectedTravelAgent = value),
-                              theme: theme,
-                              fontScale: fontScale,
-                              cardRadius: cardRadius,
-                            ),
-                            SizedBox(height: listItemSpacing),
-                            _buildTextField(
-                              label: 'Voucher No *',
-                              controller: voucherController,
-                              hint: 'Enter Voucher No',
-                              theme: theme,
-                              fontScale: fontScale,
-                            ),
-                          ],
-                        )
-                      else if (selectedBusinessSource == 'Corporate')
-                        _buildDropdownField(
-                          key: const ValueKey('corporate'),
-                          label: 'Company *',
-                          value: selectedCompany,
-                          hint: 'Select Company',
-                          items: companies,
-                          onChanged: (value) =>
-                              setState(() => selectedCompany = value),
-                          theme: theme,
-                          fontScale: fontScale,
-                          cardRadius: cardRadius,
+                          cardRadius: 8,
+                          onTap: () async {
+                            final businessSource =
+                                await _openDropdownBottomSheet(
+                                  businessSourcesByCategory,
+                                  selectedBusinessSource == 1
+                                      ? 'OTA *'
+                                      : selectedBusinessSource == 2
+                                      ? 'Travel Agent *'
+                                      : selectedBusinessSource == 5
+                                      ? 'Corporate *'
+                                      : 'Business Source',
+                                );
+                            setState(
+                              () => selectedBusinessSourceByCategory =
+                                  businessSource.id,
+                            );
+                          },
                         ),
                       if (selectedBusinessSource != null &&
                           selectedBusinessSource != 'Web')
@@ -409,17 +498,39 @@ class _QuickReservationState extends State<QuickReservation>
                       if (isMobile)
                         Column(
                           children: [
-                            _buildDropdownField(
+                            // _buildDropdownField(
+                            //   label: 'Reservation Type *',
+                            //   value: reservationType,
+                            //   hint: 'Select Type',
+                            //   items: reservationTypes,
+                            //   onChanged: (value) =>
+                            //       setState(() => reservationType = value ?? -1),
+                            //   theme: theme,
+                            //   fontScale: fontScale,
+                            //   cardRadius: cardRadius,
+                            // ),
+                            _buildSelectTextField(
                               label: 'Reservation Type *',
-                              value: reservationType,
-                              hint: 'Select Type',
-                              items: reservationTypes,
-                              onChanged: (value) => setState(
-                                () => reservationType = value ?? 'Confirm',
-                              ),
-                              theme: theme,
+                              value:
+                                  reservationType == null ||
+                                      reservationType == -1
+                                  ? null
+                                  : reservationTypes
+                                        .firstWhere(
+                                          (x) => x.id == reservationType,
+                                        )
+                                        .name,
+                              hint: 'Select Reservation Type',
+                              theme: Theme.of(context),
                               fontScale: fontScale,
-                              cardRadius: cardRadius,
+                              cardRadius: 8,
+                              onTap: () async {
+                                final resType = await _openDropdownBottomSheet(
+                                  reservationTypes,
+                                  'Select Reservation Type',
+                                );
+                                setState(() => reservationType = resType.id);
+                              },
                             ),
                             SizedBox(height: listItemSpacing),
                             _buildStepperField(
@@ -472,7 +583,7 @@ class _QuickReservationState extends State<QuickReservation>
                                 hint: 'Select Type',
                                 items: reservationTypes,
                                 onChanged: (value) => setState(
-                                  () => reservationType = value ?? 'Confirm',
+                                  () => reservationType = value ?? -1,
                                 ),
                                 theme: theme,
                                 fontScale: fontScale,
@@ -569,33 +680,99 @@ class _QuickReservationState extends State<QuickReservation>
                                 if (isMobile)
                                   Column(
                                     children: [
-                                      _buildDropdownField(
+                                      // _buildDropdownField(
+                                      //   label: 'Room Type *',
+                                      //   value: selectedRoomType,
+                                      //   hint: 'Select Room Type',
+                                      //   items: roomTypes,
+                                      //   onChanged: (value) => setState(() {
+                                      //     selectedRoomType = value;
+                                      //     if (!rateOverride) {
+                                      //       _setDefaultRates();
+                                      //     }
+                                      //   }),
+                                      //   theme: theme,
+                                      //   fontScale: fontScale,
+                                      //   cardRadius: cardRadius,
+                                      // ),
+                                      _buildSelectTextField(
                                         label: 'Room Type *',
-                                        value: selectedRoomType,
+                                        value:
+                                            selectedRoomType == null ||
+                                                selectedRoomType == -1
+                                            ? null
+                                            : roomTypes
+                                                  .firstWhere(
+                                                    (roomType) =>
+                                                        roomType.id ==
+                                                        selectedRoomType,
+                                                  )
+                                                  .name,
                                         hint: 'Select Room Type',
-                                        items: roomTypes,
-                                        onChanged: (value) => setState(() {
-                                          selectedRoomType = value;
-                                          if (!rateOverride) {
-                                            _setDefaultRates();
-                                          }
-                                        }),
-                                        theme: theme,
+                                        theme: Theme.of(context),
                                         fontScale: fontScale,
-                                        cardRadius: cardRadius,
+                                        cardRadius: 8,
+                                        onTap: () async {
+                                          final _selectedRoomType =
+                                              await _openDropdownBottomSheet(
+                                                roomTypes,
+                                                'Select Room Type',
+                                              );
+                                          if (_selectedRoomType.id != -1) {
+                                            await _loadRoomsAndRates(
+                                              _selectedRoomType.id,
+                                            );
+                                          }
+                                          setState(() {
+                                            selectedRoomType =
+                                                _selectedRoomType.id;
+                                            if (!rateOverride) {
+                                              _setDefaultRates();
+                                            }
+                                          });
+                                        },
                                       ),
                                       SizedBox(height: listItemSpacing),
-                                      _buildDropdownField(
+                                      // _buildDropdownField(
+                                      //   label: 'Rate Type *',
+                                      //   value: selectedRateType,
+                                      //   hint: 'Select Rate Type',
+                                      //   items: rateTypes,
+                                      //   onChanged: (value) => setState(
+                                      //     () => selectedRateType = value,
+                                      //   ),
+                                      //   theme: theme,
+                                      //   fontScale: fontScale,
+                                      //   cardRadius: cardRadius,
+                                      // ),
+                                      _buildSelectTextField(
                                         label: 'Rate Type *',
-                                        value: selectedRateType,
+                                        value:
+                                            selectedRateType == null ||
+                                                selectedRateType == -1
+                                            ? null
+                                            : rateTypes
+                                                  .firstWhere(
+                                                    (rateType) =>
+                                                        rateType.id ==
+                                                        selectedRateType,
+                                                  )
+                                                  .name,
                                         hint: 'Select Rate Type',
-                                        items: rateTypes,
-                                        onChanged: (value) => setState(
-                                          () => selectedRateType = value,
-                                        ),
-                                        theme: theme,
+                                        theme: Theme.of(context),
                                         fontScale: fontScale,
-                                        cardRadius: cardRadius,
+                                        cardRadius: 8,
+                                        onTap: () async {
+                                          final rateType =
+                                              await _openDropdownBottomSheet(
+                                                rateTypes,
+                                                'Select Rate Type',
+                                              );
+                                          setState(
+                                            () =>
+                                                selectedRateType = rateType.id,
+                                          );
+                                        },
                                       ),
                                     ],
                                   )
@@ -603,35 +780,103 @@ class _QuickReservationState extends State<QuickReservation>
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: _buildDropdownField(
-                                          label: 'Room Type *',
-                                          value: selectedRoomType,
-                                          hint: 'Select Room Type',
-                                          items: roomTypes,
-                                          onChanged: (value) => setState(() {
-                                            selectedRoomType = value;
-                                            if (!rateOverride) {
-                                              _setDefaultRates();
-                                            }
-                                          }),
-                                          theme: theme,
-                                          fontScale: fontScale,
-                                          cardRadius: cardRadius,
-                                        ),
+                                        child:
+                                            // _buildDropdownField(
+                                            //   label: 'Room Type *',
+                                            //   value: selectedRoomType,
+                                            //   hint: 'Select Room Type',
+                                            //   items: roomTypes,
+                                            //   onChanged: (value) => setState(() {
+                                            //     selectedRoomType = value;
+                                            //     if (!rateOverride) {
+                                            //       _setDefaultRates();
+                                            //     }
+                                            //   }),
+                                            //   theme: theme,
+                                            //   fontScale: fontScale,
+                                            //   cardRadius: cardRadius,
+                                            // ),
+                                            _buildSelectTextField(
+                                              label: 'Room Type *',
+                                              value:
+                                                  selectedRoomType == null ||
+                                                      selectedRoomType == -1
+                                                  ? null
+                                                  : roomTypes
+                                                        .firstWhere(
+                                                          (roomType) =>
+                                                              roomType.id ==
+                                                              selectedRoomType,
+                                                        )
+                                                        .name,
+                                              hint: 'Select Room Type',
+                                              theme: Theme.of(context),
+                                              fontScale: fontScale,
+                                              cardRadius: 8,
+                                              onTap: () async {
+                                                final _selectedRoomType =
+                                                    await _openDropdownBottomSheet(
+                                                      roomTypes,
+                                                      'Select Room Type',
+                                                    );
+                                                if (_selectedRoomType.id !=
+                                                    -1) {
+                                                  await _loadRoomsAndRates(
+                                                    _selectedRoomType.id,
+                                                  );
+                                                }
+                                                setState(() {
+                                                  selectedRoomType =
+                                                      _selectedRoomType.id;
+                                                  if (!rateOverride) {
+                                                    _setDefaultRates();
+                                                  }
+                                                });
+                                              },
+                                            ),
                                       ),
                                       SizedBox(width: defaultPadding),
                                       Expanded(
-                                        child: _buildDropdownField(
+                                        // child: _buildDropdownField(
+                                        //   label: 'Rate Type *',
+                                        //   value: selectedRateType,
+                                        //   hint: 'Select Rate Type',
+                                        //   items: rateTypes,
+                                        //   onChanged: (value) => setState(
+                                        //     () => selectedRateType = value,
+                                        //   ),
+                                        //   theme: theme,
+                                        //   fontScale: fontScale,
+                                        //   cardRadius: cardRadius,
+                                        // ),
+                                        child: _buildSelectTextField(
                                           label: 'Rate Type *',
-                                          value: selectedRateType,
+                                          value:
+                                              selectedRateType == null ||
+                                                  selectedRateType == -1
+                                              ? null
+                                              : rateTypes
+                                                    .firstWhere(
+                                                      (rateType) =>
+                                                          rateType.id ==
+                                                          selectedRateType,
+                                                    )
+                                                    .name,
                                           hint: 'Select Rate Type',
-                                          items: rateTypes,
-                                          onChanged: (value) => setState(
-                                            () => selectedRateType = value,
-                                          ),
-                                          theme: theme,
+                                          theme: Theme.of(context),
                                           fontScale: fontScale,
-                                          cardRadius: cardRadius,
+                                          cardRadius: 8,
+                                          onTap: () async {
+                                            final rateType =
+                                                await _openDropdownBottomSheet(
+                                                  rateTypes,
+                                                  'Select Rate Type',
+                                                );
+                                            setState(
+                                              () => selectedRateType =
+                                                  rateType.id,
+                                            );
+                                          },
                                         ),
                                       ),
                                     ],
@@ -749,7 +994,7 @@ class _QuickReservationState extends State<QuickReservation>
                                         label: '',
                                         value: selectedSalutation,
                                         hint: 'Select',
-                                        items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                        items: salutations,
                                         onChanged: (value) => setState(
                                           () => selectedSalutation = value,
                                         ),
@@ -865,7 +1110,7 @@ class _QuickReservationState extends State<QuickReservation>
                                         label: '',
                                         value: selectedSalutation,
                                         hint: 'Select',
-                                        items: ['Mr.', 'Mrs.', 'Ms.', 'Dr.'],
+                                        items: salutations,
                                         onChanged: (value) => setState(
                                           () => selectedSalutation = value,
                                         ),
@@ -1225,13 +1470,80 @@ class _QuickReservationState extends State<QuickReservation>
     );
   }
 
-  Widget _buildDropdownField({
-    ValueKey<String>? key,
+  Widget _buildSelectTextField({
+    ValueKey<int>? key,
     required String label,
     required String? value,
     required String hint,
-    required List<String> items,
-    required void Function(String?) onChanged,
+    required VoidCallback onTap,
+    required ThemeData theme,
+    required double fontScale,
+    required double cardRadius,
+  }) {
+    return Column(
+      key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontSize: 14 * fontScale,
+            color: AppColors.lightgrey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(cardRadius),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(
+                  color: AppColors.primary,
+                  width: 2,
+                ),
+              ),
+              filled: true,
+              fillColor: AppColors.surface,
+              suffixIcon: const Icon(
+                Icons.arrow_drop_down,
+                color: AppColors.lightgrey,
+              ),
+            ),
+            child: Text(
+              (value == null) ? hint : value,
+              style: TextStyle(
+                fontSize: 14 * fontScale,
+                color: (value == null)
+                    ? AppColors.lightgrey
+                    : AppColors.darkgrey,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    ValueKey<int>? key,
+    required String label,
+    required int? value,
+    required String hint,
+    required List<DropdownOption> items,
+    required void Function(int?) onChanged,
     required ThemeData theme,
     required double fontScale,
     required double cardRadius,
@@ -1248,7 +1560,7 @@ class _QuickReservationState extends State<QuickReservation>
           ),
         ),
         SizedBox(height: 4),
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<int>(
           value: value,
           hint: Text(
             hint,
@@ -1275,8 +1587,11 @@ class _QuickReservationState extends State<QuickReservation>
           ),
           icon: Icon(Icons.arrow_drop_down, color: AppColors.lightgrey),
           style: TextStyle(fontSize: 14 * fontScale, color: AppColors.darkgrey),
-          items: items.map((String item) {
-            return DropdownMenuItem<String>(value: item, child: Text(item));
+          items: items.map((DropdownOption item) {
+            return DropdownMenuItem<int>(
+              value: item.id,
+              child: Text(item.name),
+            );
           }).toList(),
           onChanged: onChanged,
         ),
@@ -1541,85 +1856,240 @@ class _QuickReservationState extends State<QuickReservation>
                   if (isMobile)
                     Column(
                       children: [
-                        _buildDropdownField(
+                        // _buildDropdownField(
+                        //   label: 'Room Type *',
+                        //   value: selectedRoomTypes[index],
+                        //   hint: 'Select Room Type',
+                        //   items: roomTypes,
+                        //   onChanged: (value) => setState(() {
+                        //     selectedRoomTypes[index] = value;
+                        //     if (!rateOverride) {
+                        //       rates[index] = defaultRates[value!] ?? 0.0;
+                        //       _updateTotals();
+                        //     }
+                        //   }),
+                        //   theme: theme,
+                        //   fontScale: fontScale,
+                        //   cardRadius: cardRadius,
+                        // ),
+                        // SizedBox(height: listItemSpacing),
+                        // _buildDropdownField(
+                        //   label: 'Rate Type *',
+                        //   value: selectedRateTypes[index],
+                        //   hint: 'Select Rate Type',
+                        //   items: rateTypes,
+                        //   onChanged: (value) =>
+                        //       setState(() => selectedRateTypes[index] = value),
+                        //   theme: theme,
+                        //   fontScale: fontScale,
+                        //   cardRadius: cardRadius,
+                        // ),
+                        // SizedBox(height: listItemSpacing),
+                        _buildSelectTextField(
                           label: 'Room Type *',
-                          value: selectedRoomTypes[index],
+                          value:
+                              selectedRoomTypes[index] == null ||
+                                  selectedRoomTypes[index] == -1
+                              ? null
+                              : roomTypes
+                                    .firstWhere(
+                                      (roomType) =>
+                                          roomType.id ==
+                                          selectedRoomTypes[index],
+                                    )
+                                    .name,
                           hint: 'Select Room Type',
-                          items: roomTypes,
-                          onChanged: (value) => setState(() {
-                            selectedRoomTypes[index] = value;
-                            if (!rateOverride) {
-                              rates[index] = defaultRates[value!] ?? 0.0;
-                              _updateTotals();
+                          theme: Theme.of(context),
+                          fontScale: fontScale,
+                          cardRadius: 8,
+                          onTap: () async {
+                            final selectedRoomType =
+                                await _openDropdownBottomSheet(
+                                  roomTypes,
+                                  'Select Room Type',
+                                );
+                            if (selectedRoomType.id != -1) {
+                              await _loadRoomsAndRates(selectedRoomType.id);
                             }
-                          }),
-                          theme: theme,
-                          fontScale: fontScale,
-                          cardRadius: cardRadius,
+                            setState(() {
+                              selectedRoomTypes[index] = selectedRoomType.id;
+                              if (!rateOverride) {
+                                rates[index] =
+                                    defaultRates[selectedRoomType.id!] ?? 0.0;
+                                _updateTotals();
+                              }
+                            });
+                          },
                         ),
                         SizedBox(height: listItemSpacing),
-                        _buildDropdownField(
+                        _buildSelectTextField(
                           label: 'Rate Type *',
-                          value: selectedRateTypes[index],
+                          value:
+                              selectedRateTypes[index] == null ||
+                                  selectedRateTypes[index] == -1
+                              ? null
+                              : rateTypes
+                                    .firstWhere(
+                                      (rateType) =>
+                                          rateType.id ==
+                                          selectedRateTypes[index],
+                                    )
+                                    .name,
                           hint: 'Select Rate Type',
-                          items: rateTypes,
-                          onChanged: (value) =>
-                              setState(() => selectedRateTypes[index] = value),
-                          theme: theme,
+                          theme: Theme.of(context),
                           fontScale: fontScale,
-                          cardRadius: cardRadius,
+                          cardRadius: 8,
+                          onTap: () async {
+                            final rateType = await _openDropdownBottomSheet(
+                              rateTypes,
+                              'Select Rate Type',
+                            );
+                            setState(
+                              () => selectedRateTypes[index] = rateType.id,
+                            );
+                          },
                         ),
-                        SizedBox(height: listItemSpacing),
                       ],
                     )
                   else
                     Row(
                       children: [
                         Expanded(
-                          child: _buildDropdownField(
-                            label: 'Room Type *',
-                            value: selectedRoomTypes[index],
-                            hint: 'Select Room Type',
-                            items: roomTypes,
-                            onChanged: (value) => setState(() {
-                              selectedRoomTypes[index] = value;
-                              if (!rateOverride) {
-                                rates[index] = defaultRates[value!] ?? 0.0;
-                                _updateTotals();
-                              }
-                            }),
-                            theme: theme,
-                            fontScale: fontScale,
-                            cardRadius: cardRadius,
-                          ),
+                          child:
+                              //  _buildDropdownField(
+                              //   label: 'Room Type *',
+                              //   value: selectedRoomTypes[index],
+                              //   hint: 'Select Room Type',
+                              //   items: roomTypes,
+                              //   onChanged: (value) => setState(() {
+                              //     selectedRoomTypes[index] = value;
+                              //     if (!rateOverride) {
+                              //       rates[index] = defaultRates[value!] ?? 0.0;
+                              //       _updateTotals();
+                              //     }
+                              //   }),
+                              //   theme: theme,
+                              //   fontScale: fontScale,
+                              //   cardRadius: cardRadius,
+                              // ),
+                              _buildSelectTextField(
+                                label: 'Room Type *',
+                                value:
+                                    selectedRoomTypes[index] == null ||
+                                        selectedRoomTypes[index] == -1
+                                    ? null
+                                    : roomTypes
+                                          .firstWhere(
+                                            (roomType) =>
+                                                roomType.id ==
+                                                selectedRoomTypes[index],
+                                          )
+                                          .name,
+                                hint: 'Select Room Type',
+                                theme: Theme.of(context),
+                                fontScale: fontScale,
+                                cardRadius: 8,
+                                onTap: () async {
+                                  final selectedRoomType =
+                                      await _openDropdownBottomSheet(
+                                        roomTypes,
+                                        'Select Room Type',
+                                      );
+                                  if (selectedRoomType.id != -1) {
+                                    await _loadRoomsAndRates(
+                                      selectedRoomType.id,
+                                    );
+                                  }
+                                  setState(() {
+                                    selectedRoomTypes[index] =
+                                        selectedRoomType.id;
+                                    if (!rateOverride) {
+                                      rates[index] =
+                                          defaultRates[selectedRoomType.id!] ??
+                                          0.0;
+                                      _updateTotals();
+                                    }
+                                  });
+                                },
+                              ),
                         ),
                         SizedBox(width: defaultPadding),
                         Expanded(
-                          child: _buildDropdownField(
-                            label: 'Rate Type *',
-                            value: selectedRateTypes[index],
-                            hint: 'Select Rate Type',
-                            items: rateTypes,
-                            onChanged: (value) => setState(
-                              () => selectedRateTypes[index] = value,
-                            ),
-                            theme: theme,
-                            fontScale: fontScale,
-                            cardRadius: cardRadius,
-                          ),
+                          child:
+                              // _buildDropdownField(
+                              //   label: 'Rate Type *',
+                              //   value: selectedRateTypes[index],
+                              //   hint: 'Select Rate Type',
+                              //   items: rateTypes,
+                              //   onChanged: (value) => setState(
+                              //     () => selectedRateTypes[index] = value,
+                              //   ),
+                              //   theme: theme,
+                              //   fontScale: fontScale,
+                              //   cardRadius: cardRadius,
+                              // ),
+                              _buildSelectTextField(
+                                label: 'Rate Type *',
+                                value:
+                                    selectedRateTypes[index] == null ||
+                                        selectedRateTypes[index] == -1
+                                    ? null
+                                    : rateTypes
+                                          .firstWhere(
+                                            (rateType) =>
+                                                rateType.id ==
+                                                selectedRateTypes[index],
+                                          )
+                                          .name,
+                                hint: 'Select Rate Type',
+                                theme: Theme.of(context),
+                                fontScale: fontScale,
+                                cardRadius: 8,
+                                onTap: () async {
+                                  final rateType =
+                                      await _openDropdownBottomSheet(
+                                        rateTypes,
+                                        'Select Rate Type',
+                                      );
+                                  setState(
+                                    () =>
+                                        selectedRateTypes[index] = rateType.id,
+                                  );
+                                },
+                              ),
                         ),
                       ],
                     ),
-                _buildDropdownField(
-                  label: 'Room',
-                  value: selectedRooms[index],
+                // _buildDropdownField(
+                //   label: 'Room',
+                //   value: selectedRooms[index],
+                //   hint: 'Select Room',
+                //   items: rooms,
+                //   onChanged: (value) =>
+                //       setState(() => selectedRooms[index] = value),
+                //   theme: theme,
+                //   fontScale: fontScale,
+                //   cardRadius: cardRadius,
+                // ),
+                _buildSelectTextField(
+                  label: 'Room *',
+                  value:
+                      selectedRooms[index] == null || selectedRooms[index] == -1
+                      ? null
+                      : rooms
+                            .firstWhere((x) => x.id == selectedRooms[index])
+                            .name,
                   hint: 'Select Room',
-                  items: rooms,
-                  onChanged: (value) =>
-                      setState(() => selectedRooms[index] = value),
-                  theme: theme,
+                  theme: Theme.of(context),
                   fontScale: fontScale,
-                  cardRadius: cardRadius,
+                  cardRadius: 8,
+                  onTap: () async {
+                    final roomSelected = await _openDropdownBottomSheet(
+                      rooms,
+                      'Select Room',
+                    );
+                    setState(() => selectedRooms[index] = roomSelected.id);
+                  },
                 ),
                 SizedBox(height: listItemSpacing),
                 if (isMobile)
@@ -1991,7 +2461,6 @@ class _QuickReservationState extends State<QuickReservation>
   }
 }
 
-// Custom transform for shimmering effect
 class _ShimmerGradientTransform extends GradientTransform {
   final double percent;
 
@@ -2000,5 +2469,103 @@ class _ShimmerGradientTransform extends GradientTransform {
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
     return Matrix4.translationValues(bounds.width * (percent - 0.5) * 2, 0, 0);
+  }
+}
+
+class DropdownOptionBottomSheet extends StatelessWidget {
+  final String title;
+  final List<DropdownOption> options;
+
+  const DropdownOptionBottomSheet({
+    super.key,
+    required this.title,
+    required this.options,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SizedBox(
+        width: double.infinity,
+        child: Container(
+          padding: const EdgeInsets.only(top: 16, bottom: 16),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: options.isEmpty
+                        ? [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 24,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'No data available',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.lightgrey,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                ),
+                              ),
+                            ),
+                          ]
+                        : options.map((option) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.pop(context, option);
+                              },
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surface,
+                                  border: Border.all(
+                                    color: AppColors.lightgrey,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  option.name,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

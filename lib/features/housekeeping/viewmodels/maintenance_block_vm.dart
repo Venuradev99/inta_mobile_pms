@@ -6,16 +6,17 @@ import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_p
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenanceblock_save_payload.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/unblock_maintenance_block_payload.dart';
+import 'package:inta_mobile_pms/features/reservations/models/room_type_response.dart';
 import 'package:inta_mobile_pms/services/apiServices/house_keeping_service.dart';
 import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/message_service.dart';
 
-class RoomTypeResponse {
-  final int roomTypeId;
-  final String name;
+// class RoomTypeResponse {
+//   final int roomTypeId;
+//   final String name;
 
-  RoomTypeResponse({required this.roomTypeId, required this.name});
-}
+//   RoomTypeResponse({required this.roomTypeId, required this.name});
+// }
 
 class MaintenanceBlockVm extends GetxController {
   final HouseKeepingService _houseKeepingService;
@@ -140,10 +141,7 @@ class MaintenanceBlockVm extends GetxController {
                 as List; // Adjust based on your API response structure
         roomTypesList.value = result
             .map(
-              (item) => RoomTypeResponse(
-                roomTypeId: item["roomTypeId"],
-                name: item["name"],
-              ),
+              (item) => RoomTypeResponse.fromJson(item),
             )
             .toList();
       } else {
