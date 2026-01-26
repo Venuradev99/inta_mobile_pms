@@ -861,13 +861,13 @@ class _HouseStatusState extends State<HouseStatus> {
                   color: AppColors.black,
                 ),
               ),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[600],
-                  height: 1.3,
-                ),
-              ),
+              // Text(
+              //   description,
+              //   style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              //     color: Colors.grey[600],
+              //     height: 1.3,
+              //   ),
+              // ),
             ],
           ),
         ),

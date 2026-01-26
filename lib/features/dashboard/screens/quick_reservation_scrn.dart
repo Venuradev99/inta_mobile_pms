@@ -577,17 +577,29 @@ class _QuickReservationState extends State<QuickReservation>
                         Row(
                           children: [
                             Expanded(
-                              child: _buildDropdownField(
+                              child: _buildSelectTextField(
                                 label: 'Reservation Type *',
-                                value: reservationType,
-                                hint: 'Select Type',
-                                items: reservationTypes,
-                                onChanged: (value) => setState(
-                                  () => reservationType = value ?? -1,
-                                ),
-                                theme: theme,
+                                value:
+                                    reservationType == null ||
+                                        reservationType == -1
+                                    ? null
+                                    : reservationTypes
+                                          .firstWhere(
+                                            (x) => x.id == reservationType,
+                                          )
+                                          .name,
+                                hint: 'Select Reservation Type',
+                                theme: Theme.of(context),
                                 fontScale: fontScale,
-                                cardRadius: cardRadius,
+                                cardRadius: 8,
+                                onTap: () async {
+                                  final resType =
+                                      await _openDropdownBottomSheet(
+                                        reservationTypes,
+                                        'Select Reservation Type',
+                                      );
+                                  setState(() => reservationType = resType.id);
+                                },
                               ),
                             ),
                             SizedBox(width: defaultPadding),

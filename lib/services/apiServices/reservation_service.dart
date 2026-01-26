@@ -23,9 +23,13 @@ class ReservationService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomTypesApi({bool? withInactive = false, bool? onlyRoomExistType = true}) async {
+  Future<Map<String, dynamic>> getAllRoomTypesApi({
+    bool? withInactive = false,
+    bool? onlyRoomExistType = true,
+  }) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -359,6 +363,16 @@ class ReservationService {
       final url =
           '${_appResources.baseUrl}${AppResources.getAllBookingRemarks}=${bookingRoomId}';
       final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> getPriceApi(Map<String, dynamic> body) async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getPrice}';
+      final response = await _dataAccess.post(body,url);
       return response;
     } catch (error) {
       return {"error": error.toString()};

@@ -223,7 +223,7 @@ class _MaintenanceBlockState extends State<MaintenanceBlock>
             },
           ),
           ActionItem(
-            icon: Icons.list_alt,
+            icon: Icons.history,
             label: 'Audit Trail',
             onTap: () {
               Navigator.pop(context);

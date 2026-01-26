@@ -624,8 +624,9 @@ class ReservationVm extends GetxController {
 
       if (paymentResponse["isSuccessful"] == true) {
         final result = paymentResponse["result"];
-        paymentSummary.value = PaymentSummary.fromJson(result);
-
+        if (result != null) {
+          paymentSummary.value = PaymentSummary.fromJson(result);
+        }
       } else {
         final msg =
             paymentResponse["errors"][0] ?? 'Error Loading Payment Summary!';

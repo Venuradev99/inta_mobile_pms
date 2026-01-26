@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inta_mobile_pms/data/models/checkin_checkout_data_model.dart';
-import 'package:inta_mobile_pms/enums/wellknown_reservation_setting.dart';
+import 'package:inta_mobile_pms/data/enums/wellknown_reservation_setting.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/dropdown_options.dart';
 import 'package:inta_mobile_pms/features/reservations/models/available_rate_type_response.dart';
 import 'package:inta_mobile_pms/features/reservations/models/business_source_category_response.dart';
@@ -206,6 +206,169 @@ class QuickReservationVm extends GetxController {
       }
     } catch (e) {
       throw Exception('Error loading available rooms: $e');
+    }
+  }
+
+  Future<void> getReservationPrice() async {
+    try {
+      final payload = {
+        "AdvancePaymentData": {
+          "paymentMode": 0,
+          "amount": 0,
+          "voucherNumber": "",
+          "currencyId": 0,
+        },
+        "BillingInformation": {
+          "ApplyingRateType": 1,
+          "BillingInstructionId": 1,
+          "BusinessCategoryId": 4,
+          "IsComplementory": false,
+          "IsTaxExempted": false,
+          "IsToBeReleased": false,
+          "PaymentMode": 2,
+          "PaymentModeCategory": 1,
+          "RateSourceId": 0,
+          "ReleaseChargeAmountPercentage": 0,
+          "ReleaseDate": null,
+          "TaxIDArray": [],
+          "TaxNo": "",
+          "TaxRegistrationDate": "",
+        },
+        "BookedBy": 0,
+        "BookingAction": 1,
+        "BookingDate": "2026-01-26 08:06",
+        "BookingNo": "",
+        "BookingRooms": [
+          {
+            "ArrivalDate": "2026-01-19 13:00",
+            "ArrivalTime": "13:00",
+            "BookingDate": "2026-01-26 08:06",
+            "BookingId": 0,
+            "BookingRoomId": 0,
+            "ChildAges": [],
+            "CurrencyId": 1,
+            "DepartureDate": "2026-01-19 17:00",
+            "DepartureTime": "17:00",
+            "DiscountPlanId": 0,
+            "DiscountPlanValue": 0,
+            "DropOffDateTime": "",
+            "DropOffDescription": "",
+            "DropOffModeId": 0,
+            "DropOffVehiceleNo": "",
+            "InclustionDataList": [],
+            "IpAddress": "112.134.195.75",
+            "IsManualRate": false,
+            "IsTaxInclusiveRate": false,
+            "ManualRate": 0,
+            "MyProperty": 0,
+            "NoOfAdults": 2,
+            "NoOfChildren": 2,
+            "NoOfNights": 0,
+            "PickUpDateTime": "",
+            "PickUpDescription": "",
+            "PickUpModeId": 0,
+            "PickUpVehiceleNo": "",
+            "RateTypeId": 2,
+            "RemarksList": [],
+            "RoomId": 1,
+            "RoomTypeId": 2,
+            "Sharers": [],
+            "StartingMealType": 0,
+            "UserId": 0,
+          },
+        ],
+        "BookingStatus": 0,
+        "BookingStatusReasonId": 0,
+        "BusinessSourceId": 4,
+        "CancellationData": {
+          "CancellDate": "",
+          "IsCancelled": false,
+          "CancellationNo": "",
+          "CancelledBy": 0,
+        },
+        "CharterId": 0,
+        "CheckingRemark": "",
+        "CheckoutRemark": "",
+        "CompanyOther": {
+          "CompanyId": 0,
+          "MarketId": 0,
+          "BusinessCategoryId": 4,
+          "BusinessSourceId": 0,
+          "TravelAgent": "",
+        },
+        "CreatedBy": 0,
+        "CreditCardData": {
+          "CardNumber": "",
+          "CardType": "",
+          "ExpiryMonth": "",
+          "ExpiryYear": "",
+          "CVVCode": "",
+          "CardHoldersName": "",
+        },
+        "Discount": {
+          "DiscountType": 0,
+          "DiscountRule": 0,
+          "DiscountRuleOccurance": 0,
+          "DiscountPlanValue": 0,
+        },
+        "DropOffData": {
+          "dropOffDescription": "",
+          "dropOffVehiceleNo": "",
+          "dropOffDateTime": "",
+          "dropOffModeId": 0,
+        },
+        "GeneralRemark": "",
+        "GroupColor": "",
+        "GroupId": 0,
+        "Guest": null,
+        "GuideId": 0,
+        "InclustionData": [],
+        "IpAddress": "112.134.195.75",
+        "IsPastTransaction": false,
+        "LastModifiedBy": 0,
+        "LoyaltyCardNo": "",
+        "MasterFolioBookingTransId": 0,
+        "NoOfPrint": 0,
+        "PaymentData": {
+          "PaymentType": 0,
+          "PaymentCurrencyId": 0,
+          "PaymentAmount": 0,
+          "VoucherNo": "",
+        },
+        "PickUpData": {
+          "pickUpDescription": "",
+          "pickUpVehiceleNo": "",
+          "pickUpDateTime": "",
+          "pickUpModeId": 0,
+        },
+        "RowVersion": "",
+        "ShouldPrintFolio": true,
+        "ShouldPrintGRCard": true,
+        "ShouldPrintReceipt": true,
+        "ShouldSendEmailAtCheckOut": "false",
+        "ShouldSuppressRateInGRCard": false,
+        "StayData": {"NoOfRooms": 1, "ReservationType": 2},
+        "TravelAgentInformation": {
+          "AgentId": 0,
+          "CommissionPlanId": 0,
+          "Value": 0,
+          "VoucherNumber": "",
+          "IsSourceRateApplied": false,
+        },
+        "VoidReason": "",
+        "WebReservationId": "",
+        "exemptedTaxes": {"taxIDArray": []},
+      };
+
+      final response = await _reservationService.getPriceApi(payload);
+
+      if (response["isSuccessful"] == true) {
+      } else {
+        final msg = response["errors"][0] ?? 'Error getting reservation price!';
+        MessageService().error(msg);
+      }
+    } catch (e) {
+      throw Exception('Error getting reservation price: $e');
     }
   }
 

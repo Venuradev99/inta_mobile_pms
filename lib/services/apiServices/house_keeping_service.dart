@@ -194,9 +194,13 @@ class HouseKeepingService {
     }
   }
 
-  Future<Map<String, dynamic>> getAllRoomTypesApi() async {
+  Future<Map<String, dynamic>> getAllRoomTypesApi({
+    bool? withInactive = false,
+    bool? onlyRoomExistType = true,
+  }) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllRoomTypes}';
+      final url =
+          '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {

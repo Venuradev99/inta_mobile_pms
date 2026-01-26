@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/core/theme/app_colors.dart';
 import 'package:inta_mobile_pms/core/config/responsive_config.dart';
 import 'package:inta_mobile_pms/core/widgets/pms_app_bar.dart';
-import 'package:inta_mobile_pms/enums/wellknown_menu.dart';
+import 'package:inta_mobile_pms/data/enums/wellknown_menu.dart';
 import 'package:inta_mobile_pms/features/dashboard/viewmodels/dashboard_vm.dart';
 import 'package:inta_mobile_pms/features/dashboard/widgets/hotel_list_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';

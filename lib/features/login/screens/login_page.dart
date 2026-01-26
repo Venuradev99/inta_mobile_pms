@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage>
   final _passwordController = TextEditingController();
   final _hotelIdController = TextEditingController();
 
-final LoginVm _loginVm = Get.find<LoginVm>();
+  final LoginVm _loginVm = Get.find<LoginVm>();
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
@@ -185,12 +185,15 @@ final LoginVm _loginVm = Get.find<LoginVm>();
   Widget _buildLogoSection(BuildContext context) {
     return Column(
       children: [
-        Image.asset(
-          _logo,
-          height: ResponsiveConfig.scaleHeight(context, 120),
-          width: ResponsiveConfig.scaleWidth(context, 120),
-          fit: BoxFit.contain,
-        ),
+        if (_logo.isNotEmpty)
+          Image.asset(
+            _logo,
+            height: ResponsiveConfig.scaleHeight(context, 120),
+            width: ResponsiveConfig.scaleWidth(context, 120),
+            fit: BoxFit.contain,
+          )
+        else
+          const SizedBox(height: 120),
         Text(
           'Welcome to Inta PMS Mobile',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(

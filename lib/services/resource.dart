@@ -52,8 +52,10 @@ class AppResources {
 
   //reservation
   static const String searchReservationList = '$booking/SearchReservationList';
+  static const String getPrice = '$booking/getPrice';
   static const String getAllRoomTypes =
       '$roomTypes/GetAll?';
+      // startIndex=0&PageSize=0&withInactive=false&onlyRoomExistType=true
   static const String getAllreservationTypes =
       '$reservationTypes/GetAll?startIndex=0&PageSize=0&withInactive=false';
   static const String getAllroomstatus =
