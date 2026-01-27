@@ -21,6 +21,7 @@ import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation
 import 'package:inta_mobile_pms/features/reservations/widgets/confirmation_dialog_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/guest_card_wgt.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/message_dialog_wgt.dart';
+import 'package:inta_mobile_pms/features/reservations/widgets/reservation_filter_bottom_sheet.dart';
 import 'package:inta_mobile_pms/features/reservations/widgets/status_info_dialog_wgt.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
 
@@ -56,25 +57,54 @@ class _ArrivalListState extends State<ArrivalList> {
           showModalBottomSheet(
             context: context,
             isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            builder: (context) => DraggableScrollableSheet(
-              initialChildSize: 0.8,
-              minChildSize: 0.5,
-              maxChildSize: 0.95,
-              builder: (context, scrollController) => Obx(() {
-                return FilterBottomSheet(
-                  type: 'arrival',
-                  roomTypes: _reservationVm.roomTypes.toList(),
-                  reservationTypes: _reservationVm.reservationTypes.toList(),
-                  statuses: _reservationVm.statuses.toList(),
-                  businessSources: _reservationVm.businessSources.toList(),
-                  filteredData: _reservationVm.receivedFilters.value ?? {},
-                  onApply: _reservationVm.applyFilters,
-                  scrollController: scrollController,
+            builder: (_) => ReservationFilterBottomSheet(
+              activeIndex: 2,
+              onPressReset: () => _reservationVm.resetFilters(),
+              editFilterData: _reservationVm.editFilterData.value ?? null,
+              initialFromDate: _reservationVm.systemDate.value!,
+              businessCategories: _reservationVm.businessSources.toList(),
+              roomTypes: _reservationVm.roomTypes.toList(),
+              rooms: _reservationVm.rooms,
+              status: _reservationVm.statuses.toList(),
+              resTypes: _reservationVm.reservationTypes.toList(),
+              getBusinessSourcesByCategory: (categoryId) async {
+                await _reservationVm.getBusinessSources(categoryId);
+                return _reservationVm.businessSourcesByCategory.toList();
+              },
+              onApply: (filters) {
+                // print('filters${filters}');
+                _reservationVm.searchFilters(filters);
+              },
+              filterByRoomType: (roomTypeId) async {
+                final roomsFiltered = _reservationVm.filterRoomsByRoomType(
+                  roomTypeId,
                 );
-              }),
+                return roomsFiltered;
+              },
             ),
           );
+          // showModalBottomSheet(
+          //   context: context,
+          //   isScrollControlled: true,
+          //   backgroundColor: Colors.transparent,
+          //   builder: (context) => DraggableScrollableSheet(
+          //     initialChildSize: 0.8,
+          //     minChildSize: 0.5,
+          //     maxChildSize: 0.95,
+          //     builder: (context, scrollController) => Obx(() {
+          //       return FilterBottomSheet(
+          //         type: 'arrival',
+          //         roomTypes: _reservationVm.roomTypes.toList(),
+          //         reservationTypes: _reservationVm.reservationTypes.toList(),
+          //         statuses: _reservationVm.statuses.toList(),
+          //         businessSources: _reservationVm.businessSources.toList(),
+          //         filteredData: _reservationVm.receivedFilters.value ?? {},
+          //         onApply: _reservationVm.applyFilters,
+          //         scrollController: scrollController,
+          //       );
+          //     }),
+          //   ),
+          // );
         },
       ),
       body: RefreshIndicator(

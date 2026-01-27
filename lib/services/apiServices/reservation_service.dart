@@ -127,6 +127,16 @@ class ReservationService {
     }
   }
 
+  Future<Map<String, dynamic>> getAllRoomsApi() async {
+    try {
+      final url = '${_appResources.baseUrl}${AppResources.getAllRooms}';
+      final response = await _dataAccess.get(url);
+      return response;
+    } catch (error) {
+      return {"error": error.toString()};
+    }
+  }
+
   Future<Map<String, dynamic>> getCancellationReasonsApi() async {
     try {
       final url =
@@ -372,7 +382,7 @@ class ReservationService {
   Future<Map<String, dynamic>> getPriceApi(Map<String, dynamic> body) async {
     try {
       final url = '${_appResources.baseUrl}${AppResources.getPrice}';
-      final response = await _dataAccess.post(body,url);
+      final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
       return {"error": error.toString()};
