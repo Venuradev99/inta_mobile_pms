@@ -2,7 +2,6 @@ import 'package:go_router/go_router.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/room_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/work_order.dart';
-import 'package:inta_mobile_pms/features/housekeeping/models/work_order_audit_trail_item.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/block_room_selection_screen.dart';
 import 'package:inta_mobile_pms/features/housekeeping/screens/post_note.dart';
@@ -10,6 +9,7 @@ import 'package:inta_mobile_pms/features/housekeeping/screens/view_work_order.da
 import 'package:inta_mobile_pms/features/housekeeping/screens/work_order_audit_trail.dart';
 import 'package:inta_mobile_pms/features/housekeeping/widgets/edit_block_room_wgt.dart';
 import 'package:inta_mobile_pms/features/login/screens/login_page.dart';
+import 'package:inta_mobile_pms/features/productActivation/screens/product_activation_screen.dart';
 import 'package:inta_mobile_pms/features/reports/screens/night_audit_report_screen.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
@@ -38,14 +38,33 @@ import 'package:inta_mobile_pms/features/reservations/widgets/change_reservation
 import 'package:inta_mobile_pms/features/reservations/widgets/edit_reservation_screen.dart';
 import 'package:inta_mobile_pms/features/stay_view/screens/stay_view_screen.dart';
 import 'package:inta_mobile_pms/router/app_routes.dart';
+import 'package:inta_mobile_pms/services/local_storage_manager.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 import '../features/housekeeping/screens/block_room_selection_details.dart';
 
 final appRouter = GoRouter(
   initialLocation: AppRoutes.login,
+  redirect: (context, state) async {
+    final hasActivationData = await LocalStorageManager.hasActivationData();
+    if (hasActivationData) {
+      final activationData = await LocalStorageManager.getActivationData();
+      final isActivated = activationData.serviceUrl.isNotEmpty;
+      if (!isActivated) {
+        return AppRoutes.activation;
+      }else{
+        return null;
+      }
+    } else {
+      return AppRoutes.activation;
+    }
+  },
   navigatorKey: NavigationService().navigatorKey,
   routes: [
+    GoRoute(
+      path: AppRoutes.activation,
+      builder: (context, state) => const ProductActivation(),
+    ),
     GoRoute(
       path: AppRoutes.dashboard,
       builder: (context, state) => const Dashboard(),
@@ -171,7 +190,7 @@ final appRouter = GoRouter(
         return PostNote(workOrder: workOrder);
       },
     ),
-     GoRoute(
+    GoRoute(
       path: AppRoutes.viewWorkOrder,
       builder: (context, state) {
         final workOrder = state.extra as WorkOrder;

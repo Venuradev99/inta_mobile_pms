@@ -83,6 +83,12 @@ class _ReservationFilterBottomSheetState
 
   Future<void> setData() async {
     final data = widget.editFilterData;
+
+    if(data?.arrivalCheck != null){
+      arrivalCheck = data?.arrivalCheck ?? true;
+      createdCheck = !arrivalCheck;
+    }
+
     if (data?.fromDate != null) {
       fromDate = DateTime.tryParse(data!.fromDate!) ?? widget.initialFromDate;
     }
@@ -170,16 +176,24 @@ class _ReservationFilterBottomSheetState
                         child: CheckboxListTile(
                           value: arrivalCheck,
                           title: const Text('Arrival'),
-                          onChanged: (val) =>
-                              setState(() => arrivalCheck = val ?? false),
+                          onChanged: (val) {
+                            setState(() {
+                              arrivalCheck = val ?? false;
+                              createdCheck = !arrivalCheck;
+                            });
+                          },
                         ),
                       ),
                       Expanded(
                         child: CheckboxListTile(
                           value: createdCheck,
                           title: const Text('Created'),
-                          onChanged: (val) =>
-                              setState(() => createdCheck = val ?? false),
+                          onChanged: (val) {
+                            setState(() {
+                              createdCheck = val ?? false;
+                              arrivalCheck = !createdCheck;
+                            });
+                          },
                         ),
                       ),
                     ],

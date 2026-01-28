@@ -11,7 +11,7 @@ class ReportsService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getNightAuditReport}';
+      final url = '${AppResources.getNightAuditReport}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -21,7 +21,7 @@ class ReportsService {
 
   Future<Map<String, dynamic>> getCurrenciesApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getCurrencies}';
+      final url = '${AppResources.getCurrencies}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -31,7 +31,7 @@ class ReportsService {
 
   Future<Map<String, dynamic>> getAllHotelApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllHotel}';
+      final url = '${AppResources.getAllHotel}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -43,7 +43,7 @@ class ReportsService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getManagerReport}';
+      final url = '${AppResources.getManagerReport}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {

@@ -5,7 +5,6 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:inta_mobile_pms/features/dashboard/models/hotel_data_response.dart';
 import 'package:inta_mobile_pms/features/housekeeping/models/maintenance_block_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
-import 'package:inta_mobile_pms/features/stay_view/models/CheckIn_data.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/available_rooms.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/dayuse_response.dart';
 import 'package:inta_mobile_pms/features/stay_view/models/stay_view_status_color.dart';

@@ -1,4 +1,5 @@
 class AppRoutes {
+  static const String activation = '/activation';
   static const String dashboard = '/dashboard';
   static const String stayView = '/stayview';
   static const String arrivalList = '/arrivallist';

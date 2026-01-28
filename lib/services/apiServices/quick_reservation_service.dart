@@ -9,7 +9,7 @@ class QuickReservationService {
 
   Future<Map<String, dynamic>> getAllTitleApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllTitle}';
+      final url = '${AppResources.getAllTitle}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -23,7 +23,7 @@ class QuickReservationService {
   }) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
+          '${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -35,7 +35,7 @@ class QuickReservationService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAvailableRooms}';
+      final url = '${AppResources.getAvailableRooms}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {

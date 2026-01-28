@@ -27,22 +27,18 @@ class _ReportWidgetState extends State<ManagerReport>
     CurrencyItem(currencyId: -1, code: 'None', symbol: 'None'),
   ];
   late List<HotelItem> _hotelList = [HotelItem(hotelId: -1, hotelName: 'All')];
-  late TabController _tabController;
   DateTime? _selectedDate;
   CurrencyItem? _selectedCurrency;
   HotelItem? _selectedHotel;
   List<HotelItem> _selectedHotels = [];
   List<int> _selectedViewIndices = [];
-  final List<ScrollController> _horizontalControllers = [];
+  final ScrollController _horizontalController = ScrollController();
   bool _isMultipleHotel = false;
+  bool _reportGenerated = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 12, vsync: this);
-    for (int i = 0; i < 12; i++) {
-      _horizontalControllers.add(ScrollController());
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         _managerReportVm.resetData();
@@ -61,10 +57,7 @@ class _ReportWidgetState extends State<ManagerReport>
 
   @override
   void dispose() {
-    _tabController.dispose();
-    for (var controller in _horizontalControllers) {
-      controller.dispose();
-    }
+    _horizontalController.dispose();
     super.dispose();
   }
 
@@ -88,6 +81,9 @@ class _ReportWidgetState extends State<ManagerReport>
           _selectedHotels,
           _isMultipleHotel,
         );
+        setState(() {
+          _reportGenerated = true;
+        });
       } else {
         MessageService().error('Invalid data selected!');
       }
@@ -118,11 +114,18 @@ class _ReportWidgetState extends State<ManagerReport>
   ];
 
   DataColumn _leftColAlign(String title) => DataColumn(
-    label: Align(alignment: Alignment.centerLeft, child: Text(title)),
+    label: Align(
+      alignment: Alignment.centerLeft,
+      child: Text(title, style: TextTheme.of(context).titleMedium),
+    ),
   );
 
   DataColumn _rightColAlign(String title) => DataColumn(
-    label: Align(alignment: Alignment.centerRight, child: Text(title)),
+    label: Align(
+      alignment: Alignment.centerRight,
+      child: Text(title, style: TextTheme.of(context).titleMedium),
+    ),
+    numeric: true,
   );
 
   DataCell _leftCell(dynamic value) => DataCell(
@@ -449,31 +452,12 @@ class _ReportWidgetState extends State<ManagerReport>
               ),
             ),
           ),
-
-          Container(
-            color: AppColors.primary,
-            child: TabBar(
-              isScrollable: true,
-              labelColor: AppColors.onPrimary,
-              unselectedLabelColor: AppColors.onPrimary.withOpacity(0.7),
-              controller: _tabController,
-              tabs: [
-                Tab(text: 'Room Charges'),
-                Tab(text: 'Extra Charge'),
-                Tab(text: 'Adjustment'),
-                Tab(text: 'Tax'),
-                Tab(text: 'Discount'),
-                Tab(text: 'Pay Outs'),
-                Tab(text: 'POS Revenue'),
-                Tab(text: 'Payment'),
-                Tab(text: 'POS Revenue Payment'),
-                Tab(text: 'City Ledger'),
-                Tab(text: 'Room Summary'),
-                Tab(text: 'Statistics'),
-              ],
-            ),
-          ),
           Obx(() {
+            // if (!_reportGenerated) {
+            //   return Center(
+            //     child: Text( 'No data available'),
+            //   );
+            // }
             if (_managerReportVm.isReportLoading.value) {
               return Expanded(
                 child: Shimmer.fromColors(
@@ -492,61 +476,17 @@ class _ReportWidgetState extends State<ManagerReport>
               );
             } else {
               return Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTableWidget(
-                      0,
-                      _managerReportVm.roomChargeData,
-                      totals: _managerReportVm.roomChargeDataTotals,
+                child: SingleChildScrollView(
+                  child: Scrollbar(
+                    controller: _horizontalController,
+                    thumbVisibility: true,
+                    trackVisibility: true,
+                    child: SingleChildScrollView(
+                      controller: _horizontalController,
+                      scrollDirection: Axis.horizontal,
+                      child: _buildCombinedTable(),
                     ),
-                    _buildTableWidget(
-                      1,
-                      _managerReportVm.extraChargeData,
-                      totals: _managerReportVm.extraChargeDataTotals,
-                    ),
-                    _buildTableWidget(
-                      2,
-                      _managerReportVm.adjustmentData,
-                      totals: _managerReportVm.adjustmentDataTotals,
-                    ),
-                    _buildTableWidget(
-                      3,
-                      _managerReportVm.taxData,
-                      totals: _managerReportVm.taxDataTotals,
-                    ),
-                    _buildTableWidget(
-                      4,
-                      _managerReportVm.discountData,
-                      totals: _managerReportVm.discountDataTotals,
-                    ),
-                    _buildTableWidget(
-                      5,
-                      _managerReportVm.payoutData,
-                      totals: _managerReportVm.payoutDataTotals,
-                    ),
-                    _buildTableWidget(
-                      6,
-                      _managerReportVm.posRevenueData,
-                      totals: _managerReportVm.posRevenueDataTotals,
-                    ),
-                    _buildTableWidget(
-                      7,
-                      _managerReportVm.paymentData,
-                      totals: _managerReportVm.paymentDataTotals,
-                    ),
-                    _buildTableWidget(
-                      8,
-                      _managerReportVm.posRevenuePaymentData,
-                      totals: _managerReportVm.posRevenuePaymentDataTotals,
-                    ),
-                    _buildTableWidget(9, _managerReportVm.cityLedgerData),
-                    _buildTableWidget(10, _managerReportVm.roomSummaryData),
-                    _buildTableWidget(
-                      11,
-                      _managerReportVm.statisticRecordsData,
-                    ),
-                  ],
+                  ),
                 ),
               );
             }
@@ -556,62 +496,122 @@ class _ReportWidgetState extends State<ManagerReport>
     );
   }
 
-  Widget _buildTableWidget(
-    int index,
-    RxList data, {
-    Map<String, dynamic>? totals,
-  }) {
-    if (data.isEmpty) {
-      return const Center(child: Text('No data to show'));
-    } else {
-      List<DataRow> rows = data.map((item) {
-        return DataRow(
-          cells: cols.map((col) {
-            if (['description'].contains(col['field'])) {
-              final value = item[col['field']];
-              return _leftCell(value.toString());
-            } else {
-              final value = item[col['field']];
-              final formatted = formatCurrency(value);
-              return _rightCell(formatted.toString());
-            }
-          }).toList(),
-        );
-      }).toList();
+  Widget _buildCombinedTable() {
+    List<Map<String, dynamic>> sections = [
+      {
+        'title': 'Room Charges',
+        'data': _managerReportVm.roomChargeData,
+        'totals': _managerReportVm.roomChargeDataTotals,
+      },
+      {
+        'title': 'Extra Charge',
+        'data': _managerReportVm.extraChargeData,
+        'totals': _managerReportVm.extraChargeDataTotals,
+      },
+      {
+        'title': 'Adjustment',
+        'data': _managerReportVm.adjustmentData,
+        'totals': _managerReportVm.adjustmentDataTotals,
+      },
+      {
+        'title': 'Tax',
+        'data': _managerReportVm.taxData,
+        'totals': _managerReportVm.taxDataTotals,
+      },
+      {
+        'title': 'Discount',
+        'data': _managerReportVm.discountData,
+        'totals': _managerReportVm.discountDataTotals,
+      },
+      {
+        'title': 'Pay Outs',
+        'data': _managerReportVm.payoutData,
+        'totals': _managerReportVm.payoutDataTotals,
+      },
+      {
+        'title': 'POS Revenue',
+        'data': _managerReportVm.posRevenueData,
+        'totals': _managerReportVm.posRevenueDataTotals,
+      },
+      {
+        'title': 'Payment',
+        'data': _managerReportVm.paymentData,
+        'totals': _managerReportVm.paymentDataTotals,
+      },
+      {
+        'title': 'POS Revenue Payment',
+        'data': _managerReportVm.posRevenuePaymentData,
+        'totals': _managerReportVm.posRevenuePaymentDataTotals,
+      },
+      {'title': 'City Ledger', 'data': _managerReportVm.cityLedgerData},
+      {'title': 'Room Summary', 'data': _managerReportVm.roomSummaryData},
+      {'title': 'Statistics', 'data': _managerReportVm.statisticRecordsData},
+    ];
 
-      if (totals != null) {
-        rows.add(
+    List<DataRow> allRows = [];
+
+    for (var section in sections) {
+      var data = section['data'] as RxList<dynamic>;
+      if (data.isNotEmpty) {
+        allRows.add(
           DataRow(
+            color: MaterialStateProperty.all(Colors.blue[50]),
             cells: [
-              _leftBoldCell('Total'),
-              _rightBoldCell(formatCurrency(totals["today"]).toString()),
-              _rightBoldCell(formatCurrency(totals["ptd"]).toString()),
-              _rightBoldCell(formatCurrency(totals["ytd"]).toString()),
+              _leftBoldCell(section['title']),
+              DataCell(Text('')),
+              DataCell(Text('')),
+              DataCell(Text('')),
             ],
           ),
         );
-      }
 
-      return SingleChildScrollView(
-        child: Scrollbar(
-          controller: _horizontalControllers[index],
-          thumbVisibility: true,
-          trackVisibility: true,
-          child: SingleChildScrollView(
-            controller: _horizontalControllers[index],
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              columns: cols.map((col) {
-                if (['description'].contains(col['field'])) {
-                  return _leftColAlign(col['header']!);
+        allRows.addAll(
+          data.map<DataRow>((item) {
+            return DataRow(
+              cells: cols.map((col) {
+                var field = col['field'];
+                var value = item[field];
+                if (field == "description") {
+                  return _leftCell(value ?? '');
                 } else {
-                  return _rightColAlign(col['header']!);
+                  var formatted = formatCurrency(value);
+                  return _rightCell(formatted);
                 }
               }).toList(),
-              rows: rows,
+            );
+          }).toList(),
+        );
+        var totals = section['totals'] as Map<String, dynamic>?;
+        if (totals != null) {
+          allRows.add(
+            DataRow(
+              // color: MaterialStateProperty.all(Colors.green[50]),
+              cells: [
+                _leftBoldCell('Total'),
+                _rightBoldCell(formatCurrency(totals["today"])),
+                _rightBoldCell(formatCurrency(totals["ptd"])),
+                _rightBoldCell(formatCurrency(totals["ytd"])),
+              ],
             ),
-          ),
-        ),
+          );
+        }
+      }
+    }
+
+    if (allRows.isEmpty) {
+      return Center(child: Text(_reportGenerated ? 'No data available' : ''));
+    } else {
+      return DataTable(
+        headingRowColor: MaterialStateProperty.all(Colors.grey[200]),
+        columns: cols.map((col) {
+          var header = col['header']!;
+          if (col['field'] == "description") {
+            return _leftColAlign(header);
+          } else {
+            return _rightColAlign(header);
+          }
+        }).toList(),
+        rows: allRows,
       );
     }
   }

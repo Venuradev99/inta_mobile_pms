@@ -6,10 +6,17 @@ import 'package:inta_mobile_pms/services/message_service.dart';
 import 'package:inta_mobile_pms/services/navigation_service.dart';
 
 class DataAccessService {
-  Map<String, dynamic>? configData;
-  late String baseUrl;
+  DataAccessService();
 
-  DataAccessService(this.baseUrl);
+  Future<String> getBaseUrl() async {
+    try {
+      final activationData = await LocalStorageManager.getActivationData();
+      final baseUrl = activationData.serviceUrl;
+      return baseUrl;
+    } catch (e) {
+      throw Exception('Error getting base url');
+    }
+  }
 
   Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
     final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -41,8 +48,11 @@ class DataAccessService {
         'Content-Type': 'application/json',
         'Hotelid': hotelId,
       };
-
-      final response = await http.get(Uri.parse(url), headers: headers);
+      final baseUrl = await getBaseUrl();
+      final response = await http.get(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
 
       return _handleResponse(response);
     } catch (e) {
@@ -64,8 +74,11 @@ class DataAccessService {
         'Content-Type': 'application/json',
         'Hotelid': hotelId,
       };
-
-      final response = await http.delete(Uri.parse(url), headers: headers);
+      final baseUrl = await getBaseUrl();
+      final response = await http.delete(
+        Uri.parse('$baseUrl$url'),
+        headers: headers,
+      );
 
       return _handleResponse(response);
     } catch (e) {
@@ -90,9 +103,9 @@ class DataAccessService {
         'Content-Type': 'application/json',
         'Hotelid': hotelId,
       };
-
+      final baseUrl = await getBaseUrl();
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse('$baseUrl$url'),
         headers: headers,
         body: jsonEncode(body),
       );
@@ -120,9 +133,9 @@ class DataAccessService {
         'Content-Type': 'application/json',
         'Hotelid': hotelId,
       };
-
+      final baseUrl = await getBaseUrl();
       final response = await http.put(
-        Uri.parse(url),
+        Uri.parse('$baseUrl$url'),
         headers: headers,
         body: jsonEncode(body),
       );

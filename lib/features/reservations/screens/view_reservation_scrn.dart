@@ -490,148 +490,144 @@ class _ViewReservation extends State<ViewReservation>
 
           const SizedBox(height: 16),
 
-          _buildModernCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildCardHeader(context, 'Folio Summary', Icons.receipt_long),
-                const SizedBox(height: 16),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Total Charges',
-                  item!.totalAmount!,
-                  // _reservationVm.paymentSummary.value!.totalPrice,
-                  isPositive: false,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-                  _buildFinancialRow(
-                    context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.totalAmount! / item!.conversionRate!
-                        : 0,
-                    isPositive: false,
-                  ),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Payments',
-                  item!.totalCredits!,
-                  isPositive: true,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-                  _buildFinancialRow(
-                    context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.totalCredits! / item!.conversionRate!
-                        : 0,
-                    isPositive: true,
-                  ),
-                const Divider(height: 24, thickness: 1.5),
-                _buildFinancialRow(
-                  context,
-                  _baseCurrencyCode,
-                  'Balance Due',
-                  item!.balanceAmount!,
-                  isBalance: true,
-                  isPositive: item!.balanceAmount! <= 0,
-                ),
-                if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-                  _buildFinancialRow(
-                    context,
-                    item!.visibleCurrencyCode!,
-                    '',
-                    item!.conversionRate != 0
-                        ? item!.balanceAmount! / item!.conversionRate!
-                        : 0,
-                    isBalance: true,
-                    isPositive: item!.balanceAmount! <= 0,
-                  ),
-              ],
-            ),
-          ),
-
-          // Obx(
-          //   () => _buildModernCard(
-          //     child: Column(
-          //       crossAxisAlignment: CrossAxisAlignment.start,
-          //       children: [
-          //         _buildCardHeader(
-          //           context,
-          //           'Folio Summary',
-          //           Icons.receipt_long,
-          //         ),
-          //         const SizedBox(height: 16),
+          // _buildModernCard(
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       _buildCardHeader(context, 'Folio Summary', Icons.receipt_long),
+          //       const SizedBox(height: 16),
+          //       _buildFinancialRow(
+          //         context,
+          //         _baseCurrencyCode,
+          //         'Total Charges',
+          //         item!.totalAmount!,
+          //         // _reservationVm.paymentSummary.value!.totalPrice,
+          //         isPositive: false,
+          //       ),
+          //       if (item!.visibleCurrencyCode! != _baseCurrencyCode)
           //         _buildFinancialRow(
           //           context,
-          //           _baseCurrencyCode,
-          //           'Total Charges',
-          //           _reservationVm.paymentSummary.value!.totalPrice,
+          //           item!.visibleCurrencyCode!,
+          //           '',
+          //           item!.conversionRate != 0
+          //               ? item!.totalAmount! / item!.conversionRate!
+          //               : 0,
           //           isPositive: false,
           //         ),
-          //         if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-          //           _buildFinancialRow(
-          //             context,
-          //             item!.visibleCurrencyCode!,
-          //             '',
-          //             item!.conversionRate != 0
-          //                 ? _reservationVm.paymentSummary.value!.totalPrice /
-          //                       item!.conversionRate!
-          //                 : 0,
-          //             isPositive: false,
-          //           ),
+          //       _buildFinancialRow(
+          //         context,
+          //         _baseCurrencyCode,
+          //         'Payments',
+          //         item!.totalCredits!,
+          //         isPositive: true,
+          //       ),
+          //       if (item!.visibleCurrencyCode! != _baseCurrencyCode)
           //         _buildFinancialRow(
           //           context,
-          //           _baseCurrencyCode,
-          //           'Payments',
-          //           _reservationVm.paymentSummary.value!.totalGrossAmount,
+          //           item!.visibleCurrencyCode!,
+          //           '',
+          //           item!.conversionRate != 0
+          //               ? item!.totalCredits! / item!.conversionRate!
+          //               : 0,
           //           isPositive: true,
           //         ),
-          //         if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-          //           _buildFinancialRow(
-          //             context,
-          //             item!.visibleCurrencyCode!,
-          //             '',
-          //             item!.conversionRate != 0
-          //                 ? _reservationVm
-          //                           .paymentSummary
-          //                           .value!
-          //                           .totalGrossAmount /
-          //                       item!.conversionRate!
-          //                 : 0,
-          //             isPositive: true,
-          //           ),
-          //         const Divider(height: 24, thickness: 1.5),
+          //       const Divider(height: 24, thickness: 1.5),
+          //       _buildFinancialRow(
+          //         context,
+          //         _baseCurrencyCode,
+          //         'Balance Due',
+          //         item!.balanceAmount!,
+          //         isBalance: true,
+          //         isPositive: item!.balanceAmount! <= 0,
+          //       ),
+          //       if (item!.visibleCurrencyCode! != _baseCurrencyCode)
           //         _buildFinancialRow(
           //           context,
-          //           _baseCurrencyCode,
-          //           'Balance Due',
-          //           _reservationVm.paymentSummary.value!.balance,
+          //           item!.visibleCurrencyCode!,
+          //           '',
+          //           item!.conversionRate != 0
+          //               ? item!.balanceAmount! / item!.conversionRate!
+          //               : 0,
           //           isBalance: true,
-          //           isPositive:
-          //               _reservationVm.paymentSummary.value!.balance <= 0,
+          //           isPositive: item!.balanceAmount! <= 0,
           //         ),
-          //         if (item!.visibleCurrencyCode! != _baseCurrencyCode)
-          //           _buildFinancialRow(
-          //             context,
-          //             item!.visibleCurrencyCode!,
-          //             '',
-          //             item!.conversionRate != 0
-          //                 ? _reservationVm.paymentSummary.value!.balance /
-          //                       item!.conversionRate!
-          //                 : 0,
-          //             isBalance: true,
-          //             isPositive:
-          //                 _reservationVm.paymentSummary.value!.balance <= 0,
-          //           ),
-          //       ],
-          //     ),
+          //     ],
           //   ),
           // ),
+          Obx(
+            () => _buildModernCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildCardHeader(
+                    context,
+                    'Billing Information',
+                    Icons.receipt_long,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFinancialRow(
+                    context,
+                    _baseCurrencyCode,
+                    'Total Amount',
+                    _reservationVm.paymentSummary.value!.totalPrice,
+                    isPositive: false,
+                  ),
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm.paymentSummary.value!.totalPrice /
+                                item!.conversionRate!
+                          : 0,
+                      isPositive: false,
+                    ),
+                  _buildFinancialRow(
+                    context,
+                    _baseCurrencyCode,
+                    'Total Payment',
+                    _reservationVm.paymentSummary.value!.totalPaid,
+                    isPositive: true,
+                  ),
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm.paymentSummary.value!.totalPaid /
+                                item!.conversionRate!
+                          : 0,
+                      isPositive: true,
+                    ),
+                  const Divider(height: 24, thickness: 1.5),
+                  _buildFinancialRow(
+                    context,
+                    _baseCurrencyCode,
+                    'Balance Amount',
+                    _reservationVm.paymentSummary.value!.balance,
+                    isBalance: true,
+                    isPositive:
+                        _reservationVm.paymentSummary.value!.balance <= 0,
+                  ),
+                  if (item!.visibleCurrencyCode! != _baseCurrencyCode)
+                    _buildFinancialRow(
+                      context,
+                      item!.visibleCurrencyCode!,
+                      '',
+                      item!.conversionRate != 0
+                          ? _reservationVm.paymentSummary.value!.balance /
+                                item!.conversionRate!
+                          : 0,
+                      isBalance: true,
+                      isPositive:
+                          _reservationVm.paymentSummary.value!.balance <= 0,
+                    ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
 
           _buildModernCard(
@@ -2073,16 +2069,14 @@ class _ViewReservation extends State<ViewReservation>
             label,
             style: (textTheme.bodyMedium)?.copyWith(
               fontWeight: isBalance ? FontWeight.bold : FontWeight.w500,
-              color: isBalance ? Colors.black87 : Colors.grey.shade700,
+              color: Colors.grey.shade700,
             ),
           ),
           Text(
             formatCurrency(amount, currencyCode),
             style: (textTheme.bodyMedium)?.copyWith(
               fontWeight: FontWeight.bold,
-              color: isBalance
-                  ? (isPositive ? Colors.green.shade600 : Colors.red.shade600)
-                  : Colors.black87,
+              color: Colors.grey.shade700,
             ),
           ),
         ],

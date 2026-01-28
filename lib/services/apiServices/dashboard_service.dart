@@ -9,7 +9,7 @@ class DashboardService {
 
   Future<Map<String, dynamic>> getBookingStaticsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getBookingStats}';
+      final url = '${AppResources.getBookingStats}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -20,7 +20,7 @@ class DashboardService {
   Future<Map<String, dynamic>> getAllLockReservationsApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllLockReservations}';
+          '${AppResources.getAllLockReservations}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -30,7 +30,7 @@ class DashboardService {
 
   Future<Map<String, dynamic>> getStatisticsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getStatistics}';
+      final url = '${AppResources.getStatistics}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -40,7 +40,7 @@ class DashboardService {
 
    Future<Map<String, dynamic>> getInventoryStatsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getInventoryStats}';
+      final url = '${AppResources.getInventoryStats}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -50,7 +50,7 @@ class DashboardService {
 
   Future<Map<String, dynamic>> lockBookingApi(Map<String, dynamic> body) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.lockBooking}';
+      final url = '${AppResources.lockBooking}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -60,7 +60,7 @@ class DashboardService {
 
     Future<Map<String, dynamic>> getAllHotelsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllHotels}/0';
+      final url = '${AppResources.getAllHotels}/0';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {

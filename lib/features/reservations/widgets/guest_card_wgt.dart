@@ -23,6 +23,7 @@ class GuestCard extends StatelessWidget {
   final String? roomType;
   final String? room;
   final String? statusName;
+  final String? businessCategoryName;
   final bool? isGroupOwner;
 
   const GuestCard({
@@ -46,6 +47,7 @@ class GuestCard extends StatelessWidget {
     this.roomType,
     this.baseCurrencySymbol,
     this.statusName,
+    this.businessCategoryName,
     this.isGroupOwner,
   });
 
@@ -242,11 +244,55 @@ class GuestCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          Text(
-                            'Res: $resId | ${room ?? 'N/A'}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.darkgrey,
-                            ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.qr_code,
+                                size: 16,
+                                color: AppColors.darkgrey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Res: $resId',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.darkgrey,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.hotel,
+                                size: 16,
+                                color: AppColors.darkgrey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${room ?? 'N/A'}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.darkgrey,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.business_rounded,
+                                size: 16,
+                                color: AppColors.darkgrey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$businessCategoryName',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                           Row(
                             children: [

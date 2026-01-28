@@ -59,7 +59,7 @@ class _ArrivalListState extends State<ArrivalList> {
             isScrollControlled: true,
             builder: (_) => ReservationFilterBottomSheet(
               activeIndex: 2,
-              onPressReset: () => _reservationVm.resetFilters(),
+              onPressReset: () => _reservationVm.resetFilters(3),
               editFilterData: _reservationVm.editFilterData.value ?? null,
               initialFromDate: _reservationVm.systemDate.value!,
               businessCategories: _reservationVm.businessSources.toList(),
@@ -208,6 +208,7 @@ class _ArrivalListState extends State<ArrivalList> {
       children: item.children!,
       statusName: item.statusName,
       reservationType: item.reservationType,
+      businessCategoryName: item.businessCategoryName!,
       totalAmount: item.totalAmount!,
       balanceAmount: item.balanceAmount!,
       baseCurrencySymbol: item.baseCurrencySymbol,
@@ -244,6 +245,15 @@ class _ArrivalListState extends State<ArrivalList> {
               if (!mounted) return;
               context.pop();
               context.push(AppRoutes.viewReservation, extra: guestData);
+            },
+          ),
+          ActionItem(
+            icon: Icons.check,
+            label: 'Check In',
+            onTap: () async {
+              if (!mounted) return;
+              context.pop();
+              // context.push(AppRoutes.viewReservation, extra: guestData);
             },
           ),
           if (isAssign == true)
@@ -293,7 +303,7 @@ class _ArrivalListState extends State<ArrivalList> {
                       AmendStay(guestItem: guestData),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(0.0, 1.0); // slide from bottom
+                        const begin = Offset(0.0, 1.0);
                         const end = Offset.zero;
                         const curve = Curves.ease;
 
@@ -562,47 +572,49 @@ class _ArrivalListState extends State<ArrivalList> {
             label: 'Print Invoice',
             onTap: () {
               context.pop();
-              context.push(AppRoutes.maintenanceBlock);
+              // context.push(AppRoutes.maintenanceBlock);
             },
           ),
           ActionItem(
-            icon: Icons.description,
-            label: 'Print Res. Voucher',
+            icon: Icons.assignment_ind,
+            label: 'Print GR Card',
             onTap: () {
               context.pop();
-              context.push(AppRoutes.maintenanceBlock);
+              // context.push(AppRoutes.maintenanceBlock);
             },
           ),
-          // UPDATED: Send Res. Voucher with MessageDialog
-          ActionItem(
-            icon: Icons.email,
-            label: 'Send Res. Voucher',
-            onTap: () async {
-              context.pop();
+          // ActionItem(
+          //   icon: Icons.description,
+          //   label: 'Print Res. Voucher',
+          //   onTap: () {
+          //     context.pop();
+          //     context.push(AppRoutes.maintenanceBlock);
+          //   },
+          // ),
+          // ActionItem(
+          //   icon: Icons.email,
+          //   label: 'Send Res. Voucher',
+          //   onTap: () async {
+          //     context.pop();
+          //     await Future.delayed(const Duration(milliseconds: 300));
 
-              // Simulate sending process
-              await Future.delayed(const Duration(milliseconds: 300));
-
-              if (context.mounted) {
-                MessageDialog.show(
-                  context,
-                  title: 'Voucher Sent!',
-                  message:
-                      'Reservation voucher has been sent successfully to ${item.guestName}.',
-                  type: MessageType.success,
-                  buttonText: 'Perfect!',
-                );
-              }
-            },
-          ),
-          // UPDATED: Resend Booking Email with MessageDialog
+          //     if (context.mounted) {
+          //       MessageDialog.show(
+          //         context,
+          //         title: 'Voucher Sent!',
+          //         message:
+          //             'Reservation voucher has been sent successfully to ${item.guestName}.',
+          //         type: MessageType.success,
+          //         buttonText: 'Perfect!',
+          //       );
+          //     }
+          //   },
+          // ),
           ActionItem(
             icon: Icons.email,
             label: 'Resend Booking Email',
             onTap: () async {
               context.pop();
-
-              // Simulate sending process
               await Future.delayed(const Duration(milliseconds: 300));
 
               if (context.mounted) {
@@ -617,30 +629,27 @@ class _ArrivalListState extends State<ArrivalList> {
               }
             },
           ),
-          // UPDATED: Resend Review Email with MessageDialog
-          ActionItem(
-            icon: Icons.mark_email_unread,
-            label: 'Resend Review Email',
-            onTap: () async {
-              context.pop();
+          // ActionItem(
+          //   icon: Icons.mark_email_unread,
+          //   label: 'Resend Review Email',
+          //   onTap: () async {
+          //     context.pop();
+          //     await Future.delayed(const Duration(milliseconds: 300));
 
-              // Simulate sending process
-              await Future.delayed(const Duration(milliseconds: 300));
-
-              if (context.mounted) {
-                MessageDialog.show(
-                  context,
-                  title: 'Review Email Sent!',
-                  message:
-                      'Review request email has been sent successfully to ${item.guestName}.',
-                  type: MessageType.success,
-                  buttonText: 'Awesome!',
-                );
-              }
-            },
-          ),
+          //     if (context.mounted) {
+          //       MessageDialog.show(
+          //         context,
+          //         title: 'Review Email Sent!',
+          //         message:
+          //             'Review request email has been sent successfully to ${item.guestName}.',
+          //         type: MessageType.success,
+          //         buttonText: 'Awesome!',
+          //       );
+          //     }
+          //   },
+          // ),
           ActionItem(
-            icon: Icons.assignment,
+            icon: Icons.history,
             label: 'Audit Trail',
             onTap: () async {
               context.pop();

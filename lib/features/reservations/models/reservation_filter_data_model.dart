@@ -1,4 +1,3 @@
-
 class ReservationFilterDataModel {
   final bool? arrivalCheck;
   final bool? createdCheck;
@@ -28,7 +27,6 @@ class ReservationFilterDataModel {
 
   /// Convert to API payload
   Map<String, dynamic> toJson() {
-
     return {
       "arrivalCheck": arrivalCheck,
       "createdCheck": createdCheck,
@@ -54,5 +52,10 @@ class ReservationFilterDataModel {
         room != null ||
         status != null ||
         resType != null;
+  }
+
+  @override
+  String toString() {
+    return 'ReservationFilterDataModel{arrivalCheck: $arrivalCheck, createdCheck: $createdCheck, fromDate: $fromDate, toDate: $toDate, customerName: $customerName, businessCategory: $businessCategory, businessSource: $businessSource, roomType: $roomType, room: $room, status: $status, resType: $resType}';
   }
 }

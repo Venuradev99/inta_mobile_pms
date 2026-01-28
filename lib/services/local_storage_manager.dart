@@ -3,9 +3,29 @@ import 'package:inta_mobile_pms/data/models/Base_currency_model.dart';
 import 'package:inta_mobile_pms/data/models/checkin_checkout_data_model.dart';
 import 'package:inta_mobile_pms/data/models/hotel_information_model.dart';
 import 'package:inta_mobile_pms/data/models/master_data.dart';
+import 'package:inta_mobile_pms/features/productActivation/models/activation_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageManager {
+  static Future<bool> hasActivationData() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey('activation_Data');
+  }
+
+  static Future<void> setActivationData(
+    Map<String, dynamic> activationData,
+  ) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('activation_Data', jsonEncode(activationData));
+  }
+
+  static Future<ActivationResponse> getActivationData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String jsonString = prefs.getString('activation_Data') ?? "";
+    final json = jsonDecode(jsonString);
+    return ActivationResponse.fromJson(json);
+  }
+
   static Future<void> setMasterData(Map<String, dynamic> masterData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('masterData', jsonEncode(masterData));
@@ -82,8 +102,10 @@ class LocalStorageManager {
   }
 
   static Future<void> clearUserData() async {
+    final activationData = await getActivationData();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    await setActivationData(activationData.toJson());
   }
 
   static Future<void> setSystemInfo(Map<String, dynamic> sysInfo) async {

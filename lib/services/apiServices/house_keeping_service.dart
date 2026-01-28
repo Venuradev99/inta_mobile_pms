@@ -11,7 +11,7 @@ class HouseKeepingService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllWorkOrders}';
+      final url = '${AppResources.getAllWorkOrders}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -23,7 +23,7 @@ class HouseKeepingService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.saveWorkOrder}';
+      final url = '${AppResources.saveWorkOrder}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -33,7 +33,7 @@ class HouseKeepingService {
 
   Future<Map<String, dynamic>> getWorkOrderStatusApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getWorkOrderStatus}';
+      final url = '${AppResources.getWorkOrderStatus}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -44,7 +44,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getWorkOrderCategoriesApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getWorkOrderCategories}';
+          '${AppResources.getWorkOrderCategories}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -55,7 +55,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getWellKnownPrioritiesApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getWellKnownPriorities}';
+          '${AppResources.getWellKnownPriorities}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -65,7 +65,7 @@ class HouseKeepingService {
 
   Future<Map<String, dynamic>> getHouseKeepersApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getHouseKeepers}';
+      final url = '${AppResources.getHouseKeepers}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -77,7 +77,7 @@ class HouseKeepingService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.updateHouseStatus}';
+      final url = '${AppResources.updateHouseStatus}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -93,7 +93,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllHouseKeepingAuditTrail}/${id}?type=${type}&isRoom=${isRoom}&date=${date}';
+          '${AppResources.getAllHouseKeepingAuditTrail}/${id}?type=${type}&isRoom=${isRoom}&date=${date}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -104,7 +104,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getAllRoomsForHouseStatusApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllRoomsForHouseStatus}';
+          '${AppResources.getAllRoomsForHouseStatus}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -115,7 +115,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getMaintenanceBlockByIdApi(int id) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getMaintenanceBlockById}/${id}';
+          '${AppResources.getMaintenanceBlockById}/${id}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -129,7 +129,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.unblockMaintenanceBLock}/${maintenanceBlockId}?CurrentUserId=${currentUserId}';
+          '${AppResources.unblockMaintenanceBLock}/${maintenanceBlockId}?CurrentUserId=${currentUserId}';
       final response = await _dataAccess.put({}, url);
       return response;
     } catch (error) {
@@ -139,7 +139,7 @@ class HouseKeepingService {
 
   Future<Map<String, dynamic>> getReasonsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getReasons}';
+      final url = '${AppResources.getReasons}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -150,7 +150,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getAllBlockRoomReasonsApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllBlockRoomReasons}';
+          '${AppResources.getAllBlockRoomReasons}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -163,7 +163,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.saveMaintenanceblock}';
+          '${AppResources.saveMaintenanceblock}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -175,7 +175,7 @@ class HouseKeepingService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.checkUserPrivilege}';
+      final url = '${AppResources.checkUserPrivilege}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -186,7 +186,7 @@ class HouseKeepingService {
   Future<Map<String, dynamic>> getAllHouseKeepingStatusApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllHouseKeepingStatus}';
+          '${AppResources.getAllHouseKeepingStatus}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -200,7 +200,7 @@ class HouseKeepingService {
   }) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
+          '${AppResources.getAllRoomTypes}startIndex=0&PageSize=0&withInactive=${withInactive}&onlyRoomExistType=${onlyRoomExistType}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -210,7 +210,7 @@ class HouseKeepingService {
 
   Future<Map<String, dynamic>> getAllRoomsApi() async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAllRooms}';
+      final url = '${AppResources.getAllRooms}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -224,7 +224,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.unblockMaintenanceblock}/$maintenanceblockRoomId';
+          '${AppResources.unblockMaintenanceblock}/$maintenanceblockRoomId';
       final response = await _dataAccess.put(body, url);
       return response;
     } catch (error) {
@@ -237,7 +237,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getAllMaintenanceblock}';
+          '${AppResources.getAllMaintenanceblock}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -251,7 +251,7 @@ class HouseKeepingService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.updatePostNote}/${workOrderId}';
+          '${AppResources.updatePostNote}/${workOrderId}';
       final response = await _dataAccess.put(body, url);
       return response;
     } catch (error) {

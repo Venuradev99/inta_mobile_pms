@@ -9,13 +9,22 @@ import 'package:inta_mobile_pms/services/resource.dart';
 
 class UserApiService {
   late String version;
-  late String baseUrl;
   late String appIconPath;
 
-  UserApiService(this.version, this.baseUrl, this.appIconPath);
+  UserApiService(this.version, this.appIconPath);
 
   get getVersion => version;
   get getIconPath => appIconPath;
+
+  Future<String> getBaseUrl() async {
+    try {
+      final activationData = await LocalStorageManager.getActivationData();
+      final baseUrl = activationData.serviceUrl;
+      return baseUrl;
+    } catch (e) {
+      throw Exception('Error getting base url');
+    }
+  }
 
   Future<void> loginApi(
     String username,
@@ -23,6 +32,7 @@ class UserApiService {
     String hotelId,
   ) async {
     try {
+      final baseUrl = await getBaseUrl();
       final loginUrl = '$baseUrl${AppResources.authentication}';
       final response = await http.post(
         Uri.parse(loginUrl),
@@ -117,6 +127,7 @@ class UserApiService {
         'requestedhotelid': (-1).toString(),
       };
 
+      final baseUrl = await getBaseUrl();
       final response = await http.get(
         Uri.parse('$baseUrl$url'),
         headers: headers,
@@ -152,7 +163,7 @@ class UserApiService {
         "hotelid": hotelId,
         'requestedhotelid': (-1).toString(),
       };
-
+      final baseUrl = await getBaseUrl();
       final response = await http.get(
         Uri.parse('$baseUrl$url'),
         headers: headers,
@@ -185,7 +196,7 @@ class UserApiService {
         "hotelid": hotelId,
         'requestedhotelid': (-1).toString(),
       };
-
+      final baseUrl = await getBaseUrl();
       final response = await http.get(
         Uri.parse('$baseUrl$url'),
         headers: headers,
@@ -218,7 +229,7 @@ class UserApiService {
         "hotelid": hotelId,
         'requestedhotelid': (-1).toString(),
       };
-
+      final baseUrl = await getBaseUrl();
       final response = await http.get(
         Uri.parse('$baseUrl$url'),
         headers: headers,

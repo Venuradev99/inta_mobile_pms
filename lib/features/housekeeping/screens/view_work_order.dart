@@ -9,9 +9,13 @@ class ViewWorkOrder extends StatelessWidget {
 
   const ViewWorkOrder({super.key, required this.workOrder});
 
-  String _formatDate(DateTime? date) {
+  String _formatDateWithTime(DateTime? date) {
     if (date == null) return '-';
-    return DateFormat('yyyy-MM-dd • HH:mm').format(date);
+    return DateFormat('yyyy-MM-dd • HH:mm a').format(date);
+  }
+  String _formatDateWithoutTime(DateTime? date) {
+    if (date == null) return '-';
+    return DateFormat('yyyy-MM-dd').format(date);
   }
 
   @override
@@ -63,9 +67,9 @@ class ViewWorkOrder extends StatelessWidget {
 
             _section(
               children: [
-                _row('Block From', _formatDate(workOrder.blockFrom)),
-                _row('Block To', _formatDate(workOrder.blockTo)),
-                _row('Due Date', _formatDate(workOrder.dueDate)),
+                _row('Block From', _formatDateWithoutTime(workOrder.blockFrom)),
+                _row('Block To', _formatDateWithoutTime(workOrder.blockTo)),
+                _row('Due Date', _formatDateWithTime(workOrder.dueDate)),
               ],
             ),
 
@@ -73,8 +77,8 @@ class ViewWorkOrder extends StatelessWidget {
 
             _section(
               children: [
-                _row('Entered On', _formatDate(workOrder.enteredOn)),
-                _row('Updated On', _formatDate(workOrder.updatedOn)),
+                _row('Entered On', _formatDateWithTime(workOrder.enteredOn)),
+                _row('Updated On', _formatDateWithTime(workOrder.updatedOn)),
               ],
             ),
 

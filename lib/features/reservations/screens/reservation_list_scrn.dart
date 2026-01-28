@@ -58,7 +58,7 @@ class _ReservationListState extends State<ReservationList> {
             isScrollControlled: true,
             builder: (_) => ReservationFilterBottomSheet(
               activeIndex: 0,
-              onPressReset: () => _reservationVm.resetFilters(),
+              onPressReset: () => _reservationVm.resetFilters(1),
               editFilterData: _reservationVm.editFilterData.value ?? null,
               initialFromDate: _reservationVm.systemDate.value!,
               businessCategories: _reservationVm.businessSources.toList(),
@@ -233,6 +233,7 @@ class _ReservationListState extends State<ReservationList> {
       adults: item.adults!,
       statusName: item.statusName,
       children: item.children!,
+      businessCategoryName: item.businessCategoryName!,
       reservationType: item.reservationType,
       totalAmount: item.totalAmount!,
       balanceAmount: item.balanceAmount!,
@@ -362,18 +363,18 @@ class _ReservationListState extends State<ReservationList> {
                 if (!mounted) return;
                 final data = {
                   'reasons': cancelReservationData["reasons"],
-                  'bookingRoomId': guestData?.bookingRoomId,
-                  'guestName': guestData?.guestName,
-                  'resNumber': guestData?.resId,
-                  'folio': guestData?.folioId,
-                  'arrivalDate': guestData?.startDate,
-                  'departureDate': guestData?.endDate,
-                  'roomType': guestData?.roomType,
-                  'room': guestData?.room,
-                  'total': guestData?.totalAmount,
+                  'bookingRoomId': guestData.bookingRoomId,
+                  'guestName': guestData.guestName,
+                  'resNumber': guestData.resId,
+                  'folio': guestData.folioId,
+                  'arrivalDate': guestData.startDate,
+                  'departureDate': guestData.endDate,
+                  'roomType': guestData.roomType,
+                  'room': guestData.room,
+                  'total': guestData.totalAmount,
                   'deposit':
-                      (guestData?.totalAmount ?? 0.0) -
-                      (guestData?.balanceAmount ?? 0.0),
+                      (guestData.totalAmount ?? 0.0) -
+                      (guestData.balanceAmount ?? 0.0),
                 };
 
                 Navigator.of(context).pop();

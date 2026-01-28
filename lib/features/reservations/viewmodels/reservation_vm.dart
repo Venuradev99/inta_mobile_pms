@@ -95,18 +95,18 @@ class ReservationVm extends GetxController {
     try {
       final businessSourcesResponse = await _reservationService
           .getBusinessSourcesByCategoryIdApi(categoryId, false);
+
       if (businessSourcesResponse["isSuccessful"] == true) {
+        businessSourcesByCategory.value = [];
+        businessSourcesByCategory.add(FilterDropdownData(id: 0, name: 'All'));
         final result = businessSourcesResponse["result"];
-        List<FilterDropdownData> businessSourcesDropdownTemp = [];
         for (final item in result) {
-          businessSourcesDropdownTemp.add(
-            FilterDropdownData.fromJson({
-              "id": item["businessSourceId"],
-              "name": item["name"],
-            }),
-          );
+          final data = FilterDropdownData.fromJson({
+            "id": item["businessSourceId"],
+            "name": item["name"],
+          });
+          businessSourcesByCategory.add(data);
         }
-        businessSourcesByCategory.value = businessSourcesDropdownTemp;
       } else {
         MessageService().error(
           businessSourcesResponse["errors"][0] ?? 'Error loading titles!',
@@ -143,6 +143,8 @@ class ReservationVm extends GetxController {
         final result = reservationTypeResponse["result"]["recordSet"];
         reservationTypes.value = [];
         resTypes = [];
+        resTypes.add({"id": 0, "name": 'All'});
+        reservationTypes.add(FilterDropdownData(id: 0, name: 'All'));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["reservationTypeId"],
@@ -150,7 +152,6 @@ class ReservationVm extends GetxController {
           });
           resTypes.add(item);
           reservationTypes.add(data);
-          reservationTypes.refresh();
         }
       } else {
         MessageService().error(
@@ -162,10 +163,19 @@ class ReservationVm extends GetxController {
       if (statusResponse["isSuccessful"] == true) {
         statusList.value = [];
         statuses.value = [];
+
+        statusList.add({
+          "id": 0,
+          "name": 'All',
+          "description": '',
+          "colorCode": hexToColor('#424242'),
+        });
+        statuses.add(FilterDropdownData(id: 0, name: 'All'));
+
         final result = statusResponse["result"]["recordSet"];
         for (final item in result) {
           final dropDownData = FilterDropdownData.fromJson({
-            "id": item["roomTypeId"],
+            "id": item["roomStatusId"],
             "name": item["name"],
           });
 
@@ -175,6 +185,7 @@ class ReservationVm extends GetxController {
             "description": item["description"] ?? '',
             "colorCode": hexToColor(item["colorCode"]),
           };
+
           statusList.add(data);
           statuses.add(dropDownData);
         }
@@ -187,13 +198,13 @@ class ReservationVm extends GetxController {
       if (roomTypeResponse["isSuccessful"]) {
         final result = roomTypeResponse["result"]["recordSet"];
         roomTypes.value = [];
+        roomTypes.add(FilterDropdownData(id: 0, name: 'All'));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomTypeId"],
             "name": item["name"],
           });
           roomTypes.add(data);
-          roomTypes.refresh();
         }
       } else {
         MessageService().error(
@@ -204,13 +215,13 @@ class ReservationVm extends GetxController {
       if (businessCategoryResponse["isSuccessful"]) {
         final result = businessCategoryResponse["result"];
         businessSources.value = [];
+        businessSources.add(FilterDropdownData(id: 0, name: 'All'));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["categoryId"],
             "name": item["description"],
           });
           businessSources.add(data);
-          businessSources.refresh();
         }
       } else {
         MessageService().error(
@@ -222,6 +233,7 @@ class ReservationVm extends GetxController {
       if (roomsResponse["isSuccessful"]) {
         final result = roomsResponse["result"]["recordSet"];
         rooms.value = [];
+        rooms.add(FilterDropdownData(id: 0, name: 'All'));
         for (final item in result) {
           final data = FilterDropdownData.fromJson({
             "id": item["roomId"],
@@ -229,7 +241,6 @@ class ReservationVm extends GetxController {
             "filterId": item["roomTypeId"],
           });
           rooms.add(data);
-          rooms.refresh();
         }
       } else {
         MessageService().error(
@@ -266,7 +277,9 @@ class ReservationVm extends GetxController {
       final body = (filters == null)
           ? ReservationSearchRequest(
               businessSourceId: 0,
-              exceptCancelled: false,
+              exceptCancelled: searchType == 3 || searchType == 2
+                  ? true
+                  : false,
               fromDate: today.toString(),
               isArrivalDate: true,
               reservationTypeId: 0,
@@ -279,18 +292,20 @@ class ReservationVm extends GetxController {
               businessCategoryId: 0,
             ).toJson()
           : ReservationSearchRequest(
-              businessSourceId: filters?.businessSource ?? 0,
-              exceptCancelled: false,
-              fromDate: filters?.fromDate ?? '',
-              isArrivalDate: filters?.arrivalCheck ?? true,
-              reservationTypeId: filters?.resType ?? 0,
-              roomId: filters?.room ?? 0,
-              roomTypeId: filters?.roomType ?? 0,
-              searchByName: filters?.customerName ?? '',
+              businessSourceId: filters.businessSource ?? 0,
+              exceptCancelled: searchType == 3 || searchType == 2
+                  ? true
+                  : false,
+              fromDate: filters.fromDate ?? '',
+              isArrivalDate: filters.arrivalCheck ?? true,
+              reservationTypeId: filters.resType ?? 0,
+              roomId: filters.room ?? 0,
+              roomTypeId: filters.roomType ?? 0,
+              searchByName: filters.customerName ?? '',
               searchType: searchType,
-              status: filters?.status ?? 0,
-              toDate: filters?.toDate ?? '',
-              businessCategoryId: filters?.businessCategory ?? 0,
+              status: filters.status ?? 0,
+              toDate: filters.toDate ?? '',
+              businessCategoryId: filters.businessCategory ?? 0,
             ).toJson();
 
       final reservationListResponse = await _reservationService
@@ -299,6 +314,7 @@ class ReservationVm extends GetxController {
         final List<dynamic> result = reservationListResponse["result"];
 
         reservationList.value = {'today': [], 'tomorrow': [], 'thisweek': []};
+        filteredList.value?.clear();
 
         for (final item in result) {
           final data = GuestItem(
@@ -315,24 +331,33 @@ class ReservationVm extends GetxController {
             totalAmount: (item['totalAmount'] ?? 0).toDouble(),
             balanceAmount: (item['balance'] ?? 0).toDouble(),
             room: item['roomName'] ?? '',
+            businessCategoryName: item['businessCategoryName'] ?? '',
             isGroupOwner: item['isGroupOwner'] ?? false,
             colorCode: getReservationColorCode(item['status']),
             statusName: getStatusName(item['status']),
             baseCurrencySymbol: baseCurrencyData.code,
           );
 
-          if (item['arrivalDate'] == today.toString()) {
+          final checkField = searchType == 3
+              ? item['arrivalDate']
+              : searchType == 2
+              ? item['departureDate']
+              : item['arrivalDate'];
+
+          if (checkField == today.toString() && searchType != 1) {
             reservationList.value!["today"]!.add(data);
           }
-          if (item['arrivalDate'] == getTomorrow(today.toString())) {
+          if (checkField == getTomorrow(today.toString()) && searchType != 1) {
             reservationList.value!["tomorrow"]!.add(data);
           }
+
           reservationList.value!["thisweek"]!.add(data);
         }
 
         filteredList.value = reservationList.value;
-        reservationList.refresh();
-        filteredList.refresh();
+
+        // reservationList.refresh();
+        // filteredList.refresh();
       } else {
         MessageService().error(
           reservationListResponse["errors"][0] ??
@@ -345,58 +370,14 @@ class ReservationVm extends GetxController {
     }
   }
 
-  resetFilters() {
+  resetFilters(int searchType) {
     editFilterData.value = null;
-     loadReservations(1);
+    loadReservations(1);
   }
 
   searchFilters(ReservationFilterDataModel filters) {
     editFilterData.value = filters;
     loadReservations(1, filters);
-  }
-
-  void search(String searchQuery) {
-    try {
-      if (searchQuery.isNotEmpty) {
-        Map<String, List<GuestItem>> filteredMap = {};
-        reservationList.value!.forEach((tab, items) {
-          filteredMap[tab] = items
-              .where(
-                (item) =>
-                    item.room!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.guestName!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.statusName!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.statusName!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.startDate!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.endDate!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.resId!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
-                    item.reservationType!.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ),
-              )
-              .toList();
-        });
-        filteredList.value = filteredMap;
-      } else {
-        filteredList.value = reservationList.value;
-      }
-    } catch (e) {
-      throw Exception('Error filter searching : $e');
-    }
   }
 
   void applyFilters(Map<String, dynamic> filters) {

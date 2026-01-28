@@ -118,15 +118,11 @@ class _ReportWidgetState extends State<ManagerReport>
   ];
 
   DataColumn _leftColAlign(String title) => DataColumn(
-    label: Expanded(
-      child: Align(alignment: Alignment.centerLeft, child: Text(title)),
-    ),
+    label: Align(alignment: Alignment.centerLeft, child: Text(title)),
   );
 
   DataColumn _rightColAlign(String title) => DataColumn(
-    label: Expanded(
-      child: Align(alignment: Alignment.centerRight, child: Text(title)),
-    ),
+    label: Align(alignment: Alignment.centerRight, child: Text(title)),
   );
 
   DataCell _leftCell(dynamic value) => DataCell(
@@ -294,15 +290,20 @@ class _ReportWidgetState extends State<ManagerReport>
                                 return _currencyList.map<Widget>((
                                   CurrencyItem item,
                                 ) {
-                                  return Text(
-                                    item.code,
-                                    style: TextStyle(
-                                      color: AppColors.onPrimary,
-                                      fontSize: 14,
+                                  return Align(
+                                    alignment: Alignment
+                                        .centerLeft, // or center if you want
+                                    child: Text(
+                                      item.code,
+                                      style: TextStyle(
+                                        color: AppColors.onPrimary,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   );
                                 }).toList();
                               },
+
                               items: _currencyList
                                   .map<DropdownMenuItem<CurrencyItem>>((
                                     CurrencyItem value,
@@ -489,780 +490,61 @@ class _ReportWidgetState extends State<ManagerReport>
                   ),
                 ),
               );
-            } else if (_managerReportVm.roomChargeData.isEmpty) {
-              return const Expanded(
-                child: Center(child: Text('Please generate the report')),
-              );
             } else {
               return Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[0],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[0],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.roomChargeData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                  _leftBoldCell('Total'),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomChargeDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomChargeDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .roomChargeDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      0,
+                      _managerReportVm.roomChargeData,
+                      totals: _managerReportVm.roomChargeDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[1],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[1],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.extraChargeData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                   _leftBoldCell('Total'),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .extraChargeDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .extraChargeDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .extraChargeDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      1,
+                      _managerReportVm.extraChargeData,
+                      totals: _managerReportVm.extraChargeDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[2],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[2],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.adjustmentData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                     _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .adjustmentDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .adjustmentDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .adjustmentDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      2,
+                      _managerReportVm.adjustmentData,
+                      totals: _managerReportVm.adjustmentDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[3],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[3],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.taxData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                     _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm.taxDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm.taxDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm.taxDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      3,
+                      _managerReportVm.taxData,
+                      totals: _managerReportVm.taxDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[4],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[4],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.discountData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                     _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .discountDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .discountDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .discountDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      4,
+                      _managerReportVm.discountData,
+                      totals: _managerReportVm.discountDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[5],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[5],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.payoutData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                   _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .payoutDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .payoutDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .payoutDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      5,
+                      _managerReportVm.payoutData,
+                      totals: _managerReportVm.payoutDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[6],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[6],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.posRevenueData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                     _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenueDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenueDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenueDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      6,
+                      _managerReportVm.posRevenueData,
+                      totals: _managerReportVm.posRevenueDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[7],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[7],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.paymentData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                   _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .paymentDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .paymentDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .paymentDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      7,
+                      _managerReportVm.paymentData,
+                      totals: _managerReportVm.paymentDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[8],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[8],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.posRevenuePaymentData.map((
-                                  item,
-                                ) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                DataRow(
-                                  cells: [
-                                   _leftBoldCell('Total'),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenuePaymentDataTotals["today"],
-                                      ).toString(),
-                                    ),
-
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenuePaymentDataTotals["ptd"],
-                                      ).toString(),
-                                    ),
-                                    _rightBoldCell(
-                                      formatCurrency(
-                                        _managerReportVm
-                                            .posRevenuePaymentDataTotals["ytd"],
-                                      ).toString(),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(
+                      8,
+                      _managerReportVm.posRevenuePaymentData,
+                      totals: _managerReportVm.posRevenuePaymentDataTotals,
                     ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[9],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[9],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.cityLedgerData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                // DataRow(
-                                //   cells: [
-                                //       _leftBoldCell('Total'),
-
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .cityLedgerDataTotals["today"],
-                                //       ).toString(),
-                                //     ),
-
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .cityLedgerDataTotals["ptd"],
-                                //       ).toString(),
-                                //     ),
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .cityLedgerDataTotals["ytd"],
-                                //       ).toString(),
-                                //     ),
-                                //   ],
-                                // ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[10],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[10],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.roomSummaryData.map((item) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                                // DataRow(
-                                //   cells: [
-                                //      _leftBoldCell('Total'),
-
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .roomSummaryDataTotals["today"],
-                                //       ).toString(),
-                                //     ),
-
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .roomSummaryDataTotals["ptd"],
-                                //       ).toString(),
-                                //     ),
-                                //     _rightBoldCell(
-                                //       formatCurrency(
-                                //         _managerReportVm
-                                //             .roomSummaryDataTotals["ytd"],
-                                //       ).toString(),
-                                //     ),
-                                //   ],
-                                // ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SingleChildScrollView(
-                      child: Scrollbar(
-                        controller: _horizontalControllers[10],
-                        thumbVisibility: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          controller: _horizontalControllers[10],
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: DataTable(
-                              columns: cols.map((col) {
-                                if (['description'].contains(col['field'])) {
-                                  return _leftColAlign(col['header']!);
-                                } else {
-                                  return _rightColAlign(col['header']!);
-                                }
-                              }).toList(),
-                              rows: [
-                                ..._managerReportVm.statisticRecordsData.map((
-                                  item,
-                                ) {
-                                  return DataRow(
-                                    cells: cols.map((col) {
-                                      if ([
-                                        'description',
-                                      ].contains(col['field'])) {
-                                        final value = item[col['field']];
-                                        return _leftCell(value.toString());
-                                      } else {
-                                        final value = item[col['field']];
-                                        final formatted = formatCurrency(value);
-                                        return _rightCell(formatted.toString());
-                                      }
-                                    }).toList(),
-                                  );
-                                }).toList(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                    _buildTableWidget(9, _managerReportVm.cityLedgerData),
+                    _buildTableWidget(10, _managerReportVm.roomSummaryData),
+                    _buildTableWidget(
+                      11,
+                      _managerReportVm.statisticRecordsData,
                     ),
                   ],
                 ),
@@ -1272,6 +554,66 @@ class _ReportWidgetState extends State<ManagerReport>
         ],
       ),
     );
+  }
+
+  Widget _buildTableWidget(
+    int index,
+    RxList data, {
+    Map<String, dynamic>? totals,
+  }) {
+    if (data.isEmpty) {
+      return const Center(child: Text('No data to show'));
+    } else {
+      List<DataRow> rows = data.map((item) {
+        return DataRow(
+          cells: cols.map((col) {
+            if (['description'].contains(col['field'])) {
+              final value = item[col['field']];
+              return _leftCell(value.toString());
+            } else {
+              final value = item[col['field']];
+              final formatted = formatCurrency(value);
+              return _rightCell(formatted.toString());
+            }
+          }).toList(),
+        );
+      }).toList();
+
+      if (totals != null) {
+        rows.add(
+          DataRow(
+            cells: [
+              _leftBoldCell('Total'),
+              _rightBoldCell(formatCurrency(totals["today"]).toString()),
+              _rightBoldCell(formatCurrency(totals["ptd"]).toString()),
+              _rightBoldCell(formatCurrency(totals["ytd"]).toString()),
+            ],
+          ),
+        );
+      }
+
+      return SingleChildScrollView(
+        child: Scrollbar(
+          controller: _horizontalControllers[index],
+          thumbVisibility: true,
+          trackVisibility: true,
+          child: SingleChildScrollView(
+            controller: _horizontalControllers[index],
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: cols.map((col) {
+                if (['description'].contains(col['field'])) {
+                  return _leftColAlign(col['header']!);
+                } else {
+                  return _rightColAlign(col['header']!);
+                }
+              }).toList(),
+              rows: rows,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   String formatCurrency(num? value) {

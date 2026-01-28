@@ -12,7 +12,7 @@ class StayViewService {
   ) async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getBookingDetailsByDate}';
+          '${AppResources.getBookingDetailsByDate}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -23,7 +23,7 @@ class StayViewService {
   Future<Map<String, dynamic>> getStatusColorForStayviewApi() async {
     try {
       final url =
-          '${_appResources.baseUrl}${AppResources.getStatusColorForStayview}';
+          '${AppResources.getStatusColorForStayview}';
       final response = await _dataAccess.get(url);
       return response;
     } catch (error) {
@@ -35,7 +35,7 @@ class StayViewService {
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getAvailableRooms}';
+      final url = '${AppResources.getAvailableRooms}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {
@@ -43,11 +43,11 @@ class StayViewService {
     }
   }
 
-    Future<Map<String, dynamic>> getDayUseListApi(
+  Future<Map<String, dynamic>> getDayUseListApi(
     Map<String, dynamic> body,
   ) async {
     try {
-      final url = '${_appResources.baseUrl}${AppResources.getDayUseList}';
+      final url = '${AppResources.getDayUseList}';
       final response = await _dataAccess.post(body, url);
       return response;
     } catch (error) {

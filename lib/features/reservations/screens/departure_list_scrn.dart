@@ -7,6 +7,7 @@ import 'package:inta_mobile_pms/features/dashboard/models/filter_dropdown_data.d
 import 'package:inta_mobile_pms/features/reservations/models/guest_item.dart';
 import 'package:inta_mobile_pms/features/reservations/models/reservation_filter_data_model.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/amend_stay_scrn.dart';
+import 'package:inta_mobile_pms/features/reservations/screens/audit_trail_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/stop_room_move_scrn.dart';
 import 'package:inta_mobile_pms/features/reservations/screens/void_reservation_scrn.dart';
@@ -57,7 +58,7 @@ class _DepartureListState extends State<DepartureList> {
             isScrollControlled: true,
             builder: (_) => ReservationFilterBottomSheet(
               activeIndex: 1,
-              onPressReset: () => _reservationVm.resetFilters(),
+              onPressReset: () => _reservationVm.resetFilters(2),
               editFilterData: _reservationVm.editFilterData.value ?? null,
               initialFromDate: _reservationVm.systemDate.value!,
               businessCategories: _reservationVm.businessSources.toList(),
@@ -208,6 +209,7 @@ class _DepartureListState extends State<DepartureList> {
               statusName: item.statusName,
               children: item.children!,
               totalAmount: item.totalAmount!,
+              businessCategoryName: item.businessCategoryName!,
               balanceAmount: item.balanceAmount!,
               isGroupOwner: item.isGroupOwner,
               baseCurrencySymbol: item.baseCurrencySymbol,
@@ -249,7 +251,16 @@ class _DepartureListState extends State<DepartureList> {
             icon: Icons.visibility,
             label: 'View Reservation',
             onTap: () async {
+              context.pop();
               context.push(AppRoutes.viewReservation, extra: guestData);
+            },
+          ),
+          ActionItem(
+            icon: Icons.arrow_forward,
+            label: 'Check Out',
+            onTap: () async {
+              context.pop();
+              // context.push(AppRoutes.viewReservation, extra: guestData);
             },
           ),
           ActionItem(
@@ -458,12 +469,50 @@ class _DepartureListState extends State<DepartureList> {
             },
           ),
           ActionItem(icon: Icons.receipt, label: 'Print Invoice'),
-          ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
-          ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
-          ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
+          ActionItem(
+            icon: Icons.assignment_ind,
+            label: 'Print GR Card',
+            onTap: () {
+              context.pop();
+              // context.push(AppRoutes.maintenanceBlock);
+            },
+          ),
+          // ActionItem(icon: Icons.description, label: 'Print Res. Voucher'),
+          // ActionItem(icon: Icons.email, label: 'Send Res. Voucher'),
+          // ActionItem(icon: Icons.email, label: 'Resend Booking Email'),
           ActionItem(
             icon: Icons.cleaning_services,
             label: 'Request Housekeeping',
+          ),
+          ActionItem(
+            icon: Icons.history,
+            label: 'Audit Trail',
+            onTap: () async {
+              context.pop();
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      AuditTrail(guestItem: guestData),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        // Slide from bottom to top (downToUp)
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        final tween = Tween(
+                          begin: begin,
+                          end: end,
+                        ).chain(CurveTween(curve: Curves.ease));
+                        final offsetAnimation = animation.drive(tween);
+
+                        return SlideTransition(
+                          position: offsetAnimation,
+                          child: child,
+                        );
+                      },
+                  transitionDuration: const Duration(milliseconds: 300),
+                ),
+              );
+            },
           ),
         ],
       ),
